@@ -69,7 +69,7 @@ LOGGING = {
     },
     "loggers": {
         "": {
-            "level": "INFO",
+            "level": "DEBUG",
             "handlers": ["error", "info", "debug", "warning", "stream"],
             "propagate": False,
         },
