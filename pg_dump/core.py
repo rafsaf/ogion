@@ -1,5 +1,6 @@
 import logging
 import pathlib
+import re
 import subprocess
 
 import psycopg2
@@ -7,6 +8,10 @@ import psycopg2
 from pg_dump import config
 
 log = logging.getLogger(__name__)
+
+
+class SubprocessError(Exception):
+    pass
 
 
 def get_connection():
@@ -23,28 +28,6 @@ def get_connection():
         database=config.settings.PGDUMP_DATABASE_DB,
     )
     return conn
-
-
-def get_postgres_major_version() -> int:
-    log.info("Start getting postgres version")
-
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT version();")
-    result = cur.fetchone()
-    if result is None:
-        raise Exception("Could not fetch version from postgres database")
-    full_version: str = result[0]
-
-    log.info(full_version)
-
-    full_version_split = full_version.split(" ")
-    major_version = int(float(full_version_split[1]))
-
-    cur.close()
-    conn.close()
-    log.info(f"Postgres major version: {major_version}")
-    return major_version
 
 
 def recreate_pgpass_file():
@@ -64,8 +47,34 @@ def recreate_pgpass_file():
     log.info("File .pgpass created")
 
 
-def run_pg_dump():
+def run_subprocess(shell_args: list[str]) -> str:
+    log.info("Running in subprocess: '%s'", " ".join(shell_args))
     p = subprocess.Popen(
+        shell_args,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    output, err = p.communicate()
+
+    if p.returncode != 0:
+        log.error("Finished with status %s", p.returncode)
+        log.error(output)
+        log.error(err)
+        raise SubprocessError(
+            f"'{' '.join(shell_args)}' \n"
+            f"Process failed with code: {p.returncode} and shell args: {shell_args}"
+        )
+    else:
+        log.info("Finished successfully")
+        log.info(output)
+        log.info(err)
+    return output
+
+
+def run_pg_dump():
+    run_subprocess(
         [
             "pg_dump",
             "-v",
@@ -81,16 +90,29 @@ def run_pg_dump():
             "-f",
             "outputasdlllll.sql",
         ],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
     )
-    output, err = p.communicate()
-    if p.returncode != 0:
-        log.error(output.decode())
-        log.error(err.decode())
-        log.error(f"Finished pg_dump with status code {p.returncode}")
-    else:
-        log.info(output.decode())
-        log.info(err.decode())
-        log.info(f"Finished pg_dump with status code {p.returncode}")
+
+
+def get_postgres_version():
+    pg_version_regex = re.compile(r"PostgreSQL \d*\.\d* ")
+    result = run_subprocess(
+        [
+            "psql",
+            "-U",
+            config.settings.PGDUMP_DATABASE_USER,
+            "-p",
+            config.settings.PGDUMP_DATABASE_PORT,
+            "-h",
+            config.settings.PGDUMP_DATABASE_HOSTNAME,
+            config.settings.PGDUMP_DATABASE_DB,
+            "-c",
+            "SELECT version();",
+        ],
+    )
+    try:
+        matches: list[str] = pg_version_regex.findall(result)
+        for match in matches:
+            return match.strip()
+        return "Unknown"
+    except KeyError:
+        return "Unknown"

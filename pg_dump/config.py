@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     PGDUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "30 4 * * *"
     PGDUMP_BACKUP_POLICY_REMOVE_AFTER_DAYS: int = 14
 
+    POSTGRESQL_VERSION: str = "Unknown"
+
 
 os.makedirs(BASE_DIR / "logs", exist_ok=True)
 LOGGING = {
