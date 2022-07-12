@@ -48,7 +48,6 @@ def recreate_pgpass_file():
 
 
 def run_subprocess(shell_args: list[str]) -> str:
-    log.info("Running in subprocess: '%s'", " ".join(shell_args))
     p = subprocess.Popen(
         shell_args,
         stdin=subprocess.PIPE,
@@ -56,6 +55,7 @@ def run_subprocess(shell_args: list[str]) -> str:
         stderr=subprocess.PIPE,
         text=True,
     )
+    log.info("Running subprocess %s: '%s'", p.pid, " ".join(shell_args))
     output, err = p.communicate()
 
     if p.returncode != 0:
@@ -64,16 +64,17 @@ def run_subprocess(shell_args: list[str]) -> str:
         log.error(err)
         raise SubprocessError(
             f"'{' '.join(shell_args)}' \n"
-            f"Process failed with code: {p.returncode} and shell args: {shell_args}"
+            f"Subprocess {p.pid} failed with code: {p.returncode} and shell args: {shell_args}"
         )
     else:
-        log.info("Finished successfully")
-        log.info(output)
-        log.info(err)
+        log.info("Finished subprocess %s successfully", p.pid)
+        log.debug(output)
+        log.debug(err)
     return output
 
 
-def run_pg_dump():
+def run_pg_dump(output_file_path: str):
+    log.info("Start pg_dump")
     run_subprocess(
         [
             "pg_dump",
@@ -88,12 +89,14 @@ def run_pg_dump():
             config.settings.PGDUMP_DATABASE_HOSTNAME,
             config.settings.PGDUMP_DATABASE_DB,
             "-f",
-            "outputasdlllll.sql",
+            output_file_path,
         ],
     )
+    log.info("Finished pg_dump, output file: %s", output_file_path)
 
 
 def get_postgres_version():
+    log.info("Start postgres connection to get pg version")
     pg_version_regex = re.compile(r"PostgreSQL \d*\.\d* ")
     result = run_subprocess(
         [
@@ -109,10 +112,15 @@ def get_postgres_version():
             "SELECT version();",
         ],
     )
+    version = "Unknown"
     try:
         matches: list[str] = pg_version_regex.findall(result)
+
         for match in matches:
-            return match.strip()
-        return "Unknown"
+            version = match.strip()
+            break
     except KeyError:
-        return "Unknown"
+        log.error("Error get_postgres_version, got KeyError: %s", result)
+
+    log.info("Calculated PostgreSQL version: %s", version)
+    return version

@@ -60,11 +60,17 @@ LOGGING = {
             "formatter": "verbose",
             "level": "INFO",
         },
+        "debug": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs/pg_dump_debug.log",
+            "formatter": "verbose",
+            "level": "DEBUG",
+        },
     },
     "loggers": {
         "": {
             "level": "INFO",
-            "handlers": ["error", "info", "warning", "stream"],
+            "handlers": ["error", "info", "debug", "warning", "stream"],
             "propagate": False,
         },
     },

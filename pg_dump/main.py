@@ -11,7 +11,7 @@ if __name__ == "__main__":
     from pg_dump import core
 
     log.info("Initialize pg_dump...")
-    # config.settings.POSTGRESQL_VERSION = core.get_postgres_version()
-    log.info("Calculated POSTGRESQL_VERSION: %s", config.settings.POSTGRESQL_VERSION)
+    config.settings.POSTGRESQL_VERSION = core.get_postgres_version()
+    log.info("config POSTGRESQL_VERSION set to: %s", config.settings.POSTGRESQL_VERSION)
     core.recreate_pgpass_file()
-    core.run_pg_dump()
+    core.run_pg_dump("test_pg_dump.sql")
