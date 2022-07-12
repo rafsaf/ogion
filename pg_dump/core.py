@@ -37,21 +37,21 @@ def run_subprocess(shell_args: list[str]) -> str:
         stderr=subprocess.PIPE,
         text=True,
     )
-    log.info("Running subprocess %s: '%s'", p.pid, " ".join(shell_args))
+    log.info("run_subprocess() %s Running: '%s'", p.pid, " ".join(shell_args))
     output, err = p.communicate()
 
     if p.returncode != 0:
-        log.error("Finished with status %s", p.returncode)
-        log.error(output)
-        log.error(err)
+        log.error("run_subprocess() %s: Fail with status %s", p.pid, p.returncode)
+        log.error("run_subprocess() stdout: %s", output)
+        log.error("run_subprocess() stderr: %s", err)
         raise SubprocessError(
             f"'{' '.join(shell_args)}' \n"
             f"Subprocess {p.pid} failed with code: {p.returncode} and shell args: {shell_args}"
         )
     else:
-        log.info("Finished subprocess %s successfully", p.pid)
-        log.debug(output)
-        log.debug(err)
+        log.info("run_subprocess() %s: Finished with status %s", p.pid, p.returncode)
+        log.debug("run_subprocess() stdout: %s", output)
+        log.debug("run_subprocess() stderr: %s", err)
     return output
 
 
