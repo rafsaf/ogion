@@ -3,8 +3,6 @@ import pathlib
 import re
 import subprocess
 
-import psycopg2
-
 from pg_dump import config
 
 log = logging.getLogger(__name__)
@@ -12,22 +10,6 @@ log = logging.getLogger(__name__)
 
 class SubprocessError(Exception):
     pass
-
-
-def get_connection():
-    log.info(
-        "Connecting to postgres on host '%s' and port '%s'",
-        config.settings.PGDUMP_DATABASE_HOSTNAME,
-        config.settings.PGDUMP_DATABASE_PORT,
-    )
-    conn = psycopg2.connect(
-        user=config.settings.PGDUMP_DATABASE_USER,
-        password=config.settings.PGDUMP_DATABASE_PASSWORD,
-        host=config.settings.PGDUMP_DATABASE_HOSTNAME,
-        port=config.settings.PGDUMP_DATABASE_PORT,
-        database=config.settings.PGDUMP_DATABASE_DB,
-    )
-    return conn
 
 
 def recreate_pgpass_file():
