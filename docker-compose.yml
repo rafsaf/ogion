@@ -1,0 +1,25 @@
+version: "3.4"
+
+services:
+  postgres_14:
+    restart: "unless-stopped"
+    image: postgres:14
+    volumes:
+      - pgdump_dev_postgresql_14:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 15432:5432
+  postgres_10:
+    restart: "unless-stopped"
+    image: postgres:10
+    volumes:
+      - pgdump_dev_postgresql_10:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 25432:5432
+
+volumes:
+  pgdump_dev_postgresql_14:
+  pgdump_dev_postgresql_10:
