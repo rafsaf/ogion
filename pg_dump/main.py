@@ -48,8 +48,10 @@ def main():
             log.info("Start pg_dump thread...")
             pg_dump_thread.join()
             # hard limit on pg_dump timeout is 120s in core module, no worries about infinite lock
-            if not core.get_full_backup_folder_path(file_name).is_file():
-                log.warning("Error, timeout inside pg_dump thread")
+            if not core.get_full_backup_folder_path(file_name).stat().st_size:
+                log.warning("Error inside pg_dump thread, backup file empty")
+                core.get_full_backup_folder_path(file_name).unlink()
+                log.warning("Removed empty backup file %s", file_name)
                 log.warning(
                     "Start cooling period %ss...",
                     config.settings.PGDUMP_COOLING_PERIOD_AFTER_TIMEOUT,
