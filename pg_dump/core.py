@@ -12,6 +12,10 @@ class SubprocessError(Exception):
     pass
 
 
+def get_full_backup_folder_path(filename: str):
+    return (config.settings.PGDUMP_BACKUP_FOLDER_PATH / filename).absolute()
+
+
 def recreate_pgpass_file():
     log.info("Start creating .pgpass file")
     text = config.settings.PGDUMP_DATABASE_HOSTNAME
@@ -38,7 +42,9 @@ def run_subprocess(shell_args: list[str]) -> str:
         text=True,
     )
     log.info("run_subprocess() %s Running: '%s'", p.pid, " ".join(shell_args))
-    output, err = p.communicate()
+    output, err = p.communicate(
+        timeout=config.settings.PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS
+    )
 
     if p.returncode != 0:
         log.error("run_subprocess() %s: Fail with status %s", p.pid, p.returncode)
@@ -55,7 +61,7 @@ def run_subprocess(shell_args: list[str]) -> str:
     return output
 
 
-def run_pg_dump(output_file_path: str):
+def run_pg_dump(output_file: str):
     log.info("Start pg_dump")
     run_subprocess(
         [
@@ -71,10 +77,10 @@ def run_pg_dump(output_file_path: str):
             config.settings.PGDUMP_DATABASE_HOSTNAME,
             config.settings.PGDUMP_DATABASE_DB,
             "-f",
-            output_file_path,
+            str(get_full_backup_folder_path(output_file)),
         ],
     )
-    log.info("Finished pg_dump, output file: %s", output_file_path)
+    log.info("Finished pg_dump, output file: %s", output_file)
 
 
 def get_postgres_version():
@@ -95,14 +101,15 @@ def get_postgres_version():
         ],
     )
     version = "Unknown"
-    try:
-        matches: list[str] = pg_version_regex.findall(result)
+    matches: list[str] = pg_version_regex.findall(result)
 
-        for match in matches:
-            version = match.strip()
-            break
-    except KeyError:
-        log.error("Error get_postgres_version, got KeyError: %s", result)
-
+    for match in matches:
+        version = match.strip()
+        break
+    if version == "Unknown":
+        log.error(
+            "get_postgres_version() Error processing pg result, version is Unknown: %s",
+            result,
+        )
     log.info("Calculated PostgreSQL version: %s", version)
-    return version
+    return version.replace(" ", "_")
