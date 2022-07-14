@@ -1,5 +1,6 @@
 # pg_dump
 backup/*
+.pgpass
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

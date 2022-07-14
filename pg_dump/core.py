@@ -1,5 +1,4 @@
 import logging
-import pathlib
 import re
 import subprocess
 
@@ -23,12 +22,11 @@ def recreate_pgpass_file():
     text += f":{settings.PGDUMP_DATABASE_USER}"
     text += f":{settings.PGDUMP_DATABASE_DB}"
     text += f":{settings.PGDUMP_DATABASE_PASSWORD}"
-    pgpass = pathlib.Path().home() / ".pgpass"
     log.info("Removing old .pgpass file")
-    pgpass.unlink(missing_ok=True)
-    pgpass.touch(0o600)
+    settings.PGDUMP_PGPASS_FILE_PATH.unlink(missing_ok=True)
+    settings.PGDUMP_PGPASS_FILE_PATH.touch(0o600)
 
-    with open(pgpass, "w") as file:
+    with open(settings.PGDUMP_PGPASS_FILE_PATH, "w") as file:
         file.write(text)
     log.info("File .pgpass created")
 
@@ -41,11 +39,11 @@ def run_subprocess(shell_args: list[str]) -> str:
         stderr=subprocess.PIPE,
         text=True,
     )
-    log.info("run_subprocess() %s Running: '%s'", p.pid, " ".join(shell_args))
+    log.info("run_subprocess() Running: '%s'", " ".join(shell_args))
     output, err = p.communicate(timeout=settings.PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS)
 
     if p.returncode != 0:
-        log.error("run_subprocess() %s: Fail with status %s", p.pid, p.returncode)
+        log.error("run_subprocess() Fail with status %s", p.returncode)
         log.error("run_subprocess() stdout: %s", output)
         log.error("run_subprocess() stderr: %s", err)
         raise SubprocessError(
@@ -53,7 +51,7 @@ def run_subprocess(shell_args: list[str]) -> str:
             f"Subprocess {p.pid} failed with code: {p.returncode} and shell args: {shell_args}"
         )
     else:
-        log.info("run_subprocess() %s: Finished with status %s", p.pid, p.returncode)
+        log.info("run_subprocess(): Finished with status %s", p.returncode)
         log.debug("run_subprocess() stdout: %s", output)
         log.debug("run_subprocess() stderr: %s", err)
     return output
@@ -74,6 +72,8 @@ def run_pg_dump(output_file: str):
             "-h",
             settings.PGDUMP_DATABASE_HOSTNAME,
             settings.PGDUMP_DATABASE_DB,
+            "passfile",
+            str(settings.PGDUMP_PGPASS_FILE_PATH),
             "-f",
             str(get_full_backup_folder_path(output_file)),
         ],
@@ -94,6 +94,8 @@ def get_postgres_version():
             "-h",
             settings.PGDUMP_DATABASE_HOSTNAME,
             settings.PGDUMP_DATABASE_DB,
+            "passfile",
+            str(settings.PGDUMP_PGPASS_FILE_PATH),
             "-c",
             "SELECT version();",
         ],

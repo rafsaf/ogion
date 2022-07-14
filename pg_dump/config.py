@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     PGDUMP_COOLING_PERIOD_AFTER_TIMEOUT: int = 60 * 5
     PGDUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "backup"
     PGDUMP_LOGS_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
+    PGDUMP_PGPASS_FILE_PATH: pathlib.Path = BASE_DIR / ".pgpass"
     PGDUMP_LOGS_MIN_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
 
     POSTGRESQL_VERSION: str = "Unknown"
