@@ -7,12 +7,6 @@ from pydantic import BaseSettings
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.absolute()
 
-os.environ["PGDUMP_DATABASE_HOSTNAME"] = "localhost"
-os.environ["PGDUMP_DATABASE_USER"] = "postgres"
-os.environ["PGDUMP_DATABASE_PASSWORD"] = "postgres"
-os.environ["PGDUMP_DATABASE_PORT"] = "15432"
-os.environ["PGDUMP_DATABASE_DB"] = "postgres"
-
 
 class Settings(BaseSettings):
     PGDUMP_DATABASE_HOSTNAME: str
@@ -21,14 +15,18 @@ class Settings(BaseSettings):
     PGDUMP_DATABASE_PORT: str
     PGDUMP_DATABASE_DB: str
 
-    PGDUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "*/1 * * * *"
-    PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 120
+    PGDUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "0 5 * * *"
+    PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 2
     PGDUMP_COOLING_PERIOD_AFTER_TIMEOUT: int = 60 * 5
     PGDUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "backup"
     PGDUMP_LOGS_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
     PGDUMP_LOGS_MIN_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
 
     POSTGRESQL_VERSION: str = "Unknown"
+
+    class Config:
+        env_file = BASE_DIR / ".env"
+        env_file_encoding = "utf-8"
 
 
 settings = Settings()  # type: ignore

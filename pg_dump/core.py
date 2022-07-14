@@ -3,7 +3,7 @@ import pathlib
 import re
 import subprocess
 
-from pg_dump import config
+from pg_dump.config import settings
 
 log = logging.getLogger(__name__)
 
@@ -13,16 +13,16 @@ class SubprocessError(Exception):
 
 
 def get_full_backup_folder_path(filename: str):
-    return (config.settings.PGDUMP_BACKUP_FOLDER_PATH / filename).absolute()
+    return (settings.PGDUMP_BACKUP_FOLDER_PATH / filename).absolute()
 
 
 def recreate_pgpass_file():
     log.info("Start creating .pgpass file")
-    text = config.settings.PGDUMP_DATABASE_HOSTNAME
-    text += f":{config.settings.PGDUMP_DATABASE_PORT}"
-    text += f":{config.settings.PGDUMP_DATABASE_USER}"
-    text += f":{config.settings.PGDUMP_DATABASE_DB}"
-    text += f":{config.settings.PGDUMP_DATABASE_PASSWORD}"
+    text = settings.PGDUMP_DATABASE_HOSTNAME
+    text += f":{settings.PGDUMP_DATABASE_PORT}"
+    text += f":{settings.PGDUMP_DATABASE_USER}"
+    text += f":{settings.PGDUMP_DATABASE_DB}"
+    text += f":{settings.PGDUMP_DATABASE_PASSWORD}"
     pgpass = pathlib.Path().home() / ".pgpass"
     log.info("Removing old .pgpass file")
     pgpass.unlink(missing_ok=True)
@@ -42,9 +42,7 @@ def run_subprocess(shell_args: list[str]) -> str:
         text=True,
     )
     log.info("run_subprocess() %s Running: '%s'", p.pid, " ".join(shell_args))
-    output, err = p.communicate(
-        timeout=config.settings.PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS
-    )
+    output, err = p.communicate(timeout=settings.PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS)
 
     if p.returncode != 0:
         log.error("run_subprocess() %s: Fail with status %s", p.pid, p.returncode)
@@ -70,12 +68,12 @@ def run_pg_dump(output_file: str):
             "-O",
             "-Fc",
             "-U",
-            config.settings.PGDUMP_DATABASE_USER,
+            settings.PGDUMP_DATABASE_USER,
             "-p",
-            config.settings.PGDUMP_DATABASE_PORT,
+            settings.PGDUMP_DATABASE_PORT,
             "-h",
-            config.settings.PGDUMP_DATABASE_HOSTNAME,
-            config.settings.PGDUMP_DATABASE_DB,
+            settings.PGDUMP_DATABASE_HOSTNAME,
+            settings.PGDUMP_DATABASE_DB,
             "-f",
             str(get_full_backup_folder_path(output_file)),
         ],
@@ -90,12 +88,12 @@ def get_postgres_version():
         [
             "psql",
             "-U",
-            config.settings.PGDUMP_DATABASE_USER,
+            settings.PGDUMP_DATABASE_USER,
             "-p",
-            config.settings.PGDUMP_DATABASE_PORT,
+            settings.PGDUMP_DATABASE_PORT,
             "-h",
-            config.settings.PGDUMP_DATABASE_HOSTNAME,
-            config.settings.PGDUMP_DATABASE_DB,
+            settings.PGDUMP_DATABASE_HOSTNAME,
+            settings.PGDUMP_DATABASE_DB,
             "-c",
             "SELECT version();",
         ],
@@ -107,7 +105,7 @@ def get_postgres_version():
         version = match.strip()
         break
     if version == "Unknown":
-        log.error(
+        log.warning(
             "get_postgres_version() Error processing pg result, version is Unknown: %s",
             result,
         )
