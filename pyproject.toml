@@ -17,7 +17,7 @@ coverage = { extras = ["toml"], version = "^6.4.1" }
 flake8 = "^4.0.1"
 isort = "^5.10.1"
 pre-commit = "^2.19.0"
-pyupgrade = "^2.35.0"
+pyupgrade = "^2.37.2"
 pytest = "^7.1.2"
 
 [tool.pytest.ini_options]
