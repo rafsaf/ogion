@@ -1,18 +1,33 @@
 import logging
+import queue
 import re
 import subprocess
 from datetime import datetime
 
+import croniter
+
 from pg_dump.config import settings
+from pg_dump.jobs import PgDumpJob
 
 log = logging.getLogger(__name__)
+
+PGDUMP_QUEUE: queue.Queue[PgDumpJob] = queue.Queue()
 
 
 class PgDumpSubprocessError(Exception):
     pass
 
 
-def get_new_backup_filename(now: datetime):
+def get_next_backup_time() -> datetime:
+    now = datetime.utcnow()
+    cron = croniter.croniter(
+        settings.PGDUMP_BACKUP_POLICY_CRON_EXPRESSION,
+        start_time=now,
+    )
+    return cron.get_next(ret_type=datetime)
+
+
+def get_new_backup_filename(now: datetime, db_version: str):
     number = str(
         len([f for f in settings.PGDUMP_BACKUP_FOLDER_PATH.iterdir() if f.is_file()])
     )
@@ -23,7 +38,7 @@ def get_new_backup_filename(now: datetime):
         number,
         settings.PGDUMP_DATABASE_DB,
         now.strftime("%Y%m%d_%H%M"),
-        settings.POSTGRESQL_VERSION.lower(),
+        db_version,
     )
 
 
@@ -127,6 +142,6 @@ def get_postgres_version():
             "get_postgres_version() Error processing pg result, version is Unknown: %s",
             result,
         )
-        return "Unknown"
+        return "unknown"
     log.info("Calculated PostgreSQL version: %s", version)
-    return version.replace(" ", "_")
+    return version.replace(" ", "_").lower()
