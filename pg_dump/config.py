@@ -32,6 +32,7 @@ class Settings(BaseSettings):
 
 settings = Settings()  # type: ignore
 
+os.environ["PGPASSFILE"] = str(settings.PGDUMP_PGPASS_FILE_PATH)
 os.makedirs(settings.PGDUMP_BACKUP_FOLDER_PATH, exist_ok=True)
 os.makedirs(settings.PGDUMP_LOGS_FOLDER_PATH, exist_ok=True)
 

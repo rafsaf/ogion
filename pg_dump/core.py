@@ -1,14 +1,30 @@
 import logging
 import re
 import subprocess
+from datetime import datetime
 
 from pg_dump.config import settings
 
 log = logging.getLogger(__name__)
 
 
-class SubprocessError(Exception):
+class PgDumpSubprocessError(Exception):
     pass
+
+
+def get_new_backup_filename(now: datetime):
+    number = str(
+        len([f for f in settings.PGDUMP_BACKUP_FOLDER_PATH.iterdir() if f.is_file()])
+    )
+    while len(number) < 4:
+        number = f"0{number}"
+
+    return "{}_{}_{}_{}.sql".format(
+        number,
+        settings.PGDUMP_DATABASE_DB,
+        now.strftime("%Y%m%d_%H%M"),
+        settings.POSTGRESQL_VERSION.lower(),
+    )
 
 
 def get_full_backup_folder_path(filename: str):
@@ -16,19 +32,22 @@ def get_full_backup_folder_path(filename: str):
 
 
 def recreate_pgpass_file():
-    log.info("Start creating .pgpass file")
+    log.info("Removing old pgpass file")
+    settings.PGDUMP_PGPASS_FILE_PATH.unlink(missing_ok=True)
+
+    log.info("Start creating pgpass file")
     text = settings.PGDUMP_DATABASE_HOSTNAME
     text += f":{settings.PGDUMP_DATABASE_PORT}"
     text += f":{settings.PGDUMP_DATABASE_USER}"
     text += f":{settings.PGDUMP_DATABASE_DB}"
     text += f":{settings.PGDUMP_DATABASE_PASSWORD}"
-    log.info("Removing old .pgpass file")
-    settings.PGDUMP_PGPASS_FILE_PATH.unlink(missing_ok=True)
+
+    log.info("Perform chmod 0600 on pgpass file")
     settings.PGDUMP_PGPASS_FILE_PATH.touch(0o600)
 
+    log.info("Start saving pgpass file")
     with open(settings.PGDUMP_PGPASS_FILE_PATH, "w") as file:
         file.write(text)
-    log.info("File .pgpass created")
 
 
 def run_subprocess(shell_args: list[str]) -> str:
@@ -46,7 +65,7 @@ def run_subprocess(shell_args: list[str]) -> str:
         log.error("run_subprocess() Fail with status %s", p.returncode)
         log.error("run_subprocess() stdout: %s", output)
         log.error("run_subprocess() stderr: %s", err)
-        raise SubprocessError(
+        raise PgDumpSubprocessError(
             f"'{' '.join(shell_args)}' \n"
             f"Subprocess {p.pid} failed with code: {p.returncode} and shell args: {shell_args}"
         )
@@ -72,8 +91,6 @@ def run_pg_dump(output_file: str):
             "-h",
             settings.PGDUMP_DATABASE_HOSTNAME,
             settings.PGDUMP_DATABASE_DB,
-            "passfile",
-            str(settings.PGDUMP_PGPASS_FILE_PATH),
             "-f",
             str(get_full_backup_folder_path(output_file)),
         ],
@@ -94,9 +111,8 @@ def get_postgres_version():
             "-h",
             settings.PGDUMP_DATABASE_HOSTNAME,
             settings.PGDUMP_DATABASE_DB,
-            "passfile",
-            str(settings.PGDUMP_PGPASS_FILE_PATH),
-            "-c",
+            "-w",
+            "--command",
             "SELECT version();",
         ],
     )

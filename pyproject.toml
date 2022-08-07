@@ -19,6 +19,7 @@ isort = "^5.10.1"
 pre-commit = "^2.19.0"
 pyupgrade = "^2.35.0"
 pytest = "^7.1.2"
+watchfiles = "^0.16.1"
 
 [tool.pytest.ini_options]
 addopts = "-v"
