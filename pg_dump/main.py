@@ -43,7 +43,7 @@ class PgDumpDaemon:
     def check_postgres_connection(self):
         try:
             db_version = core.get_postgres_version()
-        except core.PgDumpSubprocessError:
+        except core.CoreSubprocessError:
             error_message = traceback.format_exc()
             log.critical(error_message)
             log.critical("Unable to connect to database, aborted")

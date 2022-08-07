@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 PGDUMP_QUEUE: queue.Queue[PgDumpJob] = queue.Queue()
 
 
-class PgDumpSubprocessError(Exception):
+class CoreSubprocessError(Exception):
     pass
 
 
@@ -42,7 +42,7 @@ def get_new_backup_filename(now: datetime, db_version: str):
     )
 
 
-def get_full_backup_folder_path(filename: str):
+def backup_folder_path(filename: str):
     return (settings.PGDUMP_BACKUP_FOLDER_PATH / filename).absolute()
 
 
@@ -80,7 +80,7 @@ def run_subprocess(shell_args: list[str]) -> str:
         log.error("run_subprocess() Fail with status %s", p.returncode)
         log.error("run_subprocess() stdout: %s", output)
         log.error("run_subprocess() stderr: %s", err)
-        raise PgDumpSubprocessError(
+        raise CoreSubprocessError(
             f"'{' '.join(shell_args)}' \n"
             f"Subprocess {p.pid} failed with code: {p.returncode} and shell args: {shell_args}"
         )
@@ -107,7 +107,7 @@ def run_pg_dump(output_file: str):
             settings.PGDUMP_DATABASE_HOSTNAME,
             settings.PGDUMP_DATABASE_DB,
             "-f",
-            str(get_full_backup_folder_path(output_file)),
+            str(backup_folder_path(output_file)),
         ],
     )
     log.info("Finished pg_dump, output file: %s", output_file)
