@@ -116,16 +116,17 @@ def get_postgres_version():
             "SELECT version();",
         ],
     )
-    version = "Unknown"
+    version = None
     matches: list[str] = pg_version_regex.findall(result)
 
     for match in matches:
         version = match.strip()
         break
-    if version == "Unknown":
+    if version is None:
         log.warning(
             "get_postgres_version() Error processing pg result, version is Unknown: %s",
             result,
         )
+        return "Unknown"
     log.info("Calculated PostgreSQL version: %s", version)
     return version.replace(" ", "_")

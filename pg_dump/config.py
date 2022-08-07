@@ -19,9 +19,9 @@ class Settings(BaseSettings):
     PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 2
     PGDUMP_COOLING_PERIOD_AFTER_TIMEOUT: int = 60 * 5
     PGDUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "data"
-    PGDUMP_LOGS_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
+    PGDUMP_LOG_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
     PGDUMP_PGPASS_FILE_PATH: pathlib.Path = BASE_DIR / ".pgpass"
-    PGDUMP_LOGS_MIN_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
+    PGDUMP_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
 
     POSTGRESQL_VERSION: str = "Unknown"
 
@@ -34,7 +34,7 @@ settings = Settings()  # type: ignore
 
 os.environ["PGPASSFILE"] = str(settings.PGDUMP_PGPASS_FILE_PATH)
 os.makedirs(settings.PGDUMP_BACKUP_FOLDER_PATH, exist_ok=True)
-os.makedirs(settings.PGDUMP_LOGS_FOLDER_PATH, exist_ok=True)
+os.makedirs(settings.PGDUMP_LOG_FOLDER_PATH, exist_ok=True)
 
 LOGGING = {
     "version": 1,
@@ -49,37 +49,37 @@ LOGGING = {
         "stream": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
-            "level": "INFO",
+            "level": "DEBUG",
         },
         "error": {
             "class": "logging.FileHandler",
-            "filename": settings.PGDUMP_LOGS_FOLDER_PATH / "pg_dump_error.log",
+            "filename": settings.PGDUMP_LOG_FOLDER_PATH / "pg_dump_error.log",
             "formatter": "verbose",
             "level": "ERROR",
         },
         "warning": {
             "class": "logging.FileHandler",
-            "filename": settings.PGDUMP_LOGS_FOLDER_PATH / "pg_dump_warning.log",
+            "filename": settings.PGDUMP_LOG_FOLDER_PATH / "pg_dump_warning.log",
             "formatter": "verbose",
             "level": "WARNING",
         },
         "info": {
             "class": "logging.FileHandler",
-            "filename": settings.PGDUMP_LOGS_FOLDER_PATH / "pg_dump_info.log",
+            "filename": settings.PGDUMP_LOG_FOLDER_PATH / "pg_dump_info.log",
             "formatter": "verbose",
             "level": "INFO",
         },
         "debug": {
             "class": "logging.FileHandler",
-            "filename": settings.PGDUMP_LOGS_FOLDER_PATH / "pg_dump_debug.log",
+            "filename": settings.PGDUMP_LOG_FOLDER_PATH / "pg_dump_debug.log",
             "formatter": "verbose",
             "level": "DEBUG",
         },
     },
     "loggers": {
         "": {
-            "level": settings.PGDUMP_LOGS_MIN_LEVEL,
-            "handlers": ["error", "info", "debug", "warning", "stream"],
+            "level": settings.PGDUMP_LOG_LEVEL,
+            "handlers": ["debug", "info", "warning", "error", "stream"],
             "propagate": False,
         },
     },
