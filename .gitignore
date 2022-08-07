@@ -1,5 +1,5 @@
 # pg_dump
-backup/*
+data/*
 .pgpass
 
 # Byte-compiled / optimized / DLL files

@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     PGDUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "0 5 * * *"
     PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 2
     PGDUMP_COOLING_PERIOD_AFTER_TIMEOUT: int = 60 * 5
-    PGDUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "backup"
+    PGDUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "data"
     PGDUMP_LOGS_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
     PGDUMP_PGPASS_FILE_PATH: pathlib.Path = BASE_DIR / ".pgpass"
     PGDUMP_LOGS_MIN_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
