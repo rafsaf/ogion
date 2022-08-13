@@ -18,7 +18,7 @@ flake8 = "^5.0.4"
 isort = "^5.10.1"
 pre-commit = "^2.19.0"
 pytest = "^7.1.2"
-pyupgrade = "^2.35.0"
+pyupgrade = "^2.37.3"
 watchfiles = "^0.16.1"
 
 [tool.pytest.ini_options]
