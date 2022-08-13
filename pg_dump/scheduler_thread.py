@@ -1,4 +1,5 @@
 import logging
+import queue
 import time
 from datetime import datetime
 from threading import Thread
@@ -29,15 +30,18 @@ class SchedulerThread(Thread):
             now = datetime.utcnow()
             if now > self.next_backup_time:
                 log.info("Start schedulig new backup, putting pgdump job to queue")
-                core.PGDUMP_QUEUE.put(
-                    jobs.PgDumpJob(start=now, db_version=self.db_version)
-                )
+                try:
+                    core.PGDUMP_QUEUE.put(
+                        jobs.PgDumpJob(start=now, db_version=self.db_version),
+                        block=False,
+                    )
+                except queue.Full:
+                    log.warning("PGDUMP_QUEUE is full, skip scheduling pgdump job")
                 self.next_backup_time = core.get_next_backup_time()
                 log.info("Next backup time %s.", self.next_backup_time)
             time.sleep(0.02)
+        log.info("Scheduler thread has stopped")
 
     def stop(self):
         log.info("Stopping scheduler thread")
         self._running = False
-        self.join()
-        log.info("Scheduler thread has stopped")

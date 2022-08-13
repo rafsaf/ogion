@@ -11,7 +11,9 @@ from pg_dump.jobs import PgDumpJob
 
 log = logging.getLogger(__name__)
 
-PGDUMP_QUEUE: queue.Queue[PgDumpJob] = queue.Queue()
+PGDUMP_QUEUE: queue.Queue[PgDumpJob] = queue.Queue(
+    maxsize=settings.PGDUMP_NUMBER_PGDUMP_THREADS
+)
 
 
 class CoreSubprocessError(Exception):

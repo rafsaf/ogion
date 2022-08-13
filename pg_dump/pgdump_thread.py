@@ -1,7 +1,6 @@
 import logging
 import queue
 import time
-import traceback
 from datetime import datetime, timedelta
 from threading import Thread
 
@@ -50,12 +49,12 @@ class PgDumpThread(Thread):
                 continue
             try:
                 core.run_pg_dump(self.job.filename)
-                if not core.backup_folder_path(self.job.filename).stat().st_size:
+                path = core.backup_folder_path(self.job.filename)
+                if path.exists() and not path.stat().st_size:
                     log.error("Error pgdump thread %s: backup file empty", self.number)
                     raise core.CoreSubprocessError()
-            except core.CoreSubprocessError:
-                error_message = traceback.format_exc()
-                log.error(error_message)
+            except core.CoreSubprocessError as err:
+                log.error(err, exc_info=True)
                 log.error(
                     "Error pgdump thread %s: error performing pgdump", self.number
                 )
@@ -64,6 +63,7 @@ class PgDumpThread(Thread):
                 self.cooling_period()
                 self.job.retries += 1
                 core.PGDUMP_QUEUE.put(self.job)
+        log.info("Pgdump thread %s has stopped", self.number)
 
     def cooling_period(self):
         self.cooling = True
@@ -86,5 +86,3 @@ class PgDumpThread(Thread):
     def stop(self):
         log.info("Stopping pgdump thread %s", self.number)
         self._running = False
-        self.join()
-        log.info("Pgdump thread %s has stopped", self.number)

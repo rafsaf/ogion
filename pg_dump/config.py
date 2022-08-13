@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     PGDUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "data/backup"
     PGDUMP_LOG_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
     PGDUMP_PGPASS_FILE_PATH: pathlib.Path = BASE_DIR / ".pgpass"
+    PGDUMP_PICKLE_PGDUMP_QUEUE_NAME: pathlib.Path = (
+        BASE_DIR / "data/PGDUMP_QUEUE.pickle"
+    )
     PGDUMP_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
 
     class Config:
