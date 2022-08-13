@@ -9,11 +9,11 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.absolute()
 
 
 class Settings(BaseSettings):
-    PGDUMP_DATABASE_HOSTNAME: str
-    PGDUMP_DATABASE_USER: str
-    PGDUMP_DATABASE_PASSWORD: str
-    PGDUMP_DATABASE_PORT: str
-    PGDUMP_DATABASE_DB: str
+    PGDUMP_DATABASE_HOSTNAME: str = "localhost"
+    PGDUMP_DATABASE_USER: str = "postgres"
+    PGDUMP_DATABASE_PASSWORD: str = "postgres"
+    PGDUMP_DATABASE_PORT: str = "5432"
+    PGDUMP_DATABASE_DB: str = "postgres"
 
     PGDUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "0 5 * * *"
     PGDUMP_NUMBER_PGDUMP_THREADS: int = 3

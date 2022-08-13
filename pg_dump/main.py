@@ -1,18 +1,20 @@
 import logging
+import pathlib
 import pickle
 import signal
 import sys
 import time
 
-from config import BASE_DIR, settings
-
 try:
     from pg_dump import core
 except ImportError:
+    BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.absolute()
     sys.path.insert(0, str(BASE_DIR))
 
     from pg_dump import core
 
+from pg_dump import config
+from pg_dump.config import BASE_DIR
 from pg_dump.jobs import PgDumpJob
 from pg_dump.pgdump_thread import PgDumpThread
 from pg_dump.scheduler_thread import SchedulerThread
@@ -23,10 +25,11 @@ log = logging.getLogger(__name__)
 class PgDumpDaemon:
     """pg_dump service"""
 
-    def __init__(self) -> None:
+    def __init__(self, exit_on_fail: bool = False) -> None:
         signal.signal(signalnum=signal.SIGINT, handler=self.exit)
         signal.signal(signalnum=signal.SIGTERM, handler=self.exit)
         self.db_version: str = ""
+        self.exit_on_fail = exit_on_fail
         log.info("Initialize pg_dump...")
         core.recreate_pgpass_file()
         log.info("Recreated pgpass file")
@@ -37,7 +40,7 @@ class PgDumpDaemon:
 
         self.scheduler_thread = SchedulerThread(db_version=self.db_version)
         self.pgdump_threads: list[PgDumpThread] = []
-        for i in range(settings.PGDUMP_NUMBER_PGDUMP_THREADS):
+        for i in range(config.settings.PGDUMP_NUMBER_PGDUMP_THREADS):
             self.pgdump_threads.append(PgDumpThread(number=i))
 
     def run(self):
@@ -46,8 +49,8 @@ class PgDumpDaemon:
             thread.start()
 
     def initialize_pgdump_queue_from_picle(self):
-        if settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME.is_file():
-            with open(settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "rb") as file:
+        if config.settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME.is_file():
+            with open(config.settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "rb") as file:
                 queue_elements: list[PgDumpJob] = pickle.loads(file.read())
                 for item in queue_elements:
                     core.PGDUMP_QUEUE.put(item, block=False)
@@ -64,8 +67,11 @@ class PgDumpDaemon:
                 db_version = core.get_postgres_version()
             except core.CoreSubprocessError as err:
                 log.error(err, exc_info=True)
-                log.error("Unable to connect to database, next retry in 10s")
-            else:
+                if self.exit_on_fail:
+                    raise
+                else:  # pragma: no cover
+                    log.error("Unable to connect to database, next retry in 10s")
+            else:  # pragma: no cover
                 self.db_version = db_version
                 return
             time.sleep(10)
@@ -88,7 +94,7 @@ class PgDumpDaemon:
             thread.stop()
         for thread in self.pgdump_threads:
             thread.join()
-        with open(settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "wb") as file:
+        with open(config.settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "wb") as file:
             pickle.dump(list(core.PGDUMP_QUEUE.queue), file)
         log.info("Saved pickled PGDUMP_QUEUE to file")
         log.info("PgDumpDaemon exits gracefully")

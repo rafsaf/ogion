@@ -9,7 +9,34 @@ services:
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
-      - 15432:5432
+      - 10014:5432
+  postgres_13:
+    restart: "unless-stopped"
+    image: postgres:13
+    volumes:
+      - pgdump_dev_postgresql_13:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 10013:5432
+  postgres_12:
+    restart: "unless-stopped"
+    image: postgres:12
+    volumes:
+      - pgdump_dev_postgresql_12:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 10012:5432
+  postgres_11:
+    restart: "unless-stopped"
+    image: postgres:11
+    volumes:
+      - pgdump_dev_postgresql_11:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 10011:5432
   postgres_10:
     restart: "unless-stopped"
     image: postgres:10
@@ -18,8 +45,11 @@ services:
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
-      - 25432:5432
+      - 10010:5432
 
 volumes:
   pgdump_dev_postgresql_14:
+  pgdump_dev_postgresql_13:
+  pgdump_dev_postgresql_12:
+  pgdump_dev_postgresql_11:
   pgdump_dev_postgresql_10:

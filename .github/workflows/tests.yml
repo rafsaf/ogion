@@ -15,8 +15,8 @@ jobs:
         python-version: ["3.10"]
 
     services:
-      postgres:
-        image: postgres
+      postgres_14:
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: postgres
         options: >-
@@ -25,7 +25,51 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5432
+          - 10014:5432
+      postgres_13:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 10013:5432
+      postgres_12:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 10012:5432
+      postgres_11:
+        image: postgres:11
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 10011:5432
+      postgres_10:
+        image: postgres:10
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 10010:5432
     steps:
       - uses: actions/checkout@v3
 
@@ -56,8 +100,6 @@ jobs:
           # stop the build if there are Python syntax errors or undefined names
           poetry run flake8 pg_dump --count --statistics
       - name: Coverage full tests
-        env:
-          POSTGRES_HOST: localhost
         run: |
           poetry run coverage run -m pytest
           poetry run coverage xml
