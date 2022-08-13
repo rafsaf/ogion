@@ -104,9 +104,9 @@ jobs:
           poetry run coverage run -m pytest
           poetry run coverage xml
           poetry run coverage report --show-missing
-      - name: Upload coverage result to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          flags: unittests
-          file: coverage.xml
-          fail_ci_if_error: true
+      #- name: Upload coverage result to Codecov
+      #  uses: codecov/codecov-action@v3
+      #  with:
+      #    flags: unittests
+      #    file: coverage.xml
+      #    fail_ci_if_error: true
