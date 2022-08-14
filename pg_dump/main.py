@@ -26,8 +26,6 @@ class PgDumpDaemon:
     """pg_dump service"""
 
     def __init__(self, exit_on_fail: bool = False) -> None:
-        signal.signal(signalnum=signal.SIGINT, handler=self.exit)
-        signal.signal(signalnum=signal.SIGTERM, handler=self.exit)
         self.db_version: str = ""
         self.exit_on_fail = exit_on_fail
         log.info("Initialize pg_dump...")
@@ -42,6 +40,9 @@ class PgDumpDaemon:
         self.pgdump_threads: list[PgDumpThread] = []
         for i in range(config.settings.PGDUMP_NUMBER_PGDUMP_THREADS):
             self.pgdump_threads.append(PgDumpThread(number=i))
+
+        signal.signal(signalnum=signal.SIGINT, handler=self.exit)
+        signal.signal(signalnum=signal.SIGTERM, handler=self.exit)
 
     def run(self):
         self.scheduler_thread.start()
