@@ -46,7 +46,12 @@ services:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 10010:5432
-
+  pg_dump:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - .env
 volumes:
   pgdump_dev_postgresql_14:
   pgdump_dev_postgresql_13:
