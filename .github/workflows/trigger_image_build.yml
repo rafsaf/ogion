@@ -33,5 +33,5 @@ jobs:
           file: Dockerfile
           context: .
           push: true
-          tags: rafsaf/pg_dump:${{  github.ref_name }}"
+          tags: rafsaf/pg_dump:${{ github.ref_name }}
           platforms: linux/amd64,linux/arm64
