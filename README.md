@@ -9,19 +9,19 @@ version: "3.4"
 
 services:
   pg_dump:
-    image: rafsaf/pg_dump:0.2
+    image: rafsaf/pg_dump:0.3
     volumes:
-      - pgdump_data:/var/lib/pg_dump/data/
-      - pgdump_logs:/var/log/pg_dump/
+      - pg_dump_data:/var/lib/pg_dump/data/
+      - pg_dump_logs:/var/log/pg_dump/
 
 volumes:
-  pgdump_data:
-  pgdump_logs:
+  pg_dump_data:
+  pg_dump_logs:
 ```
 
 # Docker image reference
 
-`rafsaf/pg_dump:0.2`
+`rafsaf/pg_dump:0.3`
 
 ## Dockerhub:
 
@@ -41,7 +41,7 @@ https://hub.docker.com/repository/docker/rafsaf/pg_dump
 
 **PGDUMP_BACKUP_POLICY_CRON_EXPRESSION** - Cron expression when should backups perform, defaults to `0 5 * * *` (5am every day), must be valid cron syntax, see https://crontab.guru/examples.html
 
-**PGDUMP_NUMBER_PGDUMP_THREADS** - Number of worker threads, defaults to `3`
+**PGDUMP_NUMBER_PGDUMP_THREADS** - Number of worker threads, defaults to `2`
 
 **PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS** - Timeout for pgdump subprocess in seconds, defaults to `3600` (1 hour)
 

@@ -39,7 +39,7 @@ class SchedulerThread(Thread):
                     log.warning("PGDUMP_QUEUE is full, skip scheduling pgdump job")
                 self.next_backup_time = core.get_next_backup_time()
                 log.info("Next backup time %s.", self.next_backup_time)
-            time.sleep(0.02)
+            time.sleep(1)
         log.info("Scheduler thread has stopped")
 
     def stop(self):

@@ -104,3 +104,6 @@ class PgDumpDaemon:
 if __name__ == "__main__":
     pg_dump_daemon = PgDumpDaemon()
     pg_dump_daemon.run()
+    while pg_dump_daemon.healthcheck():
+        log.debug("pg_dump healthy")
+        time.sleep(5)

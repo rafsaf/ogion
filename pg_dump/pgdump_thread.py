@@ -31,7 +31,7 @@ class PgDumpThread(Thread):
             try:
                 self.job = core.PGDUMP_QUEUE.get(block=False)
             except queue.Empty:
-                time.sleep(0.02)
+                time.sleep(1)
                 continue
 
             self.job.filename = self.job.get_current_filename()
@@ -85,7 +85,7 @@ class PgDumpThread(Thread):
                 self.cooling = False
                 log.info("Pgdump thread %s finished cooling period", self.number)
                 return
-            time.sleep(0.02)
+            time.sleep(1)
         log.info("Pgdump thread %s skipping cooling period", self.number)
 
     def stop(self):
