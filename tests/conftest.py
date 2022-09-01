@@ -2,9 +2,8 @@ import os
 import pathlib
 
 import pytest
-from pytest import MonkeyPatch
 
-from pg_dump import config
+from pg_dump.config import settings
 
 POSTGRES_DATABASES_PORTS = {
     14: "10014",
@@ -16,17 +15,14 @@ POSTGRES_DATABASES_PORTS = {
 
 
 @pytest.fixture(params=[13, 14, 12, 11, 10], autouse=True)
-def config_setup(request, tmpdir, monkeypatch: MonkeyPatch):
+def config_setup(request, tmpdir):
 
-    mock_settings = config.Settings()
-    mock_settings.PGDUMP_DATABASE_PORT = POSTGRES_DATABASES_PORTS[request.param]
-    mock_settings.PGDUMP_BACKUP_FOLDER_PATH = pathlib.Path(f"{tmpdir}/backup")
-    mock_settings.PGDUMP_LOG_FOLDER_PATH = pathlib.Path(f"{tmpdir}/log")
-    mock_settings.PGDUMP_PGPASS_FILE_PATH = pathlib.Path(f"{tmpdir}/pgpass")
-    mock_settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME = pathlib.Path(f"{tmpdir}/queue")
+    settings.PGDUMP_DATABASE_PORT = POSTGRES_DATABASES_PORTS[request.param]
+    settings.PGDUMP_BACKUP_FOLDER_PATH = pathlib.Path(f"{tmpdir}/backup")
+    settings.PGDUMP_LOG_FOLDER_PATH = pathlib.Path(f"{tmpdir}/log")
+    settings.PGDUMP_PGPASS_FILE_PATH = pathlib.Path(f"{tmpdir}/pgpass")
+    settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME = pathlib.Path(f"{tmpdir}/queue")
 
-    monkeypatch.setattr(config, "settings", mock_settings)
-
-    os.environ["PGPASSFILE"] = str(config.settings.PGDUMP_PGPASS_FILE_PATH)
-    os.makedirs(config.settings.PGDUMP_BACKUP_FOLDER_PATH, exist_ok=True)
-    os.makedirs(config.settings.PGDUMP_LOG_FOLDER_PATH, exist_ok=True)
+    os.environ["PGPASSFILE"] = str(settings.PGDUMP_PGPASS_FILE_PATH)
+    os.makedirs(settings.PGDUMP_BACKUP_FOLDER_PATH, exist_ok=True)
+    os.makedirs(settings.PGDUMP_LOG_FOLDER_PATH, exist_ok=True)

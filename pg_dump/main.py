@@ -13,8 +13,7 @@ except ImportError:
 
     from pg_dump import core
 
-from pg_dump import config
-from pg_dump.config import BASE_DIR
+from pg_dump.config import BASE_DIR, settings
 from pg_dump.jobs import PgDumpJob
 from pg_dump.pgdump_thread import PgDumpThread
 from pg_dump.scheduler_thread import SchedulerThread
@@ -38,7 +37,7 @@ class PgDumpDaemon:
 
         self.scheduler_thread = SchedulerThread(db_version=self.db_version)
         self.pgdump_threads: list[PgDumpThread] = []
-        for i in range(config.settings.PGDUMP_NUMBER_PGDUMP_THREADS):
+        for i in range(settings.PGDUMP_NUMBER_PGDUMP_THREADS):
             self.pgdump_threads.append(PgDumpThread(number=i))
 
         signal.signal(signalnum=signal.SIGINT, handler=self.exit)
@@ -50,8 +49,8 @@ class PgDumpDaemon:
             thread.start()
 
     def initialize_pgdump_queue_from_picle(self):
-        if config.settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME.is_file():
-            with open(config.settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "rb") as file:
+        if settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME.is_file():
+            with open(settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "rb") as file:
                 queue_elements: list[PgDumpJob] = pickle.loads(file.read())
                 for item in queue_elements:
                     core.PGDUMP_QUEUE.put(item, block=False)
@@ -95,7 +94,7 @@ class PgDumpDaemon:
             thread.stop()
         for thread in self.pgdump_threads:
             thread.join()
-        with open(config.settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "wb") as file:
+        with open(settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "wb") as file:
             pickle.dump(list(core.PGDUMP_QUEUE.queue), file)
         log.info("Saved pickled PGDUMP_QUEUE to file")
         log.info("PgDumpDaemon exits gracefully")
@@ -104,6 +103,6 @@ class PgDumpDaemon:
 if __name__ == "__main__":
     pg_dump_daemon = PgDumpDaemon()
     pg_dump_daemon.run()
-    while pg_dump_daemon.healthcheck():
-        log.debug("pg_dump healthy")
-        time.sleep(5)
+    pg_dump_daemon.scheduler_thread.join()
+    for thread in pg_dump_daemon.pgdump_threads:
+        thread.join()

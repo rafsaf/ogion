@@ -1,5 +1,6 @@
 FROM python:3.10-slim-buster
 
+# https://www.postgresql.org/download/linux/debian/
 RUN apt-get -y update && apt-get install -y wget gnupg2
 
 RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt buster-pgdg main" > \
