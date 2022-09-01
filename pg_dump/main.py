@@ -68,7 +68,7 @@ class PgDumpDaemon:
                 log.error(err, exc_info=True)
                 log.error("Unable to connect to database, exiting")
                 exit(1)
-            else:  # pragma: no cover
+            else:
                 self.db_version = db_version
                 return
 

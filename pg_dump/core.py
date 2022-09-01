@@ -1,6 +1,7 @@
 import logging
 import queue
 import re
+import secrets
 import subprocess
 from datetime import datetime
 
@@ -30,17 +31,12 @@ def get_next_backup_time() -> datetime:
 
 
 def get_new_backup_filename(now: datetime, db_version: str):
-    number = str(
-        len([f for f in settings.PGDUMP_BACKUP_FOLDER_PATH.iterdir() if f.is_file()])
-    )
-    while len(number) < 4:
-        number = f"0{number}"
-
+    random_string = secrets.token_urlsafe(4)
     return "{}_{}_{}_{}.sql".format(
-        number,
         settings.PGDUMP_DATABASE_DB,
         now.strftime("%Y%m%d_%H%M"),
         db_version,
+        random_string,
     )
 
 
