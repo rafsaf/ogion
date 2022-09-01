@@ -3,7 +3,6 @@ import pathlib
 import pickle
 import signal
 import sys
-import time
 
 try:
     from pg_dump import core
@@ -67,14 +66,11 @@ class PgDumpDaemon:
                 db_version = core.get_postgres_version()
             except core.CoreSubprocessError as err:
                 log.error(err, exc_info=True)
-                if self.exit_on_fail:
-                    raise
-                else:  # pragma: no cover
-                    log.error("Unable to connect to database, next retry in 10s")
+                log.error("Unable to connect to database, exiting")
+                exit(1)
             else:  # pragma: no cover
                 self.db_version = db_version
                 return
-            time.sleep(10)
 
     def healthcheck(self):
         healthy = True

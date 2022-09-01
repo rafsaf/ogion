@@ -5,7 +5,7 @@ services:
     restart: "unless-stopped"
     image: postgres:14
     volumes:
-      - pgdump_dev_postgresql_14:/var/lib/postgresql/data
+      - pg_dump_dev_postgresql_14:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -14,7 +14,7 @@ services:
     restart: "unless-stopped"
     image: postgres:13
     volumes:
-      - pgdump_dev_postgresql_13:/var/lib/postgresql/data
+      - pg_dump_dev_postgresql_13:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -23,7 +23,7 @@ services:
     restart: "unless-stopped"
     image: postgres:12
     volumes:
-      - pgdump_dev_postgresql_12:/var/lib/postgresql/data
+      - pg_dump_dev_postgresql_12:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -32,7 +32,7 @@ services:
     restart: "unless-stopped"
     image: postgres:11
     volumes:
-      - pgdump_dev_postgresql_11:/var/lib/postgresql/data
+      - pg_dump_dev_postgresql_11:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -41,7 +41,7 @@ services:
     restart: "unless-stopped"
     image: postgres:10
     volumes:
-      - pgdump_dev_postgresql_10:/var/lib/postgresql/data
+      - pg_dump_dev_postgresql_10:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -52,9 +52,17 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    environment:
+      - PGDUMP_DATABASE_HOSTNAME=postgres_14
+      - PGDUMP_DATABASE_PORT=5432
+    volumes:
+      - pg_dump_dev_data:/var/lib/pg_dump/data/
+      - pg_dump_dev_logs:/var/log/pg_dump/
 volumes:
-  pgdump_dev_postgresql_14:
-  pgdump_dev_postgresql_13:
-  pgdump_dev_postgresql_12:
-  pgdump_dev_postgresql_11:
-  pgdump_dev_postgresql_10:
+  pg_dump_dev_postgresql_14:
+  pg_dump_dev_postgresql_13:
+  pg_dump_dev_postgresql_12:
+  pg_dump_dev_postgresql_11:
+  pg_dump_dev_postgresql_10:
+  pg_dump_dev_data:
+  pg_dump_dev_logs:
