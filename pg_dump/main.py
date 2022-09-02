@@ -94,7 +94,7 @@ class PgDumpDaemon:
             thread.join()
         with open(settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "wb") as file:
             pickle.dump(list(core.PGDUMP_QUEUE.queue), file)
-        log.info("Saved pickled PGDUMP_QUEUE to file")
+        log.info("Saved pickled pgdump_queue to file")
         log.info("PgDumpDaemon exits gracefully")
 
 

@@ -130,7 +130,11 @@ def recreate_gpg_public_key():
         exit(1)
     with open(settings.PGDUMP_GPG_PUBLIC_KEY_BASE64_PATH, "wb") as gpg_pub_file:
         gpg_pub_file.write(gpg_pub_cert)
-    log.debug("Saved gpg public key: %s", gpg_pub_cert.decode())
+    log.debug(
+        "Saved gpg public key to %s:\n%s",
+        settings.PGDUMP_GPG_PUBLIC_KEY_BASE64_PATH,
+        gpg_pub_cert.decode(),
+    )
     log.info("Successfully finished recreate_gpg_public_key")
 
 
