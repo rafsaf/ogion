@@ -1,6 +1,7 @@
 # pg_dump
 data/*
 .pgpass
+gpg_public.key.pub
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

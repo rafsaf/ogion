@@ -58,3 +58,7 @@ https://hub.docker.com/repository/docker/rafsaf/pg_dump
 **PGDUMP_PICKLE_PGDUMP_QUEUE_NAME** - Path to pickled queue, background queue is dumped on app exit, to avoid data losses, by default in docker image it is `/var/lib/pg_dump/data/PGDUMP_QUEUE.pickle`
 
 **PGDUMP_LOG_LEVEL** - Log level (DEBUG, INFO, WARNING, ERROR), by default in docker image it is `INFO`
+
+
+`gpg --generate-key`
+`gpg --armor --export rafsaf | base64 -w 0 > public.key`

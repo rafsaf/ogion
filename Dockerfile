@@ -22,9 +22,10 @@ RUN pip install -r /var/lib/pg_dump/requirements.txt
 
 ENV PGDUMP_FOLDER_PATH='/var/lib/pg_dump/'
 ENV PGDUMP_BACKUP_FOLDER_PATH='/var/lib/pg_dump/data/backup/'
-ENV PGDUMP_PICKLE_PGDUMP_QUEUE_NAME='/var/lib/pg_dump/data/PGDUMP_QUEUE.pickle'
+ENV PGDUMP_PICKLE_PGDUMP_QUEUE_NAME='/var/lib/pg_dump/data/pg_queue.pickle'
 ENV PGDUMP_LOG_FOLDER_PATH='/var/log/pg_dump/'
 ENV PGDUMP_PGPASS_FILE_PATH='/var/lib/pg_dump/.pgpass'
+ENV PGDUMP_GPG_PUBLIC_KEY_BASE64_PATH='/var/lib/pg_dump/gpg_public.key.pub'
 ENV PGDUMP_LOG_LEVEL='INFO'
 ENV SERVICE_NAME='pg_dump'
 

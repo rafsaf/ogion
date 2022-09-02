@@ -32,6 +32,8 @@ class PgDumpDaemon:
         self.check_postgres_connection()
         log.info("Recreating last saved queue")
         self.initialize_pgdump_queue_from_picle()
+        log.info("Recreating GPG public key")
+        core.recreate_gpg_public_key()
         log.info("Initialization finished.")
 
         self.scheduler_thread = SchedulerThread(db_version=self.db_version)

@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     PGDUMP_DATABASE_DB: str = "postgres"
 
     PGDUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "0 5 * * *"
+    PGDUMP_GPG_PUBLIC_KEY_BASE64: str = ""
     PGDUMP_NUMBER_PGDUMP_THREADS: int = 2
     PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 60
     PGDUMP_COOLING_PERIOD_SECS: int = 60 * 5
@@ -24,9 +25,8 @@ class Settings(BaseSettings):
     PGDUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "data/backup"
     PGDUMP_LOG_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
     PGDUMP_PGPASS_FILE_PATH: pathlib.Path = BASE_DIR / ".pgpass"
-    PGDUMP_PICKLE_PGDUMP_QUEUE_NAME: pathlib.Path = (
-        BASE_DIR / "data/PGDUMP_QUEUE.pickle"
-    )
+    PGDUMP_GPG_PUBLIC_KEY_BASE64_PATH: pathlib.Path = BASE_DIR / "gpg_public.key.pub"
+    PGDUMP_PICKLE_PGDUMP_QUEUE_NAME: pathlib.Path = BASE_DIR / "data/pg_queue.pickle"
     PGDUMP_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
 
     class Config:

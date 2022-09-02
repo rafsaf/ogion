@@ -1,3 +1,5 @@
+import base64
+import binascii
 import logging
 import multiprocessing
 import queue
@@ -92,6 +94,7 @@ def run_subprocess(shell_args: list[str]) -> str:
 
 def run_pg_dump(output_folder: str):
     log.info("Start pg_dump")
+    out = backup_folder_path(output_folder)
     run_subprocess(
         [
             "pg_dump",
@@ -108,10 +111,27 @@ def run_pg_dump(output_folder: str):
             settings.PGDUMP_DATABASE_HOSTNAME,
             settings.PGDUMP_DATABASE_DB,
             "-f",
-            str(backup_folder_path(output_folder)),
+            str(out),
         ],
     )
     log.info("Finished pg_dump, output folder: %s", output_folder)
+
+
+def recreate_gpg_public_key():
+    log.info("Starting recreate_gpg_public_key")
+    if not settings.PGDUMP_GPG_PUBLIC_KEY_BASE64:
+        log.info("No GPG public key provided, skipped recreate_gpg_public_key")
+        return
+    try:
+        gpg_pub_cert = base64.standard_b64decode(settings.PGDUMP_GPG_PUBLIC_KEY_BASE64)
+    except binascii.Error as err:
+        log.error("recreate_gpg_public_key base64 error: %s", err, exc_info=True)
+        log.error("Set correct PGDUMP_GPG_PUBLIC_KEY_BASE64, exiting")
+        exit(1)
+    with open(settings.PGDUMP_GPG_PUBLIC_KEY_BASE64_PATH, "wb") as gpg_pub_file:
+        gpg_pub_file.write(gpg_pub_cert)
+    log.debug("Saved gpg public key: %s", gpg_pub_cert.decode())
+    log.info("Successfully finished recreate_gpg_public_key")
 
 
 def get_postgres_version():
