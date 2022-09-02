@@ -13,7 +13,7 @@ RUN apt-get -y update && apt-get -y install postgresql-client-14
 
 COPY pg_dump /var/lib/pg_dump/pg_dump/
 COPY requirements.txt /var/lib/pg_dump/requirements.txt
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 
 RUN python -m venv /var/lib/pg_dump/venv
 ENV PATH="/var/lib/pg_dump/venv/bin:$PATH"
@@ -33,5 +33,5 @@ RUN addgroup --gid 1001 --system $PG_DUMP_SERVICE_NAME && \
     adduser --gid 1001 --shell /bin/false --disabled-password --no-create-home --uid 1001 $PG_DUMP_SERVICE_NAME && \
     mkdir -p /var/log/$PG_DUMP_SERVICE_NAME
 
-ENTRYPOINT [ "/bin/bash", "/docker-entrypoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "/docker_entrypoint.sh" ]
 CMD [ "python", "/var/lib/pg_dump/pg_dump/main.py"] 
