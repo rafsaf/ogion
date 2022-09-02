@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME: pathlib.Path = BASE_DIR / "data/pg_queue.pickle"
     PG_DUMP_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
 
+    PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT: str = ""
+
     class Config:
         env_file = BASE_DIR / ".env"
         env_file_encoding = "utf-8"

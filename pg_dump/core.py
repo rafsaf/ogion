@@ -168,6 +168,28 @@ def recreate_gpg_public_key():
         settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH,
         gpg_pub_cert.decode(),
     )
+    log.info("recreate_gpg_public_key start gpg key import")
+    run_subprocess(
+        ["gpg", "--import", str(settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH)],
+    )
+    log.info("recreate_gpg_public_key start gpg list keys")
+    result = run_subprocess(
+        ["gpg", "--list-keys"],
+    )
+    log.info("recreate_gpg_public_key gpg list keys result: %s", result)
+    pub_line = False
+    for output_line in result.split("\n"):
+        if pub_line:
+            gpg_key_recipient = output_line.strip()
+            log.info(
+                "recreate_gpg_public_key found gpg public key recipient %s",
+                gpg_key_recipient,
+            )
+            settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT = gpg_key_recipient
+            break
+        if output_line.startswith("pub"):
+            pub_line = True  # next line will be recipient
+
     log.info("recreate_gpg_public_key successfully finished")
 
 
