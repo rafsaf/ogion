@@ -6,7 +6,7 @@ from pg_dump.main import PgDumpDaemon
 
 def test_pg_dump_daemon():
     daemon = PgDumpDaemon(exit_on_fail=True)
-    pg_version = config.settings.PGDUMP_DATABASE_PORT[-2:]
+    pg_version = config.settings.PG_DUMP_DATABASE_PORT[-2:]
     assert f"postgresql_{pg_version}." in daemon.db_version
     daemon.run()
     assert daemon.healthcheck()

@@ -17,12 +17,12 @@ POSTGRES_DATABASES_PORTS = {
 @pytest.fixture(params=[13, 14, 12, 11, 10], autouse=True)
 def config_setup(request, tmpdir):
 
-    settings.PGDUMP_DATABASE_PORT = POSTGRES_DATABASES_PORTS[request.param]
-    settings.PGDUMP_BACKUP_FOLDER_PATH = pathlib.Path(f"{tmpdir}/backup")
-    settings.PGDUMP_LOG_FOLDER_PATH = pathlib.Path(f"{tmpdir}/log")
-    settings.PGDUMP_PGPASS_FILE_PATH = pathlib.Path(f"{tmpdir}/pgpass")
-    settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME = pathlib.Path(f"{tmpdir}/queue")
+    settings.PG_DUMP_DATABASE_PORT = POSTGRES_DATABASES_PORTS[request.param]
+    settings.PG_DUMP_BACKUP_FOLDER_PATH = pathlib.Path(f"{tmpdir}/backup")
+    settings.PG_DUMP_LOG_FOLDER_PATH = pathlib.Path(f"{tmpdir}/log")
+    settings.PG_DUMP_PGPASS_FILE_PATH = pathlib.Path(f"{tmpdir}/pgpass")
+    settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME = pathlib.Path(f"{tmpdir}/queue")
 
-    os.environ["PGPASSFILE"] = str(settings.PGDUMP_PGPASS_FILE_PATH)
-    os.makedirs(settings.PGDUMP_BACKUP_FOLDER_PATH, exist_ok=True)
-    os.makedirs(settings.PGDUMP_LOG_FOLDER_PATH, exist_ok=True)
+    os.environ["PGPASSFILE"] = str(settings.PG_DUMP_PGPASS_FILE_PATH)
+    os.makedirs(settings.PG_DUMP_BACKUP_FOLDER_PATH, exist_ok=True)
+    os.makedirs(settings.PG_DUMP_LOG_FOLDER_PATH, exist_ok=True)

@@ -14,7 +14,7 @@ except ImportError:
 
 from pg_dump.config import BASE_DIR, settings
 from pg_dump.jobs import PgDumpJob
-from pg_dump.pgdump_thread import PgDumpThread
+from pg_dump.pg_dump_thread import PgDumpThread
 from pg_dump.scheduler_thread import SchedulerThread
 
 log = logging.getLogger(__name__)
@@ -31,36 +31,38 @@ class PgDumpDaemon:
         log.info("Recreated pgpass file")
         self.check_postgres_connection()
         log.info("Recreating last saved queue")
-        self.initialize_pgdump_queue_from_picle()
+        self.initialize_pg_dump_queue_from_picle()
         log.info("Recreating GPG public key")
         core.recreate_gpg_public_key()
-        log.info("Initialization finished.")
+        log.info("Initialization finished")
 
         self.scheduler_thread = SchedulerThread(db_version=self.db_version)
-        self.pgdump_threads: list[PgDumpThread] = []
-        for i in range(settings.PGDUMP_NUMBER_PGDUMP_THREADS):
-            self.pgdump_threads.append(PgDumpThread(number=i))
+        self.pg_dump_threads: list[PgDumpThread] = []
+        for _ in range(settings.PG_DUMP_NUMBER_PG_DUMP_THREADS):
+            self.pg_dump_threads.append(PgDumpThread())
 
         signal.signal(signalnum=signal.SIGINT, handler=self.exit)
         signal.signal(signalnum=signal.SIGTERM, handler=self.exit)
 
     def run(self):
         self.scheduler_thread.start()
-        for thread in self.pgdump_threads:
+        for thread in self.pg_dump_threads:
             thread.start()
 
-    def initialize_pgdump_queue_from_picle(self):
-        if settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME.is_file():
-            with open(settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "rb") as file:
+    def initialize_pg_dump_queue_from_picle(self):
+        if settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME.is_file():
+            with open(settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME, "rb") as file:
                 queue_elements: list[PgDumpJob] = pickle.loads(file.read())
                 for item in queue_elements:
-                    core.PGDUMP_QUEUE.put(item, block=False)
+                    core.PG_DUMP_QUEUE.put(item, block=False)
                 log.info(
-                    "initialize_pgdump_queue_from_picle, found %s elements in queue",
+                    "initialize_pg_dump_queue_from_picle found %s elements in queue",
                     len(queue_elements),
                 )
         else:
-            log.info("initialize_pgdump_queue_from_picle no picke queue file, skipping")
+            log.info(
+                "initialize_pg_dump_queue_from_picle no picke queue file, skipping"
+            )
 
     def check_postgres_connection(self):
         while not self.db_version:
@@ -68,7 +70,9 @@ class PgDumpDaemon:
                 db_version = core.get_postgres_version()
             except core.CoreSubprocessError as err:
                 log.error(err, exc_info=True)
-                log.error("Unable to connect to database, exiting")
+                log.error(
+                    "check_postgres_connection unable to connect to database, exiting"
+                )
                 exit(1)
             else:
                 self.db_version = db_version
@@ -77,30 +81,30 @@ class PgDumpDaemon:
     def healthcheck(self):
         healthy = True
         if not self.scheduler_thread.is_alive():
-            log.critical("Scheduler thread is not alive")
+            log.critical("healthcheck SchedulerThread is not alive")
             healthy = False
-        for thread in self.pgdump_threads:
+        for thread in self.pg_dump_threads:
             if not thread.is_alive():
-                log.critical("Pgdump thread %s is not alive", thread.number)
+                log.critical("healthcheck PgDumpThread %s is not alive", thread.name)
                 healthy = False
         return healthy
 
     def exit(self, sig, frame):
         self.scheduler_thread.stop()
         self.scheduler_thread.join()
-        for thread in self.pgdump_threads:
+        for thread in self.pg_dump_threads:
             thread.stop()
-        for thread in self.pgdump_threads:
+        for thread in self.pg_dump_threads:
             thread.join()
-        with open(settings.PGDUMP_PICKLE_PGDUMP_QUEUE_NAME, "wb") as file:
-            pickle.dump(list(core.PGDUMP_QUEUE.queue), file)
-        log.info("Saved pickled pgdump_queue to file")
-        log.info("PgDumpDaemon exits gracefully")
+        with open(settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME, "wb") as file:
+            pickle.dump(list(core.PG_DUMP_QUEUE.queue), file)
+        log.info("exit saved pickled pg_dump_queue to file")
+        log.info("exit PgDumpDaemon exits gracefully")
 
 
 if __name__ == "__main__":
     pg_dump_daemon = PgDumpDaemon()
     pg_dump_daemon.run()
     pg_dump_daemon.scheduler_thread.join()
-    for thread in pg_dump_daemon.pgdump_threads:
+    for thread in pg_dump_daemon.pg_dump_threads:
         thread.join()

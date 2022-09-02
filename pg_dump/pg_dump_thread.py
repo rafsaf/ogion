@@ -11,8 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class PgDumpThread(Thread):
-    def __init__(self, number: int) -> None:
-        self.number = number
+    def __init__(self) -> None:
         self._running = False
         self.job: jobs.PgDumpJob | None = None
         self.cooling: bool = False
@@ -26,71 +25,70 @@ class PgDumpThread(Thread):
         return super().start()
 
     def action(self):
-        log.info("Start pgdump thread %s", self.number)
+        log.info("PgDumpThread start")
         while self.running():
             try:
-                self.job = core.PGDUMP_QUEUE.get(block=False)
+                self.job = core.PG_DUMP_QUEUE.get(block=False)
             except queue.Empty:
                 time.sleep(1)
                 continue
 
             self.job.foldername = self.job.get_current_foldername()
             log.info(
-                "Pgdump thread %s processing foldername '%s' started at %s, try %s",
-                self.number,
+                "PgDumpThread processing foldername '%s' started at %s, try %s",
                 self.job.foldername,
                 self.job.start,
-                f"{self.job.retries + 1}/{settings.PGDUMP_COOLING_PERIOD_RETRIES}",
+                f"{self.job.retries + 1}/{settings.PG_DUMP_COOLING_PERIOD_RETRIES}",
             )
-            if self.job.retries >= settings.PGDUMP_COOLING_PERIOD_RETRIES:
+            if self.job.retries >= settings.PG_DUMP_COOLING_PERIOD_RETRIES:
                 log.warning(
-                    "Pgdump thread job started at %s has exceeded max number of retries"
+                    "PgDumpThread job started at %s has exceeded max number of retries",
+                    self.job.start,
                 )
                 continue
             path = core.backup_folder_path(self.job.foldername)
             try:
                 core.run_pg_dump(self.job.foldername)
                 if path.exists() and not path.stat().st_size:
-                    log.error(
-                        "Error pgdump thread %s: backup folder empty", self.number
-                    )
+                    log.error("PgDumpThread error %s: backup folder empty")
                     raise core.CoreSubprocessError()
             except core.CoreSubprocessError as err:
-                log.error(err, exc_info=True)
                 log.error(
-                    "Error pgdump thread %s: error performing pgdump", self.number
+                    "PgDumpThread error performing run_pg_dump: %s", err, exc_info=True
                 )
                 if path.exists():
                     core.backup_folder_path(self.job.foldername).unlink()
-                    log.error("Removed empty backup folder %s", self.job.foldername)
+                    log.error(
+                        "PgDumpThread removed empty backup folder: %s",
+                        self.job.foldername,
+                    )
                 self.cooling_period()
                 self.job.retries += 1
                 log.error(
-                    "Adding job back to PGDUMP_QUEUE after error: %s",
+                    "PgDumpThread add job back to PG_DUMP_QUEUE after error, job foldername: %s",
                     self.job.foldername,
                 )
-                core.PGDUMP_QUEUE.put(self.job)
-        log.info("Pgdump thread %s has stopped", self.number)
+                core.PG_DUMP_QUEUE.put(self.job)
+        log.info("PgDumpThread has stopped")
 
     def cooling_period(self):
         self.cooling = True
         release_time = datetime.utcnow() + timedelta(
-            seconds=settings.PGDUMP_COOLING_PERIOD_SECS
+            seconds=settings.PG_DUMP_COOLING_PERIOD_SECS
         )
         log.info(
-            "Pgdump thread %s starting cooling period, release time is: %s",
-            self.number,
+            "PgDumpThread starting cooling period, release time is: %s",
             release_time,
         )
         while self.running():
             now = datetime.utcnow()
             if now > release_time:
                 self.cooling = False
-                log.info("Pgdump thread %s finished cooling period", self.number)
+                log.info("PgDumpThread finished cooling period")
                 return
             time.sleep(1)
-        log.info("Pgdump thread %s skipping cooling period", self.number)
+        log.info("PgDumpThread skipping cooling period")
 
     def stop(self):
-        log.info("Stopping pgdump thread %s", self.number)
+        log.info("Stopping PgDumpThread")
         self._running = False

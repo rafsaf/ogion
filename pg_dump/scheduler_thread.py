@@ -24,24 +24,28 @@ class SchedulerThread(Thread):
         return super().start()
 
     def action(self):
-        log.info("Start scheduler thread")
-        log.info("Next backup time %s", self.next_backup_time)
+        log.info("Start SchedulerThread")
+        log.info("SchedulerThread next backup time %s", self.next_backup_time)
         while self.running():
             now = datetime.utcnow()
             if now > self.next_backup_time:
-                log.info("Start schedulig new backup, putting pgdump job to queue")
+                log.info(
+                    "SchedulerThread start schedulig new backup, putting PgDumpJob to queue"
+                )
                 try:
-                    core.PGDUMP_QUEUE.put(
+                    core.PG_DUMP_QUEUE.put(
                         jobs.PgDumpJob(start=now, db_version=self.db_version),
                         block=False,
                     )
                 except queue.Full:
-                    log.warning("PGDUMP_QUEUE is full, skip scheduling pgdump job")
+                    log.warning(
+                        "SchedulerThread PG_DUMP_QUEUE is full, skip scheduling PgDumpJob"
+                    )
                 self.next_backup_time = core.get_next_backup_time()
-                log.info("Next backup time %s.", self.next_backup_time)
+                log.info("SchedulerThread next backup time %s.", self.next_backup_time)
             time.sleep(1)
-        log.info("Scheduler thread has stopped")
+        log.info("SchedulerThread has stopped")
 
     def stop(self):
-        log.info("Stopping scheduler thread")
+        log.info("Stopping SchedulerThread")
         self._running = False

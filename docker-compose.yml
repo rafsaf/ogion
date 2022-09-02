@@ -53,8 +53,8 @@ services:
     env_file:
       - .env
     environment:
-      - PGDUMP_DATABASE_HOSTNAME=postgres_14
-      - PGDUMP_DATABASE_PORT=5432
+      - PG_DUMP_DATABASE_HOSTNAME=postgres_14
+      - PG_DUMP_DATABASE_PORT=5432
     volumes:
       - pg_dump_dev_data:/var/lib/pg_dump/data/
       - pg_dump_dev_logs:/var/log/pg_dump/

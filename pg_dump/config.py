@@ -9,25 +9,25 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.absolute()
 
 
 class Settings(BaseSettings):
-    PGDUMP_DATABASE_HOSTNAME: str = "localhost"
-    PGDUMP_DATABASE_USER: str = "postgres"
-    PGDUMP_DATABASE_PASSWORD: str = "postgres"
-    PGDUMP_DATABASE_PORT: str = "5432"
-    PGDUMP_DATABASE_DB: str = "postgres"
+    PG_DUMP_DATABASE_HOSTNAME: str = "localhost"
+    PG_DUMP_DATABASE_USER: str = "postgres"
+    PG_DUMP_DATABASE_PASSWORD: str = "postgres"
+    PG_DUMP_DATABASE_PORT: str = "5432"
+    PG_DUMP_DATABASE_DB: str = "postgres"
 
-    PGDUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "0 5 * * *"
-    PGDUMP_GPG_PUBLIC_KEY_BASE64: str = ""
-    PGDUMP_NUMBER_PGDUMP_THREADS: int = 2
-    PGDUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 60
-    PGDUMP_COOLING_PERIOD_SECS: int = 60 * 5
-    PGDUMP_COOLING_PERIOD_RETRIES: int = 5
+    PG_DUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "0 5 * * *"
+    PG_DUMP_GPG_PUBLIC_KEY_BASE64: str = ""
+    PG_DUMP_NUMBER_PG_DUMP_THREADS: int = 2
+    PG_DUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 60
+    PG_DUMP_COOLING_PERIOD_SECS: int = 60 * 5
+    PG_DUMP_COOLING_PERIOD_RETRIES: int = 5
 
-    PGDUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "data/backup"
-    PGDUMP_LOG_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
-    PGDUMP_PGPASS_FILE_PATH: pathlib.Path = BASE_DIR / ".pgpass"
-    PGDUMP_GPG_PUBLIC_KEY_BASE64_PATH: pathlib.Path = BASE_DIR / "gpg_public.key.pub"
-    PGDUMP_PICKLE_PGDUMP_QUEUE_NAME: pathlib.Path = BASE_DIR / "data/pg_queue.pickle"
-    PGDUMP_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
+    PG_DUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "data/backup"
+    PG_DUMP_LOG_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
+    PG_DUMP_PGPASS_FILE_PATH: pathlib.Path = BASE_DIR / ".pgpass"
+    PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH: pathlib.Path = BASE_DIR / "gpg_public.key.pub"
+    PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME: pathlib.Path = BASE_DIR / "data/pg_queue.pickle"
+    PG_DUMP_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
 
     class Config:
         env_file = BASE_DIR / ".env"
@@ -36,16 +36,16 @@ class Settings(BaseSettings):
 
 settings = Settings()  # type: ignore
 
-os.environ["PGPASSFILE"] = str(settings.PGDUMP_PGPASS_FILE_PATH)
-os.makedirs(settings.PGDUMP_BACKUP_FOLDER_PATH, exist_ok=True)
-os.makedirs(settings.PGDUMP_LOG_FOLDER_PATH, exist_ok=True)
+os.environ["PGPASSFILE"] = str(settings.PG_DUMP_PGPASS_FILE_PATH)
+os.makedirs(settings.PG_DUMP_BACKUP_FOLDER_PATH, exist_ok=True)
+os.makedirs(settings.PG_DUMP_LOG_FOLDER_PATH, exist_ok=True)
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{asctime} [{levelname}] {name}: {message}",
+            "format": "{asctime} {threadName} [{levelname}] {name}: {message}",
             "style": "{",
         },
     },
@@ -57,32 +57,32 @@ LOGGING = {
         },
         "error": {
             "class": "logging.FileHandler",
-            "filename": settings.PGDUMP_LOG_FOLDER_PATH / "pg_dump_error.log",
+            "filename": settings.PG_DUMP_LOG_FOLDER_PATH / "pg_dump_error.log",
             "formatter": "verbose",
             "level": "ERROR",
         },
         "warning": {
             "class": "logging.FileHandler",
-            "filename": settings.PGDUMP_LOG_FOLDER_PATH / "pg_dump_warning.log",
+            "filename": settings.PG_DUMP_LOG_FOLDER_PATH / "pg_dump_warning.log",
             "formatter": "verbose",
             "level": "WARNING",
         },
         "info": {
             "class": "logging.FileHandler",
-            "filename": settings.PGDUMP_LOG_FOLDER_PATH / "pg_dump_info.log",
+            "filename": settings.PG_DUMP_LOG_FOLDER_PATH / "pg_dump_info.log",
             "formatter": "verbose",
             "level": "INFO",
         },
         "debug": {
             "class": "logging.FileHandler",
-            "filename": settings.PGDUMP_LOG_FOLDER_PATH / "pg_dump_debug.log",
+            "filename": settings.PG_DUMP_LOG_FOLDER_PATH / "pg_dump_debug.log",
             "formatter": "verbose",
             "level": "DEBUG",
         },
     },
     "loggers": {
         "": {
-            "level": settings.PGDUMP_LOG_LEVEL,
+            "level": settings.PG_DUMP_LOG_LEVEL,
             "handlers": ["debug", "info", "warning", "error", "stream"],
             "propagate": False,
         },
