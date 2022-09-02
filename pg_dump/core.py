@@ -149,24 +149,26 @@ def run_pg_dump(output_folder: str):
 
 
 def recreate_gpg_public_key():
-    log.info("Starting recreate_gpg_public_key")
+    log.info("recreate_gpg_public_key starting")
     if not settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64:
-        log.info("No GPG public key provided, skipped recreate_gpg_public_key")
+        log.info("recreate_gpg_public_key no GPG public key provided, skipped")
         return
     try:
         gpg_pub_cert = base64.standard_b64decode(settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64)
     except binascii.Error as err:
         log.error("recreate_gpg_public_key base64 error: %s", err, exc_info=True)
-        log.error("Set correct PG_DUMP_GPG_PUBLIC_KEY_BASE64, exiting")
+        log.error(
+            "recreate_gpg_public_key set correct PG_DUMP_GPG_PUBLIC_KEY_BASE64, exiting"
+        )
         exit(1)
     with open(settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH, "wb") as gpg_pub_file:
         gpg_pub_file.write(gpg_pub_cert)
     log.debug(
-        "Saved gpg public key to %s:\n%s",
+        "recreate_gpg_public_key saved gpg public key to %s:\n%s",
         settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH,
         gpg_pub_cert.decode(),
     )
-    log.info("Successfully finished recreate_gpg_public_key")
+    log.info("recreate_gpg_public_key successfully finished")
 
 
 def get_postgres_version():
