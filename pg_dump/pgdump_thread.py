@@ -34,11 +34,11 @@ class PgDumpThread(Thread):
                 time.sleep(1)
                 continue
 
-            self.job.filename = self.job.get_current_filename()
+            self.job.foldername = self.job.get_current_foldername()
             log.info(
-                "Pgdump thread %s processing filename '%s' started at %s, try %s",
+                "Pgdump thread %s processing foldername '%s' started at %s, try %s",
                 self.number,
-                self.job.filename,
+                self.job.foldername,
                 self.job.start,
                 f"{self.job.retries + 1}/{settings.PGDUMP_COOLING_PERIOD_RETRIES}",
             )
@@ -47,11 +47,13 @@ class PgDumpThread(Thread):
                     "Pgdump thread job started at %s has exceeded max number of retries"
                 )
                 continue
-            path = core.backup_folder_path(self.job.filename)
+            path = core.backup_folder_path(self.job.foldername)
             try:
-                core.run_pg_dump(self.job.filename)
+                core.run_pg_dump(self.job.foldername)
                 if path.exists() and not path.stat().st_size:
-                    log.error("Error pgdump thread %s: backup file empty", self.number)
+                    log.error(
+                        "Error pgdump thread %s: backup folder empty", self.number
+                    )
                     raise core.CoreSubprocessError()
             except core.CoreSubprocessError as err:
                 log.error(err, exc_info=True)
@@ -59,12 +61,13 @@ class PgDumpThread(Thread):
                     "Error pgdump thread %s: error performing pgdump", self.number
                 )
                 if path.exists():
-                    core.backup_folder_path(self.job.filename).unlink()
-                    log.error("Removed empty backup file %s", self.job.filename)
+                    core.backup_folder_path(self.job.foldername).unlink()
+                    log.error("Removed empty backup folder %s", self.job.foldername)
                 self.cooling_period()
                 self.job.retries += 1
                 log.error(
-                    "Adding job back to PGDUMP_QUEUE after error: %s", self.job.filename
+                    "Adding job back to PGDUMP_QUEUE after error: %s",
+                    self.job.foldername,
                 )
                 core.PGDUMP_QUEUE.put(self.job)
         log.info("Pgdump thread %s has stopped", self.number)

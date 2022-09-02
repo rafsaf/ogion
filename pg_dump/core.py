@@ -1,4 +1,5 @@
 import logging
+import multiprocessing
 import queue
 import re
 import secrets
@@ -30,9 +31,9 @@ def get_next_backup_time() -> datetime:
     return cron.get_next(ret_type=datetime)
 
 
-def get_new_backup_filename(now: datetime, db_version: str):
-    random_string = secrets.token_urlsafe(4)
-    return "{}_{}_{}_{}.sql".format(
+def get_new_backup_foldername(now: datetime, db_version: str):
+    random_string = secrets.token_urlsafe(3)
+    return "{}_{}_{}_{}".format(
         settings.PGDUMP_DATABASE_DB,
         now.strftime("%Y%m%d_%H%M"),
         db_version,
@@ -40,8 +41,8 @@ def get_new_backup_filename(now: datetime, db_version: str):
     )
 
 
-def backup_folder_path(filename: str):
-    return (settings.PGDUMP_BACKUP_FOLDER_PATH / filename).absolute()
+def backup_folder_path(foldername: str):
+    return (settings.PGDUMP_BACKUP_FOLDER_PATH / foldername).absolute()
 
 
 def recreate_pgpass_file():
@@ -84,19 +85,21 @@ def run_subprocess(shell_args: list[str]) -> str:
         )
     else:
         log.info("run_subprocess(): Finished with status %s", p.returncode)
-        log.debug("run_subprocess() stdout: %s", output)
-        log.debug("run_subprocess() stderr: %s", err)
+        log.info("run_subprocess() stdout: %s", output)
+        log.info("run_subprocess() stderr: %s", err)
     return output
 
 
-def run_pg_dump(output_file: str):
+def run_pg_dump(output_folder: str):
     log.info("Start pg_dump")
     run_subprocess(
         [
             "pg_dump",
             "-v",
             "-O",
-            "-Fc",
+            "-Fd",
+            "-j",
+            f"{multiprocessing.cpu_count()}",
             "-U",
             settings.PGDUMP_DATABASE_USER,
             "-p",
@@ -105,10 +108,10 @@ def run_pg_dump(output_file: str):
             settings.PGDUMP_DATABASE_HOSTNAME,
             settings.PGDUMP_DATABASE_DB,
             "-f",
-            str(backup_folder_path(output_file)),
+            str(backup_folder_path(output_folder)),
         ],
     )
-    log.info("Finished pg_dump, output file: %s", output_file)
+    log.info("Finished pg_dump, output folder: %s", output_folder)
 
 
 def get_postgres_version():

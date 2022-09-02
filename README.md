@@ -49,7 +49,7 @@ https://hub.docker.com/repository/docker/rafsaf/pg_dump
 
 **PGDUMP_COOLING_PERIOD_RETRIES** - Max number of retries for single scheduled backup, defaults to `5`
 
-**PGDUMP_BACKUP_FOLDER_PATH** - Path to backup folder where pgdump subprocesses output files are stored, by default in docker image it is `/var/lib/pg_dump/data/backup`
+**PGDUMP_BACKUP_FOLDER_PATH** - Path to backup folder where pgdump subprocesses output folders are stored, by default in docker image it is `/var/lib/pg_dump/data/backup`
 
 **PGDUMP_LOG_FOLDER_PATH** - Path to folder with logs, by default in docker image it is `/var/log/pg_dump/`
 

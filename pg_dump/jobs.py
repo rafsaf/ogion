@@ -11,9 +11,9 @@ class PgDumpJob:
         self.start = start
         self.retries = 0
         self.db_version = db_version
-        self.filename = self.get_current_filename()
+        self.foldername = self.get_current_foldername()
 
-    def get_current_filename(self):
-        return core.get_new_backup_filename(
+    def get_current_foldername(self):
+        return core.get_new_backup_foldername(
             now=datetime.utcnow(), db_version=self.db_version
         )
