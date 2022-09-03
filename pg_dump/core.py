@@ -51,15 +51,27 @@ def get_new_backup_foldername(now: datetime, db_version: str):
     return new_foldername
 
 
-def _get_folder_size(folder):
-    total_size = os.path.getsize(folder)
-    for item in os.listdir(folder):
-        itempath = os.path.join(folder, item)
-        if os.path.isfile(itempath):
-            total_size += os.path.getsize(itempath)
-        elif os.path.isdir(itempath):
-            total_size += _get_folder_size(itempath)
-    return total_size
+def _get_human_folder_size_msg(folder_path: pathlib.Path):
+    def get_folder_size_bytes(folder: str):
+        total_size = os.path.getsize(folder)
+        for item in os.listdir(folder):
+            itempath = os.path.join(folder, item)
+            if os.path.isfile(itempath):
+                total_size += os.path.getsize(itempath)
+            elif os.path.isdir(itempath):
+                total_size += get_folder_size_bytes(itempath)
+        return total_size
+
+    folder_size = get_folder_size_bytes(str(folder_path))
+    log.debug("get_folder_size_bytes size of %s: %s", folder_path, folder_size)
+
+    if folder_size < _MB_TO_BYTES:
+        size_msg = f"{folder_size} bytes ({round(folder_size / _MB_TO_BYTES, 3)} mb)"
+    elif folder_size < _GB_TO_BYTES:
+        size_msg = f"{round(folder_size / _MB_TO_BYTES, 3)} mb"
+    else:
+        size_msg = f"{round(folder_size / _GB_TO_BYTES, 3)} gb"
+    return size_msg
 
 
 def backup_folder_path(foldername: str):
@@ -135,21 +147,16 @@ def run_pg_dump(output_folder: str):
         gpg_out = pathlib.Path(f"{out}.gpg")
         gpg_out.mkdir(exist_ok=True)
         run_subprocess(f"mv {out / '*.gpg'} {gpg_out}")
-        log.info("run_pg_dump finished encryption, out folder: %s", gpg_out)
-
-    output_folder_size = _get_folder_size(str(out))
-    log.debug("run_pg_dump calculated size of %s: %s bytes", out, output_folder_size)
-    if output_folder_size < _MB_TO_BYTES:
-        size_msg = f"{output_folder_size} bytes ({round(output_folder_size / _MB_TO_BYTES, 4)} mb)"
-    elif output_folder_size < _GB_TO_BYTES:
-        size_msg = f"{round(output_folder_size / _MB_TO_BYTES, 4)} mb"
-    else:
-        size_msg = f"{round(output_folder_size / _GB_TO_BYTES, 4)} gb"
+        log.info(
+            "run_pg_dump finished encryption, out folder: %s, size: %s",
+            gpg_out,
+            _get_human_folder_size_msg(gpg_out),
+        )
 
     log.info(
         "run_pg_dump finished pg_dump, output folder: %s, size: %s",
         out,
-        size_msg,
+        _get_human_folder_size_msg(out),
     )
 
 
@@ -182,20 +189,13 @@ def recreate_gpg_public_key():
         "gpg --list-keys",
     )
     log.info("recreate_gpg_public_key gpg list keys result: %s", result)
-    pub_line = False
-    for output_line in result.split("\n"):
-        if output_line.startswith("pub"):
-            pub_line = True  # next line will be recipient
-            continue
-        if pub_line:
-            gpg_key_recipient = output_line.strip()
-            log.info(
-                "recreate_gpg_public_key found gpg public key recipient %s",
-                gpg_key_recipient,
-            )
-            settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT = gpg_key_recipient
-            break
 
+    gpg_key_recipient = result.split("\n")[3].strip()
+    log.info(
+        "recreate_gpg_public_key found gpg public key recipient %s",
+        gpg_key_recipient,
+    )
+    settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT = gpg_key_recipient
     log.info("recreate_gpg_public_key successfully finished")
 
 
