@@ -17,9 +17,7 @@ from pg_dump.jobs import PgDumpJob
 
 log = logging.getLogger(__name__)
 
-PG_DUMP_QUEUE: queue.Queue[PgDumpJob] = queue.Queue(
-    maxsize=settings.PG_DUMP_NUMBER_PG_DUMP_THREADS
-)
+PG_DUMP_QUEUE: queue.Queue[PgDumpJob] = queue.Queue(maxsize=1)
 _MB_TO_BYTES = 1048576
 _GB_TO_BYTES = 1073741824
 
@@ -165,24 +163,36 @@ def recreate_gpg_public_key():
         log.info("recreate_gpg_public_key no GPG public key provided, skipped")
         return
     try:
-        gpg_pub_cert = base64.standard_b64decode(settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64)
-    except binascii.Error as err:
+        gpg_pub_cert = base64.standard_b64decode(
+            settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64
+        ).decode()
+    except (binascii.Error, UnicodeDecodeError) as err:
         log.error("recreate_gpg_public_key base64 error: %s", err, exc_info=True)
         log.error(
             "recreate_gpg_public_key set correct PG_DUMP_GPG_PUBLIC_KEY_BASE64, exiting"
         )
         exit(1)
-    with open(settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH, "wb") as gpg_pub_file:
+    with open(settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH, "w") as gpg_pub_file:
         gpg_pub_file.write(gpg_pub_cert)
     log.debug(
         "recreate_gpg_public_key saved gpg public key to %s:\n%s",
         settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH,
-        gpg_pub_cert.decode(),
+        gpg_pub_cert,
     )
     log.info("recreate_gpg_public_key start gpg key import")
-    run_subprocess(
-        f"gpg --import {settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH}",
-    )
+    try:
+        run_subprocess(
+            f"gpg --import {settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH}",
+        )
+    except CoreSubprocessError as err:
+        log.error(
+            "recreate_gpg_public_key invalid gpg key error: %s", err, exc_info=True
+        )
+        log.error(
+            "recreate_gpg_public_key set correct PG_DUMP_GPG_PUBLIC_KEY_BASE64, exiting"
+        )
+        exit(1)
+
     log.info("recreate_gpg_public_key start gpg list keys")
     result = run_subprocess(
         "gpg --list-keys",
