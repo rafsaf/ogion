@@ -136,6 +136,11 @@ def run_pg_dump(output_folder: str):
         f"{settings.PG_DUMP_DATABASE_DB} "
         f"-f {out}"
     )
+    log.info(
+        "run_pg_dump finished pg_dump, output folder: %s, size: %s",
+        out,
+        _get_human_folder_size_msg(out),
+    )
 
     if settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT:
         log.info("run_pg_dump start encryption of folder with gpg: %s", out)
@@ -152,12 +157,6 @@ def run_pg_dump(output_folder: str):
             gpg_out,
             _get_human_folder_size_msg(gpg_out),
         )
-
-    log.info(
-        "run_pg_dump finished pg_dump, output folder: %s, size: %s",
-        out,
-        _get_human_folder_size_msg(out),
-    )
 
 
 def recreate_gpg_public_key():
