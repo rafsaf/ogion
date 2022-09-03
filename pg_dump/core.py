@@ -194,7 +194,7 @@ def recreate_gpg_public_key():
 
 
 def get_postgres_version():
-    log.info("Start postgres connection to get pg version")
+    log.info("get_postgres_version start postgres connection to get pg version")
     pg_version_regex = re.compile(r"PostgreSQL \d*\.\d* ")
     result = run_subprocess(
         [
@@ -215,13 +215,13 @@ def get_postgres_version():
     matches: list[str] = pg_version_regex.findall(result)
 
     for match in matches:
-        version = match.strip()
+        version = match.strip().replace(" ", "_").lower()
         break
     if version is None:
         log.warning(
-            "get_postgres_version() Error processing pg result, version is Unknown: %s",
+            "get_postgres_version error processing pg result, version is unknown: %s",
             result,
         )
-        return "unknown"
-    log.info("Calculated PostgreSQL version: %s", version)
-    return version.replace(" ", "_").lower()
+        exit(1)
+    log.info("get_postgres_version calculated database version: %s", version)
+    return version
