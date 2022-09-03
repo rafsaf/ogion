@@ -10,9 +10,8 @@ log = logging.getLogger(__name__)
 
 
 class SchedulerThread(Thread):
-    def __init__(self, db_version: str) -> None:
+    def __init__(self) -> None:
         self._running = False
-        self.db_version = db_version
         self.next_backup_time = core.get_next_backup_time()
         Thread.__init__(self, target=self.action)
 
@@ -24,7 +23,7 @@ class SchedulerThread(Thread):
         return super().start()
 
     def action(self):
-        log.info("Start SchedulerThread")
+        log.info("SchedulerThread start")
         log.info("SchedulerThread next backup time %s", self.next_backup_time)
         while self.running():
             now = datetime.utcnow()
@@ -34,7 +33,7 @@ class SchedulerThread(Thread):
                 )
                 try:
                     core.PG_DUMP_QUEUE.put(
-                        jobs.PgDumpJob(start=now, db_version=self.db_version),
+                        jobs.PgDumpJob(),
                         block=False,
                     )
                 except queue.Full:
@@ -47,5 +46,5 @@ class SchedulerThread(Thread):
         log.info("SchedulerThread has stopped")
 
     def stop(self):
-        log.info("Stopping SchedulerThread")
+        log.info("SchedulerThread stopping ")
         self._running = False

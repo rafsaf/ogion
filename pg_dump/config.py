@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     PG_DUMP_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
 
     PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT: str = ""
+    PRIV_PG_DUMP_DB_VERSION: str = ""
 
     class Config:
         env_file = BASE_DIR / ".env"

@@ -23,9 +23,7 @@ log = logging.getLogger(__name__)
 class PgDumpDaemon:
     """pg_dump service"""
 
-    def __init__(self, exit_on_fail: bool = False) -> None:
-        self.db_version: str = ""
-        self.exit_on_fail = exit_on_fail
+    def __init__(self) -> None:
         log.info("Initialize pg_dump...")
         core.recreate_pgpass_file()
         log.info("Recreated pgpass file")
@@ -36,7 +34,7 @@ class PgDumpDaemon:
         core.recreate_gpg_public_key()
         log.info("Initialization finished")
 
-        self.scheduler_thread = SchedulerThread(db_version=self.db_version)
+        self.scheduler_thread = SchedulerThread()
         self.pg_dump_threads: list[PgDumpThread] = []
         for _ in range(settings.PG_DUMP_NUMBER_PG_DUMP_THREADS):
             self.pg_dump_threads.append(PgDumpThread())
@@ -65,18 +63,16 @@ class PgDumpDaemon:
             )
 
     def check_postgres_connection(self):
-        while not self.db_version:
-            try:
-                db_version = core.get_postgres_version()
-            except core.CoreSubprocessError as err:
-                log.error(err, exc_info=True)
-                log.error(
-                    "check_postgres_connection unable to connect to database, exiting"
-                )
-                exit(1)
-            else:
-                self.db_version = db_version
-                return
+        try:
+            db_version = core.get_postgres_version()
+        except core.CoreSubprocessError as err:
+            log.error(err, exc_info=True)
+            log.error(
+                "check_postgres_connection unable to connect to database, exiting"
+            )
+            exit(1)
+        else:
+            settings.PRIV_PG_DUMP_DB_VERSION = db_version
 
     def healthcheck(self):
         healthy = True
