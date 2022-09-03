@@ -35,12 +35,12 @@ def get_next_backup_time() -> datetime:
     return cron.get_next(ret_type=datetime)
 
 
-def get_new_backup_foldername(now: datetime, db_version: str):
+def get_new_backup_foldername():
     random_string = secrets.token_urlsafe(3)
     new_foldername = "{}_{}_{}_{}".format(
+        datetime.utcnow().strftime("%Y%m%d_%H%M"),
         settings.PG_DUMP_DATABASE_DB,
-        now.strftime("%Y%m%d_%H%M"),
-        db_version,
+        settings.PRIV_PG_DUMP_DB_VERSION,
         random_string,
     )
     log.debug(
@@ -222,7 +222,7 @@ def get_postgres_version():
     matches: list[str] = pg_version_regex.findall(result)
 
     for match in matches:
-        version = match.strip().replace(" ", "_").lower()
+        version = match.strip().split(" ")[1]
         break
     if version is None:
         log.warning(

@@ -1,4 +1,5 @@
 import logging
+import pathlib
 import shutil
 import time
 from datetime import datetime, timedelta
@@ -43,7 +44,11 @@ class BaseJob:
         while running() and self.run_numbers_left():
             self.run_number += 1
             log.info(
-                "%s start, try %s/%s", self.__NAME__, self.run_number, self.__MAX_RUN__
+                "%s start job created at %s, try %s/%s",
+                self.__NAME__,
+                self.created_at,
+                self.run_number,
+                self.__MAX_RUN__,
             )
             try:
                 self.action()
@@ -65,13 +70,8 @@ class PgDumpJob(BaseJob):
     __MAX_RUN__ = settings.PG_DUMP_COOLING_PERIOD_RETRIES + 1
     __COOLING_SECS__ = settings.PG_DUMP_COOLING_PERIOD_SECS
 
-    def get_current_foldername(self):
-        return core.get_new_backup_foldername(
-            now=datetime.utcnow(), db_version=settings.PRIV_PG_DUMP_DB_VERSION
-        )
-
     def action(self):
-        foldername = self.get_current_foldername()
+        foldername = core.get_new_backup_foldername()
         log.info("%s start action processing foldername: %s", self.__NAME__, foldername)
         path = core.backup_folder_path(foldername)
         try:
@@ -91,3 +91,31 @@ class PgDumpJob(BaseJob):
                     foldername,
                 )
             raise JobCoolingError()
+
+
+class DeleteFolderJob(BaseJob):
+    __NAME__ = "DeleteFolderJob"
+    __MAX_RUN__ = 1
+    __COOLING_SECS__ = 0
+
+    def __init__(self, foldername: pathlib.Path) -> None:
+        super().__init__()
+        self.foldername = foldername
+
+    def action(self):
+        log.info(
+            "%s start action deleting foldername: %s", self.__NAME__, self.foldername
+        )
+        try:
+            shutil.rmtree(self.foldername)
+        except Exception as err:
+            log.error(
+                "%s cannot delete foldername %s: %s",
+                self.__NAME__,
+                self.foldername,
+                err,
+                exc_info=True,
+            )
+            raise JobCoolingError()
+        else:
+            log.info("%s deleted foldername %s", self.__NAME__, self.foldername)
