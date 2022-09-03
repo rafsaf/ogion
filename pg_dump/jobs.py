@@ -65,23 +65,17 @@ class PgDumpJob(BaseJob):
     __MAX_RUN__ = settings.PG_DUMP_COOLING_PERIOD_RETRIES + 1
     __COOLING_SECS__ = settings.PG_DUMP_COOLING_PERIOD_SECS
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.foldername = ""
-
     def get_current_foldername(self):
         return core.get_new_backup_foldername(
             now=datetime.utcnow(), db_version=settings.PRIV_PG_DUMP_DB_VERSION
         )
 
     def action(self):
-        self.foldername = self.get_current_foldername()
-        log.info(
-            "%s start action processing foldername: %s", self.__NAME__, self.foldername
-        )
-        path = core.backup_folder_path(self.foldername)
+        foldername = self.get_current_foldername()
+        log.info("%s start action processing foldername: %s", self.__NAME__, foldername)
+        path = core.backup_folder_path(foldername)
         try:
-            core.run_pg_dump(self.foldername)
+            core.run_pg_dump(foldername)
             if path.exists() and not path.stat().st_size:
                 log.error("%s error: backup folder empty", self.__NAME__)
                 raise core.CoreSubprocessError()
@@ -90,10 +84,10 @@ class PgDumpJob(BaseJob):
                 "%s error performing run_pg_dump: %s", self.__NAME__, err, exc_info=True
             )
             if path.exists():
-                shutil.rmtree(core.backup_folder_path(self.foldername))
+                shutil.rmtree(core.backup_folder_path(foldername))
                 log.error(
                     "%s removed empty backup folder: %s",
                     self.__NAME__,
-                    self.foldername,
+                    foldername,
                 )
             raise JobCoolingError()
