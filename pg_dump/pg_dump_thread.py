@@ -3,7 +3,7 @@ import queue
 import time
 from datetime import datetime, timedelta
 from threading import Thread
-
+import shutil
 from pg_dump import core, jobs
 from pg_dump.config import settings
 
@@ -57,7 +57,7 @@ class PgDumpThread(Thread):
                     "PgDumpThread error performing run_pg_dump: %s", err, exc_info=True
                 )
                 if path.exists():
-                    core.backup_folder_path(self.job.foldername).unlink()
+                    shutil.rmtree(core.backup_folder_path(self.job.foldername))
                     log.error(
                         "PgDumpThread removed empty backup folder: %s",
                         self.job.foldername,
@@ -68,7 +68,12 @@ class PgDumpThread(Thread):
                     "PgDumpThread add job back to PG_DUMP_QUEUE after error, job foldername: %s",
                     self.job.foldername,
                 )
-                core.PG_DUMP_QUEUE.put(self.job)
+                try:
+                    core.PG_DUMP_QUEUE.put(self.job, block=False)
+                except queue.Full:
+                    log.warning(
+                        "PgDumpThread cannot add job back to PG_DUMP_QUEUE, already full, skipping"
+                    )
         log.info("PgDumpThread has stopped")
 
     def cooling_period(self):

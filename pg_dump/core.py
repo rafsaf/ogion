@@ -84,24 +84,26 @@ def recreate_pgpass_file():
         file.write(text)
 
 
-def run_subprocess(shell_args: list[str]) -> str:
+def run_subprocess(shell_args: str) -> str:
     p = subprocess.Popen(
         shell_args,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        shell=True,
     )
-    log.info("run_subprocess running: '%s'", " ".join(shell_args))
+    log.info("run_subprocess running: '%s'", shell_args)
     output, err = p.communicate(timeout=settings.PG_DUMP_POSTGRES_TIMEOUT_AFTER_SECS)
 
     if p.returncode != 0:
-        log.error("run_subprocess fail with status %s", p.returncode)
+        log.error("run_subprocess failed with status %s", p.returncode)
         log.error("run_subprocess stdout: %s", output)
         log.error("run_subprocess stderr: %s", err)
         raise CoreSubprocessError(
-            f"'{' '.join(shell_args)}' \n"
-            f"recreate_pgpass_file subprocess {p.pid} failed with code: {p.returncode} and shell args: {shell_args}"
+            f"run_subprocess '{shell_args}'\n"
+            f"subprocess {p.pid} "
+            f"failed with code: {p.returncode}"
         )
     else:
         log.info("run_subprocess finished with status %s", p.returncode)
@@ -112,27 +114,30 @@ def run_subprocess(shell_args: list[str]) -> str:
 
 def run_pg_dump(output_folder: str):
     log.info("run_pg_dump start pg_dump in subprocess")
-    out = str(backup_folder_path(output_folder))
+    out = backup_folder_path(output_folder)
     run_subprocess(
-        [
-            "pg_dump",
-            "-v",
-            "-O",
-            "-Fd",
-            "-j",
-            f"{multiprocessing.cpu_count()}",
-            "-U",
-            settings.PG_DUMP_DATABASE_USER,
-            "-p",
-            settings.PG_DUMP_DATABASE_PORT,
-            "-h",
-            settings.PG_DUMP_DATABASE_HOSTNAME,
-            settings.PG_DUMP_DATABASE_DB,
-            "-f",
-            out,
-        ],
+        f"pg_dump -v -O -Fd -j {multiprocessing.cpu_count()} "
+        f"-U {settings.PG_DUMP_DATABASE_USER} "
+        f"-p {settings.PG_DUMP_DATABASE_PORT} "
+        f"-h {settings.PG_DUMP_DATABASE_HOSTNAME} "
+        f"{settings.PG_DUMP_DATABASE_DB} "
+        f"-f {out}"
     )
-    output_folder_size = _get_folder_size(out)
+
+    if settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT:
+        log.info("run_pg_dump start encryption of folder with gpg: %s", out)
+        run_subprocess(
+            "gpg --encrypt-files --trust-model always "
+            f"-r {settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT} "
+            f"{out / '*'}",
+        )
+        log.info("run_pg_dump finished encryption, now removing not encrypted files")
+        for file in out.iterdir():
+            if file.is_file() and not file.name.endswith(".gpg"):
+                file.unlink()
+        log.info("run_pg_dump finished encryption, only encrypted files left")
+
+    output_folder_size = _get_folder_size(str(out))
     log.debug("run_pg_dump calculated size of %s: %s bytes", out, output_folder_size)
     if output_folder_size < _MB_TO_BYTES:
         size_msg = f"{output_folder_size} bytes ({round(output_folder_size / _MB_TO_BYTES, 4)} mb)"
@@ -143,7 +148,7 @@ def run_pg_dump(output_folder: str):
 
     log.info(
         "run_pg_dump finished pg_dump, output folder: %s, size: %s",
-        output_folder,
+        out,
         size_msg,
     )
 
@@ -170,11 +175,11 @@ def recreate_gpg_public_key():
     )
     log.info("recreate_gpg_public_key start gpg key import")
     run_subprocess(
-        ["gpg", "--import", str(settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH)],
+        f"gpg --import {settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH}",
     )
     log.info("recreate_gpg_public_key start gpg list keys")
     result = run_subprocess(
-        ["gpg", "--list-keys"],
+        "gpg --list-keys",
     )
     log.info("recreate_gpg_public_key gpg list keys result: %s", result)
     pub_line = False
@@ -197,19 +202,11 @@ def get_postgres_version():
     log.info("get_postgres_version start postgres connection to get pg version")
     pg_version_regex = re.compile(r"PostgreSQL \d*\.\d* ")
     result = run_subprocess(
-        [
-            "psql",
-            "-U",
-            settings.PG_DUMP_DATABASE_USER,
-            "-p",
-            settings.PG_DUMP_DATABASE_PORT,
-            "-h",
-            settings.PG_DUMP_DATABASE_HOSTNAME,
-            settings.PG_DUMP_DATABASE_DB,
-            "-w",
-            "--command",
-            "SELECT version();",
-        ],
+        f"psql -U {settings.PG_DUMP_DATABASE_USER} "
+        f"-p {settings.PG_DUMP_DATABASE_PORT} "
+        f"-h {settings.PG_DUMP_DATABASE_HOSTNAME} "
+        f"{settings.PG_DUMP_DATABASE_DB} "
+        f"-w --command 'SELECT version();'",
     )
     version = None
     matches: list[str] = pg_version_regex.findall(result)
