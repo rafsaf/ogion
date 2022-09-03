@@ -11,7 +11,7 @@ pydantic = {version = "1.9.2", extras = ["dotenv"]}
 python = "^3.10"
 
 [tool.poetry.dev-dependencies]
-autoflake = "^1.4"
+autoflake = "^1.5"
 black = "^22.6.0"
 coverage = {extras = ["toml"], version = "^6.4.1"}
 flake8 = "^5.0.4"
