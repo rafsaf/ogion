@@ -3,6 +3,7 @@ import binascii
 import logging
 import multiprocessing
 import os
+import pathlib
 import queue
 import re
 import secrets
@@ -76,7 +77,7 @@ def recreate_pgpass_file():
     text += f":{settings.PG_DUMP_DATABASE_DB}"
     text += f":{settings.PG_DUMP_DATABASE_PASSWORD}"
 
-    log.info("recreate_pgpass_file perform chmod 0600 on pgpass file")
+    log.info("recreate_pgpass_file perform chmod 600 on pgpass file")
     settings.PG_DUMP_PGPASS_FILE_PATH.touch(0o600)
 
     log.info("recreate_pgpass_file saving pgpass file")
@@ -131,11 +132,10 @@ def run_pg_dump(output_folder: str):
             f"-r {settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT} "
             f"{out / '*'}",
         )
-        log.info("run_pg_dump finished encryption, now removing not encrypted files")
-        for file in out.iterdir():
-            if file.is_file() and not file.name.endswith(".gpg"):
-                file.unlink()
-        log.info("run_pg_dump finished encryption, only encrypted files left")
+        gpg_out = pathlib.Path(f"{out}.gpg")
+        gpg_out.mkdir(exist_ok=True)
+        run_subprocess(f"mv {out / '*.gpg'} {gpg_out}")
+        log.info("run_pg_dump finished encryption, out folder: %s", gpg_out)
 
     output_folder_size = _get_folder_size(str(out))
     log.debug("run_pg_dump calculated size of %s: %s bytes", out, output_folder_size)
@@ -184,6 +184,9 @@ def recreate_gpg_public_key():
     log.info("recreate_gpg_public_key gpg list keys result: %s", result)
     pub_line = False
     for output_line in result.split("\n"):
+        if output_line.startswith("pub"):
+            pub_line = True  # next line will be recipient
+            continue
         if pub_line:
             gpg_key_recipient = output_line.strip()
             log.info(
@@ -192,8 +195,6 @@ def recreate_gpg_public_key():
             )
             settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT = gpg_key_recipient
             break
-        if output_line.startswith("pub"):
-            pub_line = True  # next line will be recipient
 
     log.info("recreate_gpg_public_key successfully finished")
 
