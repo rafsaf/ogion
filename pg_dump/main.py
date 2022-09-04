@@ -16,6 +16,7 @@ from pg_dump.config import BASE_DIR, settings
 from pg_dump.jobs import PgDumpJob
 from pg_dump.pg_dump_thread import PgDumpThread
 from pg_dump.scheduler_thread import SchedulerThread
+from pg_dump.cleanup_thread import CleanupThread
 
 log = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ class PgDumpDaemon:
         core.recreate_gpg_public_key()
         log.info("Initialization finished")
 
+        self.cleanup_thread = CleanupThread()
         self.scheduler_thread = SchedulerThread()
         self.pg_dump_threads: list[PgDumpThread] = []
         for _ in range(settings.PG_DUMP_NUMBER_PG_DUMP_THREADS):
@@ -44,6 +46,7 @@ class PgDumpDaemon:
 
     def run(self):
         self.scheduler_thread.start()
+        self.cleanup_thread.start()
         for thread in self.pg_dump_threads:
             thread.start()
 
@@ -88,8 +91,10 @@ class PgDumpDaemon:
     def exit(self, sig, frame):
         self.scheduler_thread.stop()
         self.scheduler_thread.join()
+        self.cleanup_thread.stop()
         for thread in self.pg_dump_threads:
             thread.stop()
+        self.cleanup_thread.join()
         for thread in self.pg_dump_threads:
             thread.join()
         with open(settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME, "wb") as file:
@@ -102,5 +107,6 @@ if __name__ == "__main__":
     pg_dump_daemon = PgDumpDaemon()
     pg_dump_daemon.run()
     pg_dump_daemon.scheduler_thread.join()
+    pg_dump_daemon.cleanup_thread.join()
     for thread in pg_dump_daemon.pg_dump_threads:
         thread.join()
