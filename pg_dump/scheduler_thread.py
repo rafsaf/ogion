@@ -44,18 +44,7 @@ class SchedulerThread(Thread):
                 self.next_backup_time = core.get_next_backup_time()
                 log.info("SchedulerThread next backup time %s.", self.next_backup_time)
 
-            backups = []
-            for foldername in settings.PG_DUMP_BACKUP_FOLDER_PATH.iterdir():
-                if foldername.name.endswith(".gpg"):
-                    core.UPLOADER_QUEUE.put(jobs.UploaderJob(foldername=foldername))
-                    pass
-                else:
-                    backups.append(foldername)
-            if len(backups) > settings.PG_DUMP_MAX_NUMBER_BACKUPS_LOCAL:
-                backups.sort(key=lambda path: path.name, reverse=True)
-                for to_delete in backups[settings.PG_DUMP_MAX_NUMBER_BACKUPS_LOCAL :]:
-                    core.CLEANUP_QUEUE.put(jobs.DeleteFolderJob(foldername=to_delete))
-            time.sleep(2)
+            time.sleep(1)
 
         log.info("SchedulerThread has stopped")
 

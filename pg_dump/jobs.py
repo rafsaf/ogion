@@ -1,6 +1,7 @@
 import logging
 import pathlib
 import shutil
+import threading
 import time
 from datetime import datetime, timedelta
 from typing import Callable
@@ -74,28 +75,44 @@ class PgDumpJob(BaseJob):
     __NAME__ = "PgDumpJob"
     __MAX_RUN__ = settings.PG_DUMP_COOLING_PERIOD_RETRIES + 1
     __COOLING_SECS__ = settings.PG_DUMP_COOLING_PERIOD_SECS
+    _backups_number_lock = threading.Lock()
 
     def action(self):
         foldername = core.get_new_backup_foldername()
         log.info("%s start action processing foldername: %s", self.__NAME__, foldername)
         path = core.backup_folder_path(foldername)
         try:
-            core.run_pg_dump(foldername)
+            out_folder = core.run_pg_dump(foldername)
             if path.exists() and not path.stat().st_size:
                 log.error("%s error: backup folder empty", self.__NAME__)
                 raise core.CoreSubprocessError()
         except core.CoreSubprocessError as err:
             log.error(
-                "%s error performing run_pg_dump: %s", self.__NAME__, err, exc_info=True
+                "%s error performing pg_dump: %s", self.__NAME__, err, exc_info=True
             )
             if path.exists():
-                shutil.rmtree(core.backup_folder_path(foldername))
+                shutil.rmtree(path)
                 log.error(
                     "%s removed empty backup folder: %s",
                     self.__NAME__,
                     foldername,
                 )
             raise JobCoolingError()
+        else:
+            if settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64:
+                core.gpg_encrypt_folder_for_upload_and_delete_it(out_folder)
+                return
+            with self._backups_number_lock:
+                backups = []
+                for folder in settings.PG_DUMP_BACKUP_FOLDER_PATH.iterdir():
+                    backups.append(folder)
+
+                if len(backups) > settings.PG_DUMP_MAX_NUMBER_BACKUPS_LOCAL:
+                    backups.sort(key=lambda path: path.name, reverse=True)
+                    for to_delete in backups[
+                        settings.PG_DUMP_MAX_NUMBER_BACKUPS_LOCAL :
+                    ]:
+                        core.CLEANUP_QUEUE.put(DeleteFolderJob(foldername=to_delete))
 
 
 class DeleteFolderJob(BaseJob):

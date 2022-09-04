@@ -126,6 +126,28 @@ def run_subprocess(shell_args: str) -> str:
     return output
 
 
+def gpg_encrypt_folder_for_upload_and_delete_it(encrypt_folder: pathlib.Path):
+    log.info(
+        "gpg_encrypt_folder_for_upload_and_delete_it start encryption of folder: %s",
+        encrypt_folder,
+    )
+    run_subprocess(
+        "gpg --encrypt-files --trust-model always "
+        f"-r {settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT} "
+        f"{encrypt_folder / '*'}",
+    )
+    gpg_out = pathlib.Path(f"{encrypt_folder}.gpg")
+    gpg_out.mkdir(exist_ok=True)
+    run_subprocess(f"mv {encrypt_folder / '*.gpg'} {gpg_out}")
+    log.info(
+        "gpg_encrypt_folder_for_upload_and_delete_it finished encryption, out folder: %s, size: %s",
+        gpg_out,
+        _get_human_folder_size_msg(gpg_out),
+    )
+    CLEANUP_QUEUE.put(DeleteFolderJob(foldername=encrypt_folder))
+    UPLOADER_QUEUE.put(UploaderJob(foldername=gpg_out))
+
+
 def run_pg_dump(output_folder: str):
     log.info("run_pg_dump start pg_dump in subprocess")
     out = backup_folder_path(output_folder)
@@ -142,22 +164,7 @@ def run_pg_dump(output_folder: str):
         out,
         _get_human_folder_size_msg(out),
     )
-
-    if settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT:
-        log.info("run_pg_dump start encryption of folder with gpg: %s", out)
-        run_subprocess(
-            "gpg --encrypt-files --trust-model always "
-            f"-r {settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT} "
-            f"{out / '*'}",
-        )
-        gpg_out = pathlib.Path(f"{out}.gpg")
-        gpg_out.mkdir(exist_ok=True)
-        run_subprocess(f"mv {out / '*.gpg'} {gpg_out}")
-        log.info(
-            "run_pg_dump finished encryption, out folder: %s, size: %s",
-            gpg_out,
-            _get_human_folder_size_msg(gpg_out),
-        )
+    return out
 
 
 def recreate_gpg_public_key():
