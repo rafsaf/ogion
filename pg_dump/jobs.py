@@ -22,15 +22,13 @@ class BaseJob:
 
     def __init__(self) -> None:
         """Base interface for any job runned in threads"""
-        log.info(
-            "%s created job at %s, try %s/%s",
-            self.__NAME__,
-            self.created_at,
-            self.run_number,
-            self.__MAX_RUN__,
-        )
         self.created_at: datetime = datetime.utcnow()
         self.run_number: int = 0
+        log.info(
+            "%s created job at %s",
+            self.__NAME__,
+            self.created_at,
+        )
 
     def action(self):
         raise NotImplementedError()
