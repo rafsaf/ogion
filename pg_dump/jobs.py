@@ -22,6 +22,13 @@ class BaseJob:
 
     def __init__(self) -> None:
         """Base interface for any job runned in threads"""
+        log.info(
+            "%s created job at %s, try %s/%s",
+            self.__NAME__,
+            self.created_at,
+            self.run_number,
+            self.__MAX_RUN__,
+        )
         self.created_at: datetime = datetime.utcnow()
         self.run_number: int = 0
 
@@ -97,6 +104,39 @@ class DeleteFolderJob(BaseJob):
     __NAME__ = "DeleteFolderJob"
     __MAX_RUN__ = 1
     __COOLING_SECS__ = 0
+
+    def __init__(self, foldername: pathlib.Path) -> None:
+        super().__init__()
+        self.foldername = foldername
+
+    def action(self):
+        log.info(
+            "%s start action deleting foldername: %s", self.__NAME__, self.foldername
+        )
+        if not self.foldername.exists():
+            log.info(
+                "%s foldername already deleted: %s", self.__NAME__, self.foldername
+            )
+            return
+        try:
+            shutil.rmtree(self.foldername)
+        except Exception as err:
+            log.error(
+                "%s cannot delete foldername %s: %s",
+                self.__NAME__,
+                self.foldername,
+                err,
+                exc_info=True,
+            )
+            raise JobCoolingError()
+        else:
+            log.info("%s deleted foldername %s", self.__NAME__, self.foldername)
+
+
+class UploaderJob(BaseJob):
+    __NAME__ = "UploaderJob"
+    __MAX_RUN__ = 3
+    __COOLING_SECS__ = 120
 
     def __init__(self, foldername: pathlib.Path) -> None:
         super().__init__()

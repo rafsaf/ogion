@@ -13,11 +13,14 @@ from datetime import datetime
 import croniter
 
 from pg_dump.config import settings
-from pg_dump.jobs import PgDumpJob
+from pg_dump.jobs import DeleteFolderJob, PgDumpJob, UploaderJob
 
 log = logging.getLogger(__name__)
 
 PG_DUMP_QUEUE: queue.Queue[PgDumpJob] = queue.Queue(maxsize=1)
+UPLOADER_QUEUE: queue.Queue[UploaderJob] = queue.Queue()
+CLEANUP_QUEUE: queue.Queue[DeleteFolderJob] = queue.Queue()
+
 _MB_TO_BYTES = 1048576
 _GB_TO_BYTES = 1073741824
 

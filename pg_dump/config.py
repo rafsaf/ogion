@@ -21,13 +21,14 @@ class Settings(BaseSettings):
     PG_DUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 60
     PG_DUMP_COOLING_PERIOD_SECS: int = 60 * 5
     PG_DUMP_COOLING_PERIOD_RETRIES: int = 2
+    PG_DUMP_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
+    PG_DUMP_MAX_NUMBER_BACKUPS_LOCAL = 7
 
     PG_DUMP_BACKUP_FOLDER_PATH: pathlib.Path = BASE_DIR / "data/backup"
     PG_DUMP_LOG_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
     PG_DUMP_PGPASS_FILE_PATH: pathlib.Path = BASE_DIR / ".pgpass"
     PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH: pathlib.Path = BASE_DIR / "gpg_public.key.pub"
     PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME: pathlib.Path = BASE_DIR / "data/pg_queue.pickle"
-    PG_DUMP_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
 
     PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT: str = ""
     PRIV_PG_DUMP_DB_VERSION: str = ""
