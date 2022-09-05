@@ -17,6 +17,8 @@ class Settings(BaseSettings):
 
     PG_DUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "0 5 * * *"
     PG_DUMP_GPG_PUBLIC_KEY_BASE64: str = ""
+    PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64: str = ""
+    PG_DUMP_UPLOAD_PROVIDER: str = ""
     PG_DUMP_NUMBER_PG_DUMP_THREADS: int = 1
     PG_DUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 60
     PG_DUMP_COOLING_PERIOD_SECS: int = 60 * 5
@@ -28,6 +30,9 @@ class Settings(BaseSettings):
     PG_DUMP_LOG_FOLDER_PATH: pathlib.Path = BASE_DIR / "logs"
     PG_DUMP_PGPASS_FILE_PATH: pathlib.Path = BASE_DIR / ".pgpass"
     PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH: pathlib.Path = BASE_DIR / "gpg_public.key.pub"
+    PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64_PATH: pathlib.Path = (
+        BASE_DIR / "google_auth.json"
+    )
     PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME: pathlib.Path = BASE_DIR / "data/pg_queue.pickle"
 
     PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT: str = ""

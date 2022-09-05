@@ -218,6 +218,25 @@ def recreate_gpg_public_key():
     log.info("recreate_gpg_public_key successfully finished")
 
 
+def setup_google_auth_account():
+    log.info("setup_google_auth_account starting")
+    try:
+        google_auth_service = base64.standard_b64decode(
+            settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64
+        ).decode()
+    except (binascii.Error, UnicodeDecodeError) as err:
+        log.error("setup_google_auth_account base64 error: %s", err, exc_info=True)
+        log.error(
+            "setup_google_auth_account set correct PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64, exiting"
+        )
+        exit(1)
+    with open(
+        settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64_PATH, "w"
+    ) as google_auth_file:
+        google_auth_file.write(google_auth_service)
+    log.info("setup_google_auth_account successfully finished")
+
+
 def get_postgres_version():
     log.info("get_postgres_version start postgres connection to get pg version")
     pg_version_regex = re.compile(r"PostgreSQL \d*\.\d* ")

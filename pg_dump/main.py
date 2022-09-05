@@ -34,6 +34,9 @@ class PgDumpDaemon:
         log.info("Recreating GPG public key")
         core.recreate_gpg_public_key()
         log.info("Initialization finished")
+        self.upload_thread = None
+        if settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64:
+            core.setup_google_auth_account()
 
         self.cleanup_thread = CleanupThread()
         self.scheduler_thread = SchedulerThread()
