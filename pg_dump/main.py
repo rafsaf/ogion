@@ -17,6 +17,7 @@ from pg_dump.jobs import PgDumpJob
 from pg_dump.pg_dump_thread import PgDumpThread
 from pg_dump.scheduler_thread import SchedulerThread
 from pg_dump.cleanup_thread import CleanupThread
+from pg_dump.upload_thread import UploadThread
 
 log = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ class PgDumpDaemon:
         self.upload_thread = None
         if settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64:
             core.setup_google_auth_account()
+            self.upload_thread = UploadThread()
 
         self.cleanup_thread = CleanupThread()
         self.scheduler_thread = SchedulerThread()
@@ -52,6 +54,8 @@ class PgDumpDaemon:
         self.cleanup_thread.start()
         for thread in self.pg_dump_threads:
             thread.start()
+        if self.upload_thread:
+            self.upload_thread.start()
 
     def initialize_pg_dump_queue_from_picle(self):
         if settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME.is_file():
@@ -95,9 +99,13 @@ class PgDumpDaemon:
         self.scheduler_thread.stop()
         self.scheduler_thread.join()
         self.cleanup_thread.stop()
+        if self.upload_thread:
+            self.upload_thread.stop()
         for thread in self.pg_dump_threads:
             thread.stop()
         self.cleanup_thread.join()
+        if self.upload_thread:
+            self.upload_thread.join()
         for thread in self.pg_dump_threads:
             thread.join()
         with open(settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME, "wb") as file:
