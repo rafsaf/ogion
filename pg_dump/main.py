@@ -26,14 +26,15 @@ class PgDumpDaemon:
     """pg_dump service"""
 
     def __init__(self) -> None:
-        log.info("Initialize pg_dump...")
+        log.info("PgDumpDaemon start initialize...")
+        log.info("PgDumpDaemon start checks")
+        # pgpass file
         core.recreate_pgpass_file()
-        log.info("Recreated pgpass file")
-        self.check_postgres_connection()
-        log.info("Recreating last saved queue")
-        self.initialize_pg_dump_queue_from_picle()
-        log.info("Recreating GPG public key")
+        # check postgres connection
+        core.get_postgres_version()
+        # check gpg settings or skip
         core.recreate_gpg_public_key()
+
         self.upload_thread = None
         if settings.PG_DUMP_UPLOAD_PROVIDER == "google":
             required = {
@@ -50,9 +51,11 @@ class PgDumpDaemon:
                 )
                 exit(1)
             self.upload_thread = UploadThread()
+            # create google service account file
             core.setup_google_auth_account()
+            # test upload of empty file to bucket to be sure it works
             UploaderJob.test_upload()
-
+        log.info("PgDumpDaemon finished checks")
         self.cleanup_thread = CleanupThread()
         self.scheduler_thread = SchedulerThread()
         self.pg_dump_threads: list[PgDumpThread] = []
@@ -61,9 +64,10 @@ class PgDumpDaemon:
 
         signal.signal(signalnum=signal.SIGINT, handler=self.exit)
         signal.signal(signalnum=signal.SIGTERM, handler=self.exit)
-        log.info("Initialization finished")
+        log.info("PgDumpDaemon initialization finished")
 
     def run(self):
+        self.initialize_pg_dump_queue_from_picle()
         self.scheduler_thread.start()
         self.cleanup_thread.start()
         for thread in self.pg_dump_threads:
@@ -85,18 +89,6 @@ class PgDumpDaemon:
             log.info(
                 "initialize_pg_dump_queue_from_picle no picke queue file, skipping"
             )
-
-    def check_postgres_connection(self):
-        try:
-            db_version = core.get_postgres_version()
-        except core.CoreSubprocessError as err:
-            log.error(err, exc_info=True)
-            log.error(
-                "check_postgres_connection unable to connect to database, exiting"
-            )
-            exit(1)
-        else:
-            settings.PRIV_PG_DUMP_DB_VERSION = db_version
 
     def healthcheck(self):
         healthy = True

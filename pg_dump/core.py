@@ -240,13 +240,19 @@ def setup_google_auth_account():
 def get_postgres_version():
     log.info("get_postgres_version start postgres connection to get pg version")
     pg_version_regex = re.compile(r"PostgreSQL \d*\.\d* ")
-    result = run_subprocess(
-        f"psql -U {settings.PG_DUMP_DATABASE_USER} "
-        f"-p {settings.PG_DUMP_DATABASE_PORT} "
-        f"-h {settings.PG_DUMP_DATABASE_HOSTNAME} "
-        f"{settings.PG_DUMP_DATABASE_DB} "
-        f"-w --command 'SELECT version();'",
-    )
+    try:
+        result = run_subprocess(
+            f"psql -U {settings.PG_DUMP_DATABASE_USER} "
+            f"-p {settings.PG_DUMP_DATABASE_PORT} "
+            f"-h {settings.PG_DUMP_DATABASE_HOSTNAME} "
+            f"{settings.PG_DUMP_DATABASE_DB} "
+            f"-w --command 'SELECT version();'",
+        )
+    except CoreSubprocessError as err:
+        log.error(err, exc_info=True)
+        log.error("check_postgres_connection unable to connect to database, exiting")
+        exit(1)
+
     version = None
     matches: list[str] = pg_version_regex.findall(result)
 
@@ -254,10 +260,10 @@ def get_postgres_version():
         version = match.strip().split(" ")[1]
         break
     if version is None:
-        log.warning(
+        log.error(
             "get_postgres_version error processing pg result, version is unknown: %s",
             result,
         )
         exit(1)
+    settings.PRIV_PG_DUMP_DB_VERSION = version
     log.info("get_postgres_version calculated database version: %s", version)
-    return version
