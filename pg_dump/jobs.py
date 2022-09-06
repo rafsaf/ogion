@@ -167,11 +167,17 @@ class UploaderJob(BaseJob):
                 settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
                 self.foldername.name,
             )
-            storage_client = storage.Client()
-            bucket = storage_client.bucket(settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME)
-            for file in self.foldername.iterdir():
-                dest = f"{base_dest}/{file.name}"
-                log.info(dest)
-                blob = bucket.blob(dest)
-                blob.upload_from_filename(str(file.absolute()))
-                log.info("Uploaded %s to %s", file, dest)
+            try:
+                storage_client = storage.Client()
+                bucket = storage_client.bucket(
+                    settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME
+                )
+                for file in self.foldername.iterdir():
+                    dest = f"{base_dest}/{file.name}"
+                    log.info(dest)
+                    blob = bucket.blob(dest)
+                    blob.upload_from_filename(str(file.absolute()))
+                    log.info("Uploaded %s to %s", file, dest)
+            except Exception as err:
+                log.error("Error during google bucket update: %s", err, exc_info=True)
+                raise JobCoolingError()
