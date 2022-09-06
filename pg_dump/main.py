@@ -12,11 +12,11 @@ except ImportError:
 
     from pg_dump import core
 
+from pg_dump.cleanup_thread import CleanupThread
 from pg_dump.config import BASE_DIR, settings
-from pg_dump.jobs import PgDumpJob
+from pg_dump.jobs import PgDumpJob, UploaderJob
 from pg_dump.pg_dump_thread import PgDumpThread
 from pg_dump.scheduler_thread import SchedulerThread
-from pg_dump.cleanup_thread import CleanupThread
 from pg_dump.upload_thread import UploadThread
 
 log = logging.getLogger(__name__)
@@ -34,11 +34,24 @@ class PgDumpDaemon:
         self.initialize_pg_dump_queue_from_picle()
         log.info("Recreating GPG public key")
         core.recreate_gpg_public_key()
-        log.info("Initialization finished")
         self.upload_thread = None
-        if settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64:
-            core.setup_google_auth_account()
+        if settings.PG_DUMP_UPLOAD_PROVIDER == "google":
+            required = {
+                "PG_DUMP_GPG_PUBLIC_KEY_BASE64": settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64,
+                "PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH": settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH,
+                "PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME": settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME,
+                "PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH": settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
+                "PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64": settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64,
+            }
+            if not all(required.values()):
+                log.error(
+                    "PG_DUMP_UPLOAD_PROVIDER defined but no environemnt variables %s",
+                    [env for env in required if not required[env]],
+                )
+                exit(1)
             self.upload_thread = UploadThread()
+            core.setup_google_auth_account()
+            UploaderJob.test_upload()
 
         self.cleanup_thread = CleanupThread()
         self.scheduler_thread = SchedulerThread()
@@ -48,6 +61,7 @@ class PgDumpDaemon:
 
         signal.signal(signalnum=signal.SIGINT, handler=self.exit)
         signal.signal(signalnum=signal.SIGTERM, handler=self.exit)
+        log.info("Initialization finished")
 
     def run(self):
         self.scheduler_thread.start()

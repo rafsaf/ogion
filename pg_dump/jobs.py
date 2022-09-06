@@ -1,5 +1,6 @@
 import logging
 import pathlib
+import secrets
 import shutil
 import threading
 import time
@@ -103,7 +104,7 @@ class PgDumpJob(BaseJob):
                 )
             raise JobCoolingError()
         else:
-            if settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64:
+            if settings.PG_DUMP_UPLOAD_PROVIDER:
                 core.gpg_encrypt_folder_for_upload_and_delete_it(out_folder)
                 return
             with self._backups_number_lock:
@@ -181,3 +182,32 @@ class UploaderJob(BaseJob):
             except Exception as err:
                 log.error("Error during google bucket update: %s", err, exc_info=True)
                 raise JobCoolingError()
+
+    @staticmethod
+    def test_upload():
+        if settings.PG_DUMP_UPLOAD_PROVIDER == "google":
+            test_filename = f"test_gcp_pg_dump_{secrets.token_urlsafe(4)}"
+            test_file = pathlib.Path(f"/tmp/{test_filename}").absolute()
+            test_file.touch(exist_ok=True)
+            log.info("Test GCP upload created file %s", test_file)
+            dest = "{}/{}".format(
+                settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
+                test_filename,
+            )
+            try:
+                storage_client = storage.Client()
+                bucket = storage_client.bucket(
+                    settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME
+                )
+                blob = bucket.blob(dest)
+                blob.upload_from_filename(str(test_file))
+                log.info("Test GCP file uploaded %s to %s", test_file, dest)
+                blob.delete()
+                test_file.unlink()
+                log.info("Test GCP file deleted %s", dest)
+            except Exception as err:
+                log.error("Error during google bucket upload: %s", err, exc_info=True)
+                log.error(
+                    "Test upload failed. Check your bucket env variables and permissions"
+                )
+                exit(1)
