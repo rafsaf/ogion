@@ -6,6 +6,8 @@ import time
 from datetime import datetime, timedelta
 from typing import Callable
 
+from google.cloud import storage
+
 from pg_dump import core
 from pg_dump.config import settings
 
@@ -41,7 +43,9 @@ class BaseJob:
         log.warning(
             "%s start cooling period %s secs", self.__NAME__, self.__COOLING_SECS__
         )
-        release_time = datetime.utcnow() + timedelta(seconds=self.__COOLING_SECS__)
+        release_time: datetime = datetime.utcnow() + timedelta(
+            seconds=self.__COOLING_SECS__
+        )
         while running() and datetime.utcnow() < release_time:
             time.sleep(1)
         log.info("%s finished cooling period", self.__NAME__)
@@ -158,19 +162,16 @@ class UploaderJob(BaseJob):
         self.foldername = foldername
 
     def action(self):
-        log.info(
-            "%s start action deleting foldername: %s", self.__NAME__, self.foldername
-        )
-        try:
-            shutil.rmtree(self.foldername)
-        except Exception as err:
-            log.error(
-                "%s cannot delete foldername %s: %s",
-                self.__NAME__,
-                self.foldername,
-                err,
-                exc_info=True,
+        if settings.PG_DUMP_UPLOAD_PROVIDER == "google":
+            base_dest = "{}/{}".format(
+                settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
+                self.foldername.name,
             )
-            raise JobCoolingError()
-        else:
-            log.info("%s deleted foldername %s", self.__NAME__, self.foldername)
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME)
+            for file in self.foldername.iterdir():
+                dest = f"{base_dest}/{file.name}"
+                log.info(dest)
+                blob = bucket.blob(dest)
+                blob.upload_from_filename(str(file.absolute()))
+                log.info("Uploaded %s to %s", file, dest)

@@ -18,7 +18,9 @@ class Settings(BaseSettings):
     PG_DUMP_BACKUP_POLICY_CRON_EXPRESSION: str = "0 5 * * *"
     PG_DUMP_GPG_PUBLIC_KEY_BASE64: str = ""
     PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64: str = ""
-    PG_DUMP_UPLOAD_PROVIDER: str = ""
+    PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME = ""
+    PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH = ""
+    PG_DUMP_UPLOAD_PROVIDER: Literal["", "google"] = ""
     PG_DUMP_NUMBER_PG_DUMP_THREADS: int = 1
     PG_DUMP_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 60
     PG_DUMP_COOLING_PERIOD_SECS: int = 60 * 5
@@ -46,6 +48,9 @@ class Settings(BaseSettings):
 settings = Settings()  # type: ignore
 
 os.environ["PGPASSFILE"] = str(settings.PG_DUMP_PGPASS_FILE_PATH)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(
+    settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64_PATH
+)
 os.makedirs(settings.PG_DUMP_BACKUP_FOLDER_PATH, exist_ok=True)
 os.makedirs(settings.PG_DUMP_LOG_FOLDER_PATH, exist_ok=True)
 

@@ -2,6 +2,7 @@
 data/*
 .pgpass
 gpg_public.key.pub
+google_auth.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
