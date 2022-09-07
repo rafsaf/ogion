@@ -5,7 +5,6 @@ from datetime import datetime
 from threading import Thread
 
 from pg_dump import core, jobs
-from pg_dump.config import settings
 
 log = logging.getLogger(__name__)
 
@@ -33,13 +32,13 @@ class SchedulerThread(Thread):
                     "SchedulerThread start schedulig new backup, putting PgDumpJob to queue"
                 )
                 try:
-                    core.PG_DUMP_QUEUE.put(
+                    core.PD_QUEUE.put(
                         jobs.PgDumpJob(),
                         block=False,
                     )
                 except queue.Full:
                     log.warning(
-                        "SchedulerThread PG_DUMP_QUEUE is full, skip scheduling PgDumpJob"
+                        "SchedulerThread PD_QUEUE is full, skip scheduling PgDumpJob"
                     )
                 self.next_backup_time = core.get_next_backup_time()
                 log.info("SchedulerThread next backup time %s.", self.next_backup_time)

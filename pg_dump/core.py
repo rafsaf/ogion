@@ -17,7 +17,7 @@ from pg_dump.jobs import DeleteFolderJob, PgDumpJob, UploaderJob
 
 log = logging.getLogger(__name__)
 
-PG_DUMP_QUEUE: queue.Queue[PgDumpJob] = queue.Queue(maxsize=1)
+PD_QUEUE: queue.Queue[PgDumpJob] = queue.Queue(maxsize=1)
 UPLOADER_QUEUE: queue.Queue[UploaderJob] = queue.Queue()
 CLEANUP_QUEUE: queue.Queue[DeleteFolderJob] = queue.Queue()
 
@@ -32,7 +32,7 @@ class CoreSubprocessError(Exception):
 def get_next_backup_time() -> datetime:
     now = datetime.utcnow()
     cron = croniter.croniter(
-        settings.PG_DUMP_BACKUP_POLICY_CRON_EXPRESSION,
+        settings.PD_BACKUP_POLICY_CRON_EXPRESSION,
         start_time=now,
     )
     return cron.get_next(ret_type=datetime)
@@ -42,8 +42,8 @@ def get_new_backup_foldername():
     random_string = secrets.token_urlsafe(3)
     new_foldername = "{}_{}_{}_{}".format(
         datetime.utcnow().strftime("%Y%m%d_%H%M"),
-        settings.PG_DUMP_DATABASE_DB,
-        settings.PRIV_PG_DUMP_DB_VERSION,
+        settings.PD_DATABASE_DB,
+        settings.PRIV_PD_DB_VERSION,
         random_string,
     )
     log.debug(
@@ -76,25 +76,25 @@ def _get_human_folder_size_msg(folder_path: pathlib.Path):
 
 
 def backup_folder_path(foldername: str):
-    return (settings.PG_DUMP_BACKUP_FOLDER_PATH / foldername).absolute()
+    return (settings.PD_BACKUP_FOLDER_PATH / foldername).absolute()
 
 
 def recreate_pgpass_file():
     log.info("recreate_pgpass_file removing old pgpass file")
-    settings.PG_DUMP_PGPASS_FILE_PATH.unlink(missing_ok=True)
+    settings.PD_PGPASS_FILE_PATH.unlink(missing_ok=True)
 
     log.info("recreate_pgpass_file start creating pgpass file")
-    text = settings.PG_DUMP_DATABASE_HOSTNAME
-    text += f":{settings.PG_DUMP_DATABASE_PORT}"
-    text += f":{settings.PG_DUMP_DATABASE_USER}"
-    text += f":{settings.PG_DUMP_DATABASE_DB}"
-    text += f":{settings.PG_DUMP_DATABASE_PASSWORD}"
+    text = settings.PD_DATABASE_HOSTNAME
+    text += f":{settings.PD_DATABASE_PORT}"
+    text += f":{settings.PD_DATABASE_USER}"
+    text += f":{settings.PD_DATABASE_DB}"
+    text += f":{settings.PD_DATABASE_PASSWORD}"
 
     log.info("recreate_pgpass_file perform chmod 600 on pgpass file")
-    settings.PG_DUMP_PGPASS_FILE_PATH.touch(0o600)
+    settings.PD_PGPASS_FILE_PATH.touch(0o600)
 
     log.info("recreate_pgpass_file saving pgpass file")
-    with open(settings.PG_DUMP_PGPASS_FILE_PATH, "w") as file:
+    with open(settings.PD_PGPASS_FILE_PATH, "w") as file:
         file.write(text)
 
 
@@ -108,7 +108,7 @@ def run_subprocess(shell_args: str) -> str:
         shell=True,
     )
     log.info("run_subprocess running: '%s'", shell_args)
-    output, err = p.communicate(timeout=settings.PG_DUMP_POSTGRES_TIMEOUT_AFTER_SECS)
+    output, err = p.communicate(timeout=settings.PD_POSTGRES_TIMEOUT_AFTER_SECS)
 
     if p.returncode != 0:
         log.error("run_subprocess failed with status %s", p.returncode)
@@ -133,7 +133,7 @@ def gpg_encrypt_folder_for_upload_and_delete_it(encrypt_folder: pathlib.Path):
     )
     run_subprocess(
         "gpg --encrypt-files --trust-model always "
-        f"-r {settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT} "
+        f"-r {settings.PRIV_PD_GPG_PUBLIC_KEY_RECIPIENT} "
         f"{encrypt_folder / '*'}",
     )
     gpg_out = pathlib.Path(f"{encrypt_folder}.gpg")
@@ -153,10 +153,10 @@ def run_pg_dump(output_folder: str):
     out = backup_folder_path(output_folder)
     run_subprocess(
         f"pg_dump -v -O -Fd -j {multiprocessing.cpu_count()} "
-        f"-U {settings.PG_DUMP_DATABASE_USER} "
-        f"-p {settings.PG_DUMP_DATABASE_PORT} "
-        f"-h {settings.PG_DUMP_DATABASE_HOSTNAME} "
-        f"{settings.PG_DUMP_DATABASE_DB} "
+        f"-U {settings.PD_DATABASE_USER} "
+        f"-p {settings.PD_DATABASE_PORT} "
+        f"-h {settings.PD_DATABASE_HOSTNAME} "
+        f"{settings.PD_DATABASE_DB} "
         f"-f {out}"
     )
     log.info(
@@ -169,37 +169,37 @@ def run_pg_dump(output_folder: str):
 
 def recreate_gpg_public_key():
     log.info("recreate_gpg_public_key starting")
-    if not settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64:
+    if not settings.PD_GPG_PUBLIC_KEY_BASE64:
         log.info("recreate_gpg_public_key no GPG public key provided, skipped")
         return
     try:
         gpg_pub_cert = base64.standard_b64decode(
-            settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64
+            settings.PD_GPG_PUBLIC_KEY_BASE64
         ).decode()
     except (binascii.Error, UnicodeDecodeError) as err:
         log.error("recreate_gpg_public_key base64 error: %s", err, exc_info=True)
         log.error(
-            "recreate_gpg_public_key set correct PG_DUMP_GPG_PUBLIC_KEY_BASE64, exiting"
+            "recreate_gpg_public_key set correct PD_GPG_PUBLIC_KEY_BASE64, exiting"
         )
         exit(1)
-    with open(settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH, "w") as gpg_pub_file:
+    with open(settings.PD_GPG_PUBLIC_KEY_BASE64_PATH, "w") as gpg_pub_file:
         gpg_pub_file.write(gpg_pub_cert)
     log.debug(
         "recreate_gpg_public_key saved gpg public key to %s:\n%s",
-        settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH,
+        settings.PD_GPG_PUBLIC_KEY_BASE64_PATH,
         gpg_pub_cert,
     )
     log.info("recreate_gpg_public_key start gpg key import")
     try:
         run_subprocess(
-            f"gpg --import {settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH}",
+            f"gpg --import {settings.PD_GPG_PUBLIC_KEY_BASE64_PATH}",
         )
     except CoreSubprocessError as err:
         log.error(
             "recreate_gpg_public_key invalid gpg key error: %s", err, exc_info=True
         )
         log.error(
-            "recreate_gpg_public_key set correct PG_DUMP_GPG_PUBLIC_KEY_BASE64, exiting"
+            "recreate_gpg_public_key set correct PD_GPG_PUBLIC_KEY_BASE64, exiting"
         )
         exit(1)
 
@@ -214,7 +214,7 @@ def recreate_gpg_public_key():
         "recreate_gpg_public_key found gpg public key recipient %s",
         gpg_key_recipient,
     )
-    settings.PRIV_PG_DUMP_GPG_PUBLIC_KEY_RECIPIENT = gpg_key_recipient
+    settings.PRIV_PD_GPG_PUBLIC_KEY_RECIPIENT = gpg_key_recipient
     log.info("recreate_gpg_public_key successfully finished")
 
 
@@ -222,16 +222,16 @@ def setup_google_auth_account():
     log.info("setup_google_auth_account starting")
     try:
         google_auth_service = base64.standard_b64decode(
-            settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64
+            settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64
         ).decode()
     except (binascii.Error, UnicodeDecodeError) as err:
         log.error("setup_google_auth_account base64 error: %s", err, exc_info=True)
         log.error(
-            "setup_google_auth_account set correct PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64, exiting"
+            "setup_google_auth_account set correct PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64, exiting"
         )
         exit(1)
     with open(
-        settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64_PATH, "w"
+        settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64_PATH, "w"
     ) as google_auth_file:
         google_auth_file.write(google_auth_service)
     log.info("setup_google_auth_account successfully finished")
@@ -242,10 +242,10 @@ def get_postgres_version():
     pg_version_regex = re.compile(r"PostgreSQL \d*\.\d* ")
     try:
         result = run_subprocess(
-            f"psql -U {settings.PG_DUMP_DATABASE_USER} "
-            f"-p {settings.PG_DUMP_DATABASE_PORT} "
-            f"-h {settings.PG_DUMP_DATABASE_HOSTNAME} "
-            f"{settings.PG_DUMP_DATABASE_DB} "
+            f"psql -U {settings.PD_DATABASE_USER} "
+            f"-p {settings.PD_DATABASE_PORT} "
+            f"-h {settings.PD_DATABASE_HOSTNAME} "
+            f"{settings.PD_DATABASE_DB} "
             f"-w --command 'SELECT version();'",
         )
     except CoreSubprocessError as err:
@@ -265,5 +265,5 @@ def get_postgres_version():
             result,
         )
         exit(1)
-    settings.PRIV_PG_DUMP_DB_VERSION = version
+    settings.PRIV_PD_DB_VERSION = version
     log.info("get_postgres_version calculated database version: %s", version)

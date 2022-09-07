@@ -78,8 +78,8 @@ class BaseJob:
 
 class PgDumpJob(BaseJob):
     __NAME__ = "PgDumpJob"
-    __MAX_RUN__ = settings.PG_DUMP_COOLING_PERIOD_RETRIES + 1
-    __COOLING_SECS__ = settings.PG_DUMP_COOLING_PERIOD_SECS
+    __MAX_RUN__ = settings.PD_COOLING_PERIOD_RETRIES + 1
+    __COOLING_SECS__ = settings.PD_COOLING_PERIOD_SECS
     _backups_number_lock = threading.Lock()
 
     def action(self):
@@ -104,19 +104,17 @@ class PgDumpJob(BaseJob):
                 )
             raise JobCoolingError()
         else:
-            if settings.PG_DUMP_UPLOAD_PROVIDER:
+            if settings.PD_UPLOAD_PROVIDER:
                 core.gpg_encrypt_folder_for_upload_and_delete_it(out_folder)
                 return
             with self._backups_number_lock:
                 backups = []
-                for folder in settings.PG_DUMP_BACKUP_FOLDER_PATH.iterdir():
+                for folder in settings.PD_BACKUP_FOLDER_PATH.iterdir():
                     backups.append(folder)
 
-                if len(backups) > settings.PG_DUMP_MAX_NUMBER_BACKUPS_LOCAL:
+                if len(backups) > settings.PD_MAX_NUMBER_BACKUPS_LOCAL:
                     backups.sort(key=lambda path: path.name, reverse=True)
-                    for to_delete in backups[
-                        settings.PG_DUMP_MAX_NUMBER_BACKUPS_LOCAL :
-                    ]:
+                    for to_delete in backups[settings.PD_MAX_NUMBER_BACKUPS_LOCAL :]:
                         core.CLEANUP_QUEUE.put(DeleteFolderJob(foldername=to_delete))
 
 
@@ -163,16 +161,14 @@ class UploaderJob(BaseJob):
         self.foldername = foldername
 
     def action(self):
-        if settings.PG_DUMP_UPLOAD_PROVIDER == "google":
+        if settings.PD_UPLOAD_PROVIDER == "google":
             base_dest = "{}/{}".format(
-                settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
+                settings.PD_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
                 self.foldername.name,
             )
             try:
                 storage_client = storage.Client()
-                bucket = storage_client.bucket(
-                    settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME
-                )
+                bucket = storage_client.bucket(settings.PD_UPLOAD_GOOGLE_BUCKET_NAME)
                 for file in self.foldername.iterdir():
                     dest = f"{base_dest}/{file.name}"
                     log.info(dest)
@@ -185,20 +181,18 @@ class UploaderJob(BaseJob):
 
     @staticmethod
     def test_upload():
-        if settings.PG_DUMP_UPLOAD_PROVIDER == "google":
+        if settings.PD_UPLOAD_PROVIDER == "google":
             test_filename = f"test_gcp_pg_dump_{secrets.token_urlsafe(4)}"
             test_file = pathlib.Path(f"/tmp/{test_filename}").absolute()
             test_file.touch(exist_ok=True)
             log.info("Test GCP upload created file %s", test_file)
             dest = "{}/{}".format(
-                settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
+                settings.PD_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
                 test_filename,
             )
             try:
                 storage_client = storage.Client()
-                bucket = storage_client.bucket(
-                    settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME
-                )
+                bucket = storage_client.bucket(settings.PD_UPLOAD_GOOGLE_BUCKET_NAME)
                 blob = bucket.blob(dest)
                 blob.upload_from_filename(str(test_file))
                 log.info("Test GCP file uploaded %s to %s", test_file, dest)

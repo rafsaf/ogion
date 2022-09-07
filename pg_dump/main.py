@@ -13,7 +13,7 @@ except ImportError:
     from pg_dump import core
 
 from pg_dump.cleanup_thread import CleanupThread
-from pg_dump.config import BASE_DIR, settings
+from pg_dump.config import settings
 from pg_dump.jobs import PgDumpJob, UploaderJob
 from pg_dump.pg_dump_thread import PgDumpThread
 from pg_dump.scheduler_thread import SchedulerThread
@@ -36,17 +36,17 @@ class PgDumpDaemon:
         core.recreate_gpg_public_key()
 
         self.upload_thread = None
-        if settings.PG_DUMP_UPLOAD_PROVIDER == "google":
+        if settings.PD_UPLOAD_PROVIDER == "google":
             required = {
-                "PG_DUMP_GPG_PUBLIC_KEY_BASE64": settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64,
-                "PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH": settings.PG_DUMP_GPG_PUBLIC_KEY_BASE64_PATH,
-                "PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME": settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_NAME,
-                "PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH": settings.PG_DUMP_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
-                "PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64": settings.PG_DUMP_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64,
+                "PD_GPG_PUBLIC_KEY_BASE64": settings.PD_GPG_PUBLIC_KEY_BASE64,
+                "PD_GPG_PUBLIC_KEY_BASE64_PATH": settings.PD_GPG_PUBLIC_KEY_BASE64_PATH,
+                "PD_UPLOAD_GOOGLE_BUCKET_NAME": settings.PD_UPLOAD_GOOGLE_BUCKET_NAME,
+                "PD_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH": settings.PD_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
+                "PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64": settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64,
             }
             if not all(required.values()):
                 log.error(
-                    "PG_DUMP_UPLOAD_PROVIDER defined but no environemnt variables %s",
+                    "PD_UPLOAD_PROVIDER defined but no environemnt variables %s",
                     [env for env in required if not required[env]],
                 )
                 exit(1)
@@ -59,7 +59,7 @@ class PgDumpDaemon:
         self.cleanup_thread = CleanupThread()
         self.scheduler_thread = SchedulerThread()
         self.pg_dump_threads: list[PgDumpThread] = []
-        for _ in range(settings.PG_DUMP_NUMBER_PG_DUMP_THREADS):
+        for _ in range(settings.PD_NUMBER_PD_THREADS):
             self.pg_dump_threads.append(PgDumpThread())
 
         signal.signal(signalnum=signal.SIGINT, handler=self.exit)
@@ -76,11 +76,11 @@ class PgDumpDaemon:
             self.upload_thread.start()
 
     def initialize_pg_dump_queue_from_picle(self):
-        if settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME.is_file():
-            with open(settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME, "rb") as file:
+        if settings.PD_PICKLE_PD_QUEUE_NAME.is_file():
+            with open(settings.PD_PICKLE_PD_QUEUE_NAME, "rb") as file:
                 queue_elements: list[PgDumpJob] = pickle.loads(file.read())
                 for item in queue_elements:
-                    core.PG_DUMP_QUEUE.put(item, block=False)
+                    core.PD_QUEUE.put(item, block=False)
                 log.info(
                     "initialize_pg_dump_queue_from_picle found %s elements in queue",
                     len(queue_elements),
@@ -114,8 +114,8 @@ class PgDumpDaemon:
             self.upload_thread.join()
         for thread in self.pg_dump_threads:
             thread.join()
-        with open(settings.PG_DUMP_PICKLE_PG_DUMP_QUEUE_NAME, "wb") as file:
-            pickle.dump(list(core.PG_DUMP_QUEUE.queue), file)
+        with open(settings.PD_PICKLE_PD_QUEUE_NAME, "wb") as file:
+            pickle.dump(list(core.PD_QUEUE.queue), file)
         log.info("exit saved pickled pg_dump_queue to file")
         log.info("exit PgDumpDaemon exits gracefully")
 

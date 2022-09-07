@@ -24,7 +24,7 @@ class PgDumpThread(Thread):
         log.info("PgDumpThread start")
         while self.running():
             try:
-                job = core.PG_DUMP_QUEUE.get(block=False)
+                job = core.PD_QUEUE.get(block=False)
             except queue.Empty:
                 time.sleep(1)
                 continue
@@ -34,10 +34,10 @@ class PgDumpThread(Thread):
                 continue
             else:
                 try:
-                    core.PG_DUMP_QUEUE.put(job, block=False)
+                    core.PD_QUEUE.put(job, block=False)
                 except queue.Full:
                     log.warning(
-                        "PgDumpThread cannot add job back to PG_DUMP_QUEUE, already full, skipping"
+                        "PgDumpThread cannot add job back to PD_QUEUE, already full, skipping"
                     )
         log.info("PgDumpThread has stopped")
 
