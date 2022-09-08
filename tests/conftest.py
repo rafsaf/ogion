@@ -18,11 +18,11 @@ POSTGRES_DATABASES_PORTS = {
 def config_setup(request, tmpdir):
 
     settings.PD_DATABASE_PORT = POSTGRES_DATABASES_PORTS[request.param]
-    settings.PD_BACKUP_FOLDER_PATH = pathlib.Path(f"{tmpdir}/backup")
+    settings.BACKUP_FOLDER_PATH = pathlib.Path(f"{tmpdir}/backup")
     settings.PD_LOG_FOLDER_PATH = pathlib.Path(f"{tmpdir}/log")
-    settings.PD_PGPASS_FILE_PATH = pathlib.Path(f"{tmpdir}/pgpass")
+    settings.PGPASS_FILE_PATH = pathlib.Path(f"{tmpdir}/pgpass")
     settings.PD_PICKLE_PD_QUEUE_NAME = pathlib.Path(f"{tmpdir}/queue")
 
-    os.environ["PGPASSFILE"] = str(settings.PD_PGPASS_FILE_PATH)
-    os.makedirs(settings.PD_BACKUP_FOLDER_PATH, exist_ok=True)
+    os.environ["PGPASSFILE"] = str(settings.PGPASS_FILE_PATH)
+    os.makedirs(settings.BACKUP_FOLDER_PATH, exist_ok=True)
     os.makedirs(settings.PD_LOG_FOLDER_PATH, exist_ok=True)

@@ -49,16 +49,15 @@ https://hub.docker.com/repository/docker/rafsaf/pg_dump
 
 **PD_COOLING_PERIOD_RETRIES** - Max number of retries for single scheduled backup, defaults to `5`
 
-**PD_BACKUP_FOLDER_PATH** - Path to backup folder where pg_dump subprocesses output folders are stored, by default in docker image it is `/var/lib/pg_dump/data/backup`
+**BACKUP_FOLDER_PATH** - Path to backup folder where pg_dump subprocesses output folders are stored, by default in docker image it is `/var/lib/pg_dump/data/backup`
 
 **PD_LOG_FOLDER_PATH** - Path to folder with logs, by default in docker image it is `/var/log/pg_dump/`
 
-**PD_PGPASS_FILE_PATH** - Path to pgpass file, by default in docker image it is `/var/lib/pg_dump/.pgpass`
+**PGPASS_FILE_PATH** - Path to pgpass file, by default in docker image it is `/var/lib/pg_dump/.pgpass`
 
 **PD_PICKLE_PD_QUEUE_NAME** - Path to pickled queue, background queue is dumped on app exit, to avoid data losses, by default in docker image it is `/var/lib/pg_dump/data/PD_QUEUE.pickle`
 
 **PD_LOG_LEVEL** - Log level (DEBUG, INFO, WARNING, ERROR), by default in docker image it is `INFO`
-
 
 `gpg --generate-key`
 `gpg --armor --export rafsaf | base64 -w 0 > public.key`

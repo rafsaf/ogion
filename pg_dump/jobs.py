@@ -109,7 +109,7 @@ class PgDumpJob(BaseJob):
                 return
             with self._backups_number_lock:
                 backups = []
-                for folder in settings.PD_BACKUP_FOLDER_PATH.iterdir():
+                for folder in settings.BACKUP_FOLDER_PATH.iterdir():
                     backups.append(folder)
 
                 if len(backups) > settings.PD_MAX_NUMBER_BACKUPS_LOCAL:

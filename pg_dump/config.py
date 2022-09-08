@@ -1,39 +1,50 @@
 import logging.config
 import os
 from pathlib import Path
-from typing import Literal
+from typing import Literal, TypedDict
 
 from pydantic import BaseSettings
 
 BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 
 
-class Settings(BaseSettings):
-    PD_DATABASE_HOSTNAME: str = "localhost"
-    PD_DATABASE_USER: str = "postgres"
-    PD_DATABASE_PASSWORD: str = "postgres"
-    PD_DATABASE_PORT: str = "5432"
-    PD_DATABASE_DB: str = "postgres"
+class Database(TypedDict):
+    host: str
+    user: str
+    password: str
+    port: str | int
+    db: str
+    cron_rule: str
 
-    PD_BACKUP_POLICY_CRON_EXPRESSION: str = "0 5 * * *"
+
+class Settings(BaseSettings):
+    PD_DATABASES: list[Database] = [
+        {
+            "host": "localhost",
+            "user": "postgres",
+            "password": "postgres",
+            "port": 5432,
+            "db": "postgres",
+            "cron_rule": "0 5 * * *",
+        }
+    ]
     PD_GPG_PUBLIC_KEY_BASE64: str = ""
+    PD_UPLOAD_PROVIDER: Literal["google"] = "google"
     PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64: str = ""
     PD_UPLOAD_GOOGLE_BUCKET_NAME = ""
     PD_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH = ""
-    PD_UPLOAD_PROVIDER: Literal["", "google"] = ""
-    PD_NUMBER_PD_THREADS: int = 1
+
+    # Advanced settings
+    PD_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     PD_POSTGRES_TIMEOUT_AFTER_SECS: int = 60 * 60
     PD_COOLING_PERIOD_SECS: int = 60 * 5
     PD_COOLING_PERIOD_RETRIES: int = 2
-    PD_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "DEBUG"
-    PD_MAX_NUMBER_BACKUPS_LOCAL = 7
-
+    PD_NUMBER_PD_THREADS: int = 2
     PD_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data/backup"
     PD_LOG_FOLDER_PATH: Path = BASE_DIR / "logs"
     PD_PGPASS_FILE_PATH: Path = BASE_DIR / ".pgpass"
-    PD_GPG_PUBLIC_KEY_BASE64_PATH: Path = BASE_DIR / "gpg_public.key.pub"
-    PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64_PATH: Path = BASE_DIR / "google_auth.json"
-    PD_PICKLE_PD_QUEUE_NAME: Path = BASE_DIR / "data/pg_queue.pickle"
+    PD_GPG_PUBLIC_KEY_PATH: Path = BASE_DIR / "gpg_public.key.pub"
+    PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
 
     PRIV_PD_GPG_PUBLIC_KEY_RECIPIENT: str = ""
     PRIV_PD_DB_VERSION: str = ""
@@ -45,12 +56,16 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+
+settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_PATH.touch(mode=0o640, exist_ok=True)
+settings.PD_GPG_PUBLIC_KEY_PATH.touch(mode=0o640, exist_ok=True)
+settings.PD_PGPASS_FILE_PATH.touch(mode=0o640, exist_ok=True)
+settings.PD_BACKUP_FOLDER_PATH.mkdir(mode=0o640, parents=True, exist_ok=True)
+settings.PD_LOG_FOLDER_PATH.mkdir(mode=0o644, parents=True, exist_ok=True)
 os.environ["PGPASSFILE"] = str(settings.PD_PGPASS_FILE_PATH)
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(
-    settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64_PATH
+    settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_PATH
 )
-os.makedirs(settings.PD_BACKUP_FOLDER_PATH, exist_ok=True)
-os.makedirs(settings.PD_LOG_FOLDER_PATH, exist_ok=True)
 
 
 LOGGING = {

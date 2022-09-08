@@ -76,12 +76,12 @@ def _get_human_folder_size_msg(folder_path: pathlib.Path):
 
 
 def backup_folder_path(foldername: str):
-    return (settings.PD_BACKUP_FOLDER_PATH / foldername).absolute()
+    return (settings.BACKUP_FOLDER_PATH / foldername).absolute()
 
 
 def recreate_pgpass_file():
     log.info("recreate_pgpass_file removing old pgpass file")
-    settings.PD_PGPASS_FILE_PATH.unlink(missing_ok=True)
+    settings.PGPASS_FILE_PATH.unlink(missing_ok=True)
 
     log.info("recreate_pgpass_file start creating pgpass file")
     text = settings.PD_DATABASE_HOSTNAME
@@ -91,10 +91,10 @@ def recreate_pgpass_file():
     text += f":{settings.PD_DATABASE_PASSWORD}"
 
     log.info("recreate_pgpass_file perform chmod 600 on pgpass file")
-    settings.PD_PGPASS_FILE_PATH.touch(0o600)
+    settings.PGPASS_FILE_PATH.touch(0o600)
 
     log.info("recreate_pgpass_file saving pgpass file")
-    with open(settings.PD_PGPASS_FILE_PATH, "w") as file:
+    with open(settings.PGPASS_FILE_PATH, "w") as file:
         file.write(text)
 
 
@@ -182,17 +182,17 @@ def recreate_gpg_public_key():
             "recreate_gpg_public_key set correct PD_GPG_PUBLIC_KEY_BASE64, exiting"
         )
         exit(1)
-    with open(settings.PD_GPG_PUBLIC_KEY_BASE64_PATH, "w") as gpg_pub_file:
+    with open(settings.GPG_PUBLIC_KEY_BASE64_PATH, "w") as gpg_pub_file:
         gpg_pub_file.write(gpg_pub_cert)
     log.debug(
         "recreate_gpg_public_key saved gpg public key to %s:\n%s",
-        settings.PD_GPG_PUBLIC_KEY_BASE64_PATH,
+        settings.GPG_PUBLIC_KEY_BASE64_PATH,
         gpg_pub_cert,
     )
     log.info("recreate_gpg_public_key start gpg key import")
     try:
         run_subprocess(
-            f"gpg --import {settings.PD_GPG_PUBLIC_KEY_BASE64_PATH}",
+            f"gpg --import {settings.GPG_PUBLIC_KEY_BASE64_PATH}",
         )
     except CoreSubprocessError as err:
         log.error(
@@ -230,9 +230,7 @@ def setup_google_auth_account():
             "setup_google_auth_account set correct PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64, exiting"
         )
         exit(1)
-    with open(
-        settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64_PATH, "w"
-    ) as google_auth_file:
+    with open(settings.UPLOAD_GOOGLE_SERVICE_ACCOUNT_PATH, "w") as google_auth_file:
         google_auth_file.write(google_auth_service)
     log.info("setup_google_auth_account successfully finished")
 
