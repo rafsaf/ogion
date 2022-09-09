@@ -2,15 +2,17 @@ import logging
 import pathlib
 import secrets
 import shutil
-import threading
 import time
 from datetime import datetime, timedelta
-from typing import Callable
+from queue import Queue
+from typing import TYPE_CHECKING, Callable
 
-from google.cloud import storage
+from google.cloud import storage  # type: ignore
 
-from pg_dump import core
 from pg_dump.config import settings
+
+if TYPE_CHECKING:
+    from pg_dump import core
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +36,7 @@ class BaseJob:
             self.created_at,
         )
 
-    def action(self):
+    def action(self) -> None:
         raise NotImplementedError()
 
     def run_numbers_left(self):
@@ -80,42 +82,38 @@ class PgDumpJob(BaseJob):
     __NAME__ = "PgDumpJob"
     __MAX_RUN__ = settings.PD_COOLING_PERIOD_RETRIES + 1
     __COOLING_SECS__ = settings.PD_COOLING_PERIOD_SECS
-    _backups_number_lock = threading.Lock()
+
+    def __init__(self, pg_dump_database: "core.PgDumpDatabase") -> None:
+        super().__init__()
+        self.pg_dump_database = pg_dump_database
 
     def action(self):
-        foldername = core.get_new_backup_foldername()
-        log.info("%s start action processing foldername: %s", self.__NAME__, foldername)
-        path = core.backup_folder_path(foldername)
+        log.info("%s start action", self.__NAME__)
+        out_folder = self.pg_dump_database.get_new_backup_full_path()
         try:
-            out_folder = core.run_pg_dump(foldername)
-            if path.exists() and not path.stat().st_size:
-                log.error("%s error: backup folder empty", self.__NAME__)
-                raise core.CoreSubprocessError()
-        except core.CoreSubprocessError as err:
-            log.error(
-                "%s error performing pg_dump: %s", self.__NAME__, err, exc_info=True
-            )
-            if path.exists():
-                shutil.rmtree(path)
+
+            self.pg_dump_database.run_pg_dump(out=out_folder)
+            if out_folder.exists() and not out_folder.stat().st_size:
                 log.error(
-                    "%s removed empty backup folder: %s",
+                    "%s error: backup folder empty: %s", self.__NAME__, out_folder
+                )
+                raise ValueError()
+        except Exception as err:
+            log.error(
+                "%s error performing pg_dump file %s: %s",
+                self.__NAME__,
+                out_folder,
+                err,
+                exc_info=True,
+            )
+            if out_folder.exists():
+                shutil.rmtree(out_folder)
+                log.error(
+                    "%s removed empty or not valid backup folder: %s",
                     self.__NAME__,
-                    foldername,
+                    out_folder,
                 )
             raise JobCoolingError()
-        else:
-            if settings.PD_UPLOAD_PROVIDER:
-                core.gpg_encrypt_folder_for_upload_and_delete_it(out_folder)
-                return
-            with self._backups_number_lock:
-                backups = []
-                for folder in settings.BACKUP_FOLDER_PATH.iterdir():
-                    backups.append(folder)
-
-                if len(backups) > settings.PD_MAX_NUMBER_BACKUPS_LOCAL:
-                    backups.sort(key=lambda path: path.name, reverse=True)
-                    for to_delete in backups[settings.PD_MAX_NUMBER_BACKUPS_LOCAL :]:
-                        core.CLEANUP_QUEUE.put(DeleteFolderJob(foldername=to_delete))
 
 
 class DeleteFolderJob(BaseJob):
@@ -156,52 +154,68 @@ class UploaderJob(BaseJob):
     __MAX_RUN__ = 3
     __COOLING_SECS__ = 120
 
-    def __init__(self, foldername: pathlib.Path) -> None:
+    def __init__(self, foldername: pathlib.Path, cleanup_queue: Queue) -> None:
         super().__init__()
         self.foldername = foldername
+        self.cleanup_queue = cleanup_queue
 
     def action(self):
         if settings.PD_UPLOAD_PROVIDER == "google":
-            base_dest = "{}/{}".format(
+            base_dest = "{}/{}/{}".format(
                 settings.PD_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
+                self.foldername.parent.name,
                 self.foldername.name,
             )
-            try:
-                storage_client = storage.Client()
-                bucket = storage_client.bucket(settings.PD_UPLOAD_GOOGLE_BUCKET_NAME)
-                for file in self.foldername.iterdir():
-                    dest = f"{base_dest}/{file.name}"
-                    log.info(dest)
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(settings.PD_UPLOAD_GOOGLE_BUCKET_NAME)
+            for file in self.foldername.iterdir():
+                dest = f"{base_dest}/{file.name}"
+                log.debug("%s Start uploading %s to %s", self.__NAME__, file, dest)
+                try:
                     blob = bucket.blob(dest)
-                    blob.upload_from_filename(str(file.absolute()))
-                    log.info("Uploaded %s to %s", file, dest)
-            except Exception as err:
-                log.error("Error during google bucket update: %s", err, exc_info=True)
-                raise JobCoolingError()
+                    blob.upload_from_filename(file)
+                    log.debug("%s Uploaded %s to %s", self.__NAME__, file, dest)
+                except Exception as err:
+                    log.error(
+                        "%s Error during google bucket uploading %s to %s: %s",
+                        self.__NAME__,
+                        file,
+                        dest,
+                        err,
+                        exc_info=True,
+                    )
+                    raise JobCoolingError()
+        self.cleanup_queue.put(DeleteFolderJob(foldername=self.foldername))
 
     @staticmethod
-    def test_upload():
+    def test_gcs_upload():
         if settings.PD_UPLOAD_PROVIDER == "google":
             test_filename = f"test_gcp_pg_dump_{secrets.token_urlsafe(4)}"
             test_file = pathlib.Path(f"/tmp/{test_filename}").absolute()
             test_file.touch(exist_ok=True)
-            log.info("Test GCP upload created file %s", test_file)
+
             dest = "{}/{}".format(
                 settings.PD_UPLOAD_GOOGLE_BUCKET_DESTINATION_PATH,
                 test_filename,
             )
+            log.info("test_gcs_upload upload dummy file to bucket at %s", dest)
             try:
                 storage_client = storage.Client()
                 bucket = storage_client.bucket(settings.PD_UPLOAD_GOOGLE_BUCKET_NAME)
                 blob = bucket.blob(dest)
                 blob.upload_from_filename(str(test_file))
-                log.info("Test GCP file uploaded %s to %s", test_file, dest)
                 blob.delete()
                 test_file.unlink()
-                log.info("Test GCP file deleted %s", dest)
+                log.info(
+                    "test_gcs_upload test GCS file deleted from bucket at %s", dest
+                )
             except Exception as err:
-                log.error("Error during google bucket upload: %s", err, exc_info=True)
                 log.error(
-                    "Test upload failed. Check your bucket env variables and permissions"
+                    "test_gcs_upload error during google bucket upload: %s",
+                    err,
+                    exc_info=True,
+                )
+                log.error(
+                    "test_gcs_upload test upload failed. Check your bucket env variables and permissions"
                 )
                 exit(1)

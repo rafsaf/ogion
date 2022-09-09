@@ -33,12 +33,8 @@ class PgDumpThread(Thread):
             if success or not job.run_numbers_left():
                 continue
             else:
-                try:
-                    core.PD_QUEUE.put(job, block=False)
-                except queue.Full:
-                    log.warning(
-                        "PgDumpThread cannot add job back to PD_QUEUE, already full, skipping"
-                    )
+                core.PD_QUEUE.put(job)
+
         log.info("PgDumpThread has stopped")
 
     def stop(self):
