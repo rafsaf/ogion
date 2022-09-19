@@ -12,7 +12,7 @@ python = "^3.10"
 google-cloud-storage = "^2.5.0"
 
 [tool.poetry.dev-dependencies]
-autoflake = "^1.5"
+autoflake = "^1.6"
 black = "^22.6.0"
 coverage = {extras = ["toml"], version = "^6.4.1"}
 flake8 = "^5.0.4"
