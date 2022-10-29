@@ -1,10 +1,7 @@
-import base64
-import binascii
 import logging
 import multiprocessing
 import os
 import pathlib
-import queue
 import re
 import secrets
 import subprocess
@@ -12,14 +9,10 @@ from datetime import datetime
 
 import croniter
 
-from pg_dump.config import Database, settings
-from pg_dump.jobs import DeleteFolderJob, PgDumpJob, UploaderJob
+from pg_dump import config
 
 log = logging.getLogger(__name__)
 
-PD_QUEUE: queue.Queue["PgDumpJob"] = queue.Queue()
-UPLOADER_QUEUE: queue.Queue["UploaderJob"] = queue.Queue()
-CLEANUP_QUEUE: queue.Queue["DeleteFolderJob"] = queue.Queue()
 
 _MB_TO_BYTES = 1048576
 _GB_TO_BYTES = 1073741824
@@ -62,7 +55,7 @@ def run_subprocess(shell_args: str) -> str:
         shell=True,
     )
     log.debug("run_subprocess running: '%s'", shell_args)
-    output, err = p.communicate(timeout=settings.PD_POSTGRES_TIMEOUT_AFTER_SECS)
+    output, err = p.communicate(timeout=config.SUBPROCESS_TIMEOUT_SECS)
 
     if p.returncode != 0:
         log.error("run_subprocess failed with status %s", p.returncode)
@@ -81,7 +74,7 @@ def run_subprocess(shell_args: str) -> str:
 
 
 class PgDumpDatabase:
-    def __init__(self, pg_dump: "PgDump", database: Database) -> None:
+    def __init__(self, pg_dump: "PgDump", database) -> None:
         self.pg_dump = pg_dump
         self.db = database
         self.database_version: str = self.init_postgres_connection()
@@ -132,7 +125,7 @@ class PgDumpDatabase:
 
     def init_backup_folder(self):
         log.debug("init_backup_folder start %s", self.db)
-        backup_folder_path = settings.PD_BACKUP_FOLDER_PATH / self.db.friendly_name
+        backup_folder_path = config.BACKUP_FOLDER_PATH / self.db.friendly_name
         log.debug(
             "init_backup_folder creating folder backup_folder_path %s",
             backup_folder_path,
@@ -187,11 +180,6 @@ class PgDumpDatabase:
             "run_pg_dump start encryption of folder: %s",
             out,
         )
-        run_subprocess(
-            "gpg --encrypt-files --trust-model always "
-            f"-r {self.pg_dump.gpg_recipient} "
-            f"{out / '*'}",
-        )
         gpg_out = pathlib.Path(f"{out}.gpg")
         gpg_out.mkdir(mode=0o740, parents=True, exist_ok=True)
         run_subprocess(f"mv {out / '*.gpg'} {gpg_out}")
@@ -200,113 +188,139 @@ class PgDumpDatabase:
             gpg_out,
             _get_human_folder_size_msg(gpg_out),
         )
-        CLEANUP_QUEUE.put(DeleteFolderJob(foldername=out))
-        UPLOADER_QUEUE.put(UploaderJob(foldername=gpg_out, cleanup_queue=CLEANUP_QUEUE))
 
 
 class PgDump:
     def __init__(self) -> None:
-        self.gpg_recipient = self.init_gpg_public_key()
         self.init_pgpass_file()
-        self.init_google_auth_account()
 
         self.pg_dump_databases: list[PgDumpDatabase] = []
-        for database in settings.PD_DATABASES:
-            self.pg_dump_databases.append(
-                PgDumpDatabase(
-                    pg_dump=self,
-                    database=database,
-                )
-            )
-
-        UploaderJob.test_gcs_upload()
 
     def init_pgpass_file(self):
         log.debug("init_pgpass_file start creating pgpass file")
-        pgpass_text = ""
-        for database in settings.PD_DATABASES:
-            pgpass_text += "{}:{}:{}:{}:{}\n".format(
-                database.host,
-                database.port,
-                database.user,
-                database.db,
-                database.password.get_secret_value(),
-            )
+        # for database in settings.PD_DATABASES:
+        #     pgpass_text += "{}:{}:{}:{}:{}\n".format(
+        #         database.host,
+        #         database.port,
+        #         database.user,
+        #         database.db,
+        #         database.password.get_secret_value(),
+        #     )
 
-        log.debug("init_pgpass_file saving pgpass file")
-        with open(settings.PD_PGPASS_FILE_PATH, "w") as file:
-            file.write(pgpass_text)
+        # log.debug("init_pgpass_file saving pgpass file")
+        # with open(settings.PD_PGPASS_FILE_PATH, "w") as file:
+        #     file.write(pgpass_text)
 
         log.debug("init_pgpass_file pgpass file saved")
 
-    def init_gpg_public_key(self):
-        log.debug("init_gpg_public_key starting")
-        if not settings.PD_GPG_PUBLIC_KEY_BASE64:
-            log.error("init_gpg_public_key no GPG public key provided, skipped")
-            exit(1)
-        try:
-            gpg_pub_cert = base64.standard_b64decode(
-                settings.PD_GPG_PUBLIC_KEY_BASE64
-            ).decode()
-        except (binascii.Error, UnicodeDecodeError) as err:
-            log.error("init_gpg_public_key base64 error: %s", err, exc_info=True)
-            log.error(
-                "init_gpg_public_key set correct PD_GPG_PUBLIC_KEY_BASE64, exiting"
-            )
-            exit(1)
-        with open(settings.PD_GPG_PUBLIC_KEY_PATH, "w") as gpg_pub_file:
-            gpg_pub_file.write(gpg_pub_cert)
-        log.debug(
-            "init_gpg_public_key saved gpg public key to %s:\n%s",
-            settings.PD_GPG_PUBLIC_KEY_PATH,
-            gpg_pub_cert,
-        )
-        log.debug("init_gpg_public_key start gpg key import")
-        try:
-            run_subprocess(
-                f"gpg --import {settings.PD_GPG_PUBLIC_KEY_PATH}",
-            )
-        except CoreSubprocessError as err:
-            log.error(
-                "init_gpg_public_key invalid gpg key error: %s", err, exc_info=True
-            )
-            log.error(
-                "init_gpg_public_key set correct PD_GPG_PUBLIC_KEY_BASE64, exiting"
-            )
-            exit(1)
 
-        log.debug("init_gpg_public_key start gpg list keys")
-        result = run_subprocess(
-            "gpg --list-keys",
-        )
-        log.debug("init_gpg_public_key gpg list keys result: %s", result)
+# def encode(signer, payload, header=None, key_id=None):
+#     """Make a signed JWT.
 
-        gpg_recipient = result.split("\n")[3].strip()
-        log.debug(
-            "init_gpg_public_key found gpg public key recipient %s",
-            gpg_recipient,
-        )
-        log.debug("recreate_gpg_public_key successfully finished")
-        return gpg_recipient
+#     Args:
+#         signer (google.auth.crypt.Signer): The signer used to sign the JWT.
+#         payload (Mapping[str, str]): The JWT payload.
+#         header (Mapping[str, str]): Additional JWT header payload.
+#         key_id (str): The key id to add to the JWT header. If the
+#             signer has a key id it will be used as the default. If this is
+#             specified it will override the signer's key id.
 
-    def init_google_auth_account(self):
-        log.debug("init_google_auth_account starting")
-        try:
-            google_auth_service = base64.standard_b64decode(
-                settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64
-            ).decode()
-        except (binascii.Error, UnicodeDecodeError) as err:
-            log.error("init_google_auth_account base64 error: %s", err, exc_info=True)
-            log.error(
-                "init_google_auth_account set correct PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_BASE64, exiting"
-            )
-            exit(1)
-        log.debug(
-            "init_google_auth_account saving google_auth_service to %s",
-            settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_PATH,
-        )
-        with open(
-            settings.PD_UPLOAD_GOOGLE_SERVICE_ACCOUNT_PATH, "w"
-        ) as google_auth_file:
-            google_auth_file.write(google_auth_service)
-        log.debug("init_google_auth_account successfully finished")
+#     Returns:
+#         bytes: The encoded JWT.
+#     """
+#     if header is None:
+#         header = {}
+
+#     if key_id is None:
+#         key_id = signer.key_id
+
+#     header.update({"typ": "JWT"})
+
+#     if "alg" not in header:
+#         if es256 is not None and isinstance(signer, es256.ES256Signer):
+#             header.update({"alg": "ES256"})
+#         else:
+#             header.update({"alg": "RS256"})
+
+#     if key_id is not None:
+#         header["kid"] = key_id
+
+#     segments = [
+#         _helpers.unpadded_urlsafe_b64encode(json.dumps(header).encode("utf-8")),
+#         _helpers.unpadded_urlsafe_b64encode(json.dumps(payload).encode("utf-8")),
+#     ]
+
+#     signing_input = b".".join(segments)
+#     signature = signer.sign(signing_input)
+#     segments.append(_helpers.unpadded_urlsafe_b64encode(signature))
+
+#     return b".".join(segments)
+
+
+# import cryptography.exceptions
+# from cryptography.hazmat import backends
+# from cryptography.hazmat.primitives import hashes
+# from cryptography.hazmat.primitives import serialization
+# from cryptography.hazmat.primitives.asymmetric import padding
+
+
+# def from_string(cls, key, key_id=None):
+
+#     # return cls.from_string(
+#     #     info[_JSON_FILE_PRIVATE_KEY], info.get(_JSON_FILE_PRIVATE_KEY_ID)
+#     # )
+#     """Construct a RSASigner from a private key in PEM format.
+
+#     Args:
+#         key (Union[bytes, str]): Private key in PEM format.
+#         key_id (str): An optional key id used to identify the private key.
+
+#     Returns:
+#         google.auth.crypt._cryptography_rsa.RSASigner: The
+#         constructed signer.
+
+#     Raises:
+#         ValueError: If ``key`` is not ``bytes`` or ``str`` (unicode).
+#         UnicodeDecodeError: If ``key`` is ``bytes`` but cannot be decoded
+#             into a UTF-8 ``str``.
+#         ValueError: If ``cryptography`` "Could not deserialize key data."
+#     """
+#     key = _helpers.to_bytes(key)
+#     private_key = serialization.load_pem_private_key(
+#         key, password=None, backend=_BACKEND
+#     )
+#     return cls(private_key, key_id=key_id)
+
+
+# def _make_authorization_grant_assertion(self):
+#     """Create the OAuth 2.0 assertion.
+
+#     This assertion is used during the OAuth 2.0 grant to acquire an
+#     access token.
+
+#     Returns:
+#         bytes: The authorization grant assertion.
+#     """
+#     now = _helpers.utcnow()
+#     lifetime = datetime.timedelta(seconds=_DEFAULT_TOKEN_LIFETIME_SECS)
+#     expiry = now + lifetime
+
+#     payload = {
+#         "iat": _helpers.datetime_to_secs(now),
+#         "exp": _helpers.datetime_to_secs(expiry),
+#         # The issuer must be the service account email.
+#         "iss": self._service_account_email,
+#         # The audience must be the auth token endpoint's URI
+#         "aud": _GOOGLE_OAUTH2_TOKEN_ENDPOINT,
+#         "scope": _helpers.scopes_to_string(self._scopes or ()),
+#     }
+
+#     payload.update(self._additional_claims)
+
+#     # The subject can be a user email for domain-wide delegation.
+#     if self._subject:
+#         payload.setdefault("sub", self._subject)
+
+#     token = jwt.encode(self._signer, payload)
+
+#     return token

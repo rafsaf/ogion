@@ -3,9 +3,10 @@ import pathlib
 import secrets
 import shutil
 import time
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from queue import Queue
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from google.cloud import storage  # type: ignore
 
