@@ -23,7 +23,6 @@ SUBPROCESS_TIMEOUT_SECS: int = int(
 BACKUP_COOLING_SECS: int = int(os.environ.get("PD_BACKUP_COOLING_SECS", 60))
 BACKUP_COOLING_RETRIES: int = int(os.environ.get("PD_BACKUP_COOLING_RETRIES", 1))
 BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
-LOG_FOLDER_PATH: Path = BASE_DIR / "logs"
 PGPASS_FILE_PATH: Path = BASE_DIR / ".pgpass"
 GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
 
@@ -31,7 +30,6 @@ GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
 GOOGLE_SERVICE_ACCOUNT_PATH.touch(mode=0o700, exist_ok=True)
 PGPASS_FILE_PATH.touch(mode=0o700, exist_ok=True)
 BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
-LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 os.environ["PGPASSFILE"] = str(PGPASS_FILE_PATH)
 
 
@@ -50,35 +48,11 @@ LOGGING = {
             "formatter": "verbose",
             "level": "DEBUG",
         },
-        "error": {
-            "class": "logging.FileHandler",
-            "filename": LOG_FOLDER_PATH / "pg_dump_error.log",
-            "formatter": "verbose",
-            "level": "ERROR",
-        },
-        "warning": {
-            "class": "logging.FileHandler",
-            "filename": LOG_FOLDER_PATH / "pg_dump_warning.log",
-            "formatter": "verbose",
-            "level": "WARNING",
-        },
-        "info": {
-            "class": "logging.FileHandler",
-            "filename": LOG_FOLDER_PATH / "pg_dump_info.log",
-            "formatter": "verbose",
-            "level": "INFO",
-        },
-        "debug": {
-            "class": "logging.FileHandler",
-            "filename": LOG_FOLDER_PATH / "pg_dump_debug.log",
-            "formatter": "verbose",
-            "level": "DEBUG",
-        },
     },
     "loggers": {
         "": {
             "level": LOG_LEVEL,
-            "handlers": ["debug", "info", "warning", "error", "stream"],
+            "handlers": ["stream"],
             "propagate": False,
         },
     },
