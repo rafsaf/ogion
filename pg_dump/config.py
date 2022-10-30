@@ -6,13 +6,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 FRIENDLY_NAME_REGEX = re.compile(r"^[\w\.-]{1,}$")
 
-POSTGRES_NAME = os.environ.get("PD_POSTGRES_NAME", "postgres")
+POSTGRES_USER = os.environ.get("PD_POSTGRES_USER", "postgres")
 POSTGRES_HOST = os.environ.get("PD_POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.environ.get("PD_POSTGRES_PORT", "5432")
 POSTGRES_DB = os.environ.get("PD_POSTGRES_DB", "postgres")
 POSTGRES_PASSWORD = os.environ.get("PD_POSTGRES_PASSWORD", "postgres")
 
-CRON_RULE = os.environ.get("PD_CRON_RULE")
+CRON_RULE = os.environ.get("PD_CRON_RULE", "0 5 * * *")
 
 LOG_LEVEL = os.environ.get("PD_LOG_LEVEL", "INFO")
 assert LOG_LEVEL in ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -22,6 +22,7 @@ SUBPROCESS_TIMEOUT_SECS: int = int(
 )
 BACKUP_COOLING_SECS: int = int(os.environ.get("PD_BACKUP_COOLING_SECS", 60))
 BACKUP_COOLING_RETRIES: int = int(os.environ.get("PD_BACKUP_COOLING_RETRIES", 1))
+BACKUP_MAX_NUMBER: int = int(os.environ.get("PD_BACKUP_NUMBER", 5))
 BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
 PGPASS_FILE_PATH: Path = BASE_DIR / ".pgpass"
 GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
