@@ -1,1 +1,1 @@
-from .local import Local  # noqa
+from .local import LocalFiles  # noqa

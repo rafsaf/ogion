@@ -7,7 +7,7 @@ from pg_dump.providers import common
 log = logging.getLogger(__name__)
 
 
-class Local(common.Provider):
+class LocalFiles(common.Provider):
     """Represent local folder `data` for storing backups.
 
     If docker volume/persistant volume is lost, so are backups.

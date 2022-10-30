@@ -6,7 +6,7 @@ from datetime import datetime
 import croniter
 
 from pg_dump import config, core
-from pg_dump.providers import Local
+from pg_dump.providers import LocalFiles
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def quit(sig, frame):
 def main():
     core.init_pgpass_file()
     db_version = core.postgres_connection()
-    provider = Local()
+    provider = LocalFiles()
     sleep_till_next_backup()
 
     while not exit_event.is_set():
