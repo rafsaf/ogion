@@ -1,4 +1,4 @@
-FROM python:3.10-slim-buster
+FROM python:3.11.0-slim-buster
 
 ENV PD_SERVICE_NAME="pg_dump"
 ENV PD_FOLDER_PATH="/var/lib/pg_dump"
