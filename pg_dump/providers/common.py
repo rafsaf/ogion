@@ -4,12 +4,12 @@ from abc import ABC, abstractmethod
 class Provider(ABC):
     NAME = "provider"
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def post_save(backup_file: str):
         return
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def clean():
         return

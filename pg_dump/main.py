@@ -20,6 +20,7 @@ def sleep_till_next_backup():
     )
     next_backup: datetime = cron.get_next(ret_type=datetime)
     wait_time = next_backup - now
+    log.info("Next backup at: %s", next_backup)
     exit_event.wait(wait_time.seconds + 1)
 
 

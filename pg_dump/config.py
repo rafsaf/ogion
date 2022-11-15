@@ -1,10 +1,8 @@
 import logging.config
 import os
-import re
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
-FRIENDLY_NAME_REGEX = re.compile(r"^[\w\.-]{1,}$")
 
 POSTGRES_USER = os.environ.get("PD_POSTGRES_USER", "postgres")
 POSTGRES_HOST = os.environ.get("PD_POSTGRES_HOST", "localhost")
