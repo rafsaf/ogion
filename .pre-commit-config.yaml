@@ -52,11 +52,13 @@ repos:
     rev: "1.2.2"
     hooks:
       - id: poetry-export
+        args: ["-o", "requirements.txt", "--without-hashes"]
+      - id: poetry-export
         args:
           [
-            "-f",
-            "requirements.txt",
+            "--with",
+            "tests",
             "-o",
-            "requirements.txt",
+            "requirements-tests.txt",
             "--without-hashes",
           ]
