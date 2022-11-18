@@ -37,8 +37,8 @@ def main():
 
     while not exit_event.is_set():
         backup = core.run_pg_dump(db_version=db_version)
-        provider.post_save(backup_file=backup)
-        provider.clean()
+        success = provider.post_save(backup_file=backup)
+        provider.clean(success)
         sleep_till_next_backup()
     log.info("Gracefully exited")
 

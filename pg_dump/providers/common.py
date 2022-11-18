@@ -6,10 +6,10 @@ class Provider(ABC):
 
     @staticmethod
     @abstractmethod
-    def post_save(backup_file: str):
+    def post_save(backup_file: str) -> bool:
         return
 
     @staticmethod
     @abstractmethod
-    def clean():
+    def clean(success: bool) -> None:
         return

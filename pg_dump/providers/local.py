@@ -15,10 +15,10 @@ class LocalFiles(common.Provider):
 
     @staticmethod
     def post_save(backup_file: str):
-        pass
+        return True
 
     @staticmethod
-    def clean():
+    def clean(success: bool):
         files: list[str] = []
         for backup_path in config.BACKUP_FOLDER_PATH.iterdir():
             files.append(str(backup_path.absolute()))
