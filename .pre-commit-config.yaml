@@ -55,4 +55,4 @@ repos:
         args: ["-o", "requirements.txt", "--without-hashes"]
       - id: poetry-export
         args:
-          ["--with", "dev", "-o", "requirements-tests.txt", "--without-hashes"]
+          ["--with", "dev", "-o", "requirements-dev.txt", "--without-hashes"]

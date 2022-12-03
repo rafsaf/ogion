@@ -23,8 +23,8 @@ COPY pg_dump .
 CMD ["python", "-m", "pg_dump.main"] 
 
 FROM base AS tests
-COPY requirements-tests.txt .
-RUN pip install -r requirements-tests.txt
+COPY requirements-dev.txt .
+RUN pip install -r requirements-dev.txt
 COPY pyproject.toml .
 COPY tests .
 COPY pg_dump .
