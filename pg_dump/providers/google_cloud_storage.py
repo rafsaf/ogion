@@ -11,8 +11,9 @@ log = logging.getLogger(__name__)
 class GoogleCloudStorage(common.Provider):
     """Represent GCS bucket for storing backups."""
 
-    @staticmethod
-    def post_save(backup_file: str):
+    NAME = "gcs"
+
+    def post_save(self, backup_file: str):
         backup_dest_in_bucket = "{}/{}".format(
             config.GOOGLE_BUCKET_UPLOAD_PATH,
             backup_file,
@@ -35,8 +36,7 @@ class GoogleCloudStorage(common.Provider):
             )
             return False
 
-    @staticmethod
-    def clean(success: bool):
+    def clean(self, success: bool):
         if success:
             for backup_path in config.BACKUP_FOLDER_PATH.iterdir():
                 backup_path.unlink()
