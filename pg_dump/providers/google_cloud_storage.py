@@ -30,7 +30,7 @@ class GoogleCloudStorage(common.Provider):
 
         backup_dest_in_bucket = "{}/{}".format(
             config.GOOGLE_BUCKET_UPLOAD_PATH,
-            zip_backup_file,
+            zip_backup_file.split("/")[-1],
         )
         storage_client = storage.Client()
         bucket = storage_client.bucket(config.GOOGLE_BUCKET_NAME)
@@ -62,3 +62,4 @@ class GoogleCloudStorage(common.Provider):
         if success:
             for backup_path in config.BACKUP_FOLDER_PATH.iterdir():
                 backup_path.unlink()
+                log.info("Removed %s", backup_path)

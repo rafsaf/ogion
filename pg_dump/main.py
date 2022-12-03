@@ -6,7 +6,7 @@ from datetime import datetime
 from croniter import croniter
 
 from pg_dump import config, core
-from pg_dump.providers import LocalFiles
+from pg_dump.providers import GoogleCloudStorage, LocalFiles
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)
@@ -31,12 +31,19 @@ def quit(sig, frame):
 
 def main():
     if not croniter.is_valid(config.CRON_RULE):
-        raise RuntimeError(f"Croniter: cron expression {config.CRON_RULE} is not valid")
+        raise RuntimeError(
+            f"Croniter: cron expression `{config.CRON_RULE}` is not valid"
+        )
     core.init_pgpass_file()
     db_version = core.postgres_connection()
-    provider = LocalFiles()
-    sleep_till_next_backup()
+    if config.BACKUP_PROVIDER == config.Provider.LOCAL_FILES:
+        provider = LocalFiles()
+    elif config.BACKUP_PROVIDER == config.Provider.GOOGLE_CLOUD_STORAGE:
+        provider = GoogleCloudStorage()
+    else:
+        raise RuntimeError(f"Unknown provider: `{config.BACKUP_PROVIDER}`")
 
+    sleep_till_next_backup()
     while not exit_event.is_set():
         backup = core.run_pg_dump(db_version=db_version)
         success = provider.safe_post_save(backup_file=backup)

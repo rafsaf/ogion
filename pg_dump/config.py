@@ -1,15 +1,22 @@
 import logging.config
 import os
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 
-class Provider(Enum):
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(BASE_DIR / ".env")
+except ImportError:
+    pass
+
+
+class Provider(StrEnum):
     LOCAL_FILES = "local"
     GOOGLE_CLOUD_STORAGE = "gcs"
 
-
-BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 
 POSTGRES_USER = os.environ.get("PD_POSTGRES_USER", "postgres")
 POSTGRES_HOST = os.environ.get("PD_POSTGRES_HOST", "localhost")
@@ -50,15 +57,15 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(GOOGLE_SERVICE_ACCOUNT_PATH)
 if BACKUP_PROVIDER == Provider.GOOGLE_CLOUD_STORAGE:
     if not ZIP_ARCHIVE_PASSWORD:
         raise RuntimeError(
-            f"For provider: {BACKUP_PROVIDER} you must use environment variable ZIP_ARCHIVE_PASSWORD"
+            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable ZIP_ARCHIVE_PASSWORD"
         )
     elif not GOOGLE_BUCKET_NAME:
         raise RuntimeError(
-            f"For provider: {BACKUP_PROVIDER} you must use environment variable GOOGLE_BUCKET_NAME"
+            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable GOOGLE_BUCKET_NAME"
         )
     elif not GOOGLE_SERVICE_ACCOUNT_BASE64:
         raise RuntimeError(
-            f"For provider: {BACKUP_PROVIDER} you must use environment variable GOOGLE_SERVICE_ACCOUNT_BASE64"
+            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable GOOGLE_SERVICE_ACCOUNT_BASE64"
         )
 
 LOGGING = {
