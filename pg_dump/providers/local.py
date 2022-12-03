@@ -13,7 +13,7 @@ class LocalFiles(common.Provider):
     If docker volume/persistant volume is lost, so are backups.
     """
 
-    NAME = "local"
+    NAME = config.Provider.LOCAL_FILES
 
     def post_save(self, backup_file: str):
         return True

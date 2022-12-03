@@ -45,6 +45,18 @@ def get_new_backup_path(db_version: str):
     return new_file
 
 
+def run_create_zip_archive(backup_file: str):
+    out_file = f"{backup_file}.zip"
+    shell_args = (
+        f"/opt/7zip/7zz a -p{config.ZIP_ARCHIVE_PASSWORD} -mx=5 "
+        f"{out_file} {backup_file}"
+    )
+    log.debug("run_create_zip_archive start in subprocess: %s", backup_file)
+    run_subprocess(shell_args)
+    log.debug("run_create_zip_archive finished, output: %s", out_file)
+    return out_file
+
+
 def run_pg_dump(db_version: str):
     out_file = get_new_backup_path(db_version)
 

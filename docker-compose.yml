@@ -1,6 +1,15 @@
 version: "3.4"
 
 services:
+  postgres_15:
+    restart: "unless-stopped"
+    image: postgres:15
+    volumes:
+      - pg_dump_dev_postgresql_15:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 10015:5432
   postgres_14:
     restart: "unless-stopped"
     image: postgres:14
@@ -52,9 +61,14 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    environment:
+      - PD_POSTGRES_HOST=postgres_15
+      - PD_POSTGRES_PORT=5432
     volumes:
       - pg_dump_dev_data:/var/lib/pg_dump/data/
+
 volumes:
+  pg_dump_dev_postgresql_15:
   pg_dump_dev_postgresql_14:
   pg_dump_dev_postgresql_13:
   pg_dump_dev_postgresql_12:
