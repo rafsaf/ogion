@@ -3,7 +3,7 @@ import signal
 import threading
 from datetime import datetime
 
-import croniter
+from croniter import croniter
 
 from pg_dump import config, core
 from pg_dump.providers import LocalFiles
@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 def sleep_till_next_backup():
     now = datetime.utcnow()
-    cron = croniter.croniter(
+    cron = croniter(
         config.CRON_RULE,
         start_time=now,
     )
@@ -30,6 +30,8 @@ def quit(sig, frame):
 
 
 def main():
+    if not croniter.is_valid(config.CRON_RULE):
+        raise RuntimeError(f"Croniter: cron expression {config.CRON_RULE} is not valid")
     core.init_pgpass_file()
     db_version = core.postgres_connection()
     provider = LocalFiles()
@@ -37,8 +39,8 @@ def main():
 
     while not exit_event.is_set():
         backup = core.run_pg_dump(db_version=db_version)
-        success = provider.post_save(backup_file=backup)
-        provider.clean(success)
+        success = provider.safe_post_save(backup_file=backup)
+        provider.safe_clean(success)
         sleep_till_next_backup()
     log.info("Gracefully exited")
 
