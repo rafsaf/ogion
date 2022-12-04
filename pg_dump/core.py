@@ -49,7 +49,7 @@ def get_new_backup_path(db_version: str):
 def run_create_zip_archive(backup_file: str):
     out_file = f"{backup_file}.zip"
     shell_args = (
-        f"/opt/7zip/7zz a -p{config.ZIP_ARCHIVE_PASSWORD} -mx=5 "
+        f"{config.ZIP_BIN_7ZZ_PATH} a -p{config.ZIP_ARCHIVE_PASSWORD} -mx=5 "
         f"{out_file} {backup_file}"
     )
     log.debug("run_create_zip_archive start in subprocess: %s", backup_file)

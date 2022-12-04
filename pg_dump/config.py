@@ -29,6 +29,7 @@ CRON_RULE = os.environ.get("PD_CRON_RULE", "0 5 * * *")
 LOG_LEVEL = os.environ.get("PD_LOG_LEVEL", "INFO")
 assert LOG_LEVEL in ["DEBUG", "INFO", "WARNING", "ERROR"]
 ZIP_ARCHIVE_PASSWORD = os.environ.get("PD_ZIP_ARCHIVE_PASSWORD", "")
+ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
 BACKUP_PROVIDER = os.environ.get("PD_BACKUP_PROVIDER", Provider.LOCAL_FILES)
 
 SUBPROCESS_TIMEOUT_SECS: int = int(
@@ -57,16 +58,20 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(GOOGLE_SERVICE_ACCOUNT_PATH)
 if BACKUP_PROVIDER == Provider.GOOGLE_CLOUD_STORAGE:
     if not ZIP_ARCHIVE_PASSWORD:
         raise RuntimeError(
-            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable ZIP_ARCHIVE_PASSWORD"
+            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `ZIP_ARCHIVE_PASSWORD`"
         )
     elif not GOOGLE_BUCKET_NAME:
         raise RuntimeError(
-            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable GOOGLE_BUCKET_NAME"
+            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `GOOGLE_BUCKET_NAME`"
         )
     elif not GOOGLE_SERVICE_ACCOUNT_BASE64:
         raise RuntimeError(
-            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable GOOGLE_SERVICE_ACCOUNT_BASE64"
+            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `GOOGLE_SERVICE_ACCOUNT_BASE64`"
         )
+if ZIP_ARCHIVE_PASSWORD and not ZIP_BIN_7ZZ_PATH.exists():
+    raise RuntimeError(
+        f"`{ZIP_ARCHIVE_PASSWORD}` is set but `{ZIP_BIN_7ZZ_PATH}` binary does not exists, did you forget to create it?"
+    )
 
 LOGGING = {
     "version": 1,

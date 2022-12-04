@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye AS base
+FROM python:3.11.0-slim-bullseye AS base
 ENV PYTHONUNBUFFERED=1
 ENV PD_SERVICE_NAME="pg_dump"
 ENV PD_FOLDER_PATH="/var/lib/pg_dump"
@@ -11,21 +11,25 @@ RUN python -m venv venv
 ENV PATH="$PD_FOLDER_PATH/venv/bin:$PATH"
 
 COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
-COPY scripts/install_pg_client_and_7zip.sh /install_pg_client_and_7zip.sh
-RUN /bin/bash /install_pg_client_and_7zip.sh && rm -f /install_pg_client_and_7zip.sh
+COPY scripts scripts
+COPY bin bin
+RUN /bin/bash scripts/install_pg_client_and_7zip.sh
+RUN rm -rf scripts bin/7zip
+RUN apt-get remove -y wget lsb-release gpg xz-utils && apt-get autoremove --purge -y        \
+    && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/*.list
 
 ENTRYPOINT ["/bin/bash", "/docker_entrypoint.sh"]
-
-FROM base AS build
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY pg_dump .
-CMD ["python", "-m", "pg_dump.main"] 
 
 FROM base AS tests
 COPY requirements-dev.txt .
 RUN pip install -r requirements-dev.txt
 COPY pyproject.toml .
-COPY tests .
-COPY pg_dump .
+COPY tests tests
+COPY pg_dump pg_dump
 CMD ["pytest"]
+
+FROM base AS build
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY pg_dump pg_dump
+CMD ["python", "-m", "pg_dump.main"] 

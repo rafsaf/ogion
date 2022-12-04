@@ -4,6 +4,8 @@ set -e
 apt-get -y update && apt-get install -y wget lsb-release gpg xz-utils
 CPU="$(dpkg --print-architecture)"
 DISTR="$(lsb_release -cs)"
+SCRIPT_PATH=`readlink -f "$0"`
+SCRIPT_DIR=`dirname "$SCRIPT_PATH"`
 
 #########################################################################
 # POSTGRES CLIENT INSTALLATION
@@ -35,32 +37,42 @@ echo "postgresql-client-15 installed"
 # https://www.7-zip.org/download.html
 #########################################################################
 
-if [ -f "/opt/7zip/7zz" ]
+AMD64_DIR="$SCRIPT_DIR/../bin/7zip/amd64"
+AMD64_7ZZ="$AMD64_DIR/7zz"
+
+ARM64_DIR="$SCRIPT_DIR/../bin/7zip/arm64"
+ARM64_7ZZ="$ARM64_DIR/7zz"
+
+if [ -f "$AMD64_7ZZ" ]
 then
-  echo "/opt/7zip/7zz exists"
+  echo "$AMD64_7ZZ exists"
 else
-  ZIP_DIR="/opt/7zip"
-  ZIP_TAR_FILE="$ZIP_DIR/7zip.tar.xz"
-
-  if [ "$CPU" = "amd64" ]
-  then
-    echo "Installing 7zip for amd64"
-    ZIP_DOWNLOAD_URL="https://www.7-zip.org/a/7z2201-linux-x64.tar.xz"
-  elif [ "$CPU" = "arm64" ]
-  then
-    echo "Installing 7zip for arm64"
-    ZIP_DOWNLOAD_URL="https://www.7-zip.org/a/7z2201-linux-arm64.tar.xz"
-  else
-    echo "Unknown cpu architecture $CPU: expected amd64 or arm64"
-    exit 1
-  fi
-
-  mkdir -p $ZIP_DIR
-  wget --quiet -O $ZIP_TAR_FILE $ZIP_DOWNLOAD_URL
-  cd $ZIP_DIR
-  ls
-  tar -xf $ZIP_TAR_FILE
-  rm -f $ZIP_TAR_FILE
-  echo "7zip installed: /opt/7zip/7zz"
+  mkdir -p $AMD64_DIR
+  cd $AMD64_DIR
+  wget --quiet "https://www.7-zip.org/a/7z2201-linux-x64.tar.xz"
+  tar -xf "7z2201-linux-x64.tar.xz"
+  rm -f "7z2201-linux-x64.tar.xz"
 fi
- 
+
+if [ -f "$ARM64_7ZZ" ]
+then
+  echo "$ARM64_7ZZ exists"
+else
+  mkdir -p $ARM64_DIR
+  cd $ARM64_DIR
+  wget --quiet "https://www.7-zip.org/a/7z2201-linux-arm64.tar.xz"
+  tar -xf "7z2201-linux-arm64.tar.xz"
+  rm -f "7z2201-linux-arm64.tar.xz"
+fi
+
+
+if [ "$CPU" = "amd64" ]
+then
+  cp $AMD64_7ZZ "$SCRIPT_DIR/../bin/7zz"
+elif [ "$CPU" = "arm64" ]
+then
+  cp $ARM64_7ZZ "$SCRIPT_DIR/../bin/7zz"
+else
+  echo "Unknown cpu architecture $CPU: expected amd64 or arm64"
+  exit 1
+fi
