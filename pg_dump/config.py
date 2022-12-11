@@ -9,7 +9,7 @@ try:
     from dotenv import load_dotenv
 
     load_dotenv(BASE_DIR / ".env")
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 
@@ -46,32 +46,8 @@ GOOGLE_BUCKET_UPLOAD_PATH: str = os.environ.get("PD_GOOGLE_BUCKET_UPLOAD_PATH", 
 GOOGLE_SERVICE_ACCOUNT_BASE64: str = os.environ.get(
     "PD_GOOGLE_SERVICE_ACCOUNT_BASE64", ""
 )
-GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
-
-
-GOOGLE_SERVICE_ACCOUNT_PATH.touch(mode=0o700, exist_ok=True)
-PGPASS_FILE_PATH.touch(mode=0o700, exist_ok=True)
-BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 os.environ["PGPASSFILE"] = str(PGPASS_FILE_PATH)
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(GOOGLE_SERVICE_ACCOUNT_PATH)
-
-if BACKUP_PROVIDER == Provider.GOOGLE_CLOUD_STORAGE:
-    if not ZIP_ARCHIVE_PASSWORD:
-        raise RuntimeError(
-            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `ZIP_ARCHIVE_PASSWORD`"
-        )
-    elif not GOOGLE_BUCKET_NAME:
-        raise RuntimeError(
-            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `GOOGLE_BUCKET_NAME`"
-        )
-    elif not GOOGLE_SERVICE_ACCOUNT_BASE64:
-        raise RuntimeError(
-            f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `GOOGLE_SERVICE_ACCOUNT_BASE64`"
-        )
-if ZIP_ARCHIVE_PASSWORD and not ZIP_BIN_7ZZ_PATH.exists():
-    raise RuntimeError(
-        f"`{ZIP_ARCHIVE_PASSWORD}` is set but `{ZIP_BIN_7ZZ_PATH}` binary does not exists, did you forget to create it?"
-    )
 
 LOGGING = {
     "version": 1,
@@ -99,3 +75,30 @@ LOGGING = {
 }
 
 logging.config.dictConfig(LOGGING)
+
+
+def runtime_configuration():
+    GOOGLE_SERVICE_ACCOUNT_PATH.touch(mode=0o700, exist_ok=True)
+    PGPASS_FILE_PATH.touch(mode=0o700, exist_ok=True)
+    BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+    if BACKUP_PROVIDER == Provider.GOOGLE_CLOUD_STORAGE:
+        if not ZIP_ARCHIVE_PASSWORD:
+            raise RuntimeError(
+                f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `ZIP_ARCHIVE_PASSWORD`"
+            )
+        elif not GOOGLE_BUCKET_NAME:
+            raise RuntimeError(
+                f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `GOOGLE_BUCKET_NAME`"
+            )
+        elif not GOOGLE_SERVICE_ACCOUNT_BASE64:
+            raise RuntimeError(
+                f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `GOOGLE_SERVICE_ACCOUNT_BASE64`"
+            )
+    if ZIP_ARCHIVE_PASSWORD and not ZIP_BIN_7ZZ_PATH.exists():
+        raise RuntimeError(
+            f"`{ZIP_ARCHIVE_PASSWORD}` is set but `{ZIP_BIN_7ZZ_PATH}` binary does not exists, did you forget to create it?"
+        )
+
+
+runtime_configuration()

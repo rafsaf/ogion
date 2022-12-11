@@ -97,7 +97,7 @@ def postgres_connection():
     for match in matches:
         version = match.strip().split(" ")[1]
         break
-    if version is None:
+    if version is None:  # pragma: no cover
         log.error(
             "postgres_connection error processing pg result, version unknown: %s",
             result,

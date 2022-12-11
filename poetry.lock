@@ -170,6 +170,17 @@ pycodestyle = ">=2.9.0,<2.10.0"
 pyflakes = ">=2.5.0,<2.6.0"
 
 [[package]]
+name = "freezegun"
+version = "1.2.2"
+description = "Let your Python tests travel through time"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+python-dateutil = ">=2.7"
+
+[[package]]
 name = "google-api-core"
 version = "2.11.0"
 description = "Google API client core library"
@@ -625,7 +636,7 @@ anyio = ">=3.0.0,<4"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.11"
-content-hash = "1e21786ce6ff3b2a56857afd9bf8be5af7bd4fe28254696cc60a6e0fa45e0a34"
+content-hash = "58c83cf58fef9c8c36b449e73ef35035779ddefa6255e2b0e3c8fc63dd7d3126"
 
 [metadata.files]
 anyio = [
@@ -745,6 +756,10 @@ filelock = [
 flake8 = [
     {file = "flake8-5.0.4-py2.py3-none-any.whl", hash = "sha256:7a1cf6b73744f5806ab95e526f6f0d8c01c66d7bbe349562d22dfca20610b248"},
     {file = "flake8-5.0.4.tar.gz", hash = "sha256:6fbe320aad8d6b95cec8b8e47bc933004678dc63095be98528b7bdd2a9f510db"},
+]
+freezegun = [
+    {file = "freezegun-1.2.2-py3-none-any.whl", hash = "sha256:ea1b963b993cb9ea195adbd893a48d573fda951b0da64f60883d7e988b606c9f"},
+    {file = "freezegun-1.2.2.tar.gz", hash = "sha256:cd22d1ba06941384410cd967d8a99d5ae2442f57dfafeff2fda5de8dc5c05446"},
 ]
 google-api-core = [
     {file = "google-api-core-2.11.0.tar.gz", hash = "sha256:4b9bb5d5a380a0befa0573b302651b8a9a89262c1730e37bf423cec511804c22"},
