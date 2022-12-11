@@ -54,15 +54,15 @@ https://hub.docker.com/repository/docker/rafsaf/pg_dump
 
 **PD_BACKUP_COOLING_RETRIES** - Max number of retries for single scheduled backup, defaults to `1`.
 
-**BACKUP_MAX_NUMBER** - Max number of backups that can be stored in data folder, make senses only with `local` as a `PD_BACKUP_PROVIDER`, for other providers files are instantly deleted after moving backups to cloud.
+**PD_BACKUP_MAX_NUMBER** - Max number of backups that can be stored in data folder (for local files provider) or in cloud, defaults to 7.
 
 **PD_LOG_LEVEL** - Log level (DEBUG, INFO, WARNING, ERROR), by default in docker image it is `INFO`
 
-**GOOGLE_BUCKET_NAME** - Name of google bucket, by default empty string, requried for `gcs` as a `PD_BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
+**PD_GOOGLE_BUCKET_NAME** - Name of google bucket, by default empty string, requried for `gcs` as a `PD_BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
 
-**GOOGLE_SERVICE_ACCOUNT_BASE64** - Base64 gcloud json service account, by default empty string, requried for `gcs` as a `PD_BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
+**PD_GOOGLE_SERVICE_ACCOUNT_BASE64** - Base64 gcloud json service account, by default empty string, requried for `gcs` as a `PD_BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
 
-**GOOGLE_BUCKET_UPLOAD_PATH** - Name of google bucket, by default empty string, optional for `gcs` as a `PD_BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
+**PD_GOOGLE_BUCKET_UPLOAD_PATH** - Name of google bucket, by default None, optional for `gcs` as a `PD_BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
 
 
 `gpg --generate-key`

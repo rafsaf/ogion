@@ -21,6 +21,9 @@ class GoogleCloudStorage(common.Provider):
         with open(config.GOOGLE_SERVICE_ACCOUNT_PATH, "wb") as f:
             f.write(service_account_bytes)
 
+        self.storage_client = storage.Client()
+        self.bucket = self.storage_client.bucket(config.GOOGLE_BUCKET_NAME)
+
     def post_save(self, backup_file: str):
         try:
             zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
@@ -28,16 +31,17 @@ class GoogleCloudStorage(common.Provider):
             log.error("Could not create zip_backup_file from %s", backup_file)
             raise
 
-        backup_dest_in_bucket = "{}/{}".format(
-            config.GOOGLE_BUCKET_UPLOAD_PATH,
-            zip_backup_file.split("/")[-1],
-        )
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(config.GOOGLE_BUCKET_NAME)
+        if config.GOOGLE_BUCKET_UPLOAD_PATH is not None:
+            backup_dest_in_bucket = "{}/{}".format(
+                config.GOOGLE_BUCKET_UPLOAD_PATH,
+                zip_backup_file.split("/")[-1],
+            )
+        else:
+            backup_dest_in_bucket = zip_backup_file.split("/")[-1]
 
         log.debug("Start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
 
-        blob = bucket.blob(backup_dest_in_bucket)
+        blob = self.bucket.blob(backup_dest_in_bucket)
         retry = 1
         while retry <= self.MAX_UPLOAD_RETRY:
             try:
@@ -62,4 +66,17 @@ class GoogleCloudStorage(common.Provider):
         if success:
             for backup_path in config.BACKUP_FOLDER_PATH.iterdir():
                 backup_path.unlink()
-                log.info("Removed %s", backup_path)
+                log.info("Removed %s from local disk", backup_path)
+
+            backup_list_cloud: list[str] = []
+            for blob in self.storage_client.list_blobs(
+                self.bucket, prefix=config.GOOGLE_BUCKET_UPLOAD_PATH
+            ):
+                backup_list_cloud.append(blob.name)
+
+            backup_list_cloud.sort(reverse=True)
+            while len(backup_list_cloud) > config.BACKUP_MAX_NUMBER:
+                backup_to_remove = backup_list_cloud.pop()
+                blob = self.bucket.blob(backup_to_remove)
+                blob.delete()
+                log.info("Deleted backup %s from Google Cloud Storage")

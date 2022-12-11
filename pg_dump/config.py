@@ -37,12 +37,14 @@ SUBPROCESS_TIMEOUT_SECS: int = int(
 )
 BACKUP_COOLING_SECS: int = int(os.environ.get("PD_BACKUP_COOLING_SECS", 60))
 BACKUP_COOLING_RETRIES: int = int(os.environ.get("PD_BACKUP_COOLING_RETRIES", 1))
-BACKUP_MAX_NUMBER: int = int(os.environ.get("PD_BACKUP_NUMBER", 5))
+BACKUP_MAX_NUMBER: int = int(os.environ.get("PD_BACKUP_MAX_NUMBER", 7))
 BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
 PGPASS_FILE_PATH: Path = BASE_DIR / ".pgpass"
 GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
 GOOGLE_BUCKET_NAME: str = os.environ.get("PD_GOOGLE_BUCKET_NAME", "")
-GOOGLE_BUCKET_UPLOAD_PATH: str = os.environ.get("PD_GOOGLE_BUCKET_UPLOAD_PATH", "")
+GOOGLE_BUCKET_UPLOAD_PATH: str | None = os.environ.get(
+    "PD_GOOGLE_BUCKET_UPLOAD_PATH", None
+)
 GOOGLE_SERVICE_ACCOUNT_BASE64: str = os.environ.get(
     "PD_GOOGLE_SERVICE_ACCOUNT_BASE64", ""
 )
