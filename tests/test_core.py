@@ -6,7 +6,7 @@ from pytest import LogCaptureFixture, MonkeyPatch
 
 from pg_dump import config, core
 
-from .conftest import POSTGRES_VERSION_BY_PORT
+from .conftest import POSTGRES_VERSION_BY_PORT_AND_HOST
 
 
 def test_run_subprocess_fail(caplog: LogCaptureFixture):
@@ -88,7 +88,9 @@ def test_run_pg_dump(caplog: LogCaptureFixture):
 def test_postgres_connection_success(caplog: LogCaptureFixture):
     core.init_pgpass_file()
     db_version = core.postgres_connection()
-    expected_version = POSTGRES_VERSION_BY_PORT[config.POSTGRES_PORT]
+    expected_version = POSTGRES_VERSION_BY_PORT_AND_HOST[
+        (config.POSTGRES_HOST, config.POSTGRES_PORT)
+    ]
     assert db_version == expected_version
     assert "postgres_connection start postgres connection" == caplog.messages[0]
     assert "run_subprocess finished with status 0" == caplog.messages[2]
@@ -112,7 +114,6 @@ def test_postgres_connection_fail_conn(
         core.postgres_connection()
     assert system_exit.type == SystemExit
     assert system_exit.value.code == 1
-    print(caplog.messages)
     assert "postgres_connection start postgres connection" == caplog.messages[0]
     assert (
         f"run_subprocess running: 'psql -U postgres -p 9999 -h {config.POSTGRES_HOST} postgres -w --command 'SELECT version();''"

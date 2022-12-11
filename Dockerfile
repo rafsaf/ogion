@@ -26,7 +26,7 @@ RUN pip install -r requirements-dev.txt
 COPY pyproject.toml .
 COPY tests tests
 COPY pg_dump pg_dump
-CMD ["pytest"]
+CMD ["coverage", "run", "-m", "pytest", "-vv"]
 
 FROM base AS build
 COPY requirements.txt .

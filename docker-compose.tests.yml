@@ -1,0 +1,37 @@
+# Used in GH workflows
+version: "3.4"
+
+services:
+  postgres_15:
+    image: postgres:15.1
+    environment:
+      - POSTGRES_PASSWORD=postgres
+  postgres_14:
+    image: postgres:14.6
+    environment:
+      - POSTGRES_PASSWORD=postgres
+  postgres_13:
+    image: postgres:13.8
+    environment:
+      - POSTGRES_PASSWORD=postgres
+  postgres_12:
+    image: postgres:12.12
+    environment:
+      - POSTGRES_PASSWORD=postgres
+  postgres_11:
+    image: postgres:11.16
+    environment:
+      - POSTGRES_PASSWORD=postgres
+  pg_dump_tests:
+    depends_on:
+      - postgres_15
+      - postgres_14
+      - postgres_13
+      - postgres_12
+      - postgres_11
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: tests
+    environment:
+      - PD_POSTGRES_HOST=postgres

@@ -49,33 +49,6 @@ GOOGLE_SERVICE_ACCOUNT_BASE64: str = os.environ.get(
 os.environ["PGPASSFILE"] = str(PGPASS_FILE_PATH)
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(GOOGLE_SERVICE_ACCOUNT_PATH)
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{asctime} [{levelname}] {name}: {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "stream": {
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-            "level": "DEBUG",
-        },
-    },
-    "loggers": {
-        "": {
-            "level": LOG_LEVEL,
-            "handlers": ["stream"],
-            "propagate": False,
-        },
-    },
-}
-
-logging.config.dictConfig(LOGGING)
-
 
 def runtime_configuration():
     GOOGLE_SERVICE_ACCOUNT_PATH.touch(mode=0o700, exist_ok=True)
@@ -99,6 +72,32 @@ def runtime_configuration():
         raise RuntimeError(
             f"`{ZIP_ARCHIVE_PASSWORD}` is set but `{ZIP_BIN_7ZZ_PATH}` binary does not exists, did you forget to create it?"
         )
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "{asctime} [{levelname}] {name}: {message}",
+                "style": "{",
+            },
+        },
+        "handlers": {
+            "stream": {
+                "class": "logging.StreamHandler",
+                "formatter": "verbose",
+                "level": "DEBUG",
+            },
+        },
+        "loggers": {
+            "": {
+                "level": LOG_LEVEL,
+                "handlers": ["stream"],
+                "propagate": False,
+            },
+        },
+    }
+
+    logging.config.dictConfig(LOGGING)
 
 
 runtime_configuration()
