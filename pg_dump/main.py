@@ -1,3 +1,4 @@
+import argparse
 import logging
 import signal
 import threading
@@ -30,6 +31,15 @@ def quit(sig, frame):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Pg dump backup program")
+    parser.add_argument(
+        "-s", "--single", action="store_true", help="Only single backup then exit"
+    )
+    parser.add_argument(
+        "-n", "--now", action="store_true", help="Start first backup immediatly"
+    )
+    args = parser.parse_args()
+
     if not croniter.is_valid(config.CRON_RULE):
         raise RuntimeError(
             f"Croniter: cron expression `{config.CRON_RULE}` is not valid"
@@ -42,12 +52,14 @@ def main():
         provider = GoogleCloudStorage()
     else:
         raise RuntimeError(f"Unknown provider: `{config.BACKUP_PROVIDER}`")
-
-    sleep_till_next_backup()
+    if not args.single and not args.now:
+        sleep_till_next_backup()
     while not exit_event.is_set():
         backup = core.run_pg_dump(db_version=db_version)
         success = provider.safe_post_save(backup_file=backup)
         provider.safe_clean(success)
+        if args.single:
+            exit_event.set()
         sleep_till_next_backup()
     log.info("Gracefully exited")
 
