@@ -16,7 +16,7 @@ autoflake = "^1.5"
 black = "^22.6.0"
 coverage = { extras = ["toml"], version = "^6.4.1" }
 flake8 = "^5.0.4"
-isort = "^5.10.1"
+isort = "^5.11.4"
 pre-commit = "^2.20.0"
 pytest = "^7.1.2"
 pyupgrade = "^2.37.3"
