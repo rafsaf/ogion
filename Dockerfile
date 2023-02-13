@@ -1,4 +1,4 @@
-FROM python:3.11.0-slim-bullseye AS base
+FROM python:3.11.2-slim-bullseye AS base
 ENV PYTHONUNBUFFERED=1
 ENV PD_SERVICE_NAME="pg_dump"
 ENV PD_FOLDER_PATH="/var/lib/pg_dump"
