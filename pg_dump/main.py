@@ -7,7 +7,7 @@ from datetime import datetime
 from croniter import croniter
 
 from pg_dump import config, core
-from pg_dump.providers import GoogleCloudStorage, LocalFiles
+from pg_dump.storage_providers import GoogleCloudStorage, LocalFiles
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)

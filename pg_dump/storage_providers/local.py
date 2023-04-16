@@ -2,7 +2,7 @@ import logging
 import os
 
 from pg_dump import config
-from pg_dump.providers import common
+from pg_dump.storage_providers import common
 
 log = logging.getLogger(__name__)
 
