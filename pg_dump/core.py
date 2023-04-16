@@ -1,5 +1,4 @@
 import logging
-import re
 import secrets
 import subprocess
 from datetime import datetime
@@ -55,64 +54,3 @@ def run_create_zip_archive(backup_file: str):
     run_subprocess(shell_args)
     log.debug("run_create_zip_archive finished, output: %s", out_file)
     return out_file
-
-
-def run_pg_dump(db_version: str):
-    out_file = get_new_backup_path(db_version)
-
-    shell_args = (
-        f"pg_dump -v -O -Fc "
-        f"-U {config.POSTGRES_USER} "
-        f"-p {config.POSTGRES_PORT} "
-        f"-h {config.POSTGRES_HOST} "
-        f"{config.POSTGRES_DB} "
-        f"-f {out_file}"
-    )
-    log.debug("run_pg_dump start pg_dump in subprocess: %s", shell_args)
-    run_subprocess(shell_args)
-    log.debug("run_pg_dump finished pg_dump, output: %s", out_file)
-    return out_file
-
-
-def postgres_connection():
-    log.debug("postgres_connection start postgres connection")
-    pg_version_regex = re.compile(r"PostgreSQL \d*\.\d* ")
-    try:
-        result = run_subprocess(
-            f"psql -U {config.POSTGRES_USER} "
-            f"-p {config.POSTGRES_PORT} "
-            f"-h {config.POSTGRES_HOST} "
-            f"{config.POSTGRES_DB} "
-            f"-w --command 'SELECT version();'",
-        )
-    except CoreSubprocessError as err:
-        log.error(err, exc_info=True)
-        log.error("postgres_connection unable to connect to database, exiting")
-        exit(1)
-
-    version = None
-    matches: list[str] = pg_version_regex.findall(result)
-
-    for match in matches:
-        version = match.strip().split(" ")[1]
-        break
-    if version is None:  # pragma: no cover
-        log.error(
-            "postgres_connection error processing pg result, version unknown: %s",
-            result,
-        )
-        exit(1)
-    log.debug("postgres_connection calculated version: %s", version)
-    return version
-
-
-def init_pgpass_file():
-    pgpass_text = "{}:{}:{}:{}:{}".format(
-        config.POSTGRES_HOST,
-        config.POSTGRES_PORT,
-        config.POSTGRES_USER,
-        config.POSTGRES_DB,
-        config.POSTGRES_PASSWORD,
-    )
-    with open(config.PGPASS_FILE_PATH, "w") as file:
-        file.write(pgpass_text)
