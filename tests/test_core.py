@@ -33,11 +33,9 @@ def test_run_subprocess_success(caplog: LogCaptureFixture):
 @freeze_time("2022-12-11")
 def test_get_new_backup_path(caplog: LogCaptureFixture):
     new_path = core.get_new_backup_path("db_string")
-
-    assert (
-        new_path
-        == f"{config.BACKUP_FOLDER_PATH}/20221211_0000_postgres_db_string_mocked_random_string"
-    )
+    expected_file = "20221211_0000_postgres_db_string_mocked_random_string"
+    expected_path = config.BACKUP_FOLDER_PATH / expected_file
+    assert new_path == expected_path
     assert caplog.messages == []
 
 
@@ -67,7 +65,8 @@ def test_run_create_zip_archive(tmp_path: Path, caplog: LogCaptureFixture):
 def test_run_pg_dump(caplog: LogCaptureFixture):
     core.init_pgpass_file()
     out_backup = core.run_pg_dump("test_version")
-    out_path = f"{config.BACKUP_FOLDER_PATH}/20221211_0000_postgres_test_version_mocked_random_string"
+    out_file = "20221211_0000_postgres_test_version_mocked_random_string"
+    out_path = config.BACKUP_FOLDER_PATH / out_file
     assert (
         f"run_pg_dump start pg_dump in subprocess: pg_dump -v -O -Fc -U postgres -p {config.POSTGRES_PORT} -h {config.POSTGRES_HOST} postgres -f {out_path}"
         == caplog.messages[0]

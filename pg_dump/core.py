@@ -36,14 +36,13 @@ def run_subprocess(shell_args: str) -> str:
 
 def get_new_backup_path(db_version: str):
     random_string = secrets.token_urlsafe(3)
-    new_file = "{}/{}_{}_{}_{}".format(
-        config.BACKUP_FOLDER_PATH,
+    new_file = "{}_{}_{}_{}".format(
         datetime.utcnow().strftime("%Y%m%d_%H%M"),
         config.POSTGRES_DB,
         db_version,
         random_string,
     )
-    return new_file
+    return config.BACKUP_FOLDER_PATH / new_file
 
 
 def run_create_zip_archive(backup_file: str):
