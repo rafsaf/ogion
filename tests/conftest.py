@@ -32,7 +32,6 @@ POSTGRES_VERSION_BY_PORT_AND_HOST: dict[tuple[str, str], str] = {
     autouse=True,
 )
 def config_setup(request: FixtureRequest, tmp_path: Path, monkeypatch: MonkeyPatch):
-
     if config.POSTGRES_HOST != "localhost":
         # tests running in docker container, use hosts from params
         monkeypatch.setattr(config, "POSTGRES_HOST", request.param)
@@ -49,13 +48,15 @@ def config_setup(request: FixtureRequest, tmp_path: Path, monkeypatch: MonkeyPat
     monkeypatch.setattr(config, "BACKUP_COOLING_RETRIES", 0)
     monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 1)
     monkeypatch.setattr(config, "ZIP_ARCHIVE_PASSWORD", "test")
-    backup_folder_path = tmp_path / "pytest_data"
-    monkeypatch.setattr(config, "BACKUP_FOLDER_PATH", backup_folder_path)
-    pgpass_file_path = tmp_path / "pytest_pgpass"
-    monkeypatch.setattr(config, "PGPASS_FILE_PATH", pgpass_file_path)
+    CONST_BACKUP_FOLDER_PATH = tmp_path / "pytest_data"
+    monkeypatch.setattr(config, "CONST_BACKUP_FOLDER_PATH", CONST_BACKUP_FOLDER_PATH)
+    CONST_PGPASS_FILE_PATH = tmp_path / "pytest_pgpass"
+    monkeypatch.setattr(config, "CONST_PGPASS_FILE_PATH", CONST_PGPASS_FILE_PATH)
     google_serv_acc_path = tmp_path / "pytest_google_auth"
-    monkeypatch.setattr(config, "GOOGLE_SERVICE_ACCOUNT_PATH", google_serv_acc_path)
-    monkeypatch.setenv("PGPASSFILE", str(pgpass_file_path))
+    monkeypatch.setattr(
+        config, "CONST_GOOGLE_SERVICE_ACCOUNT_PATH", google_serv_acc_path
+    )
+    monkeypatch.setenv("PGPASSFILE", str(CONST_PGPASS_FILE_PATH))
     monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(google_serv_acc_path))
     config.runtime_configuration()
 

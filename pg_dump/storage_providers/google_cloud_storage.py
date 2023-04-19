@@ -18,7 +18,7 @@ class GoogleCloudStorage(common.Provider):
 
     def __init__(self) -> None:
         service_account_bytes = base64.b64decode(config.GOOGLE_SERVICE_ACCOUNT_BASE64)
-        with open(config.GOOGLE_SERVICE_ACCOUNT_PATH, "wb") as f:
+        with open(config.CONST_GOOGLE_SERVICE_ACCOUNT_PATH, "wb") as f:
             f.write(service_account_bytes)
 
         self.storage_client = storage.Client()
@@ -64,7 +64,7 @@ class GoogleCloudStorage(common.Provider):
 
     def clean(self, success: bool):
         if success:
-            for backup_path in config.BACKUP_FOLDER_PATH.iterdir():
+            for backup_path in config.CONST_BACKUP_FOLDER_PATH.iterdir():
                 backup_path.unlink()
                 log.info("Removed %s from local disk", backup_path)
 

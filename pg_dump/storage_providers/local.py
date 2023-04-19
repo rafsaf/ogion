@@ -20,7 +20,7 @@ class LocalFiles(common.Provider):
 
     def clean(self, success: bool):
         files: list[str] = []
-        for backup_path in config.BACKUP_FOLDER_PATH.iterdir():
+        for backup_path in config.CONST_BACKUP_FOLDER_PATH.iterdir():
             files.append(str(backup_path.absolute()))
         files.sort(reverse=True)
         while len(files) > config.BACKUP_MAX_NUMBER:

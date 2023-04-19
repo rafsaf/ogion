@@ -26,7 +26,7 @@ class PostgreSQL:
             self.db,
             self.password,
         )
-        with open(config.PGPASS_FILE_PATH, "a") as file:
+        with open(config.CONST_PGPASS_FILE_PATH, "a") as file:
             file.write(pgpass_text)
 
     def _postgres_connection(self):
