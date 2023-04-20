@@ -26,13 +26,17 @@ except ImportError:  # pragma: no cover
     pass
 
 
-class Provider(StrEnum):
+class BackupProviderEnum(StrEnum):
     LOCAL_FILES = "local"
     GOOGLE_CLOUD_STORAGE = "gcs"
 
 
+class BackupTargetEnum(StrEnum):
+    POSTGRESQL = "postgresql"
+
+
 CRON_RULE = os.environ.get("PD_CRON_RULE", "0 5 * * *")
-BACKUP_PROVIDER = os.environ.get("PD_BACKUP_PROVIDER", Provider.LOCAL_FILES)
+BACKUP_PROVIDER = os.environ.get("PD_BACKUP_PROVIDER", BackupProviderEnum.LOCAL_FILES)
 LOG_LEVEL = os.environ.get("PD_LOG_LEVEL", "INFO")
 assert LOG_LEVEL in [
     "DEBUG",
@@ -56,24 +60,30 @@ GOOGLE_SERVICE_ACCOUNT_BASE64: str = os.environ.get(
 )
 
 
-class PostgreSQLBackupTarget(BaseModel):
+class BackupTarget(BaseModel):
+    type: BackupTargetEnum
+
+
+class PostgreSQLBackupTarget(BackupTarget):
     user: str = "postgres"
     host: str = "localhost"
     port: int = 5432
     db: str = "postgres"
     password: str
     cron_rule: str = CRON_RULE
+    type = BackupTargetEnum.POSTGRESQL
 
 
-POSTGRESQL_DBS: list[PostgreSQLBackupTarget] = []
+BACKUP_TARGETS: list[BackupTarget] = []
 for env_name, val in os.environ.items():
     if env_name.startswith("POSTGRESQL"):
+        print(val)
         db_data_from_env = json.loads(val)
-        POSTGRESQL_DBS.append(PostgreSQLBackupTarget(**db_data_from_env))
+        BACKUP_TARGETS.append(PostgreSQLBackupTarget(**db_data_from_env))
 
 
 def runtime_configuration():
-    if BACKUP_PROVIDER == Provider.GOOGLE_CLOUD_STORAGE:
+    if BACKUP_PROVIDER == BackupProviderEnum.GOOGLE_CLOUD_STORAGE:
         if not ZIP_ARCHIVE_PASSWORD:
             raise RuntimeError(
                 f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `ZIP_ARCHIVE_PASSWORD`"

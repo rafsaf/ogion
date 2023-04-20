@@ -33,12 +33,11 @@ def run_subprocess(shell_args: str) -> str:
     return p.stdout
 
 
-def get_new_backup_path(db_version: str):
+def get_new_backup_path(name: str):
     random_string = secrets.token_urlsafe(3)
-    new_file = "{}_{}_{}_{}".format(
+    new_file = "{}_{}_{}".format(
         datetime.utcnow().strftime("%Y%m%d_%H%M"),
-        config.POSTGRES_DB,
-        db_version,
+        name,
         random_string,
     )
     return config.CONST_BACKUP_FOLDER_PATH / new_file

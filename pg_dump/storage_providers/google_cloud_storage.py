@@ -10,10 +10,10 @@ from pg_dump.storage_providers import common
 log = logging.getLogger(__name__)
 
 
-class GoogleCloudStorage(common.Provider):
+class GoogleCloudStorage(common.BaseBackupProvider):
     """Represent GCS bucket for storing backups."""
 
-    NAME = config.Provider.GOOGLE_CLOUD_STORAGE
+    NAME = config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE
     MAX_UPLOAD_RETRY = 5
 
     def __init__(self) -> None:

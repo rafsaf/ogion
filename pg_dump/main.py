@@ -8,7 +8,7 @@ from croniter import croniter
 
 from pg_dump import config
 from pg_dump.backup_targets import PostgreSQL
-from pg_dump.storage_providers import GoogleCloudStorage, LocalFiles
+from pg_dump.storage_providers import BaseBackupProvider, GoogleCloudStorage, LocalFiles
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)
@@ -31,6 +31,25 @@ def quit(sig, frame):
     exit_event.set()
 
 
+def backup_provider():
+    map: dict[str, BaseBackupProvider] = {
+        config.BackupProviderEnum.LOCAL_FILES: LocalFiles(),
+        config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE: GoogleCloudStorage(),
+    }
+    provider = map.get(config.BACKUP_PROVIDER, None)
+    if provider is None:
+        raise RuntimeError(f"Unknown provider: `{config.BACKUP_PROVIDER}`")
+    return provider
+
+
+def backup_targets():
+    targets = []
+    for target in config.BACKUP_TARGETS:
+        if target.type == config.BackupTargetEnum.POSTGRESQL:
+            targets.append(PostgreSQL(**target.dict()))
+    return targets
+
+
 def main():
     parser = argparse.ArgumentParser(description="Pg dump backup program")
     parser.add_argument(
@@ -45,25 +64,17 @@ def main():
         raise RuntimeError(
             f"Croniter: cron expression `{config.CRON_RULE}` is not valid"
         )
-    if config.BACKUP_PROVIDER == config.Provider.LOCAL_FILES:
-        provider = LocalFiles()
-    elif config.BACKUP_PROVIDER == config.Provider.GOOGLE_CLOUD_STORAGE:
-        provider = GoogleCloudStorage()
-    else:
-        raise RuntimeError(f"Unknown provider: `{config.BACKUP_PROVIDER}`")
-    db = config.POSTGRESQL_DBS[0]
-    postgres_db = PostgreSQL(
-        user=db.user, password=db.password, port=db.port, host=db.host, db=db.db
-    )
-    if not args.single and not args.now:
-        sleep_till_next_backup()
+    provider = backup_provider()
+    targets = backup_targets()
+
     while not exit_event.is_set():
-        backup = postgres_db.run_pg_dump()
-        success = provider.safe_post_save(backup_file=backup)
-        provider.safe_clean(success)
+        for target in targets:
+            backup = target.backup()
+            success = provider.safe_post_save(backup_file=backup)
+            provider.safe_clean(success)
         if args.single:
             exit_event.set()
-        sleep_till_next_backup()
+        exit_event.wait(5)
     log.info("Gracefully exited")
 
 

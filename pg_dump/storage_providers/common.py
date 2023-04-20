@@ -6,7 +6,7 @@ from typing import final
 log = logging.getLogger(__name__)
 
 
-class Provider(ABC):
+class BaseBackupProvider(ABC):
     NAME = "provider"
 
     @final

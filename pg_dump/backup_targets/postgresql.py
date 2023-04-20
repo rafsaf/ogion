@@ -9,7 +9,9 @@ VERSION_REGEX = re.compile(r"PostgreSQL \d*\.\d* ")
 
 
 class PostgreSQL:
-    def __init__(self, user: str, password: str, port: int, host: str, db: str) -> None:
+    def __init__(
+        self, user: str, password: str, port: int, host: str, db: str, **kwargs
+    ) -> None:
         self.user = user
         self.port = port
         self.db = db
@@ -60,8 +62,9 @@ class PostgreSQL:
         log.debug("postgres_connection calculated version: %s", version)
         return version
 
-    def run_pg_dump(self):
-        out_file = core.get_new_backup_path(self.db_version)
+    def backup(self):
+        name = f"{self.db}_{self.db_version}"
+        out_file = core.get_new_backup_path(name)
 
         shell_args = (
             f"pg_dump -v -O -Fc "
@@ -71,7 +74,7 @@ class PostgreSQL:
             f"{self.db} "
             f"-f {out_file}"
         )
-        log.debug("run_pg_dump start pg_dump in subprocess: %s", shell_args)
+        log.debug("start pg_dump in subprocess: %s", shell_args)
         core.run_subprocess(shell_args)
-        log.debug("run_pg_dump finished pg_dump, output: %s", out_file)
+        log.debug("finished pg_dump, output: %s", out_file)
         return out_file

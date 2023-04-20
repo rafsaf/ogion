@@ -7,13 +7,13 @@ from pg_dump.storage_providers import common
 log = logging.getLogger(__name__)
 
 
-class LocalFiles(common.Provider):
+class LocalFiles(common.BaseBackupProvider):
     """Represent local folder `data` for storing backups.
 
     If docker volume/persistant volume is lost, so are backups.
     """
 
-    NAME = config.Provider.LOCAL_FILES
+    NAME = config.BackupProviderEnum.LOCAL_FILES
 
     def post_save(self, backup_file: str):
         return True
