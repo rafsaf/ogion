@@ -12,7 +12,7 @@ class BaseBackupProvider(ABC):
     @final
     def safe_post_save(self, backup_file: Path) -> bool:
         try:
-            return self.post_save(backup_file=backup_file)
+            return self._post_save(backup_file=backup_file)
         except Exception as err:
             log.error(err, exc_info=True)
             return False
@@ -20,14 +20,14 @@ class BaseBackupProvider(ABC):
     @final
     def safe_clean(self, success: bool) -> None:
         try:
-            return self.clean(success=success)
+            return self._clean(success=success)
         except Exception as err:
             log.error(err, exc_info=True)
 
     @abstractmethod
-    def post_save(self, backup_file: Path) -> bool:
+    def _post_save(self, backup_file: Path) -> bool:
         return
 
     @abstractmethod
-    def clean(self, success: bool) -> None:
+    def _clean(self, success: bool) -> None:
         return

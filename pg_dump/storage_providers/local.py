@@ -2,12 +2,12 @@ import logging
 import os
 
 from pg_dump import config
-from pg_dump.storage_providers import common
+from pg_dump.storage_providers import base_provider
 
 log = logging.getLogger(__name__)
 
 
-class LocalFiles(common.BaseBackupProvider):
+class LocalFiles(base_provider.BaseBackupProvider):
     """Represent local folder `data` for storing backups.
 
     If docker volume/persistant volume is lost, so are backups.
@@ -15,10 +15,10 @@ class LocalFiles(common.BaseBackupProvider):
 
     NAME = config.BackupProviderEnum.LOCAL_FILES
 
-    def post_save(self, backup_file: str):
+    def _post_save(self, backup_file: str):
         return True
 
-    def clean(self, success: bool):
+    def _clean(self, success: bool):
         files: list[str] = []
         for backup_path in config.CONST_BACKUP_FOLDER_PATH.iterdir():
             files.append(str(backup_path.absolute()))

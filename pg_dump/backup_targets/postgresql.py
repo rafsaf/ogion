@@ -2,16 +2,25 @@ import logging
 import re
 
 from pg_dump import config, core
+from pg_dump.backup_targets.base_target import BaseBackupTarget
 
 log = logging.getLogger(__name__)
 
 VERSION_REGEX = re.compile(r"PostgreSQL \d*\.\d* ")
 
 
-class PostgreSQL:
+class PostgreSQL(BaseBackupTarget):
     def __init__(
-        self, user: str, password: str, port: int, host: str, db: str, **kwargs
+        self,
+        user: str,
+        password: str,
+        port: int,
+        host: str,
+        db: str,
+        cron_rule: str,
+        **kwargs,
     ) -> None:
+        self.cron_rule = cron_rule
         self.user = user
         self.port = port
         self.db = db
@@ -19,6 +28,7 @@ class PostgreSQL:
         self.password = password
         self._init_pgpass_file()
         self.db_version = self._postgres_connection()
+        super().__init__(cron_rule=cron_rule)
 
     def _init_pgpass_file(self):
         pgpass_text = "{}:{}:{}:{}:{}\n".format(
@@ -62,7 +72,7 @@ class PostgreSQL:
         log.debug("postgres_connection calculated version: %s", version)
         return version
 
-    def backup(self):
+    def _backup(self):
         name = f"{self.db}_{self.db_version}"
         out_file = core.get_new_backup_path(name)
 

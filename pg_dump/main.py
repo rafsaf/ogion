@@ -2,28 +2,13 @@ import argparse
 import logging
 import signal
 import threading
-from datetime import datetime
-
-from croniter import croniter
 
 from pg_dump import config
-from pg_dump.backup_targets import PostgreSQL
+from pg_dump.backup_targets import BaseBackupTarget, PostgreSQL
 from pg_dump.storage_providers import BaseBackupProvider, GoogleCloudStorage, LocalFiles
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)
-
-
-def sleep_till_next_backup():
-    now = datetime.utcnow()
-    cron = croniter(
-        config.CRON_RULE,
-        start_time=now,
-    )
-    next_backup: datetime = cron.get_next(ret_type=datetime)
-    wait_time = next_backup - now
-    log.info("Next backup at: %s", next_backup)
-    exit_event.wait(wait_time.seconds + 1)
 
 
 def quit(sig, frame):
@@ -31,7 +16,7 @@ def quit(sig, frame):
     exit_event.set()
 
 
-def backup_provider():
+def backup_provider() -> BaseBackupProvider:
     map: dict[str, BaseBackupProvider] = {
         config.BackupProviderEnum.LOCAL_FILES: LocalFiles(),
         config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE: GoogleCloudStorage(),
@@ -42,7 +27,7 @@ def backup_provider():
     return provider
 
 
-def backup_targets():
+def backup_targets() -> list[BaseBackupTarget]:
     targets = []
     for target in config.BACKUP_TARGETS:
         if target.type == config.BackupTargetEnum.POSTGRESQL:
@@ -58,22 +43,25 @@ def main():
     parser.add_argument(
         "-n", "--now", action="store_true", help="Start first backup immediatly"
     )
-    args = parser.parse_args()
+    parser.parse_args()
 
-    if not croniter.is_valid(config.CRON_RULE):
-        raise RuntimeError(
-            f"Croniter: cron expression `{config.CRON_RULE}` is not valid"
-        )
+    # if not croniter.is_valid(config.CRON_RULE):
+    #     raise RuntimeError(
+    #         f"Croniter: cron expression `{config.CRON_RULE}` is not valid"
+    #     )
     provider = backup_provider()
     targets = backup_targets()
 
     while not exit_event.is_set():
         for target in targets:
-            backup = target.backup()
-            success = provider.safe_post_save(backup_file=backup)
-            provider.safe_clean(success)
-        if args.single:
-            exit_event.set()
+            if target.next_backup():
+                backup_file = target.make_backup()
+                if not backup_file:
+                    continue
+                success = provider.safe_post_save(backup_file=backup_file)
+                provider.safe_clean(success)
+        # if args.single:
+        #     exit_event.set()
         exit_event.wait(5)
     log.info("Gracefully exited")
 

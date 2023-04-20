@@ -5,12 +5,12 @@ import time
 from google.cloud import storage
 
 from pg_dump import config, core
-from pg_dump.storage_providers import common
+from pg_dump.storage_providers import base_provider
 
 log = logging.getLogger(__name__)
 
 
-class GoogleCloudStorage(common.BaseBackupProvider):
+class GoogleCloudStorage(base_provider.BaseBackupProvider):
     """Represent GCS bucket for storing backups."""
 
     NAME = config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE
@@ -24,7 +24,7 @@ class GoogleCloudStorage(common.BaseBackupProvider):
         self.storage_client = storage.Client()
         self.bucket = self.storage_client.bucket(config.GOOGLE_BUCKET_NAME)
 
-    def post_save(self, backup_file: str):
+    def _post_save(self, backup_file: str):
         try:
             zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
         except core.CoreSubprocessError:
@@ -62,7 +62,7 @@ class GoogleCloudStorage(common.BaseBackupProvider):
         log.debug("Uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return True
 
-    def clean(self, success: bool):
+    def _clean(self, success: bool):
         if success:
             for backup_path in config.CONST_BACKUP_FOLDER_PATH.iterdir():
                 backup_path.unlink()
