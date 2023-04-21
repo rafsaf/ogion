@@ -12,8 +12,9 @@ log = logging.getLogger(__name__)
 class BaseBackupTarget(ABC):
     NAME = "target"
 
-    def __init__(self, cron_rule: str) -> None:
+    def __init__(self, cron_rule: str, env_name: str) -> None:
         self.cron_rule: str = cron_rule
+        self.env_name = env_name
         self.last_backup_time = datetime.utcnow()
         self.next_backup_time = self._get_next_backup_time()
 

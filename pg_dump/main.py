@@ -31,7 +31,11 @@ def backup_targets() -> list[BaseBackupTarget]:
     targets = []
     for target in config.BACKUP_TARGETS:
         if target.type == config.BackupTargetEnum.POSTGRESQL:
+            log.info(
+                "start initializing connection with database: `%s`", target.env_name
+            )
             targets.append(PostgreSQL(**target.dict()))
+            log.info("connection with database `%s`: ok", target.env_name)
     return targets
 
 
@@ -40,28 +44,21 @@ def main():
     parser.add_argument(
         "-s", "--single", action="store_true", help="Only single backup then exit"
     )
-    parser.add_argument(
-        "-n", "--now", action="store_true", help="Start first backup immediatly"
-    )
-    parser.parse_args()
+    args = parser.parse_args()
 
-    # if not croniter.is_valid(config.CRON_RULE):
-    #     raise RuntimeError(
-    #         f"Croniter: cron expression `{config.CRON_RULE}` is not valid"
-    #     )
     provider = backup_provider()
     targets = backup_targets()
 
     while not exit_event.is_set():
         for target in targets:
-            if target.next_backup():
+            if target.next_backup() or args.single:
                 backup_file = target.make_backup()
                 if not backup_file:
                     continue
                 success = provider.safe_post_save(backup_file=backup_file)
                 provider.safe_clean(success)
-        # if args.single:
-        #     exit_event.set()
+        if args.single:
+            exit_event.set()
         exit_event.wait(5)
     log.info("Gracefully exited")
 

@@ -18,6 +18,7 @@ class PostgreSQL(BaseBackupTarget):
         host: str,
         db: str,
         cron_rule: str,
+        env_name: str,
         **kwargs,
     ) -> None:
         self.cron_rule = cron_rule
@@ -28,7 +29,7 @@ class PostgreSQL(BaseBackupTarget):
         self.password = password
         self._init_pgpass_file()
         self.db_version = self._postgres_connection()
-        super().__init__(cron_rule=cron_rule)
+        super().__init__(cron_rule=cron_rule, env_name=env_name)
 
     def _init_pgpass_file(self):
         pgpass_text = "{}:{}:{}:{}:{}\n".format(
@@ -74,7 +75,7 @@ class PostgreSQL(BaseBackupTarget):
 
     def _backup(self):
         name = f"{self.db}_{self.db_version}"
-        out_file = core.get_new_backup_path(name)
+        out_file = core.get_new_backup_path(self.env_name, name)
 
         shell_args = (
             f"pg_dump -v -O -Fc "

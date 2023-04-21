@@ -33,14 +33,16 @@ def run_subprocess(shell_args: str) -> str:
     return p.stdout
 
 
-def get_new_backup_path(name: str):
+def get_new_backup_path(env_name: str, name: str):
+    base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
+    base_dir_path.mkdir(mode=0o700, exist_ok=True)
     random_string = secrets.token_urlsafe(3)
     new_file = "{}_{}_{}".format(
         datetime.utcnow().strftime("%Y%m%d_%H%M"),
         name,
         random_string,
     )
-    return config.CONST_BACKUP_FOLDER_PATH / new_file
+    return base_dir_path / new_file
 
 
 def run_create_zip_archive(backup_file: str):
