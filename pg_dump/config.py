@@ -32,8 +32,10 @@ LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 assert (
     LOG_LEVEL in CONST_ALLOWED_LOG_LEVELS
 ), f"invalid log level: {LOG_LEVEL}, must be one of {CONST_ALLOWED_LOG_LEVELS}"
-logging.config.dictConfig(
-    {
+
+
+def logging_config(log_level: str):
+    conf = {
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": {
@@ -57,8 +59,10 @@ logging.config.dictConfig(
             },
         },
     }
-)
+    logging.config.dictConfig(conf)
 
+
+logging_config(LOG_LEVEL)
 
 log = logging.getLogger(__name__)
 

@@ -36,7 +36,7 @@ def run_subprocess(shell_args: str) -> str:
 
 def get_new_backup_path(env_name: str, name: str) -> Path:
     base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
-    base_dir_path.mkdir(mode=0o700, exist_ok=True)
+    base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
     random_string = secrets.token_urlsafe(3)
     new_file = "{}_{}_{}".format(
         datetime.utcnow().strftime("%Y%m%d_%H%M"),
@@ -56,16 +56,12 @@ def run_create_zip_archive(backup_file: Path) -> Path:
     run_subprocess(shell_args_create)
     log.debug("run_create_zip_archive finished, output: %s", out_file)
 
-    log.debug(
-        "run_create_zip_archive start integriy test in subprocess: %s", backup_file
-    )
+    log.debug("run_create_zip_archive start integriy test in subprocess: %s", out_file)
     shell_args_integriy = (
         f"{config.CONST_ZIP_BIN_7ZZ_PATH} t "
         f"-p{config.ZIP_ARCHIVE_PASSWORD} {out_file}"
     )
     integrity_check_result = run_subprocess(shell_args_integriy)
     assert "Everything is Ok" in integrity_check_result
-    log.debug(
-        "run_create_zip_archive finish integriy test in subprocess: %s", backup_file
-    )
+    log.debug("run_create_zip_archive finish integriy test in subprocess: %s", out_file)
     return out_file

@@ -34,4 +34,4 @@ services:
       dockerfile: Dockerfile
       target: tests
     environment:
-      - POSTGRES_HOST=postgres
+      - DOCKER_TESTS=true
