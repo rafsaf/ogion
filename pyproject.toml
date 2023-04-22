@@ -27,6 +27,10 @@ freezegun = "^1.2.2"
 [tool.pytest.ini_options]
 addopts = "-v"
 minversion = "6.0"
+filterwarnings = [
+    "ignore:Deprecated call to `pkg_resources.declare_namespace\\('google:DeprecationWarning",
+    "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
+]
 
 [tool.coverage.run]
 omit = []

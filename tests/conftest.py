@@ -1,8 +1,10 @@
 import os
 import secrets
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
+from google.cloud import storage
 from pytest import MonkeyPatch
 
 from pg_dump import config
@@ -75,6 +77,7 @@ def fixed_config_setup(tmp_path: Path, monkeypatch: MonkeyPatch):
     monkeypatch.setattr(config, "BACKUP_COOLING_RETRIES", 0)
     monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 1)
     monkeypatch.setattr(config, "ZIP_ARCHIVE_PASSWORD", "test")
+    monkeypatch.setattr(config, "GOOGLE_BUCKET_UPLOAD_PATH", "test")
     CONST_BACKUP_FOLDER_PATH = tmp_path / "pytest_data"
     monkeypatch.setattr(config, "CONST_BACKUP_FOLDER_PATH", CONST_BACKUP_FOLDER_PATH)
     CONST_PGPASS_FILE_PATH = tmp_path / "pytest_pgpass"
@@ -96,3 +99,19 @@ def fixed_secrets_token_urlsafe(monkeypatch: MonkeyPatch):
         return CONST_TOKEN_URLSAFE
 
     monkeypatch.setattr(secrets, "token_urlsafe", mock_token_urlsafe)
+
+
+@pytest.fixture(autouse=True)
+def mock_google_cloud_storage(monkeypatch: MonkeyPatch):
+    class Blob:
+        def __init__(self) -> None:
+            self.name = "test_blob"
+
+    class TestClient:
+        def bucket(self, *args, **kwargs):
+            return MagicMock()
+
+        def list_blobs(self, *args, **kwargs):
+            return [Blob()]
+
+    monkeypatch.setattr(storage, "Client", TestClient)
