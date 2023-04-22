@@ -1,6 +1,7 @@
 import base64
 import logging
 import time
+from pathlib import Path
 
 from google.cloud import storage
 
@@ -24,20 +25,22 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
         self.storage_client = storage.Client()
         self.bucket = self.storage_client.bucket(config.GOOGLE_BUCKET_NAME)
 
-    def _post_save(self, backup_file: str):
+    def _post_save(self, backup_file: Path):
         try:
             zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
         except core.CoreSubprocessError:
             log.error("Could not create zip_backup_file from %s", backup_file)
             raise
 
+        backup_dest_in_bucket = "{}/{}".format(
+            zip_backup_file.parent.name,
+            zip_backup_file.name,
+        )
         if config.GOOGLE_BUCKET_UPLOAD_PATH is not None:
             backup_dest_in_bucket = "{}/{}".format(
                 config.GOOGLE_BUCKET_UPLOAD_PATH,
-                zip_backup_file.split("/")[-1],
+                backup_dest_in_bucket,
             )
-        else:
-            backup_dest_in_bucket = zip_backup_file.split("/")[-1]
 
         log.debug("Start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
 
@@ -62,22 +65,21 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
         log.debug("Uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return True
 
-    def _clean(self, success: bool):
-        if success:
-            for backup_dir_path in config.CONST_BACKUP_FOLDER_PATH.iterdir():
-                for backup_path in backup_dir_path.iterdir():
-                    backup_path.unlink()
-                    log.info("Removed %s from local disk", backup_path)
+    def _clean(self, backup_file: Path):
+        for backup_path in backup_file.parent.iterdir():
+            backup_path.unlink()
+            log.info("Removed %s from local disk", backup_path)
 
-            backup_list_cloud: list[str] = []
-            for blob in self.storage_client.list_blobs(
-                self.bucket, prefix=config.GOOGLE_BUCKET_UPLOAD_PATH
-            ):
-                backup_list_cloud.append(blob.name)
+        backup_list_cloud: list[str] = []
+        prefix = backup_file.parent.name
+        if config.GOOGLE_BUCKET_UPLOAD_PATH:
+            prefix = f"{config.GOOGLE_BUCKET_UPLOAD_PATH}/{prefix}"
+        for blob in self.storage_client.list_blobs(self.bucket, prefix=prefix):
+            backup_list_cloud.append(blob.name)
 
-            backup_list_cloud.sort(reverse=True)
-            while len(backup_list_cloud) > config.BACKUP_MAX_NUMBER:
-                backup_to_remove = backup_list_cloud.pop()
-                blob = self.bucket.blob(backup_to_remove)
-                blob.delete()
-                log.info("Deleted backup %s from Google Cloud Storage")
+        backup_list_cloud.sort(reverse=True)
+        while len(backup_list_cloud) > config.BACKUP_MAX_NUMBER:
+            backup_to_remove = backup_list_cloud.pop()
+            blob = self.bucket.blob(backup_to_remove)
+            blob.delete()
+            log.info("Deleted backup %s from Google Cloud Storage", backup_to_remove)

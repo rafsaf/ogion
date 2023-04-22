@@ -18,9 +18,9 @@ class BaseBackupProvider(ABC):
             return False
 
     @final
-    def safe_clean(self, success: bool) -> None:
+    def safe_clean(self, backup_file: Path) -> None:
         try:
-            return self._clean(success=success)
+            return self._clean(backup_file=backup_file)
         except Exception as err:
             log.error(err, exc_info=True)
 
@@ -29,5 +29,5 @@ class BaseBackupProvider(ABC):
         return
 
     @abstractmethod
-    def _clean(self, success: bool) -> None:
+    def _clean(self, backup_file: Path) -> None:
         return

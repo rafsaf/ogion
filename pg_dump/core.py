@@ -2,6 +2,7 @@ import logging
 import secrets
 import subprocess
 from datetime import datetime
+from pathlib import Path
 
 from pg_dump import config
 
@@ -33,7 +34,7 @@ def run_subprocess(shell_args: str) -> str:
     return p.stdout
 
 
-def get_new_backup_path(env_name: str, name: str):
+def get_new_backup_path(env_name: str, name: str) -> Path:
     base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
     base_dir_path.mkdir(mode=0o700, exist_ok=True)
     random_string = secrets.token_urlsafe(3)
@@ -45,8 +46,8 @@ def get_new_backup_path(env_name: str, name: str):
     return base_dir_path / new_file
 
 
-def run_create_zip_archive(backup_file: str):
-    out_file = f"{backup_file}.zip"
+def run_create_zip_archive(backup_file: Path) -> Path:
+    out_file = Path(f"{backup_file}.zip")
     shell_args = (
         f"{config.CONST_ZIP_BIN_7ZZ_PATH} a -p{config.ZIP_ARCHIVE_PASSWORD} -mx=5 "
         f"{out_file} {backup_file}"

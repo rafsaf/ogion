@@ -56,7 +56,8 @@ def main():
                 if not backup_file:
                     continue
                 success = provider.safe_post_save(backup_file=backup_file)
-                provider.safe_clean(success)
+                if success:
+                    provider.safe_clean(backup_file=backup_file)
         if args.single:
             exit_event.set()
         exit_event.wait(5)

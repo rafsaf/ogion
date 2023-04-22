@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from pg_dump import config
 from pg_dump.storage_providers import base_provider
@@ -15,12 +16,12 @@ class LocalFiles(base_provider.BaseBackupProvider):
 
     NAME = config.BackupProviderEnum.LOCAL_FILES
 
-    def _post_save(self, backup_file: str):
+    def _post_save(self, backup_file: Path):
         return True
 
-    def _clean(self, success: bool):
+    def _clean(self, backup_file: Path):
         files: list[str] = []
-        for backup_path in config.CONST_BACKUP_FOLDER_PATH.iterdir():
+        for backup_path in backup_file.parent.iterdir():
             files.append(str(backup_path.absolute()))
         files.sort(reverse=True)
         while len(files) > config.BACKUP_MAX_NUMBER:
