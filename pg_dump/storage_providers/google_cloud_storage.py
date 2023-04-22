@@ -66,9 +66,9 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
         return True
 
     def _clean(self, backup_file: Path):
-        # for backup_path in backup_file.parent.iterdir():
-        #     backup_path.unlink()
-        #     log.info("Removed %s from local disk", backup_path)
+        for backup_path in backup_file.parent.iterdir():
+            backup_path.unlink()
+            log.info("Removed %s from local disk", backup_path)
 
         backup_list_cloud: list[str] = []
         prefix = backup_file.parent.name
