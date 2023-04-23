@@ -43,7 +43,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
                 backup_dest_in_bucket,
             )
 
-        log.debug("Start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("Start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
 
         blob = self.bucket.blob(backup_dest_in_bucket)
         retry = 1
@@ -63,7 +63,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
                 time.sleep(2 ^ retry)
                 retry += 1
 
-        log.debug("Uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("Uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return True
 
     def _clean(self, backup_file: Path):

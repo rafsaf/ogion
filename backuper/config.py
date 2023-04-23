@@ -2,6 +2,7 @@ import json
 import logging
 import logging.config
 import os
+import re
 from enum import StrEnum
 from pathlib import Path
 
@@ -17,6 +18,7 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
+CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9]{4,1024}$")
 CONST_ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
 CONST_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
 CONST_PGPASS_FILE_PATH: Path = BASE_DIR / ".pgpass"
@@ -81,6 +83,10 @@ class BackupTargetEnum(StrEnum):
 BACKUP_PROVIDER = os.environ.get("BACKUP_PROVIDER", BackupProviderEnum.LOCAL_FILES)
 
 ZIP_ARCHIVE_PASSWORD = os.environ.get("ZIP_ARCHIVE_PASSWORD", "")
+if not CONST_ZIP_PASSWORD_REGEX.match(ZIP_ARCHIVE_PASSWORD):
+    raise RuntimeError(
+        f"`ZIP_ARCHIVE_PASSWORD` does not match regex {CONST_ZIP_PASSWORD_REGEX}: `{ZIP_ARCHIVE_PASSWORD}`"
+    )
 SUBPROCESS_TIMEOUT_SECS: int = int(os.environ.get("SUBPROCESS_TIMEOUT_SECS", 60 * 60))
 BACKUP_COOLING_SECS: int = int(os.environ.get("BACKUP_COOLING_SECS", 60))
 BACKUP_COOLING_RETRIES: int = int(os.environ.get("BACKUP_COOLING_RETRIES", 1))
@@ -149,11 +155,7 @@ for env_name, val in os.environ.items():
 
 def runtime_configuration():
     if BACKUP_PROVIDER == BackupProviderEnum.GOOGLE_CLOUD_STORAGE:
-        if not ZIP_ARCHIVE_PASSWORD:
-            raise RuntimeError(
-                f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `ZIP_ARCHIVE_PASSWORD`"
-            )
-        elif not GOOGLE_BUCKET_NAME:
+        if not GOOGLE_BUCKET_NAME:
             raise RuntimeError(
                 f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `GOOGLE_BUCKET_NAME`"
             )
