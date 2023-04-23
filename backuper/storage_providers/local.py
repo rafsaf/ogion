@@ -28,8 +28,8 @@ class LocalFiles(base_provider.BaseBackupProvider):
             backup_to_remove = files.pop()
             try:
                 os.unlink(backup_to_remove)
-                log.info("Removed file %s", backup_to_remove)
+                log.info("removed file %s", backup_to_remove)
             except Exception as e:
                 log.error(
-                    "Could not remove file %s: %s", backup_to_remove, e, exc_info=True
+                    "could not remove file %s: %s", backup_to_remove, e, exc_info=True
                 )

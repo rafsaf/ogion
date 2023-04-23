@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 def quit(sig, frame):
-    log.info("Interrupted by %s, shutting down" % sig)
+    log.info("interrupted by %s, shutting down" % sig)
     exit_event.set()
 
 
@@ -36,18 +36,24 @@ def backup_targets() -> list[BaseBackupTarget]:
     for target in config.BACKUP_TARGETS:
         if target.type == config.BackupTargetEnum.POSTGRESQL:
             log.info(
-                "start initializing connection with database: `%s`", target.env_name
+                "initializing postgres target, trying to connect to database: `%s`",
+                target.env_name,
             )
-            targets.append(PostgreSQL(**target.dict()))
-            log.info("connection with database `%s`: ok", target.env_name)
+            pg_target = PostgreSQL(**target.dict())
+            targets.append(pg_target)
+            log.info(
+                "success initializing postgres target, obtained db version is %s: `%s`",
+                pg_target.db_version,
+                target.env_name,
+            )
         elif target.type == config.BackupTargetEnum.FILE:
-            log.info("start initializing file: `%s`", target.env_name)
+            log.info("initializing file target: `%s`", target.env_name)
             targets.append(File(**target.dict()))
-            log.info("file `%s`: ok", target.env_name)
+            log.info("success initializing file target: `%s`", target.env_name)
         elif target.type == config.BackupTargetEnum.FOLDER:
-            log.info("start initializing folder: `%s`", target.env_name)
+            log.info("initializing folder target: `%s`", target.env_name)
             targets.append(Folder(**target.dict()))
-            log.info("folder `%s`: ok", target.env_name)
+            log.info("success initializing folder target: `%s`", target.env_name)
     return targets
 
 
@@ -64,16 +70,22 @@ def main():
     while not exit_event.is_set():
         for target in targets:
             if target.next_backup() or args.single:
+                log.info("start making backup of target: `%s`", target.env_name)
                 backup_file = target.make_backup()
                 if not backup_file:
                     continue
                 success = provider.safe_post_save(backup_file=backup_file)
                 if success:
                     provider.safe_clean(backup_file=backup_file)
+                log.info(
+                    "next planned backup of target `%s` is: %s",
+                    target.env_name,
+                    target.next_backup_time,
+                )
         if args.single:
             exit_event.set()
         exit_event.wait(5)
-    log.info("Gracefully exited")
+    log.info("gracefully exited backuper")
 
 
 if __name__ == "__main__":

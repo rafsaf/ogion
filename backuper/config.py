@@ -135,22 +135,22 @@ BACKUP_TARGETS: list[BackupTarget] = []
 for env_name, val in os.environ.items():
     env_name = env_name.lower()
     if env_name.startswith(BackupTargetEnum.POSTGRESQL):
-        log.info("validating PostgreSQLBackupTarget variable: `%s`", env_name)
+        log.info("validating postgresqlbackuptarget variable: `%s`", env_name)
         db_data_from_env = json.loads(val)
         BACKUP_TARGETS.append(
             PostgreSQLBackupTarget(env_name=env_name, **db_data_from_env)
         )
-        log.info("PostgreSQLBackupTarget variable `%s`: ok", env_name)
+        log.info("postgresqlbackuptarget variable ok: `%s`", env_name)
     elif env_name.startswith(BackupTargetEnum.FILE):
-        log.info("validating FileBackupTarget variable: `%s`", env_name)
+        log.info("validating filebackuptarget variable: `%s`", env_name)
         db_data_from_env = json.loads(val)
         BACKUP_TARGETS.append(FileBackupTarget(env_name=env_name, **db_data_from_env))
-        log.info("FileBackupTarget variable `%s`: ok", env_name)
+        log.info("filebackuptarget variable ok: `%s`", env_name)
     elif env_name.startswith(BackupTargetEnum.FOLDER):
-        log.info("validating FolderBackupTarget variable: `%s`", env_name)
+        log.info("validating folderbackuptarget variable: `%s`", env_name)
         db_data_from_env = json.loads(val)
         BACKUP_TARGETS.append(FolderBackupTarget(env_name=env_name, **db_data_from_env))
-        log.info("FolderBackupTarget variable `%s`: ok", env_name)
+        log.info("folderbackuptarget variable ok: `%s`", env_name)
 
 
 def runtime_configuration():

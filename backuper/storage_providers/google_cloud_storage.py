@@ -30,7 +30,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
         try:
             zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
         except core.CoreSubprocessError:
-            log.error("Could not create zip_backup_file from %s", backup_file)
+            log.error("could not create zip_backup_file from %s", backup_file)
             raise
 
         backup_dest_in_bucket = "{}/{}".format(
@@ -43,7 +43,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
                 backup_dest_in_bucket,
             )
 
-        log.info("Start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
 
         blob = self.bucket.blob(backup_dest_in_bucket)
         retry = 1
@@ -63,7 +63,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
                 time.sleep(2 ^ retry)
                 retry += 1
 
-        log.info("Uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return True
 
     def _clean(self, backup_file: Path):
@@ -72,7 +72,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
                 shutil.rmtree(backup_path)
             else:
                 backup_path.unlink()
-            log.info("Removed %s from local disk", backup_path)
+            log.info("removed %s from local disk", backup_path)
 
         backup_list_cloud: list[str] = []
         prefix = backup_file.parent.name
@@ -86,4 +86,4 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
             backup_to_remove = backup_list_cloud.pop()
             blob = self.bucket.blob(backup_to_remove)
             blob.delete()
-            log.info("Deleted backup %s from Google Cloud Storage", backup_to_remove)
+            log.info("deleted backup %s from google cloud storage", backup_to_remove)

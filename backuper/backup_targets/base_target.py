@@ -17,6 +17,11 @@ class BaseBackupTarget(ABC):
         self.env_name = env_name
         self.last_backup_time = datetime.utcnow()
         self.next_backup_time = self._get_next_backup_time()
+        log.info(
+            "first planned backup of target `%s` is: %s",
+            env_name,
+            self.next_backup_time,
+        )
 
     @final
     def make_backup(self) -> Path | None:
