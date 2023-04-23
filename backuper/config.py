@@ -141,13 +141,31 @@ class MySQLBackupTarget(BackupTarget):
 
 
 class FileBackupTarget(BackupTarget):
-    abs_path: str
+    abs_path: Path
     type = BackupTargetEnum.FILE
+
+    @validator("abs_path")
+    def abs_path_is_valid(cls, abs_path: Path):
+        if not abs_path.is_file() or not abs_path.exists():
+            raise ValueError(
+                f"Path {abs_path} is not a file or does not exist\n "
+                f"Error validating environment variable: {env_name}"
+            )
+        return env_name
 
 
 class FolderBackupTarget(BackupTarget):
-    abs_path: str
+    abs_path: Path
     type = BackupTargetEnum.FOLDER
+
+    @validator("abs_path")
+    def abs_path_is_valid(cls, abs_path: Path):
+        if not abs_path.is_dir() or not abs_path.exists():
+            raise ValueError(
+                f"Path {abs_path} is not a dir or does not exist\n "
+                f"Error validating environment variable: {env_name}"
+            )
+        return env_name
 
 
 def _validate_backup_target(env_name: str, val: str, target: type[BackupTarget]):
@@ -156,9 +174,9 @@ def _validate_backup_target(env_name: str, val: str, target: type[BackupTarget])
     try:
         db_data_from_env = json.loads(val)
         res = target(env_name=env_name, **db_data_from_env)
-    except Exception as err:
-        log.error(err)
-        raise RuntimeError(f"Error validating environment variable: `{env_name}`")
+    except Exception:
+        log.critical("Error validating environment variable: `%s`", env_name)
+        raise
     log.info("%s variable ok: `%s`", target_type, env_name)
     return res
 
