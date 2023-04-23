@@ -4,7 +4,7 @@ import signal
 import threading
 
 from pg_dump import config
-from pg_dump.backup_targets import BaseBackupTarget, PostgreSQL
+from pg_dump.backup_targets import BaseBackupTarget, File, Folder, PostgreSQL
 from pg_dump.storage_providers import BaseBackupProvider, GoogleCloudStorage, LocalFiles
 
 exit_event = threading.Event()
@@ -36,6 +36,14 @@ def backup_targets() -> list[BaseBackupTarget]:
             )
             targets.append(PostgreSQL(**target.dict()))
             log.info("connection with database `%s`: ok", target.env_name)
+        elif target.type == config.BackupTargetEnum.FILE:
+            log.info("start initializing file: `%s`", target.env_name)
+            targets.append(File(**target.dict()))
+            log.info("file `%s`: ok", target.env_name)
+        elif target.type == config.BackupTargetEnum.FOLDER:
+            log.info("start initializing folder: `%s`", target.env_name)
+            targets.append(Folder(**target.dict()))
+            log.info("folder `%s`: ok", target.env_name)
     return targets
 
 

@@ -74,6 +74,8 @@ class BackupProviderEnum(StrEnum):
 
 class BackupTargetEnum(StrEnum):
     POSTGRESQL = "postgresql"
+    FILE = "file"
+    FOLDER = "folder"
 
 
 BACKUP_PROVIDER = os.environ.get("BACKUP_PROVIDER", BackupProviderEnum.LOCAL_FILES)
@@ -113,6 +115,16 @@ class PostgreSQLBackupTarget(BackupTarget):
     type = BackupTargetEnum.POSTGRESQL
 
 
+class FileBackupTarget(BackupTarget):
+    abs_path: str
+    type = BackupTargetEnum.FILE
+
+
+class FolderBackupTarget(BackupTarget):
+    abs_path: str
+    type = BackupTargetEnum.FOLDER
+
+
 BACKUP_TARGETS: list[BackupTarget] = []
 for env_name, val in os.environ.items():
     env_name = env_name.lower()
@@ -123,6 +135,16 @@ for env_name, val in os.environ.items():
             PostgreSQLBackupTarget(env_name=env_name, **db_data_from_env)
         )
         log.info("PostgreSQLBackupTarget variable `%s`: ok", env_name)
+    elif env_name.startswith(BackupTargetEnum.FILE):
+        log.info("validating FileBackupTarget variable: `%s`", env_name)
+        db_data_from_env = json.loads(val)
+        BACKUP_TARGETS.append(FileBackupTarget(env_name=env_name, **db_data_from_env))
+        log.info("FileBackupTarget variable `%s`: ok", env_name)
+    elif env_name.startswith(BackupTargetEnum.FOLDER):
+        log.info("validating FolderBackupTarget variable: `%s`", env_name)
+        db_data_from_env = json.loads(val)
+        BACKUP_TARGETS.append(FolderBackupTarget(env_name=env_name, **db_data_from_env))
+        log.info("FolderBackupTarget variable `%s`: ok", env_name)
 
 
 def runtime_configuration():

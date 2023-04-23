@@ -1,5 +1,6 @@
 import base64
 import logging
+import shutil
 import time
 from pathlib import Path
 
@@ -67,7 +68,10 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
 
     def _clean(self, backup_file: Path):
         for backup_path in backup_file.parent.iterdir():
-            backup_path.unlink()
+            if backup_path.is_dir():
+                shutil.rmtree(backup_path)
+            else:
+                backup_path.unlink()
             log.info("Removed %s from local disk", backup_path)
 
         backup_list_cloud: list[str] = []
