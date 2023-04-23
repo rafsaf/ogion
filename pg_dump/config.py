@@ -53,7 +53,7 @@ def logging_config(log_level: str):
         },
         "loggers": {
             "": {
-                "level": LOG_LEVEL,
+                "level": log_level,
                 "handlers": ["stream"],
                 "propagate": False,
             },
