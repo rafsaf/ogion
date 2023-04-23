@@ -22,7 +22,7 @@ services:
     image: postgres:11.16
     environment:
       - POSTGRES_PASSWORD=postgres
-  pg_dump_tests:
+  backuper_tests:
     depends_on:
       - postgres_15
       - postgres_14

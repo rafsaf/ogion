@@ -17,4 +17,4 @@ jobs:
         run: docker compose -f docker-compose.tests.yml build
 
       - name: Run tests in container
-        run: docker compose -f docker-compose.tests.yml run pg_dump_tests
+        run: docker compose -f docker-compose.tests.yml run backuper_tests

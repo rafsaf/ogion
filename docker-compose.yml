@@ -5,7 +5,7 @@ services:
     restart: "unless-stopped"
     image: postgres:15.1
     volumes:
-      - pg_dump_dev_postgresql_15:/var/lib/postgresql/data
+      - backuper_dev_postgresql_15:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -14,7 +14,7 @@ services:
     restart: "unless-stopped"
     image: postgres:14.6
     volumes:
-      - pg_dump_dev_postgresql_14:/var/lib/postgresql/data
+      - backuper_dev_postgresql_14:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -23,7 +23,7 @@ services:
     restart: "unless-stopped"
     image: postgres:13.8
     volumes:
-      - pg_dump_dev_postgresql_13:/var/lib/postgresql/data
+      - backuper_dev_postgresql_13:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -32,7 +32,7 @@ services:
     restart: "unless-stopped"
     image: postgres:12.12
     volumes:
-      - pg_dump_dev_postgresql_12:/var/lib/postgresql/data
+      - backuper_dev_postgresql_12:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -41,15 +41,15 @@ services:
     restart: "unless-stopped"
     image: postgres:11.16
     volumes:
-      - pg_dump_dev_postgresql_11:/var/lib/postgresql/data
+      - backuper_dev_postgresql_11:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 10011:5432
 
 volumes:
-  pg_dump_dev_postgresql_15:
-  pg_dump_dev_postgresql_14:
-  pg_dump_dev_postgresql_13:
-  pg_dump_dev_postgresql_12:
-  pg_dump_dev_postgresql_11:
+  backuper_dev_postgresql_15:
+  backuper_dev_postgresql_14:
+  backuper_dev_postgresql_13:
+  backuper_dev_postgresql_12:
+  backuper_dev_postgresql_11:

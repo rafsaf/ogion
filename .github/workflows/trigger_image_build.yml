@@ -27,11 +27,11 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-      - name: Build and push pg_dump image
+      - name: Build and push backuper image
         uses: docker/build-push-action@v4
         with:
           file: Dockerfile
           context: .
           push: true
-          tags: rafsaf/pg_dump:${{ github.ref_name }},rafsaf/pg_dump:latest
+          tags: rafsaf/backuper:${{ github.ref_name }},rafsaf/backuper:latest
           platforms: linux/amd64,linux/arm64

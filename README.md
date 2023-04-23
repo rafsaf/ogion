@@ -1,6 +1,6 @@
-# pg_dump
+# backuper
 
-Small yet solid image for postgresql 10-15 backups scheduling based on postgresql-client `pg_dump`.
+Small yet solid image for postgresql 10-15 backups scheduling based on postgresql-client `backuper`.
 
 # Example docker-compose.yml
 
@@ -8,13 +8,13 @@ Small yet solid image for postgresql 10-15 backups scheduling based on postgresq
 version: "3.4"
 
 services:
-  pg_dump:
-    image: rafsaf/pg_dump:0.4.0
+  backuper:
+    image: rafsaf/backuper:0.4.0
     volumes:
-      - pg_dump_data:/var/lib/pg_dump/data/
+      - backuper_data:/var/lib/backuper/data/
 
 volumes:
-  pg_dump_data:
+  backuper_data:
 ```
 
 Supported backup providers:
@@ -24,11 +24,11 @@ Supported backup providers:
 
 # Full docker image reference
 
-`rafsaf/pg_dump:0.4.0`
+`rafsaf/backuper:0.4.0`
 
 ## Dockerhub:
 
-https://hub.docker.com/repository/docker/rafsaf/pg_dump
+https://hub.docker.com/repository/docker/rafsaf/backuper
 
 ## Reference:
 
@@ -50,7 +50,7 @@ https://hub.docker.com/repository/docker/rafsaf/pg_dump
 
 **SUBPROCESS_TIMEOUT_SECS** - Timeout for all shell subprocesses in seconds, defaults to `3600` (1 hour).
 
-**BACKUP_COOLING_SECS** - Cooling period after pg_dump subprocess fail in seconds, defaults to `60` (1 min).
+**BACKUP_COOLING_SECS** - Cooling period after backuper subprocess fail in seconds, defaults to `60` (1 min).
 
 **BACKUP_COOLING_RETRIES** - Max number of retries for single scheduled backup, defaults to `1`.
 
@@ -63,7 +63,6 @@ https://hub.docker.com/repository/docker/rafsaf/pg_dump
 **GOOGLE_SERVICE_ACCOUNT_BASE64** - Base64 gcloud json service account, by default empty string, requried for `gcs` as a `BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
 
 **GOOGLE_BUCKET_UPLOAD_PATH** - Name of google bucket, by default None, optional for `gcs` as a `BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
-
 
 `gpg --generate-key`
 `gpg --armor --export rafsaf | base64 -w 0 > public.key`

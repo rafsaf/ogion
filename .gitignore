@@ -1,4 +1,4 @@
-# pg_dump
+# backuper
 data/*
 .pgpass
 gpg_public.key.pub

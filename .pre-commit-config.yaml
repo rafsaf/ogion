@@ -61,4 +61,4 @@ repos:
     hooks:
       - id: pyproject-tag-check
         args:
-          - https://github.com/rafsaf/pg_dump
+          - https://github.com/rafsaf/backuper

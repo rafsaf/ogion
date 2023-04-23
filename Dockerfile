@@ -1,7 +1,7 @@
 FROM python:3.11.3-slim-bullseye AS base
 ENV PYTHONUNBUFFERED=1
-ENV SERVICE_NAME="pg_dump"
-ENV FOLDER_PATH="/var/lib/pg_dump"
+ENV SERVICE_NAME="backuper"
+ENV FOLDER_PATH="/var/lib/backuper"
 WORKDIR ${FOLDER_PATH}
 
 RUN addgroup --gid 1001 --system $SERVICE_NAME && \
@@ -25,11 +25,11 @@ COPY requirements-dev.txt .
 RUN pip install -r requirements-dev.txt
 COPY pyproject.toml .
 COPY tests tests
-COPY pg_dump pg_dump
+COPY backuper backuper
 CMD ["coverage", "run", "-m", "pytest", "-vv"]
 
 FROM base AS build
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-COPY pg_dump pg_dump
-CMD ["python", "-m", "pg_dump.main"] 
+COPY backuper backuper
+CMD ["python", "-m", "backuper.main"] 
