@@ -23,6 +23,7 @@ pytest = "^7.3.1"
 python-dotenv = "^1.0.0"
 pyupgrade = "^3.3.1"
 watchfiles = "^0.16.1"
+pyinstaller = {version = "^5.10.1", python = ">=3.11,<3.12"}
 
 [tool.pytest.ini_options]
 addopts = "-v"
@@ -38,6 +39,9 @@ source = ["backuper"]
 
 [tool.isort]
 profile = "black"
+
+[tool.poetry.scripts]
+backuper = "backuper.main:main"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

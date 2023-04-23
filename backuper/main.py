@@ -52,7 +52,7 @@ def backup_targets() -> list[BaseBackupTarget]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Pg dump backup program")
+    parser = argparse.ArgumentParser(description="Backuper program")
     parser.add_argument(
         "-s", "--single", action="store_true", help="Only single backup then exit"
     )
