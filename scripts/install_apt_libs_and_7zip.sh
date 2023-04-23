@@ -1,11 +1,15 @@
 #!/bin/bash
 set -e
 
-apt-get -y update && apt-get install -y wget lsb-release gpg xz-utils
+apt-get -y update && apt-get install -y wget gpg xz-utils
+
 CPU="$(dpkg --print-architecture)"
-DISTR="$(lsb_release -cs)"
+DISTR="$(awk -F= '/^ID=/{print $2}' /etc/os-release)"
+DISTR_VERSION="$(awk -F= '/^VERSION_CODENAME=/{print $2}' /etc/os-release)"
 SCRIPT_PATH=`readlink -f "$0"`
 SCRIPT_DIR=`dirname "$SCRIPT_PATH"`
+
+echo "Runs on $DISTR version $DISTR_VERSION"
 
 #########################################################################
 # POSTGRES CLIENT INSTALLATION
@@ -26,7 +30,7 @@ if [ -f "/etc/apt/sources.list.d/pgdg.list" ]
 then
   echo "/etc/apt/sources.list.d/pgdg.list exists"
 else
-  echo "deb [signed-by=/usr/share/keyrings/www.postgresql.org.gpg arch=$CPU] http://apt.postgresql.org/pub/repos/apt $DISTR-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+  echo "deb [signed-by=/usr/share/keyrings/www.postgresql.org.gpg arch=$CPU] http://apt.postgresql.org/pub/repos/apt $DISTR_VERSION-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 fi
 apt-get -y update && apt-get -y install postgresql-client-15
 echo "postgresql-client-15 installed"
@@ -49,7 +53,7 @@ if [ -f "/etc/apt/sources.list.d/mysql.list" ]
 then
   echo "/etc/apt/sources.list.d/mysql.list exists"
 else
-  echo "deb [signed-by=/usr/share/keyrings/pgp.mit.edu.gpg arch=$CPU] http://repo.mysql.com/apt/debian/ $DISTR mysql-8.0" > /etc/apt/sources.list.d/mysql.list
+  echo "deb [signed-by=/usr/share/keyrings/pgp.mit.edu.gpg arch=$CPU] http://repo.mysql.com/apt/$DISTR/ $DISTR_VERSION mysql-8.0" > /etc/apt/sources.list.d/mysql.list
 fi
 apt-get -y update && apt-get -y install mysql-client
 echo "mysql-client installed"
