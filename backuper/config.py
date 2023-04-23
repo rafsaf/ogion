@@ -18,6 +18,7 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
+CONST_ENV_NAME_REGEX = re.compile(r"^[A-Za-z_0-9]{1,}$")
 CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9]{4,1024}$")
 CONST_ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
 CONST_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
@@ -110,6 +111,14 @@ class BackupTarget(BaseModel):
                 f"Error in cron_rule expression: `{cron_rule}` is not valid"
             )
         return cron_rule
+
+    @validator("env_name")
+    def env_name_is_valid(cls, env_name: str):
+        if not CONST_ENV_NAME_REGEX.match(env_name):
+            raise ValueError(
+                f"Env variable does not match regex {CONST_ENV_NAME_REGEX}: `{env_name}`"
+            )
+        return env_name
 
 
 class PostgreSQLBackupTarget(BackupTarget):
