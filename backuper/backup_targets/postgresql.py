@@ -1,6 +1,8 @@
 import logging
 import re
 
+from pydantic import SecretStr
+
 from backuper import config, core
 from backuper.backup_targets.base_target import BaseBackupTarget
 
@@ -10,10 +12,14 @@ VERSION_REGEX = re.compile(r"PostgreSQL \d*\.\d* ")
 
 
 class PostgreSQL(BaseBackupTarget):
+    # https://www.postgresql.org/docs/current/libpq-pgpass.html
+    # https://www.postgresql.org/docs/current/app-pgdump.html
+    # https://www.postgresql.org/docs/current/app-psql.html
+
     def __init__(
         self,
         user: str,
-        password: str,
+        password: SecretStr,
         port: int,
         host: str,
         db: str,
@@ -21,6 +27,7 @@ class PostgreSQL(BaseBackupTarget):
         env_name: str,
         **kwargs,
     ) -> None:
+        super().__init__(cron_rule=cron_rule, env_name=env_name)
         self.cron_rule = cron_rule
         self.user = user
         self.port = port
@@ -29,7 +36,6 @@ class PostgreSQL(BaseBackupTarget):
         self.password = password
         self._init_pgpass_file()
         self.db_version = self._postgres_connection()
-        super().__init__(cron_rule=cron_rule, env_name=env_name)
 
     def _init_pgpass_file(self):
         pgpass_text = "{}:{}:{}:{}:{}\n".format(
@@ -37,7 +43,7 @@ class PostgreSQL(BaseBackupTarget):
             self.port,
             self.user,
             self.db,
-            self.password,
+            self.password.get_secret_value(),
         )
         with open(config.CONST_PGPASS_FILE_PATH, "a") as file:
             file.write(pgpass_text)
@@ -59,10 +65,10 @@ class PostgreSQL(BaseBackupTarget):
             exit(1)
 
         version = None
-        matches: list[str] = VERSION_REGEX.findall(result)
+        matches = VERSION_REGEX.finditer(result)
 
         for match in matches:
-            version = match.strip().split(" ")[1]
+            version = match.group(0).strip().split(" ")[1]
             break
         if version is None:  # pragma: no cover
             log.error(

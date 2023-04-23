@@ -39,6 +39,7 @@ echo "postgresql-client-15 installed"
 # MYSQL CLIENT INSTALLATION
 #
 # https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/
+# https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/#repo-qg-apt-available
 #########################################################################
 
 echo "Installing mysql-client"

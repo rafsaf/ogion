@@ -4,7 +4,7 @@ import signal
 import threading
 
 from backuper import config
-from backuper.backup_targets import BaseBackupTarget, File, Folder, PostgreSQL
+from backuper.backup_targets import BaseBackupTarget, File, Folder, MySQL, PostgreSQL
 from backuper.storage_providers import (
     BaseBackupProvider,
     GoogleCloudStorage,
@@ -54,6 +54,15 @@ def backup_targets() -> list[BaseBackupTarget]:
             log.info("initializing folder target: `%s`", target.env_name)
             targets.append(Folder(**target.dict()))
             log.info("success initializing folder target: `%s`", target.env_name)
+        elif target.type == config.BackupTargetEnum.MYSQL:
+            log.info("initializing folder target: `%s`", target.env_name)
+            targets.append(MySQL(**target.dict()))
+            log.info("success initializing folder target: `%s`", target.env_name)
+        else:
+            raise RuntimeError(
+                "panic!!! unsupported backup target",
+                target.dict(),
+            )
     return targets
 
 

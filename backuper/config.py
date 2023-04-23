@@ -7,7 +7,7 @@ from enum import StrEnum
 from pathlib import Path
 
 from croniter import croniter
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, SecretStr, validator
 
 BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 
@@ -77,6 +77,7 @@ class BackupProviderEnum(StrEnum):
 
 class BackupTargetEnum(StrEnum):
     POSTGRESQL = "postgresql"
+    MYSQL = "mysql"
     FILE = "singlefile"
     FOLDER = "directory"
 
@@ -126,8 +127,17 @@ class PostgreSQLBackupTarget(BackupTarget):
     host: str = "localhost"
     port: int = 5432
     db: str = "postgres"
-    password: str
+    password: SecretStr
     type = BackupTargetEnum.POSTGRESQL
+
+
+class MySQLBackupTarget(BackupTarget):
+    user: str = "root"
+    host: str = "localhost"
+    port: int = 3306
+    db: str
+    password: SecretStr
+    type = BackupTargetEnum.MYSQL
 
 
 class FileBackupTarget(BackupTarget):
@@ -140,26 +150,34 @@ class FolderBackupTarget(BackupTarget):
     type = BackupTargetEnum.FOLDER
 
 
+def _validate_backup_target(env_name: str, val: str, target: type[BackupTarget]):
+    target_type = target.__name__.lower()
+    log.info("validating %s variable: `%s`", target_type, env_name)
+    try:
+        db_data_from_env = json.loads(val)
+        res = target(env_name=env_name, **db_data_from_env)
+    except Exception as err:
+        log.error(err)
+        raise RuntimeError(f"Error validating environment variable: `{env_name}`")
+    log.info("%s variable ok: `%s`", target_type, env_name)
+    return res
+
+
 BACKUP_TARGETS: list[BackupTarget] = []
 for env_name, val in os.environ.items():
     env_name = env_name.lower()
     if env_name.startswith(BackupTargetEnum.POSTGRESQL):
-        log.info("validating postgresqlbackuptarget variable: `%s`", env_name)
-        db_data_from_env = json.loads(val)
         BACKUP_TARGETS.append(
-            PostgreSQLBackupTarget(env_name=env_name, **db_data_from_env)
+            _validate_backup_target(env_name, val, PostgreSQLBackupTarget)
         )
-        log.info("postgresqlbackuptarget variable ok: `%s`", env_name)
+    elif env_name.startswith(BackupTargetEnum.MYSQL):
+        BACKUP_TARGETS.append(_validate_backup_target(env_name, val, MySQLBackupTarget))
     elif env_name.startswith(BackupTargetEnum.FILE):
-        log.info("validating filebackuptarget variable: `%s`", env_name)
-        db_data_from_env = json.loads(val)
-        BACKUP_TARGETS.append(FileBackupTarget(env_name=env_name, **db_data_from_env))
-        log.info("filebackuptarget variable ok: `%s`", env_name)
+        BACKUP_TARGETS.append(_validate_backup_target(env_name, val, FileBackupTarget))
     elif env_name.startswith(BackupTargetEnum.FOLDER):
-        log.info("validating folderbackuptarget variable: `%s`", env_name)
-        db_data_from_env = json.loads(val)
-        BACKUP_TARGETS.append(FolderBackupTarget(env_name=env_name, **db_data_from_env))
-        log.info("folderbackuptarget variable ok: `%s`", env_name)
+        BACKUP_TARGETS.append(
+            _validate_backup_target(env_name, val, FolderBackupTarget)
+        )
 
 
 def runtime_configuration():

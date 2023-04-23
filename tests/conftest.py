@@ -5,10 +5,11 @@ from unittest.mock import MagicMock
 
 import pytest
 from google.cloud import storage
+from pydantic import SecretStr
 from pytest import MonkeyPatch
 
 from backuper import config
-from backuper.config import BackupTargetEnum, PostgreSQLBackupTarget
+from backuper.config import BackupTargetEnum, MySQLBackupTarget, PostgreSQLBackupTarget
 
 DOCKER_TESTS: bool = os.environ.get("DOCKER_TESTS", None) is not None
 CONST_TOKEN_URLSAFE = "mock"
@@ -17,7 +18,7 @@ POSTGRES_15 = PostgreSQLBackupTarget(
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_15" if DOCKER_TESTS else "localhost",
-    password="postgres",
+    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10015,
 )
 POSTGRES_14 = PostgreSQLBackupTarget(
@@ -25,7 +26,7 @@ POSTGRES_14 = PostgreSQLBackupTarget(
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_14" if DOCKER_TESTS else "localhost",
-    password="postgres",
+    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10014,
 )
 POSTGRES_13 = PostgreSQLBackupTarget(
@@ -33,7 +34,7 @@ POSTGRES_13 = PostgreSQLBackupTarget(
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_13" if DOCKER_TESTS else "localhost",
-    password="postgres",
+    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10013,
 )
 POSTGRES_12 = PostgreSQLBackupTarget(
@@ -41,7 +42,7 @@ POSTGRES_12 = PostgreSQLBackupTarget(
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_12" if DOCKER_TESTS else "localhost",
-    password="postgres",
+    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10012,
 )
 POSTGRES_11 = PostgreSQLBackupTarget(
@@ -49,16 +50,36 @@ POSTGRES_11 = PostgreSQLBackupTarget(
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_11" if DOCKER_TESTS else "localhost",
-    password="postgres",
+    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10011,
 )
+MYSQL_57 = MySQLBackupTarget(
+    env_name="mysql_db_57",
+    type=BackupTargetEnum.MYSQL,
+    cron_rule="* * * * *",
+    host="mysql_57" if DOCKER_TESTS else "localhost",
+    password=SecretStr("mysql"),
+    port=3306 if DOCKER_TESTS else 10057,
+    db="database",
+)
+MYSQL_80 = MySQLBackupTarget(
+    env_name="mysql_db_80",
+    type=BackupTargetEnum.MYSQL,
+    cron_rule="* * * * *",
+    host="mysql_80" if DOCKER_TESTS else "localhost",
+    password=SecretStr("mysql"),
+    port=3306 if DOCKER_TESTS else 10080,
+    db="database",
+)
 
-POSTGRES_VERSION_BY_ENV: dict[str, str] = {
+DB_VERSION_BY_ENV_VAR: dict[str, str] = {
     "postgresql_db_15": "15.1",
     "postgresql_db_14": "14.6",
     "postgresql_db_13": "13.8",
     "postgresql_db_12": "12.12",
     "postgresql_db_11": "11.16",
+    "mysql_db_80": "8.0.33",
+    "mysql_db_57": "5.7.42",
 }
 ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLBackupTarget] = [
     POSTGRES_11,
@@ -66,6 +87,10 @@ ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLBackupTarget] = [
     POSTGRES_13,
     POSTGRES_14,
     POSTGRES_15,
+]
+ALL_MYSQL_DBS_TARGETS: list[MySQLBackupTarget] = [
+    MYSQL_57,
+    MYSQL_80,
 ]
 
 

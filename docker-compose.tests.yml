@@ -22,6 +22,16 @@ services:
     image: postgres:11.16
     environment:
       - POSTGRES_PASSWORD=postgres
+  mysql_57:
+    image: mysql:5.7.42
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+      - MYSQL_DATABASE=database
+  mysql_80:
+    image: mysql:8.0.33
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+      - MYSQL_DATABASE=database
   backuper_tests:
     depends_on:
       - postgres_15
@@ -29,6 +39,8 @@ services:
       - postgres_13
       - postgres_12
       - postgres_11
+      - mysql_57
+      - mysql_80
     build:
       context: ./
       dockerfile: Dockerfile
