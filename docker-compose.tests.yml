@@ -35,3 +35,4 @@ services:
       target: tests
     environment:
       - DOCKER_TESTS=true
+      - ZIP_ARCHIVE_PASSWORD=password
