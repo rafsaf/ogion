@@ -13,7 +13,7 @@ ENV PATH="$FOLDER_PATH/venv/bin:$PATH"
 COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 COPY scripts scripts
 COPY bin bin
-RUN /bin/bash scripts/install_pg_client_and_7zip.sh
+RUN /bin/bash scripts/install_apt_libs_and_7zip.sh
 RUN rm -rf scripts bin/7zip
 RUN apt-get remove -y wget lsb-release gpg xz-utils && apt-get autoremove --purge -y        \
     && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/*.list

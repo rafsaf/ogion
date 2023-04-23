@@ -20,7 +20,7 @@ if [ -f "/usr/share/keyrings/www.postgresql.org.gpg" ]
 then
   echo "/usr/share/keyrings/www.postgresql.org.gpg exists"
 else
-  wget -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/www.postgresql.org.gpg
+  cat $SCRIPT_DIR/keys/www.postgresql.org.asc | gpg --dearmor -o /usr/share/keyrings/www.postgresql.org.gpg
 fi
 if [ -f "/etc/apt/sources.list.d/pgdg.list" ]
 then
@@ -30,6 +30,29 @@ else
 fi
 apt-get -y update && apt-get -y install postgresql-client-15
 echo "postgresql-client-15 installed"
+
+#########################################################################
+# MYSQL CLIENT INSTALLATION
+#
+# https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/
+#########################################################################
+
+echo "Installing mysql-client"
+mkdir -p /usr/share/keyrings/
+if [ -f "/usr/share/keyrings/pgp.mit.edu.gpg" ]
+then
+  echo "/usr/share/keyrings/pgp.mit.edu.gpg exists"
+else
+  cat $SCRIPT_DIR/keys/pgp.mit.edu.asc | gpg --dearmor -o /usr/share/keyrings/pgp.mit.edu.gpg
+fi
+if [ -f "/etc/apt/sources.list.d/mysql.list" ]
+then
+  echo "/etc/apt/sources.list.d/mysql.list exists"
+else
+  echo "deb [signed-by=/usr/share/keyrings/pgp.mit.edu.gpg arch=$CPU] http://repo.mysql.com/apt/debian/ $DISTR mysql-8.0" > /etc/apt/sources.list.d/mysql.list
+fi
+apt-get -y update && apt-get -y install mysql-client
+echo "mysql-client installed"
 
 #########################################################################
 # 7ZIP INSTALLATION
