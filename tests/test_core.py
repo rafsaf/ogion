@@ -4,7 +4,7 @@ import pytest
 from freezegun import freeze_time
 from pytest import LogCaptureFixture
 
-from pg_dump import config, core
+from backuper import config, core
 
 
 def test_run_subprocess_fail(caplog: LogCaptureFixture):

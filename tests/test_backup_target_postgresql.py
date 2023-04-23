@@ -2,8 +2,8 @@ import pytest
 from freezegun import freeze_time
 from pytest import LogCaptureFixture, MonkeyPatch
 
-from pg_dump import config
-from pg_dump.backup_targets import PostgreSQL
+from backuper import config
+from backuper.backup_targets import PostgreSQL
 
 from .conftest import (
     ALL_POSTGRES_DBS_TARGETS,

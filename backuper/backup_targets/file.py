@@ -1,8 +1,8 @@
 import logging
 from pathlib import Path
 
-from pg_dump import core
-from pg_dump.backup_targets.base_target import BaseBackupTarget
+from backuper import core
+from backuper.backup_targets.base_target import BaseBackupTarget
 
 log = logging.getLogger(__name__)
 

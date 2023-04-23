@@ -2,8 +2,8 @@ import logging
 import os
 from pathlib import Path
 
-from pg_dump import config
-from pg_dump.storage_providers import base_provider
+from backuper import config
+from backuper.storage_providers import base_provider
 
 log = logging.getLogger(__name__)
 

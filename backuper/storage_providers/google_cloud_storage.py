@@ -6,8 +6,8 @@ from pathlib import Path
 
 from google.cloud import storage
 
-from pg_dump import config, core
-from pg_dump.storage_providers import base_provider
+from backuper import config, core
+from backuper.storage_providers import base_provider
 
 log = logging.getLogger(__name__)
 

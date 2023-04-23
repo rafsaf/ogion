@@ -4,7 +4,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
-from pg_dump import config
+from backuper import config
 
 log = logging.getLogger(__name__)
 

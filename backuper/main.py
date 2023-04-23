@@ -3,9 +3,13 @@ import logging
 import signal
 import threading
 
-from pg_dump import config
-from pg_dump.backup_targets import BaseBackupTarget, File, Folder, PostgreSQL
-from pg_dump.storage_providers import BaseBackupProvider, GoogleCloudStorage, LocalFiles
+from backuper import config
+from backuper.backup_targets import BaseBackupTarget, File, Folder, PostgreSQL
+from backuper.storage_providers import (
+    BaseBackupProvider,
+    GoogleCloudStorage,
+    LocalFiles,
+)
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)

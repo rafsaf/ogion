@@ -7,8 +7,8 @@ import pytest
 from google.cloud import storage
 from pytest import MonkeyPatch
 
-from pg_dump import config
-from pg_dump.config import BackupTargetEnum, PostgreSQLBackupTarget
+from backuper import config
+from backuper.config import BackupTargetEnum, PostgreSQLBackupTarget
 
 DOCKER_TESTS: bool = os.environ.get("DOCKER_TESTS", None) is not None
 CONST_TOKEN_URLSAFE = "mock"

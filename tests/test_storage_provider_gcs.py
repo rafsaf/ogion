@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pg_dump.storage_providers import GoogleCloudStorage
+from backuper.storage_providers import GoogleCloudStorage
 
 
 def test_gcs_save_and_clean(tmp_path: Path):

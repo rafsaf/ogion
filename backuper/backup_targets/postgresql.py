@@ -1,8 +1,8 @@
 import logging
 import re
 
-from pg_dump import config, core
-from pg_dump.backup_targets.base_target import BaseBackupTarget
+from backuper import config, core
+from backuper.backup_targets.base_target import BaseBackupTarget
 
 log = logging.getLogger(__name__)
 
