@@ -87,7 +87,7 @@ BACKUP_PROVIDER = os.environ.get("BACKUP_PROVIDER", BackupProviderEnum.LOCAL_FIL
 ZIP_ARCHIVE_PASSWORD = os.environ.get("ZIP_ARCHIVE_PASSWORD", "")
 if not CONST_ZIP_PASSWORD_REGEX.match(ZIP_ARCHIVE_PASSWORD):
     raise RuntimeError(
-        f"`ZIP_ARCHIVE_PASSWORD` does not match regex {CONST_ZIP_PASSWORD_REGEX}: `{ZIP_ARCHIVE_PASSWORD}`"
+        f"Error: `ZIP_ARCHIVE_PASSWORD` must match regex {CONST_ZIP_PASSWORD_REGEX}"
     )
 SUBPROCESS_TIMEOUT_SECS: int = int(os.environ.get("SUBPROCESS_TIMEOUT_SECS", 60 * 60))
 BACKUP_COOLING_SECS: int = int(os.environ.get("BACKUP_COOLING_SECS", 60))
@@ -151,7 +151,7 @@ class FileBackupTarget(BackupTarget):
                 f"Path {abs_path} is not a file or does not exist\n "
                 f"Error validating environment variable: {env_name}"
             )
-        return env_name
+        return abs_path
 
 
 class FolderBackupTarget(BackupTarget):
@@ -165,7 +165,7 @@ class FolderBackupTarget(BackupTarget):
                 f"Path {abs_path} is not a dir or does not exist\n "
                 f"Error validating environment variable: {env_name}"
             )
-        return env_name
+        return abs_path
 
 
 def _validate_backup_target(env_name: str, val: str, target: type[BackupTarget]):
