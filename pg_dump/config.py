@@ -74,8 +74,8 @@ class BackupProviderEnum(StrEnum):
 
 class BackupTargetEnum(StrEnum):
     POSTGRESQL = "postgresql"
-    FILE = "file"
-    FOLDER = "folder"
+    FILE = "singlefile"
+    FOLDER = "directory"
 
 
 BACKUP_PROVIDER = os.environ.get("BACKUP_PROVIDER", BackupProviderEnum.LOCAL_FILES)
