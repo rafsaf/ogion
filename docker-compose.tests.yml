@@ -1,4 +1,5 @@
 # Used in GH workflows
+# docker compose -f docker-compose.tests.yml run backuper_tests
 version: "3.4"
 
 services:
