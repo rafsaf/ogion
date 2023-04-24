@@ -26,7 +26,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
         self.storage_client = storage.Client()
         self.bucket = self.storage_client.bucket(config.GOOGLE_BUCKET_NAME)
 
-    def _post_save(self, backup_file: Path):
+    def _post_save(self, backup_file: Path) -> str:
         try:
             zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
         except core.CoreSubprocessError:
@@ -46,8 +46,8 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
         log.info("start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
 
         blob = self.bucket.blob(backup_dest_in_bucket)
-        retry = 1
-        while retry <= self.MAX_UPLOAD_RETRY:
+        retry = 0
+        while retry < self.MAX_UPLOAD_RETRY:
             try:
                 blob.upload_from_filename(zip_backup_file)
                 break
@@ -62,9 +62,10 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
                 )
                 time.sleep(2 ^ retry)
                 retry += 1
-
+        if retry == self.MAX_UPLOAD_RETRY:
+            raise RuntimeError("failed upload %s file to gcs", zip_backup_file)
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
-        return True
+        return backup_dest_in_bucket
 
     def _clean(self, backup_file: Path):
         for backup_path in backup_file.parent.iterdir():

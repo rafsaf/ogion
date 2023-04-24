@@ -3,7 +3,7 @@ import logging
 import signal
 import threading
 
-from backuper import config
+from backuper import config, notifications
 from backuper.backup_targets import BaseBackupTarget, File, Folder, MySQL, PostgreSQL
 from backuper.storage_providers import (
     BaseBackupProvider,
@@ -82,15 +82,24 @@ def main():
                 log.info("start making backup of target: `%s`", target.env_name)
                 backup_file = target.make_backup()
                 if not backup_file:
+                    notifications.send_fail_backup_message(target.env_name)
                     continue
-                success = provider.safe_post_save(backup_file=backup_file)
-                if success:
+                upload_path = provider.safe_post_save(backup_file=backup_file)
+                if upload_path:
                     provider.safe_clean(backup_file=backup_file)
+                    notifications.send_success_message(
+                        provider_name=provider.NAME, upload_path=upload_path
+                    )
+                else:
+                    notifications.send_fail_upload_message(
+                        provider_name=provider.NAME, backup_file=backup_file
+                    )
                 log.info(
                     "next planned backup of target `%s` is: %s",
                     target.env_name,
                     target.next_backup_time,
                 )
+                exit_event.wait(1)
         if args.single:
             exit_event.set()
         exit_event.wait(5)

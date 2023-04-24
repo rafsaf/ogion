@@ -98,6 +98,8 @@ GOOGLE_BUCKET_UPLOAD_PATH: str | None = os.environ.get(
     "GOOGLE_BUCKET_UPLOAD_PATH", None
 )
 GOOGLE_SERVICE_ACCOUNT_BASE64: str = os.environ.get("GOOGLE_SERVICE_ACCOUNT_BASE64", "")
+DISCORD_SUCCESS_WEBHOOK_URL: str = os.environ.get("DISCORD_SUCCESS_WEBHOOK_URL", "")
+DISCORD_FAIL_WEBHOOK_URL: str = os.environ.get("DISCORD_FAIL_WEBHOOK_URL", "")
 
 
 class BackupTarget(BaseModel):

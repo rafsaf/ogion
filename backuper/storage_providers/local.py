@@ -16,13 +16,13 @@ class LocalFiles(base_provider.BaseBackupProvider):
 
     NAME = config.BackupProviderEnum.LOCAL_FILES
 
-    def _post_save(self, backup_file: Path):
+    def _post_save(self, backup_file: Path) -> str:
         try:
-            core.run_create_zip_archive(backup_file=backup_file)
+            zip_file = core.run_create_zip_archive(backup_file=backup_file)
         except core.CoreSubprocessError:
             log.error("could not create zip_backup_file from %s", backup_file)
             raise
-        return True
+        return str(zip_file)
 
     def _clean(self, backup_file: Path):
         if backup_file.is_file():
