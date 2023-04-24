@@ -1,3 +1,6 @@
+"""
+https://discord.com/developers/docs/resources/webhook#execute-webhook
+"""
 import logging
 from datetime import datetime
 from pathlib import Path
