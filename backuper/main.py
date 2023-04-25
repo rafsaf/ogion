@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 def quit(sig, frame):
-    log.info("interrupted by %s, shutting down" % sig)
+    log.info("interrupted by %s, shutting down", sig)
     exit_event.set()
 
 
