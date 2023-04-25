@@ -19,10 +19,14 @@ class FAIL_REASON(StrEnum):
 log = logging.getLogger(__name__)
 
 
+def _formated_now():
+    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S,%f UTC")
+
+
 def send_success_message(env_name: str, provider_name: str, upload_path: str):
-    now = datetime.utcnow().isoformat()
+    now = _formated_now()
     message_to_send = (
-        f"[{now}] SUCCESS target `{env_name}` uploading new backup file "
+        f"{now} [SUCCESS] target `{env_name}` uploading new backup file "
         f"to provider {provider_name} with upload path {upload_path}"
     )
     try:
@@ -42,14 +46,14 @@ def send_fail_message(
     reason: FAIL_REASON,
     backup_file: Path | None = None,
 ):
-    now = datetime.utcnow().isoformat()
+    now = _formated_now()
     if reason == FAIL_REASON.BACKUP_CREATE:
         message_to_send = (
-            f"[{now}] FAIL target `{env_name}` uploading backup file "
+            f"{now} [FAIL] target `{env_name}` uploading backup file "
             f"{backup_file} to provider {provider_name}"
         )
     elif reason == FAIL_REASON.UPLOAD:
-        message_to_send = f"[{now}] FAIL target `{env_name}` creating new backup file"
+        message_to_send = f"{now} [FAIL] target `{env_name}` creating new backup file"
     else:
         raise RuntimeError("panic!!! unexpected reason", reason)
 
