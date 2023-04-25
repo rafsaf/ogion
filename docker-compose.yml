@@ -61,34 +61,34 @@ services:
     restart: "unless-stopped"
     image: mariadb:10.11.2
     environment:
-      - MARIADB_ROOT_PASSWORD=mysql
-      - MARIADB_DATABASE=database
+      - MARIADB_ROOT_PASSWORD=maria
+      - MARIADB_DATABASE=maria
     ports:
-      - 11011:3808
+      - 11011:3306
 
   mariadb_1006:
     restart: "unless-stopped"
     image: mariadb:10.6.12
     environment:
-      - MARIADB_ROOT_PASSWORD=mysql
-      - MARIADB_DATABASE=database
+      - MARIADB_ROOT_PASSWORD=maria
+      - MARIADB_DATABASE=maria
     ports:
-      - 11006:3808
+      - 11006:3306
 
   mariadb_1005:
     restart: "unless-stopped"
     image: mariadb:10.5.19
     environment:
-      - MARIADB_ROOT_PASSWORD=mysql
-      - MARIADB_DATABASE=database
+      - MARIADB_ROOT_PASSWORD=maria
+      - MARIADB_DATABASE=maria
     ports:
-      - 11005:3808
+      - 11005:3306
 
   mariadb_1004:
     restart: "unless-stopped"
     image: mariadb:10.4.28
     environment:
-      - MARIADB_ROOT_PASSWORD=mysql
-      - MARIADB_DATABASE=database
+      - MARIADB_ROOT_PASSWORD=maria
+      - MARIADB_DATABASE=maria
     ports:
-      - 11004:3808
+      - 11004:3306

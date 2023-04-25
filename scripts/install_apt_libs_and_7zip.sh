@@ -60,6 +60,17 @@ apt-get -y update && apt-get -y install mysql-client
 echo "mysql-client installed"
 
 #########################################################################
+# MARIADB CLIENT INSTALLATION
+#
+# https://mariadb.com/kb/en/mariadb-package-repository-setup-and-usage/
+#########################################################################
+
+echo "Installing mariadb-client with their script"
+curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | bash
+apt-get -y update && apt-get -y install mariadb-client
+echo "mariadb-client installed"
+
+#########################################################################
 # 7ZIP INSTALLATION
 #
 # https://www.7-zip.org/download.html

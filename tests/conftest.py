@@ -9,7 +9,12 @@ from pydantic import SecretStr
 from pytest import MonkeyPatch
 
 from backuper import config
-from backuper.config import BackupTargetEnum, MySQLBackupTarget, PostgreSQLBackupTarget
+from backuper.config import (
+    BackupTargetEnum,
+    MariaDBBackupTarget,
+    MySQLBackupTarget,
+    PostgreSQLBackupTarget,
+)
 
 DOCKER_TESTS: bool = os.environ.get("DOCKER_TESTS", None) is not None
 CONST_TOKEN_URLSAFE = "mock"
@@ -71,6 +76,42 @@ MYSQL_80 = MySQLBackupTarget(
     port=3306 if DOCKER_TESTS else 10080,
     db="database",
 )
+MARIADB_1011 = MariaDBBackupTarget(
+    env_name="mariadb_1011",
+    type=BackupTargetEnum.MARIADB,
+    cron_rule="* * * * *",
+    host="mariadb_1011" if DOCKER_TESTS else "localhost",
+    password=SecretStr("maria"),
+    port=3306 if DOCKER_TESTS else 11011,
+    db="maria",
+)
+MARIADB_1006 = MariaDBBackupTarget(
+    env_name="mariadb_1006",
+    type=BackupTargetEnum.MARIADB,
+    cron_rule="* * * * *",
+    host="mariadb_1006" if DOCKER_TESTS else "localhost",
+    password=SecretStr("maria"),
+    port=3306 if DOCKER_TESTS else 11006,
+    db="maria",
+)
+MARIADB_1005 = MariaDBBackupTarget(
+    env_name="mariadb_1005",
+    type=BackupTargetEnum.MARIADB,
+    cron_rule="* * * * *",
+    host="mariadb_1005" if DOCKER_TESTS else "localhost",
+    password=SecretStr("maria"),
+    port=3306 if DOCKER_TESTS else 11005,
+    db="maria",
+)
+MARIADB_1004 = MariaDBBackupTarget(
+    env_name="mariadb_1004",
+    type=BackupTargetEnum.MARIADB,
+    cron_rule="* * * * *",
+    host="mariadb_1004" if DOCKER_TESTS else "localhost",
+    password=SecretStr("maria"),
+    port=3306 if DOCKER_TESTS else 11004,
+    db="maria",
+)
 
 DB_VERSION_BY_ENV_VAR: dict[str, str] = {
     "postgresql_db_15": "15.1",
@@ -80,6 +121,10 @@ DB_VERSION_BY_ENV_VAR: dict[str, str] = {
     "postgresql_db_11": "11.16",
     "mysql_db_80": "8.0.33",
     "mysql_db_57": "5.7.42",
+    "mariadb_1011": "10.11.2",
+    "mariadb_1006": "10.6.12",
+    "mariadb_1005": "10.5.19",
+    "mariadb_1004": "10.4.28",
 }
 ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLBackupTarget] = [
     POSTGRES_11,
@@ -91,6 +136,12 @@ ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLBackupTarget] = [
 ALL_MYSQL_DBS_TARGETS: list[MySQLBackupTarget] = [
     MYSQL_57,
     MYSQL_80,
+]
+ALL_MARIADB_DBS_TARGETS: list[MariaDBBackupTarget] = [
+    MARIADB_1011,
+    MARIADB_1006,
+    MARIADB_1005,
+    MARIADB_1004,
 ]
 
 

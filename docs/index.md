@@ -7,8 +7,9 @@ Tool for making scheduled backups of databases and uploading encrypted to safe c
 
 ## Supported backup targets
 
-- PostgreSQL (11, 12, 13, 14, 15)
-- MySQL (5.7, 8.0)
+- PostgreSQL (tested on 15, 14, 13, 12, 11)
+- MySQL (tested on 8.0, 5.7)
+- MariaDB (tested on 10.11, 10.6, 10.5, 10.4)
 - Files
 - Directories
 

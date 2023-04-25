@@ -4,7 +4,14 @@ import signal
 import threading
 
 from backuper import config, notifications
-from backuper.backup_targets import BaseBackupTarget, File, Folder, MySQL, PostgreSQL
+from backuper.backup_targets import (
+    BaseBackupTarget,
+    File,
+    Folder,
+    MariaDB,
+    MySQL,
+    PostgreSQL,
+)
 from backuper.storage_providers import (
     BaseBackupProvider,
     GoogleCloudStorage,
@@ -36,14 +43,14 @@ def backup_targets() -> list[BaseBackupTarget]:
     for target in config.BACKUP_TARGETS:
         if target.type == config.BackupTargetEnum.POSTGRESQL:
             log.info(
-                "initializing postgres target, trying to connect to database: `%s`",
+                "initializing postgres target, connecting to database: `%s`",
                 target.env_name,
             )
-            pg_target = PostgreSQL(**target.dict())
-            targets.append(pg_target)
+            backup_target = PostgreSQL(**target.dict())
+            targets.append(backup_target)
             log.info(
-                "success initializing postgres target, obtained db version is %s: `%s`",
-                pg_target.db_version,
+                "success initializing postgres target db version is %s: `%s`",
+                backup_target.db_version,
                 target.env_name,
             )
         elif target.type == config.BackupTargetEnum.FILE:
@@ -55,9 +62,29 @@ def backup_targets() -> list[BaseBackupTarget]:
             targets.append(Folder(**target.dict()))
             log.info("success initializing folder target: `%s`", target.env_name)
         elif target.type == config.BackupTargetEnum.MYSQL:
-            log.info("initializing folder target: `%s`", target.env_name)
-            targets.append(MySQL(**target.dict()))
-            log.info("success initializing folder target: `%s`", target.env_name)
+            log.info(
+                "initializing mysql target, connecting to database: `%s`",
+                target.env_name,
+            )
+            backup_target = MySQL(**target.dict())
+            targets.append(backup_target)
+            log.info(
+                "success initializing mysql target db version is %s: `%s`",
+                backup_target.db_version,
+                target.env_name,
+            )
+        elif target.type == config.BackupTargetEnum.MARIADB:
+            log.info(
+                "initializing mariadb target, connecting to database: `%s`",
+                target.env_name,
+            )
+            backup_target = MariaDB(**target.dict())
+            targets.append(backup_target)
+            log.info(
+                "success initializing mariadb target db version is %s: `%s`",
+                backup_target.db_version,
+                target.env_name,
+            )
         else:
             raise RuntimeError(
                 "panic!!! unsupported backup target",

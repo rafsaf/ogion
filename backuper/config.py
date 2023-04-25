@@ -78,6 +78,7 @@ class BackupProviderEnum(StrEnum):
 class BackupTargetEnum(StrEnum):
     POSTGRESQL = "postgresql"
     MYSQL = "mysql"
+    MARIADB = "mariadb"
     FILE = "singlefile"
     FOLDER = "directory"
 
@@ -142,6 +143,15 @@ class MySQLBackupTarget(BackupTarget):
     type = BackupTargetEnum.MYSQL
 
 
+class MariaDBBackupTarget(BackupTarget):
+    user: str = "root"
+    host: str = "localhost"
+    port: int = 3808
+    db: str
+    password: SecretStr
+    type = BackupTargetEnum.MARIADB
+
+
 class FileBackupTarget(BackupTarget):
     abs_path: Path
     type = BackupTargetEnum.FILE
@@ -197,6 +207,10 @@ for env_name, val in os.environ.items():
     elif env_name.startswith(BackupTargetEnum.FOLDER):
         BACKUP_TARGETS.append(
             _validate_backup_target(env_name, val, FolderBackupTarget)
+        )
+    elif env_name.startswith(BackupTargetEnum.MARIADB):
+        BACKUP_TARGETS.append(
+            _validate_backup_target(env_name, val, MariaDBBackupTarget)
         )
 
 
