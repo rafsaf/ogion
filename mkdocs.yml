@@ -1,0 +1,49 @@
+site_name: backuper
+theme:
+  favicon: images/favicon.ico
+  name: material
+  palette:
+    primary: purple
+
+repo_name: rafsaf/backuper
+repo_url: https://github.com/rafsaf/backuper
+
+markdown_extensions:
+  - markdown_include.include:
+      base_path: docs
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+# nav:
+#   - Overview: index.md
+#   - install.md
+#   - Usage:
+#       - usage/declaring_roles_and_permissions.md
+#       - usage/respo_create_cli.md
+#       - usage/get_respo_model.md
+#       - usage/user_have_permission.md
+#       - usage/environment_variables.md
+#   - Reference:
+#       - reference/core.md
+#       - reference/cli.md
+#       - reference/client.md
+#       - reference/fields.django.md
+#       - reference/fields.sqlalchemy.md
+#       - reference/exceptions.md
+#       - reference/settings.md
+#   - changelog.md
+
+plugins:
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_source: true
+            show_root_heading: true
+      watch:
+        - backuper
