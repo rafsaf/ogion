@@ -39,6 +39,42 @@ services:
       - MYSQL_ROOT_PASSWORD=mysql
       - MYSQL_DATABASE=database
 
+  mariadb_1011:
+    restart: "unless-stopped"
+    image: mariadb:10.11.2
+    environment:
+      - MARIADB_ROOT_PASSWORD=mysql
+      - MARIADB_DATABASE=database
+    ports:
+      - 11011:3808
+
+  mariadb_1006:
+    restart: "unless-stopped"
+    image: mariadb:10.6.12
+    environment:
+      - MARIADB_ROOT_PASSWORD=mysql
+      - MARIADB_DATABASE=database
+    ports:
+      - 11006:3808
+
+  mariadb_1005:
+    restart: "unless-stopped"
+    image: mariadb:10.5.19
+    environment:
+      - MARIADB_ROOT_PASSWORD=mysql
+      - MARIADB_DATABASE=database
+    ports:
+      - 11005:3808
+
+  mariadb_1004:
+    restart: "unless-stopped"
+    image: mariadb:10.4.28
+    environment:
+      - MARIADB_ROOT_PASSWORD=mysql
+      - MARIADB_DATABASE=database
+    ports:
+      - 11004:3808
+
   backuper_tests:
     depends_on:
       - postgres_15
@@ -48,6 +84,10 @@ services:
       - postgres_11
       - mysql_57
       - mysql_80
+      - mariadb_1011
+      - mariadb_1006
+      - mariadb_1005
+      - mariadb_1004
     build:
       context: ./
       dockerfile: Dockerfile
