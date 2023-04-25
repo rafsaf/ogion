@@ -1,76 +1,58 @@
-version: "3.4"
-
 services:
   postgres_15:
     restart: "unless-stopped"
     image: postgres:15.1
-    volumes:
-      - backuper_dev_postgresql_15:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 10015:5432
+
   postgres_14:
     restart: "unless-stopped"
     image: postgres:14.6
-    volumes:
-      - backuper_dev_postgresql_14:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 10014:5432
+
   postgres_13:
     restart: "unless-stopped"
     image: postgres:13.8
-    volumes:
-      - backuper_dev_postgresql_13:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 10013:5432
+
   postgres_12:
     restart: "unless-stopped"
     image: postgres:12.12
-    volumes:
-      - backuper_dev_postgresql_12:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 10012:5432
+
   postgres_11:
     restart: "unless-stopped"
     image: postgres:11.16
-    volumes:
-      - backuper_dev_postgresql_11:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 10011:5432
+
   mysql_57:
     restart: "unless-stopped"
     image: mysql:5.7.42
-    volumes:
-      - backuper_dev_mysql_57:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=mysql
       - MYSQL_DATABASE=database
     ports:
       - 10057:3306
+
   mysql_80:
     restart: "unless-stopped"
     image: mysql:8.0.33
-    volumes:
-      - backuper_dev_mysql_80:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=mysql
       - MYSQL_DATABASE=database
     ports:
       - 10080:3306
-volumes:
-  backuper_dev_postgresql_15:
-  backuper_dev_postgresql_14:
-  backuper_dev_postgresql_13:
-  backuper_dev_postgresql_12:
-  backuper_dev_postgresql_11:
-  backuper_dev_mysql_80:
-  backuper_dev_mysql_57:
