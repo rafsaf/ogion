@@ -24,6 +24,8 @@ nav:
       - providers/google_cloud_storage.md
   - Backup targets:
       - backup_targets/postgresql.md
+      - backup_targets/mysql.md
+      - backup_targets/mariadb.md
 #       - usage/respo_create_cli.md
 #       - usage/get_respo_model.md
 #       - usage/user_have_permission.md
