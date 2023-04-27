@@ -7,7 +7,7 @@ MARIADB_SOME_STRING="json encoded database data"
 ```
 
 !!! note
-    *Any variable that starts with "MARIADB".* There can be multiple MariaDB databases definition for one backuper instance, for example `MARIADB_FOO_MY_DB1` and `MARIADB_BAR_MY_DB2`. Supported versions are: 15, 14, 13, 12, 11.
+    *Any variable that starts with "MARIADB".* There can be multiple MariaDB databases definition for one backuper instance, for example `MARIADB_FOO_MY_DB1` and `MARIADB_BAR_MY_DB2`. Supported versions are: 10.11, 10.6, 10.5, 10.4.
 
 ## MariaDB environment variables values
 

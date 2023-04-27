@@ -7,7 +7,7 @@ MYSQL_SOME_STRING="json encoded database data"
 ```
 
 !!! note
-    *Any variable that starts with "MYSQL".* There can be multiple MySQL databases definition for one backuper instance, for example `MYSQL_FOO_MY_DB1` and `MYSQL_BAR_MY_DB2`. Supported versions are: 15, 14, 13, 12, 11.
+    *Any variable that starts with "MYSQL".* There can be multiple MySQL databases definition for one backuper instance, for example `MYSQL_FOO_MY_DB1` and `MYSQL_BAR_MY_DB2`. Supported versions are: 8.0, 5.7.
 
 ## MySQL environment variables values
 
