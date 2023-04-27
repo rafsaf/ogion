@@ -31,13 +31,19 @@ def send_success_message(env_name: str, provider_name: str, upload_path: str):
     )
     try:
         if config.DISCORD_SUCCESS_WEBHOOK_URL:
-            requests.post(
+            discord_success_res = requests.post(
                 config.DISCORD_SUCCESS_WEBHOOK_URL,
                 json={"content": message_to_send},
                 headers={"Content-Type": "application/json"},
+                timeout=5,
             )
+            if discord_success_res.status_code != 204:
+                log.error(
+                    "Sent fail message `%s` to DISCORD_SUCCESS_WEBHOOK_URL",
+                    message_to_send,
+                )
     except Exception as err:
-        log.error("error when sending %s: %s", message_to_send, err)
+        log.error("fatal error when sending %s: %s", message_to_send, err)
 
 
 def send_fail_message(
@@ -54,15 +60,21 @@ def send_fail_message(
         )
     elif reason == FAIL_REASON.UPLOAD:
         message_to_send = f"{now} [FAIL] target `{env_name}` creating new backup file"
-    else:
+    else:  # pragma: no cover
         raise RuntimeError("panic!!! unexpected reason", reason)
 
     try:
         if config.DISCORD_FAIL_WEBHOOK_URL:
-            requests.post(
+            discord_fail_res = requests.post(
                 config.DISCORD_FAIL_WEBHOOK_URL,
                 json={"content": message_to_send},
                 headers={"Content-Type": "application/json"},
+                timeout=5,
             )
+            if discord_fail_res.status_code != 204:
+                log.error(
+                    "Sent fail message `%s` to DISCORD_FAIL_WEBHOOK_URL",
+                    message_to_send,
+                )
     except Exception as err:
-        log.error("error when sending %s: %s", message_to_send, err)
+        log.error("fatal error when sending %s: %s", message_to_send, err)
