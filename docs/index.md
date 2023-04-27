@@ -10,8 +10,8 @@ Tool for making scheduled backups of databases and uploading encrypted to safe c
 - PostgreSQL (tested on 15, 14, 13, 12, 11)
 - MySQL (tested on 8.0, 5.7)
 - MariaDB (tested on 10.11, 10.6, 10.5, 10.4)
-- Files
-- Directories
+- Single file
+- Directory
 
 ## Supported upload providers
 

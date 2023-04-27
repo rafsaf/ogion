@@ -105,6 +105,7 @@ class BackupTarget(BaseModel):
     env_name: str
     type: BackupTargetEnum
     cron_rule: str
+    max_backups: int = BACKUP_MAX_NUMBER
 
     @validator("cron_rule")
     def cron_rule_is_valid(cls, cron_rule: str):
