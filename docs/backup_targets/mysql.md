@@ -1,6 +1,6 @@
 # MySQL
 
-## Required environment variables
+## Environment variable
 
 ```bash
 MYSQL_SOME_STRING="json encoded database data"
@@ -14,7 +14,7 @@ MYSQL_SOME_STRING="json encoded database data"
 Value of variables must be valid JSON encoded strings with following keys:
 
 - **"password": "mysql password"**, *required parameter* (string)
-- **"cron_rule": "\* \* \* \* \*"**, cron expression for backups, *required parameter* see https://crontab.guru/ for help (string)
+- **"cron_rule": "\* \* \* \* \*"**, cron expression for backups, *required parameter* see [https://crontab.guru/](https://crontab.guru/) for help (string)
 - **"user": "mysql username"**, defaults to "root" (string)
 - **"host": "mysql hostname"**, defaults to "localhost" (string)
 - **"port": 3306**, port defaults to 3306 (integer)

@@ -1,6 +1,6 @@
 # PostgreSQL
 
-## Required environment variables
+## Environment variable
 
 
 
@@ -17,7 +17,7 @@ POSTGRESQL_SOME_STRING="json encoded database data"
 Value of variables must be valid JSON encoded strings with following keys:
 
 - **"password": "postgres password"**, *required parameter* (string)
-- **"cron_rule": "\* \* \* \* \*"**, cron expression for backups, *required parameter* see https://crontab.guru/ for help (string)
+- **"cron_rule": "\* \* \* \* \*"**, cron expression for backups, *required parameter* see [https://crontab.guru/](https://crontab.guru/) for help (string)
 - **"user": "postgres username"**, defaults to "postgres" (string)
 - **"host": "postgres hostname"**, defaults to "localhost" (string)
 - **"port": 5432**, port defaults to 5432 (integer)

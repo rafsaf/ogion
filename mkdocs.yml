@@ -28,6 +28,8 @@ nav:
       - backup_targets/mariadb.md
       - backup_targets/file.md
       - backup_targets/directory.md
+  - Notifications:
+      - notifications/discord.md
 #       - usage/respo_create_cli.md
 #       - usage/get_respo_model.md
 #       - usage/user_have_permission.md

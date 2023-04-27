@@ -1,6 +1,6 @@
 # Directory
 
-## Required environment variables
+## Environment variable
 
 ```bash
 DIRECTORY_SOME_STRING="json encoded data"
@@ -14,7 +14,7 @@ DIRECTORY_SOME_STRING="json encoded data"
 Value of variables must be valid JSON encoded strings with following keys:
 
 - **"abs_path": "/path/to/your/dir"**, *required parameter* (string)
-- **"cron_rule": "\* \* \* \* \*"**, cron expression for backups, *required parameter* see https://crontab.guru/ for help (string)
+- **"cron_rule": "\* \* \* \* \*"**, cron expression for backups, *required parameter* see [https://crontab.guru/](https://crontab.guru/) for help (string)
 - **"max_backups": 7**, max number of backups, if this number is exceeded, oldest one is removed, defaults to environment variable `BACKUP_MAX_NUMBER` (integer)
 
 ## Examples
