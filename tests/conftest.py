@@ -1,10 +1,9 @@
 import os
 import secrets
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
-from google.cloud import storage
+import responses
 from pydantic import SecretStr
 from pytest import MonkeyPatch
 
@@ -178,16 +177,8 @@ def fixed_secrets_token_urlsafe(monkeypatch: MonkeyPatch):
 
 
 @pytest.fixture(autouse=True)
-def mock_google_cloud_storage(monkeypatch: MonkeyPatch):
-    class Blob:
-        def __init__(self) -> None:
-            self.name = "test_blob"
-
-    class TestClient:
-        def bucket(self, *args, **kwargs):
-            return MagicMock()
-
-        def list_blobs(self, *args, **kwargs):
-            return [Blob()]
-
-    monkeypatch.setattr(storage, "Client", TestClient)
+def responses_activate_mock_to_prevent_accidential_requests():
+    r_mock = responses.RequestsMock()
+    r_mock.start()
+    yield
+    r_mock.stop()

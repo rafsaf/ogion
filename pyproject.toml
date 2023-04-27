@@ -29,6 +29,7 @@ mkdocs-material = "^9.1.8"
 mkdocstrings = { extras = ["python"], version = "^0.21.2" }
 pymdown-extensions = "^9.11"
 markdown-include = "^0.8.1"
+responses = "^0.23.1"
 
 [tool.pytest.ini_options]
 addopts = "-v"

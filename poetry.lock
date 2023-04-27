@@ -1493,6 +1493,27 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
+name = "responses"
+version = "0.23.1"
+description = "A utility library for mocking out the `requests` Python library."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "responses-0.23.1-py3-none-any.whl", hash = "sha256:8a3a5915713483bf353b6f4079ba8b2a29029d1d1090a503c70b0dc5d9d0c7bd"},
+    {file = "responses-0.23.1.tar.gz", hash = "sha256:c4d9aa9fc888188f0c673eff79a8dadbe2e75b7fe879dc80a221a06e0a68138f"},
+]
+
+[package.dependencies]
+pyyaml = "*"
+requests = ">=2.22.0,<3.0"
+types-PyYAML = "*"
+urllib3 = ">=1.25.10"
+
+[package.extras]
+tests = ["coverage (>=6.0.0)", "flake8", "mypy", "pytest (>=7.0.0)", "pytest-asyncio", "pytest-cov", "pytest-httpserver", "tomli", "tomli-w", "types-requests"]
+
+[[package]]
 name = "rsa"
 version = "4.9"
 description = "Pure-Python RSA implementation"
@@ -1558,6 +1579,18 @@ python-versions = ">=3.6.1"
 files = [
     {file = "tokenize_rt-4.2.1-py2.py3-none-any.whl", hash = "sha256:08a27fa032a81cf45e8858d0ac706004fcd523e8463415ddf1442be38e204ea8"},
     {file = "tokenize_rt-4.2.1.tar.gz", hash = "sha256:0d4f69026fed520f8a1e0103aa36c406ef4661417f20ca643f913e33531b3b94"},
+]
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.12.9"
+description = "Typing stubs for PyYAML"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-PyYAML-6.0.12.9.tar.gz", hash = "sha256:c51b1bd6d99ddf0aa2884a7a328810ebf70a4262c292195d3f4f9a0005f9eeb6"},
+    {file = "types_PyYAML-6.0.12.9-py3-none-any.whl", hash = "sha256:5aed5aa66bd2d2e158f75dda22b059570ede988559f030cf294871d3b647e3e8"},
 ]
 
 [[package]]
@@ -1684,4 +1717,4 @@ anyio = ">=3.0.0,<4"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "c9247e196c8174bc5b1f800185fa1b19fdd13497c20a79869e2a2f85311dd0e7"
+content-hash = "e64007c4630421ea32505ffd4152b5746702577c652daa8049d20d751aa088f0"
