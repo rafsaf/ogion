@@ -28,15 +28,12 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
 
     def _post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
-        backup_dest_in_bucket = "{}/{}".format(
+
+        backup_dest_in_bucket = "{}/{}/{}".format(
+            config.GOOGLE_BUCKET_UPLOAD_PATH,
             zip_backup_file.parent.name,
             zip_backup_file.name,
         )
-        if config.GOOGLE_BUCKET_UPLOAD_PATH is not None:
-            backup_dest_in_bucket = "{}/{}".format(
-                config.GOOGLE_BUCKET_UPLOAD_PATH,
-                backup_dest_in_bucket,
-            )
 
         log.info("start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
 
@@ -73,9 +70,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
             log.info("removed %s from local disk", backup_path)
 
         backup_list_cloud: list[str] = []
-        prefix = backup_file.parent.name
-        if config.GOOGLE_BUCKET_UPLOAD_PATH:
-            prefix = f"{config.GOOGLE_BUCKET_UPLOAD_PATH}/{prefix}"
+        prefix = f"{config.GOOGLE_BUCKET_UPLOAD_PATH}/{backup_file.parent.name}"
         for blob in self.storage_client.list_blobs(self.bucket, prefix=prefix):
             backup_list_cloud.append(blob.name)
 

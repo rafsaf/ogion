@@ -18,11 +18,10 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
 
-# nav:
-#   - Overview: index.md
-#   - install.md
-#   - Usage:
-#       - usage/declaring_roles_and_permissions.md
+nav:
+  - Backuper: index.md
+  - Providers:
+      - backup_targets/google_cloud_storage.md
 #       - usage/respo_create_cli.md
 #       - usage/get_respo_model.md
 #       - usage/user_have_permission.md

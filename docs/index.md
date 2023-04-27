@@ -1,4 +1,4 @@
-# backuper
+# Backuper
 
 Tool for making scheduled backups of databases and uploading encrypted to safe clouds, for homelabs, hobby projects and so on, in environments like k8s, docker, vms.
 
@@ -16,8 +16,6 @@ Tool for making scheduled backups of databases and uploading encrypted to safe c
 ## Supported upload providers
 
 - Google Cloud Storage bucket
-- Local directory
-- ... more in the future
 
 ## Notifications
 
