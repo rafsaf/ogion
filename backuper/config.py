@@ -187,7 +187,7 @@ def _validate_backup_target(env_name: str, val: str, target: type[BackupTarget])
         db_data_from_env = json.loads(val)
         res = target(env_name=env_name, **db_data_from_env)
     except Exception:
-        log.critical("Error validating environment variable: `%s`", env_name)
+        log.critical("error validating environment variable: `%s`", env_name)
         raise
     log.info("%s variable ok: `%s`", target_type, env_name)
     return res
