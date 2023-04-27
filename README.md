@@ -1,68 +1,28 @@
-# backuper
+# Backuper
 
-Small yet solid image for postgresql 10-15 backups scheduling based on postgresql-client `backuper`.
+Tool for making scheduled backups of databases and uploading encrypted to safe clouds, for homelabs, hobby projects and so on, in environments like k8s, docker, vms.
 
-# Example docker-compose.yml
+!!! warning
+    Although this project aims to be reliable backup tool and can help protect your 5GB Postgres data from evaporation, it's **NOT** a fit for your enterprise production systems with enormous databases size and application load. You have been warned.
 
-```yml
-version: "3.4"
+## Supported backup targets
 
-services:
-  backuper:
-    image: rafsaf/backuper:0.4.0
-    volumes:
-      - backuper_data:/var/lib/backuper/data/
+- PostgreSQL (tested on 15, 14, 13, 12, 11)
+- MySQL (tested on 8.0, 5.7)
+- MariaDB (tested on 10.11, 10.6, 10.5, 10.4)
+- Single file
+- Directory
 
-volumes:
-  backuper_data:
-```
+## Supported upload providers
 
-Supported backup providers:
+- Google Cloud Storage bucket
 
-- Local files
-- Google Cloud Storage
+## Notifications
 
-# Full docker image reference
+- Discord
 
-`rafsaf/backuper:0.4.0`
+## Deployment strategies
 
-## Dockerhub:
-
-https://hub.docker.com/repository/docker/rafsaf/backuper
-
-## Reference:
-
-**POSTGRES_HOST** - Postgres database hostname, defaults to `localhost`.
-
-**POSTGRES_USER** - Postgres database username, defaults to `postgres`.
-
-**POSTGRES_PASSWORD** - Postgres database password, defaults to `postgres`.
-
-**POSTGRES_PORT** - Postgres database port, defaults to `5432`.
-
-**POSTGRES_DB** - Postgres database name of db, defaults to `postgres`.
-
-**CRON_RULE** - Cron expression when should backups perform, defaults to `0 5 * * *` (5 am UTC every day), must be valid cron syntax, see https://crontab.guru/examples.html for examples.
-
-**ZIP_ARCHIVE_PASSWORD** - Password to 7zip archive creating, defaults to empty string, required for every provider in `BACKUP_PROVIDER` except `local`.
-
-**BACKUP_PROVIDER** - Backup provider, must be one of supported, defaults to `local`.
-
-**SUBPROCESS_TIMEOUT_SECS** - Timeout for all shell subprocesses in seconds, defaults to `3600` (1 hour).
-
-**BACKUP_COOLING_SECS** - Cooling period after backuper subprocess fail in seconds, defaults to `60` (1 min).
-
-**BACKUP_COOLING_RETRIES** - Max number of retries for single scheduled backup, defaults to `1`.
-
-**BACKUP_MAX_NUMBER** - Max number of backups that can be stored in data folder (for local files provider) or in cloud, defaults to 7.
-
-**LOG_LEVEL** - Log level (DEBUG, INFO, WARNING, ERROR), by default in docker image it is `INFO`
-
-**GOOGLE_BUCKET_NAME** - Name of google bucket, by default empty string, requried for `gcs` as a `BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
-
-**GOOGLE_SERVICE_ACCOUNT_BASE64** - Base64 gcloud json service account, by default empty string, requried for `gcs` as a `BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
-
-**GOOGLE_BUCKET_UPLOAD_PATH** - Name of google bucket, by default None, optional for `gcs` as a `BACKUP_PROVIDER`, refer to section about Google Cloud Storage.
-
-`gpg --generate-key`
-`gpg --armor --export rafsaf | base64 -w 0 > public.key`
+- docker (docker compose) container
+- kubernetes container
+- systemd application
