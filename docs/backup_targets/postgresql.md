@@ -9,7 +9,7 @@ POSTGRESQL_SOME_STRING="json encoded database data"
 ```
 
 !!! note
-    *Any variable that starts with "POSTGRESQL".* There can be multiple PostgreSQL databases definition for one backuper instance, for example `POSTGRESQL_MY_FOO_POSTGRES_DB1` and `POSTGRESQL_MY_BAR_POSTGRES_DB2`. Supported versions are: 15, 14, 13, 12, 11
+    *Any variable that starts with "POSTGRESQL".* There can be multiple PostgreSQL databases definition for one backuper instance, for example `POSTGRESQL_MY_FOO_POSTGRES_DB1` and `POSTGRESQL_MY_BAR_POSTGRES_DB2`. Supported versions are: 15, 14, 13, 12, 11.
 
 
 ## Postgres environment variables values
@@ -22,7 +22,7 @@ Value of variables must be valid JSON encoded strings with following keys:
 - **"host": "postgres hostname"**, defaults to "localhost" (string)
 - **"port": 5432**, port defaults to 5432 (integer)
 - **"db": "database name"**, port defaults to "postgres" (string)
-- **"max_backups": 7**, max number of backups, if this number is exceeded, oldest one is removed (integer)
+- **"max_backups": 7**, max number of backups, if this number is exceeded, oldest one is removed, defaults to environment variable `BACKUP_MAX_NUMBER` (integer)
 
 
 
