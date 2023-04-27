@@ -40,24 +40,27 @@ echo "postgresql-client-15 installed"
 #
 # https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/
 # https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/#repo-qg-apt-available
+#
+# Due to problems with arm64 arch (mysql doesnt support them for debian),
+# we rely on mariadb mysql client which should be compatibile
 #########################################################################
 
-echo "Installing mysql-client"
-mkdir -p /usr/share/keyrings/
-if [ -f "/usr/share/keyrings/pgp.mit.edu.gpg" ]
-then
-  echo "/usr/share/keyrings/pgp.mit.edu.gpg exists"
-else
-  cat $SCRIPT_DIR/keys/pgp.mit.edu.asc | gpg --dearmor -o /usr/share/keyrings/pgp.mit.edu.gpg
-fi
-if [ -f "/etc/apt/sources.list.d/mysql.list" ]
-then
-  echo "/etc/apt/sources.list.d/mysql.list exists"
-else
-  echo "deb [signed-by=/usr/share/keyrings/pgp.mit.edu.gpg arch=$CPU] http://repo.mysql.com/apt/$DISTR/ $DISTR_VERSION mysql-8.0" > /etc/apt/sources.list.d/mysql.list
-fi
-apt-get -y update && apt-get -y install mysql-client
-echo "mysql-client installed"
+# echo "Installing mysql-client"
+# mkdir -p /usr/share/keyrings/
+# if [ -f "/usr/share/keyrings/pgp.mit.edu.gpg" ]
+# then
+#   echo "/usr/share/keyrings/pgp.mit.edu.gpg exists"
+# else
+#   cat $SCRIPT_DIR/keys/pgp.mit.edu.asc | gpg --dearmor -o /usr/share/keyrings/pgp.mit.edu.gpg
+# fi
+# if [ -f "/etc/apt/sources.list.d/mysql.list" ]
+# then
+#   echo "/etc/apt/sources.list.d/mysql.list exists"
+# else
+#   echo "deb [signed-by=/usr/share/keyrings/pgp.mit.edu.gpg arch=$CPU] http://repo.mysql.com/apt/$DISTR/ $DISTR_VERSION mysql-8.0" > /etc/apt/sources.list.d/mysql.list
+# fi
+# apt-get -y update && apt-get -y install mysql-client
+# echo "mysql-client installed"
 
 #########################################################################
 # MARIADB CLIENT INSTALLATION
