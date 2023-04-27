@@ -21,7 +21,7 @@ Value of variables must be valid JSON encoded strings with following keys:
 - **"user": "postgres username"**, defaults to "postgres" (string)
 - **"host": "postgres hostname"**, defaults to "localhost" (string)
 - **"port": 5432**, port defaults to 5432 (integer)
-- **"db": "database name"**, port defaults to "postgres" (string)
+- **"db": "database name"**, defaults to "postgres" (string)
 - **"max_backups": 7**, max number of backups, if this number is exceeded, oldest one is removed, defaults to environment variable `BACKUP_MAX_NUMBER` (integer)
 
 

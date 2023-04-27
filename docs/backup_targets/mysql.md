@@ -18,7 +18,7 @@ Value of variables must be valid JSON encoded strings with following keys:
 - **"user": "mysql username"**, defaults to "root" (string)
 - **"host": "mysql hostname"**, defaults to "localhost" (string)
 - **"port": 3306**, port defaults to 3306 (integer)
-- **"db": "database name"**, port defaults to "mysql" (string)
+- **"db": "database name"**, defaults to "mysql" (string)
 - **"max_backups": 7**, max number of backups, if this number is exceeded, oldest one is removed, defaults to environment variable `BACKUP_MAX_NUMBER` (integer)
 
 ## Examples
