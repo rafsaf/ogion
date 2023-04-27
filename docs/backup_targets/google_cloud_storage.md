@@ -19,7 +19,7 @@ GOOGLE_SERVICE_ACCOUNT_BASE64="base64 service account"
 
 ## GOOGLE_BUCKET_UPLOAD_PATH
 
-`GOOGLE_BUCKET_UPLOAD_PATH` is prefix that **every created backup** will have, for example if it is equal to `backuper1`, paths to backups will look like `backuper1/your_backup_target_eg_postgresql/file123.zip`. Usually this should be something unique for this backuper instance, for example `k8s_foo_backuper`.
+`GOOGLE_BUCKET_UPLOAD_PATH` is prefix that **every created backup** will have, for example if it is equal to `my_backuper_instance_1`, paths to backups will look like `my_backuper_instance_1/your_backup_target_eg_postgresql/file123.zip`. Usually this should be something unique for this backuper instance, for example `k8s_foo_backuper`.
 
 ## GOOGLE_SERVICE_ACCOUNT_BASE64
 
