@@ -19,7 +19,7 @@ except ImportError:  # pragma: no cover
     pass
 
 CONST_ENV_NAME_REGEX = re.compile(r"^[A-Za-z_0-9]{1,}$")
-CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9]{4,1024}$")
+CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9]{1,}$")
 CONST_ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
 CONST_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
 CONST_PGPASS_FILE_PATH: Path = BASE_DIR / ".pgpass"
@@ -145,7 +145,7 @@ class MySQLBackupTarget(BackupTarget):
 class MariaDBBackupTarget(BackupTarget):
     user: str = "root"
     host: str = "localhost"
-    port: int = 3808
+    port: int = 3306
     db: str
     password: SecretStr
     type = BackupTargetEnum.MARIADB

@@ -50,7 +50,7 @@ def run_create_zip_archive(backup_file: Path) -> Path:
     out_file = Path(f"{backup_file}.zip")
     log.debug("run_create_zip_archive start creating in subprocess: %s", backup_file)
     shell_args_create = (
-        f"{config.CONST_ZIP_BIN_7ZZ_PATH} a -p{config.ZIP_ARCHIVE_PASSWORD} -mx=9 "
+        f"{config.CONST_ZIP_BIN_7ZZ_PATH} a -p'{config.ZIP_ARCHIVE_PASSWORD}' -mx=9 "
         f"{out_file} {backup_file}"
     )
     run_subprocess(shell_args_create)
