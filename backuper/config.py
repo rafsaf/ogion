@@ -92,6 +92,7 @@ if not CONST_ZIP_PASSWORD_REGEX.match(ZIP_ARCHIVE_PASSWORD):
     )
 SUBPROCESS_TIMEOUT_SECS: int = int(os.environ.get("SUBPROCESS_TIMEOUT_SECS", 60 * 60))
 BACKUP_COOLING_SECS: int = int(os.environ.get("BACKUP_COOLING_SECS", 60))
+ZIP_ARCHIVE_LEVEL: int = int(os.environ.get("ZIP_ARCHIVE_LEVEL", 3))
 BACKUP_COOLING_RETRIES: int = int(os.environ.get("BACKUP_COOLING_RETRIES", 1))
 BACKUP_MAX_NUMBER: int = int(os.environ.get("BACKUP_MAX_NUMBER", 7))
 GOOGLE_BUCKET_NAME: str = os.environ.get("GOOGLE_BUCKET_NAME", "")
@@ -106,6 +107,7 @@ class BackupTarget(BaseModel):
     type: BackupTargetEnum
     cron_rule: str
     max_backups: int = BACKUP_MAX_NUMBER
+    archive_level: int = ZIP_ARCHIVE_LEVEL
 
     @validator("cron_rule")
     def cron_rule_is_valid(cls, cron_rule: str):
