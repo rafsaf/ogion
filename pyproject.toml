@@ -21,7 +21,7 @@ isort = "^5.12.0"
 pre-commit = "^3.2.2"
 pytest = "^7.3.1"
 python-dotenv = "^1.0.0"
-pyupgrade = "^3.3.1"
+pyupgrade = "^3.3.2"
 watchfiles = "^0.16.1"
 pyinstaller = { version = "^5.10.1", python = ">=3.11,<3.12" }
 mkdocs = "^1.4.2"
