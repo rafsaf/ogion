@@ -31,7 +31,7 @@ class BaseBackupTarget(ABC):
             log.error(err, exc_info=True)
 
     @final
-    def _get_next_backup_time(self):
+    def _get_next_backup_time(self) -> datetime:
         now = datetime.utcnow()
         cron = croniter(
             self.cron_rule,
@@ -41,7 +41,7 @@ class BaseBackupTarget(ABC):
 
     @final
     def next_backup(self) -> bool:
-        backup_time: datetime = self._get_next_backup_time()
+        backup_time = self._get_next_backup_time()
         if backup_time > self.next_backup_time:
             self.last_backup_time = self.next_backup_time
             self.next_backup_time = backup_time

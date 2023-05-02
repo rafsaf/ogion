@@ -2,6 +2,8 @@ import argparse
 import logging
 import signal
 import threading
+import time
+from threading import Thread
 
 from backuper import config, notifications
 from backuper.backup_targets import (
@@ -93,56 +95,109 @@ def backup_targets() -> list[BaseBackupTarget]:
     return targets
 
 
-def main():
+def shutdown():
+    timeout_secs = config.BACKUPER_SIGTERM_TIMEOUT_SECS
+    start = time.time()
+    deadline = start + timeout_secs
+    log.info(
+        "start backuper shutdown, force exit after BACKUPER_SIGTERM_TIMEOUT_SECS=%ss",
+        timeout_secs,
+    )
+    for thread in threading.enumerate():
+        if thread.name == "MainThread":
+            continue
+        timeout_left = deadline - time.time()
+        if timeout_left < 0:
+            break
+        log.info(
+            "there is still backup running, waiting %ss for thread `%s` to join...",
+            round(timeout_left, 2),
+            thread.name,
+        )
+        thread.join(timeout=timeout_left)
+        if not thread.is_alive():
+            log.info(
+                "thread `%s` exited gracefully",
+                thread.name,
+            )
+    if threading.active_count() == 1:
+        log.info("gracefully exiting backuper")
+    else:
+        log.warning(
+            "noooo, force exiting! i am now killing myself with %d daemon threads left running",
+            threading.active_count() - 1,
+        )
+
+
+def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider):
+    log.info("start making backup of target: `%s`", target.env_name)
+    backup_file = target.make_backup()
+    if not backup_file:
+        notifications.send_fail_message(
+            target.env_name,
+            provider_name=provider.NAME,
+            reason=notifications.FAIL_REASON.BACKUP_CREATE,
+        )
+        return
+    upload_path = provider.safe_post_save(backup_file=backup_file)
+    if upload_path:
+        provider.safe_clean(backup_file=backup_file)
+        notifications.send_success_message(
+            env_name=target.env_name,
+            provider_name=provider.NAME,
+            upload_path=upload_path,
+        )
+    else:
+        notifications.send_fail_message(
+            target.env_name,
+            provider_name=provider.NAME,
+            reason=notifications.FAIL_REASON.UPLOAD,
+            backup_file=backup_file,
+        )
+    log.info(
+        "next planned backup of target `%s` is: %s",
+        target.env_name,
+        target.next_backup_time,
+    )
+
+
+def setup_runtime_arguments():
     parser = argparse.ArgumentParser(description="Backuper program")
     parser.add_argument(
         "-s", "--single", action="store_true", help="Only single backup then exit"
     )
     args = parser.parse_args()
+    config.RUNTIME_SINGLE = args.single
+
+
+def main():
+    signal.signal(signalnum=signal.SIGINT, handler=quit)
+    signal.signal(signalnum=signal.SIGTERM, handler=quit)
+
+    setup_runtime_arguments()
 
     provider = backup_provider()
     targets = backup_targets()
 
+    i = 0
     while not exit_event.is_set():
         for target in targets:
-            if target.next_backup() or args.single:
-                log.info("start making backup of target: `%s`", target.env_name)
-                backup_file = target.make_backup()
-                if not backup_file:
-                    notifications.send_fail_message(
-                        target.env_name,
-                        provider_name=provider.NAME,
-                        reason=notifications.FAIL_REASON.BACKUP_CREATE,
-                    )
-                    continue
-                upload_path = provider.safe_post_save(backup_file=backup_file)
-                if upload_path:
-                    provider.safe_clean(backup_file=backup_file)
-                    notifications.send_success_message(
-                        env_name=target.env_name,
-                        provider_name=provider.NAME,
-                        upload_path=upload_path,
-                    )
-                else:
-                    notifications.send_fail_message(
-                        target.env_name,
-                        provider_name=provider.NAME,
-                        reason=notifications.FAIL_REASON.UPLOAD,
-                        backup_file=backup_file,
-                    )
-                log.info(
-                    "next planned backup of target `%s` is: %s",
-                    target.env_name,
-                    target.next_backup_time,
+            if target.next_backup() or config.RUNTIME_SINGLE:
+                i += 1
+                backup_thread = Thread(
+                    target=run_backup,
+                    args=(target, provider),
+                    daemon=True,
+                    name=f"{target.env_name}-{i}",
                 )
-                exit_event.wait(1)
-        if args.single:
+                backup_thread.start()
+                exit_event.wait(0.5)
+        if config.RUNTIME_SINGLE:
             exit_event.set()
         exit_event.wait(5)
-    log.info("gracefully exited backuper")
+
+    shutdown()
 
 
 if __name__ == "__main__":
-    signal.signal(signalnum=signal.SIGINT, handler=quit)
-    signal.signal(signalnum=signal.SIGTERM, handler=quit)
     main()

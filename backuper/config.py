@@ -22,6 +22,7 @@ CONST_ENV_NAME_REGEX = re.compile(r"^[A-Za-z_0-9]{1,}$")
 CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9]{1,}$")
 CONST_ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
 CONST_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
+CONST_LOG_FOLDER_PATH: Path = BASE_DIR / "logs"
 CONST_PGPASS_FILE_PATH: Path = BASE_DIR / ".pgpass"
 CONST_GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
 os.environ["PGPASSFILE"] = str(CONST_PGPASS_FILE_PATH)
@@ -31,6 +32,7 @@ CONST_PGPASS_FILE_PATH.unlink(missing_ok=True)
 CONST_PGPASS_FILE_PATH.touch(mode=0o700)
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_ALLOWED_LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
+RUNTIME_SINGLE = False
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 assert (
     LOG_LEVEL in CONST_ALLOWED_LOG_LEVELS
@@ -53,11 +55,43 @@ def logging_config(log_level: str):
                 "formatter": "verbose",
                 "level": "DEBUG",
             },
+            "error": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": CONST_LOG_FOLDER_PATH / "backuper_error.log",
+                "formatter": "verbose",
+                "maxBytes": 10**6,
+                "backupCount": 1,
+                "level": "ERROR",
+            },
+            "warning": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": CONST_LOG_FOLDER_PATH / "backuper_warning.log",
+                "formatter": "verbose",
+                "maxBytes": 10**6,
+                "backupCount": 1,
+                "level": "WARNING",
+            },
+            "info": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": CONST_LOG_FOLDER_PATH / "backuper_info.log",
+                "formatter": "verbose",
+                "maxBytes": 10**6,
+                "backupCount": 1,
+                "level": "INFO",
+            },
+            "debug": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": CONST_LOG_FOLDER_PATH / "backuper_debug.log",
+                "formatter": "verbose",
+                "maxBytes": 10**6,
+                "backupCount": 1,
+                "level": "DEBUG",
+            },
         },
         "loggers": {
             "": {
                 "level": log_level,
-                "handlers": ["stream"],
+                "handlers": ["debug", "info", "warning", "error", "stream"],
                 "propagate": False,
             },
         },
@@ -91,6 +125,9 @@ if not CONST_ZIP_PASSWORD_REGEX.match(ZIP_ARCHIVE_PASSWORD):
         f"Error: `ZIP_ARCHIVE_PASSWORD` must match regex {CONST_ZIP_PASSWORD_REGEX}"
     )
 SUBPROCESS_TIMEOUT_SECS: int = int(os.environ.get("SUBPROCESS_TIMEOUT_SECS", 60 * 60))
+BACKUPER_SIGTERM_TIMEOUT_SECS: int = int(
+    os.environ.get("BACKUPER_SIGTERM_TIMEOUT_SECS", 30)
+)
 BACKUP_COOLING_SECS: int = int(os.environ.get("BACKUP_COOLING_SECS", 60))
 ZIP_ARCHIVE_LEVEL: int = int(os.environ.get("ZIP_ARCHIVE_LEVEL", 3))
 BACKUP_COOLING_RETRIES: int = int(os.environ.get("BACKUP_COOLING_RETRIES", 1))
