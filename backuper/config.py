@@ -31,6 +31,7 @@ CONST_GOOGLE_SERVICE_ACCOUNT_PATH.touch(mode=0o700, exist_ok=True)
 CONST_PGPASS_FILE_PATH.unlink(missing_ok=True)
 CONST_PGPASS_FILE_PATH.touch(mode=0o700)
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
+CONST_LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_ALLOWED_LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 RUNTIME_SINGLE: bool = False
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
