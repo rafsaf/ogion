@@ -10,6 +10,8 @@ from pytest import MonkeyPatch
 from backuper import config
 from backuper.config import (
     BackupTargetEnum,
+    FileBackupTarget,
+    FolderBackupTarget,
     MariaDBBackupTarget,
     MySQLBackupTarget,
     PostgreSQLBackupTarget,
@@ -17,6 +19,18 @@ from backuper.config import (
 
 DOCKER_TESTS: bool = os.environ.get("DOCKER_TESTS", None) is not None
 CONST_TOKEN_URLSAFE = "mock"
+FILE_1 = FileBackupTarget(
+    env_name="singlefile_1",
+    cron_rule="* * * * *",
+    type=BackupTargetEnum.FILE,
+    abs_path=Path(__file__).absolute().parent / "const/testfile.txt",
+)
+FOLDER_1 = FolderBackupTarget(
+    env_name="directory_1",
+    cron_rule="* * * * *",
+    type=BackupTargetEnum.FOLDER,
+    abs_path=Path(__file__).absolute().parent / "const/testfolder",
+)
 POSTGRES_15 = PostgreSQLBackupTarget(
     env_name="postgresql_db_15",
     type=BackupTargetEnum.POSTGRESQL,
@@ -154,10 +168,11 @@ def fixed_config_setup(tmp_path: Path, monkeypatch: MonkeyPatch):
     monkeypatch.setattr(config, "ZIP_ARCHIVE_PASSWORD", "test")
     monkeypatch.setattr(config, "GOOGLE_BUCKET_UPLOAD_PATH", "test")
     CONST_LOG_FOLDER_PATH = tmp_path / "pytest_logs"
-    CONST_LOG_FOLDER_PATH.mkdir()
+    CONST_LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
     monkeypatch.setattr(config, "CONST_LOG_FOLDER_PATH", CONST_LOG_FOLDER_PATH)
     CONST_BACKUP_FOLDER_PATH = tmp_path / "pytest_data"
     monkeypatch.setattr(config, "CONST_BACKUP_FOLDER_PATH", CONST_BACKUP_FOLDER_PATH)
+    CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
     CONST_PGPASS_FILE_PATH = tmp_path / "pytest_pgpass"
     CONST_PGPASS_FILE_PATH.touch(0o600, exist_ok=True)
     monkeypatch.setattr(config, "CONST_PGPASS_FILE_PATH", CONST_PGPASS_FILE_PATH)

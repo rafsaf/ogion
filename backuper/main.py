@@ -35,7 +35,7 @@ def backup_provider() -> BaseBackupProvider:
         config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE: GoogleCloudStorage(),
     }
     provider = map.get(config.BACKUP_PROVIDER, None)
-    if provider is None:
+    if provider is None:  # pragma: no cover
         raise RuntimeError(f"Unknown provider: `{config.BACKUP_PROVIDER}`")
     return provider
 
@@ -87,7 +87,7 @@ def backup_targets() -> list[BaseBackupTarget]:
                 backup_target.db_version,
                 target.env_name,
             )
-        else:
+        else:  # pragma: no cover
             raise RuntimeError(
                 "panic!!! unsupported backup target",
                 target.dict(),
@@ -115,18 +115,25 @@ def shutdown():
             thread.name,
         )
         thread.join(timeout=timeout_left)
-        if not thread.is_alive():
+        if thread.is_alive():
+            log.warning(
+                "thread `%s` is still alive!",
+                thread.name,
+            )
+        else:
             log.info(
                 "thread `%s` exited gracefully",
                 thread.name,
             )
     if threading.active_count() == 1:
         log.info("gracefully exiting backuper")
+        exit(0)
     else:
         log.warning(
             "noooo, force exiting! i am now killing myself with %d daemon threads left running",
             threading.active_count() - 1,
         )
+        exit(1)
 
 
 def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider):
