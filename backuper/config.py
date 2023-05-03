@@ -19,7 +19,7 @@ except ImportError:  # pragma: no cover
     pass
 
 CONST_ENV_NAME_REGEX = re.compile(r"^[A-Za-z_0-9]{1,}$")
-CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9]{1,}$")
+CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9_-]{1,}$")
 CONST_ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
 CONST_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
 CONST_LOG_FOLDER_PATH: Path = BASE_DIR / "logs"
@@ -32,12 +32,14 @@ CONST_PGPASS_FILE_PATH.unlink(missing_ok=True)
 CONST_PGPASS_FILE_PATH.touch(mode=0o700)
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
-CONST_ALLOWED_LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 RUNTIME_SINGLE: bool = False
+
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
-assert (
-    LOG_LEVEL in CONST_ALLOWED_LOG_LEVELS
-), f"invalid log level: {LOG_LEVEL}, must be one of {CONST_ALLOWED_LOG_LEVELS}"
+allowed_logs_levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
+if LOG_LEVEL not in allowed_logs_levels:
+    raise RuntimeError(
+        f"error log level must be one of {allowed_logs_levels}, currently: `{LOG_LEVEL}`"
+    )
 
 
 def logging_config(log_level: str):
@@ -119,11 +121,19 @@ class BackupTargetEnum(StrEnum):
 
 
 BACKUP_PROVIDER = os.environ.get("BACKUP_PROVIDER", BackupProviderEnum.LOCAL_FILES)
+allowed_providers = [
+    BackupProviderEnum.LOCAL_FILES,
+    BackupProviderEnum.GOOGLE_CLOUD_STORAGE,
+]
+if BACKUP_PROVIDER not in allowed_providers:
+    raise RuntimeError(
+        f"error, BACKUP_PROVIDER must be one of {allowed_providers}, currently: `{BACKUP_PROVIDER}`"
+    )
 
 ZIP_ARCHIVE_PASSWORD = os.environ.get("ZIP_ARCHIVE_PASSWORD", "")
 if not CONST_ZIP_PASSWORD_REGEX.match(ZIP_ARCHIVE_PASSWORD):
     raise RuntimeError(
-        f"Error: `ZIP_ARCHIVE_PASSWORD` must match regex {CONST_ZIP_PASSWORD_REGEX}"
+        f"error: `ZIP_ARCHIVE_PASSWORD` must match regex {CONST_ZIP_PASSWORD_REGEX}"
     )
 SUBPROCESS_TIMEOUT_SECS: int = int(os.environ.get("SUBPROCESS_TIMEOUT_SECS", 60 * 60))
 BACKUPER_SIGTERM_TIMEOUT_SECS: int = int(
