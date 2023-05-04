@@ -1,5 +1,6 @@
 import logging
 import re
+import sys
 from pathlib import Path
 
 from pydantic import SecretStr
@@ -68,7 +69,7 @@ class MariaDB(BaseBackupTarget):
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
             log.error("mariadb_connection unable to connect to database, exiting")
-            exit(1)
+            sys.exit(1)
 
         version = None
         matches = VERSION_REGEX.finditer(result)
@@ -81,7 +82,7 @@ class MariaDB(BaseBackupTarget):
                 "mariadb_connection error processing sql result, version unknown: %s",
                 result,
             )
-            exit(1)
+            sys.exit(1)
         log.debug("mariadb_connection calculated version: %s", version)
         return version
 

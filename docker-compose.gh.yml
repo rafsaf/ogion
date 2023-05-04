@@ -67,7 +67,30 @@ services:
       - MARIADB_ROOT_PASSWORD=maria
       - MARIADB_DATABASE=maria
 
-  backuper_tests:
+  backuper_tests_amd64:
+    platform: linux/amd64
+    depends_on:
+      - postgres_15
+      - postgres_14
+      - postgres_13
+      - postgres_12
+      - postgres_11
+      - mysql_57
+      - mysql_80
+      - mariadb_1011
+      - mariadb_1006
+      - mariadb_1005
+      - mariadb_1004
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: tests
+    environment:
+      - DOCKER_TESTS=true
+      - ZIP_ARCHIVE_PASSWORD=password
+
+  backuper_tests_arm64:
+    platform: linux/arm64
     depends_on:
       - postgres_15
       - postgres_14

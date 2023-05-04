@@ -28,6 +28,12 @@ COPY tests tests
 COPY backuper backuper
 CMD ["coverage", "run", "-m", "pytest", "-vv"]
 
+FROM tests AS pyinstaller
+COPY backuper_cli.py .
+RUN apt-get -y update && apt-get -y install binutils
+ENTRYPOINT []
+CMD ["pyinstaller", "backuper_cli.py", "--add-binary", "bin/7zz:bin/7zz", "--name","backuper"]
+
 FROM base AS build
 COPY requirements.txt .
 RUN pip install -r requirements.txt

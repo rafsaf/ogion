@@ -1,6 +1,7 @@
 import argparse
 import logging
 import signal
+import sys
 import threading
 import time
 from threading import Thread
@@ -30,14 +31,12 @@ def quit(sig, frame):
 
 
 def backup_provider() -> BaseBackupProvider:
-    map: dict[str, BaseBackupProvider] = {
-        config.BackupProviderEnum.LOCAL_FILES: LocalFiles(),
-        config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE: GoogleCloudStorage(),
-    }
-    provider = map.get(config.BACKUP_PROVIDER, None)
-    if provider is None:  # pragma: no cover
+    if config.BACKUP_PROVIDER == config.BackupProviderEnum.LOCAL_FILES:
+        return LocalFiles()
+    elif config.BACKUP_PROVIDER == config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE:
+        return GoogleCloudStorage()
+    else:  # pragma: no cover
         raise RuntimeError(f"Unknown provider: `{config.BACKUP_PROVIDER}`")
-    return provider
 
 
 def backup_targets() -> list[BaseBackupTarget]:
@@ -127,13 +126,13 @@ def shutdown():
             )
     if threading.active_count() == 1:
         log.info("gracefully exiting backuper")
-        exit(0)
+        sys.exit(0)
     else:
         log.warning(
             "noooo, force exiting! i am now killing myself with %d daemon threads left running",
             threading.active_count() - 1,
         )
-        exit(1)
+        sys.exit(1)
 
 
 def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider):

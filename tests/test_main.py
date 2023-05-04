@@ -1,13 +1,20 @@
 import sys
 import threading
 import time
+from unittest.mock import Mock
 
 import pytest
+from google.cloud import storage
 
 from backuper import config
 from backuper.main import backup_provider, backup_targets, main, shutdown
 
 from .conftest import FILE_1, FOLDER_1, MARIADB_1011, MYSQL_80, POSTGRES_15
+
+
+@pytest.fixture(autouse=True)
+def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(storage, "Client", Mock())
 
 
 def test_backup_targets(monkeypatch: pytest.MonkeyPatch):
