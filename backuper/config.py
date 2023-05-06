@@ -23,13 +23,9 @@ CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9_-]{1,}$")
 CONST_ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
 CONST_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
 CONST_LOG_FOLDER_PATH: Path = BASE_DIR / "logs"
-CONST_PGPASS_FILE_PATH: Path = BASE_DIR / ".pgpass"
 CONST_GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
-os.environ["PGPASSFILE"] = str(CONST_PGPASS_FILE_PATH)
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(CONST_GOOGLE_SERVICE_ACCOUNT_PATH)
 CONST_GOOGLE_SERVICE_ACCOUNT_PATH.touch(mode=0o700, exist_ok=True)
-CONST_PGPASS_FILE_PATH.unlink(missing_ok=True)
-CONST_PGPASS_FILE_PATH.touch(mode=0o600)
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 RUNTIME_SINGLE: bool = False

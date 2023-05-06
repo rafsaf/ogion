@@ -173,14 +173,10 @@ def fixed_config_setup(tmp_path: Path, monkeypatch: MonkeyPatch):
     CONST_BACKUP_FOLDER_PATH = tmp_path / "pytest_data"
     monkeypatch.setattr(config, "CONST_BACKUP_FOLDER_PATH", CONST_BACKUP_FOLDER_PATH)
     CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
-    CONST_PGPASS_FILE_PATH = tmp_path / "pytest_pgpass"
-    CONST_PGPASS_FILE_PATH.touch(0o600, exist_ok=True)
-    monkeypatch.setattr(config, "CONST_PGPASS_FILE_PATH", CONST_PGPASS_FILE_PATH)
     google_serv_acc_path = tmp_path / "pytest_google_auth"
     monkeypatch.setattr(
         config, "CONST_GOOGLE_SERVICE_ACCOUNT_PATH", google_serv_acc_path
     )
-    monkeypatch.setenv("PGPASSFILE", str(CONST_PGPASS_FILE_PATH))
     monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(google_serv_acc_path))
     config.runtime_configuration()
     config.logging_config("DEBUG")

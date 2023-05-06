@@ -35,36 +35,37 @@ class PostgreSQL(BaseBackupTarget):
         self.db = db
         self.host = host
         self.password = password
-        self._init_pgpass_file()
+        self.pgpass_file = self._init_pgpass_file()
         self.db_version = self._postgres_connection()
 
     def _init_pgpass_file(self):
         # https://www.postgresql.org/docs/current/libpq-pgpass.html
-        pgpass_text = "{}:{}:{}:{}:{}\n".format(
-            self.host,
-            self.port,
-            self.user,
-            self.db,
-            self.password.get_secret_value(),
-        )
-        with open(config.CONST_PGPASS_FILE_PATH, "a") as file:
-            file.write(pgpass_text)
-        log.debug(
-            "%s file with permissions %s current content: %s",
-            config.CONST_PGPASS_FILE_PATH.absolute(),
-            config.CONST_PGPASS_FILE_PATH.stat().st_mode,
-            config.CONST_PGPASS_FILE_PATH.read_text(),
-        )
+
+        name = f"{self.env_name}.pgpass"
+        path = config.BASE_DIR / name
+        path.unlink(missing_ok=True)
+        path.touch(0o600)
+        with open(path, "w") as file:
+            password = self.password.get_secret_value()
+            file.write(
+                "{}:{}:{}:{}:{}\n".format(
+                    self.host,
+                    self.port,
+                    self.user,
+                    self.db,
+                    password,
+                )
+            )
+        return path
 
     def _postgres_connection(self):
         log.debug("postgres_connection start postgres connection")
 
         try:
             result = core.run_subprocess(
-                f"psql -U {self.user} "
-                f"-p {self.port} "
-                f"-h {self.host} "
-                f"{self.db} "
+                f"psql -d "
+                f"postgresql://{self.user}@{self.host}:{self.port}/{self.db}?"
+                f"passfile={self.pgpass_file} "
                 "-w --command 'SELECT version();'",
             )
         except core.CoreSubprocessError as err:
@@ -92,11 +93,9 @@ class PostgreSQL(BaseBackupTarget):
         out_file = core.get_new_backup_path(self.env_name, name)
 
         shell_args = (
-            f"pg_dump -v -O -Fc "
-            f"-U {self.user} "
-            f"-p {self.port} "
-            f"-h {self.host} "
-            f"{self.db} "
+            f"pg_dump -v -O -Fc -d "
+            f"postgresql://{self.user}@{self.host}:{self.port}/{self.db}?"
+            f"passfile={self.pgpass_file} "
             f"-f {out_file}"
         )
         log.debug("start pg_dump in subprocess: %s", shell_args)
