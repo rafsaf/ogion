@@ -39,6 +39,7 @@ class PostgreSQL(BaseBackupTarget):
         self.db_version = self._postgres_connection()
 
     def _init_pgpass_file(self):
+        # https://www.postgresql.org/docs/current/libpq-pgpass.html
         pgpass_text = "{}:{}:{}:{}:{}\n".format(
             self.host,
             self.port,

@@ -29,7 +29,7 @@ os.environ["PGPASSFILE"] = str(CONST_PGPASS_FILE_PATH)
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(CONST_GOOGLE_SERVICE_ACCOUNT_PATH)
 CONST_GOOGLE_SERVICE_ACCOUNT_PATH.touch(mode=0o700, exist_ok=True)
 CONST_PGPASS_FILE_PATH.unlink(missing_ok=True)
-CONST_PGPASS_FILE_PATH.touch(mode=0o700)
+CONST_PGPASS_FILE_PATH.touch(mode=0o600)
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 RUNTIME_SINGLE: bool = False
