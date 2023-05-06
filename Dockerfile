@@ -7,7 +7,7 @@ WORKDIR ${FOLDER_PATH}
 RUN addgroup --gid 1001 --system $SERVICE_NAME && \
     adduser --gid 1001 --shell /bin/false --disabled-password --uid 1001 $SERVICE_NAME
 
-RUN python -m venv venv
+RUN python -m venv /venv
 ENV PATH="/venv/bin:$PATH"
 
 COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
