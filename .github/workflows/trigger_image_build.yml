@@ -1,5 +1,4 @@
-name: Push image to dockerhub
-
+name: push image to dockerhub on release
 on:
   release:
     types:

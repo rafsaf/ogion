@@ -1,5 +1,4 @@
-name: Run pytest based tests
-
+name: tests
 on:
   push:
     branches:
