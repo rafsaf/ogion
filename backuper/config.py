@@ -232,6 +232,7 @@ class FolderBackupTarget(BackupTarget):
 def _validate_backup_target(env_name: str, val: str, target: type[BackupTarget]):
     target_type = target.__name__.lower()
     log.info("validating %s variable: `%s`", target_type, env_name)
+    log.debug("%s=%s", target_type, val)
     try:
         db_data_from_env = json.loads(val)
         res = target(env_name=env_name, **db_data_from_env)
