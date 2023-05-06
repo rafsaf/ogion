@@ -1,0 +1,11 @@
+# docker-compose.yml
+
+services:
+  postgresql_15:
+    image: postgres:15
+    environment:
+      - POSTGRES_PASSWORD=secret
+  backuper:
+    image: rafsaf/backuper:latest
+    env_file:
+      - .env.demo
