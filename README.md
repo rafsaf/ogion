@@ -1,10 +1,10 @@
 # Backuper
 
-Tool for making scheduled backups of databases and uploading encrypted to safe clouds, for homelabs, hobby projects and so on, in environments like k8s, docker, vms.
+A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms.
 
-| WARNING                                                                                                                                                                                                                                                |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Although this project aims to be reliable backup tool and can help protect your 5GB Postgres data from evaporation, it's **NOT** a fit for your enterprise production systems with enormous databases size and application load. You have been warned. |
+| WARNING                                                                                                                                                                                                                                                    |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| While this project aims to be a reliable backup tool and can help protect your hobby 5GB Postgres database from evaporation, it is **NOT** suitable for enterprise production systems with huge databases and application workloads. You have been warned. |
 
 ## Documentation
 [https://backuper.rafsaf.pl](https://backuper.rafsaf.pl)
@@ -28,8 +28,12 @@ Tool for making scheduled backups of databases and uploading encrypted to safe c
 ## Deployment strategies
 
 - docker (docker compose) container
-- kubernetes container
-- systemd application
+- kubernetes deployment
+
+## Architectures
+
+- linux/amd64
+- linux/arm64
 
 <br>
 <br>

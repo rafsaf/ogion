@@ -57,8 +57,9 @@ repos:
         args:
           ["--with", "dev", "-o", "requirements-dev.txt", "--without-hashes"]
   - repo: https://github.com/rafsaf/pyproject-tag-check
-    rev: "0.3.1"
+    rev: "1.0.0"
     hooks:
       - id: pyproject-tag-check
+        always_run: true
         args:
           - https://github.com/rafsaf/backuper
