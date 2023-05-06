@@ -30,19 +30,10 @@ nav:
       - backup_targets/directory.md
   - Notifications:
       - notifications/discord.md
-#       - usage/respo_create_cli.md
-#       - usage/get_respo_model.md
-#       - usage/user_have_permission.md
-#       - usage/environment_variables.md
-#   - Reference:
-#       - reference/core.md
-#       - reference/cli.md
-#       - reference/client.md
-#       - reference/fields.django.md
-#       - reference/fields.sqlalchemy.md
-#       - reference/exceptions.md
-#       - reference/settings.md
-#   - changelog.md
+  - Deployment: deployment.md
+  - Configuration: configuration.md
+  - How to restore?: how_to_restore.md
+  - Design, history and future: design_history_future.md
 
 plugins:
   - mkdocstrings:
