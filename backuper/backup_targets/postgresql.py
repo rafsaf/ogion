@@ -49,6 +49,12 @@ class PostgreSQL(BaseBackupTarget):
         )
         with open(config.CONST_PGPASS_FILE_PATH, "a") as file:
             file.write(pgpass_text)
+        log.debug(
+            "%s file with permissions %s current content: %s",
+            config.CONST_PGPASS_FILE_PATH.absolute(),
+            config.CONST_PGPASS_FILE_PATH.stat().st_mode,
+            config.CONST_PGPASS_FILE_PATH.read_text(),
+        )
 
     def _postgres_connection(self):
         log.debug("postgres_connection start postgres connection")
