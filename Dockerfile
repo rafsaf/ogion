@@ -2,7 +2,7 @@ FROM python:3.11.3-slim-bullseye AS base
 ENV PYTHONUNBUFFERED=1
 ENV SERVICE_NAME="backuper"
 ENV FOLDER_PATH="/var/lib/backuper"
-ENV LOG_FOLDER_PATH="/var/log"
+ENV LOG_FOLDER_PATH="/var/log/backuper"
 WORKDIR ${FOLDER_PATH}
 
 RUN addgroup --gid 1001 --system $SERVICE_NAME && \
