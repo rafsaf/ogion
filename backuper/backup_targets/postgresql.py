@@ -51,8 +51,8 @@ class PostgreSQL(BaseBackupTarget):
                 "{}:{}:{}:{}:{}\n".format(
                     self.host,
                     self.port,
-                    self.user,
                     self.db,
+                    self.user,
                     password,
                 )
             )
