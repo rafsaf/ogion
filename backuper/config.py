@@ -22,14 +22,14 @@ CONST_ENV_NAME_REGEX = re.compile(r"^[A-Za-z_0-9]{1,}$")
 CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9_-]{1,}$")
 CONST_ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
 CONST_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
-CONST_LOG_FOLDER_PATH: Path = BASE_DIR / "logs"
 CONST_GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(CONST_GOOGLE_SERVICE_ACCOUNT_PATH)
 CONST_GOOGLE_SERVICE_ACCOUNT_PATH.touch(mode=0o700, exist_ok=True)
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
-CONST_LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
-RUNTIME_SINGLE: bool = False
 
+RUNTIME_SINGLE: bool = False
+LOG_FOLDER_PATH: Path = Path(os.environ.get("LOG_FOLDER_PATH", BASE_DIR / "logs"))
+LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 allowed_logs_levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
 if LOG_LEVEL not in allowed_logs_levels:
@@ -56,7 +56,7 @@ def logging_config(log_level: str):
             },
             "error": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": CONST_LOG_FOLDER_PATH / "backuper_error.log",
+                "filename": LOG_FOLDER_PATH / "backuper_error.log",
                 "formatter": "verbose",
                 "maxBytes": 10**5,
                 "backupCount": 1,
@@ -64,7 +64,7 @@ def logging_config(log_level: str):
             },
             "warning": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": CONST_LOG_FOLDER_PATH / "backuper_warning.log",
+                "filename": LOG_FOLDER_PATH / "backuper_warning.log",
                 "formatter": "verbose",
                 "maxBytes": 10**5,
                 "backupCount": 1,
@@ -72,7 +72,7 @@ def logging_config(log_level: str):
             },
             "info": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": CONST_LOG_FOLDER_PATH / "backuper_info.log",
+                "filename": LOG_FOLDER_PATH / "backuper_info.log",
                 "formatter": "verbose",
                 "maxBytes": 10**5,
                 "backupCount": 1,
@@ -80,7 +80,7 @@ def logging_config(log_level: str):
             },
             "debug": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": CONST_LOG_FOLDER_PATH / "backuper_debug.log",
+                "filename": LOG_FOLDER_PATH / "backuper_debug.log",
                 "formatter": "verbose",
                 "maxBytes": 10**5,
                 "backupCount": 1,

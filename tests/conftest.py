@@ -167,9 +167,9 @@ def fixed_config_setup(tmp_path: Path, monkeypatch: MonkeyPatch):
     monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 1)
     monkeypatch.setattr(config, "ZIP_ARCHIVE_PASSWORD", "test")
     monkeypatch.setattr(config, "GOOGLE_BUCKET_UPLOAD_PATH", "test")
-    CONST_LOG_FOLDER_PATH = tmp_path / "pytest_logs"
-    CONST_LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
-    monkeypatch.setattr(config, "CONST_LOG_FOLDER_PATH", CONST_LOG_FOLDER_PATH)
+    LOG_FOLDER_PATH = tmp_path / "pytest_logs"
+    LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
+    monkeypatch.setattr(config, "LOG_FOLDER_PATH", LOG_FOLDER_PATH)
     CONST_BACKUP_FOLDER_PATH = tmp_path / "pytest_data"
     monkeypatch.setattr(config, "CONST_BACKUP_FOLDER_PATH", CONST_BACKUP_FOLDER_PATH)
     CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
