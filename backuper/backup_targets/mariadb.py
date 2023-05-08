@@ -1,5 +1,6 @@
 import logging
 import re
+import shlex
 import sys
 from pathlib import Path
 
@@ -31,10 +32,10 @@ class MariaDB(BaseBackupTarget):
     ) -> None:
         super().__init__(cron_rule=cron_rule, env_name=env_name)
         self.cron_rule = cron_rule
-        self.user = user
+        self.user = shlex.quote(user)
+        self.db = shlex.quote(db)
+        self.host = shlex.quote(host)
         self.port = port
-        self.db = db
-        self.host = host
         self.password = password
         self.option_file = self._init_option_file()
         self.db_version = self._mariadb_connection()

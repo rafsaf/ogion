@@ -1,6 +1,8 @@
 import logging
 import re
+import shlex
 import sys
+import urllib.parse
 
 from pydantic import SecretStr
 
@@ -30,10 +32,10 @@ class PostgreSQL(BaseBackupTarget):
     ) -> None:
         super().__init__(cron_rule=cron_rule, env_name=env_name)
         self.cron_rule = cron_rule
-        self.user = user
-        self.port = port
-        self.db = db
+        self.user = urllib.parse.quote(user)
+        self.db = urllib.parse.quote(db)
         self.host = host
+        self.port = port
         self.password = password
         self.pgpass_file = self._init_pgpass_file()
         self.db_version = self._postgres_connection()
@@ -46,7 +48,7 @@ class PostgreSQL(BaseBackupTarget):
         path.unlink(missing_ok=True)
         path.touch(0o600)
         with open(path, "w") as file:
-            password = self.password.get_secret_value()
+            password = urllib.parse.quote(self.password.get_secret_value())
             file.write(
                 "{}:{}:{}:{}:{}\n".format(
                     self.host,
@@ -56,17 +58,20 @@ class PostgreSQL(BaseBackupTarget):
                     password,
                 )
             )
+        log.critical(path.read_text())
         return path
 
     def _postgres_connection(self):
         log.debug("postgres_connection start postgres connection")
 
         try:
-            result = core.run_subprocess(
-                f"psql -d "
+            uri = (
                 f"postgresql://{self.user}@{self.host}:{self.port}/{self.db}?"
-                f"passfile={self.pgpass_file} "
-                "-w --command 'SELECT version();'",
+                f"passfile={self.pgpass_file}"
+            )
+            escaped_uri = shlex.quote(uri)
+            result = core.run_subprocess(
+                f"psql -d {escaped_uri} -w --command 'SELECT version();'",
             )
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
@@ -91,13 +96,12 @@ class PostgreSQL(BaseBackupTarget):
     def _backup(self):
         name = f"{self.db}_{self.db_version}"
         out_file = core.get_new_backup_path(self.env_name, name)
-
-        shell_args = (
-            f"pg_dump -v -O -Fc -d "
+        uri = (
             f"postgresql://{self.user}@{self.host}:{self.port}/{self.db}?"
-            f"passfile={self.pgpass_file} "
-            f"-f {out_file}"
+            f"passfile={self.pgpass_file}"
         )
+        escaped_uri = shlex.quote(uri)
+        shell_args = f"pg_dump -v -O -Fc -d {escaped_uri} -f {out_file}"
         log.debug("start pg_dump in subprocess: %s", shell_args)
         core.run_subprocess(shell_args)
         log.debug("finished pg_dump, output: %s", out_file)

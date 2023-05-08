@@ -19,7 +19,6 @@ except ImportError:  # pragma: no cover
     pass
 
 CONST_ENV_NAME_REGEX = re.compile(r"^[A-Za-z_0-9]{1,}$")
-CONST_ZIP_PASSWORD_REGEX = re.compile(r"^[a-zA-Z0-9_-]{1,}$")
 CONST_ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
 CONST_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
 CONST_GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
@@ -126,10 +125,6 @@ if BACKUP_PROVIDER not in allowed_providers:
     )
 
 ZIP_ARCHIVE_PASSWORD = os.environ.get("ZIP_ARCHIVE_PASSWORD", "")
-if not CONST_ZIP_PASSWORD_REGEX.match(ZIP_ARCHIVE_PASSWORD):
-    raise RuntimeError(
-        f"error: `ZIP_ARCHIVE_PASSWORD` must match regex {CONST_ZIP_PASSWORD_REGEX}"
-    )
 SUBPROCESS_TIMEOUT_SECS: int = int(os.environ.get("SUBPROCESS_TIMEOUT_SECS", 60 * 60))
 BACKUPER_SIGTERM_TIMEOUT_SECS: float = float(
     os.environ.get("BACKUPER_SIGTERM_TIMEOUT_SECS", 30)

@@ -36,94 +36,110 @@ POSTGRES_15 = PostgreSQLBackupTarget(
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_15" if DOCKER_TESTS else "localhost",
-    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10015,
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user="user",
 )
 POSTGRES_14 = PostgreSQLBackupTarget(
     env_name="postgresql_db_14",
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_14" if DOCKER_TESTS else "localhost",
-    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10014,
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user="user",
 )
 POSTGRES_13 = PostgreSQLBackupTarget(
     env_name="postgresql_db_13",
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_13" if DOCKER_TESTS else "localhost",
-    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10013,
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user="user",
 )
 POSTGRES_12 = PostgreSQLBackupTarget(
     env_name="postgresql_db_12",
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_12" if DOCKER_TESTS else "localhost",
-    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10012,
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user="user",
 )
 POSTGRES_11 = PostgreSQLBackupTarget(
     env_name="postgresql_db_11",
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_11" if DOCKER_TESTS else "localhost",
-    password=SecretStr("postgres"),
     port=5432 if DOCKER_TESTS else 10011,
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user="user",
 )
 MYSQL_57 = MySQLBackupTarget(
     env_name="mysql_db_57",
     type=BackupTargetEnum.MYSQL,
     cron_rule="* * * * *",
     host="mysql_57" if DOCKER_TESTS else "localhost",
-    password=SecretStr("mysql"),
     port=3306 if DOCKER_TESTS else 10057,
-    db="database",
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user='user-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
 )
 MYSQL_80 = MySQLBackupTarget(
     env_name="mysql_db_80",
     type=BackupTargetEnum.MYSQL,
     cron_rule="* * * * *",
     host="mysql_80" if DOCKER_TESTS else "localhost",
-    password=SecretStr("mysql"),
     port=3306 if DOCKER_TESTS else 10080,
-    db="database",
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user='user-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
 )
 MARIADB_1011 = MariaDBBackupTarget(
     env_name="mariadb_1011",
     type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
     host="mariadb_1011" if DOCKER_TESTS else "localhost",
-    password=SecretStr("maria"),
     port=3306 if DOCKER_TESTS else 11011,
-    db="maria",
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user='user-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
 )
 MARIADB_1006 = MariaDBBackupTarget(
     env_name="mariadb_1006",
     type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
     host="mariadb_1006" if DOCKER_TESTS else "localhost",
-    password=SecretStr("maria"),
     port=3306 if DOCKER_TESTS else 11006,
-    db="maria",
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user='user-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
 )
 MARIADB_1005 = MariaDBBackupTarget(
     env_name="mariadb_1005",
     type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
     host="mariadb_1005" if DOCKER_TESTS else "localhost",
-    password=SecretStr("maria"),
     port=3306 if DOCKER_TESTS else 11005,
-    db="maria",
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user='user-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
 )
 MARIADB_1004 = MariaDBBackupTarget(
     env_name="mariadb_1004",
     type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
     host="mariadb_1004" if DOCKER_TESTS else "localhost",
-    password=SecretStr("maria"),
     port=3306 if DOCKER_TESTS else 11004,
-    db="maria",
+    password=SecretStr('password-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""'),
+    db='database-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
+    user='user-_-12!@#$%^&*()/;><.,]}{[\\]}`~\'"\'"\'""',
 )
 
 DB_VERSION_BY_ENV_VAR: dict[str, str] = {
@@ -165,7 +181,11 @@ def fixed_config_setup(tmp_path: Path, monkeypatch: MonkeyPatch):
     monkeypatch.setattr(config, "BACKUP_COOLING_SECS", 1)
     monkeypatch.setattr(config, "BACKUP_COOLING_RETRIES", 0)
     monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 1)
-    monkeypatch.setattr(config, "ZIP_ARCHIVE_PASSWORD", "test")
+    monkeypatch.setattr(
+        config,
+        "ZIP_ARCHIVE_PASSWORD",
+        'very_unpleasant:password-_-12!@#$%^&*()/;><.,]}{[\\`~\'"\'"\'""',
+    )
     monkeypatch.setattr(config, "GOOGLE_BUCKET_UPLOAD_PATH", "test")
     LOG_FOLDER_PATH = tmp_path / "pytest_logs"
     LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
