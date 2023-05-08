@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 import responses
 from pydantic import SecretStr
-from pytest import MonkeyPatch
 
 from backuper import config
 from backuper.config import (
@@ -175,7 +174,7 @@ ALL_MARIADB_DBS_TARGETS: list[MariaDBBackupTarget] = [
 
 
 @pytest.fixture(autouse=True)
-def fixed_config_setup(tmp_path: Path, monkeypatch: MonkeyPatch):
+def fixed_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(config, "SUBPROCESS_TIMEOUT_SECS", 1)
     monkeypatch.setattr(config, "LOG_LEVEL", "DEBUG")
     monkeypatch.setattr(config, "BACKUP_COOLING_SECS", 1)
@@ -203,7 +202,7 @@ def fixed_config_setup(tmp_path: Path, monkeypatch: MonkeyPatch):
 
 
 @pytest.fixture(autouse=True)
-def fixed_secrets_token_urlsafe(monkeypatch: MonkeyPatch):
+def fixed_secrets_token_urlsafe(monkeypatch: pytest.MonkeyPatch):
     def mock_token_urlsafe(nbytes: int):
         return CONST_TOKEN_URLSAFE
 

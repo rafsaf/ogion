@@ -1,4 +1,5 @@
 import logging
+import re
 import secrets
 import shlex
 import subprocess
@@ -8,6 +9,8 @@ from pathlib import Path
 from backuper import config
 
 log = logging.getLogger(__name__)
+
+SAFE_LETTER_PATTERN = r"[^A-Za-z0-9_]*"
 
 
 class CoreSubprocessError(Exception):
@@ -66,3 +69,7 @@ def run_create_zip_archive(backup_file: Path) -> Path:
     assert "Everything is Ok" in integrity_check_result
     log.debug("run_create_zip_archive finish integriy test in subprocess: %s", out_file)
     return out_file
+
+
+def safe_text_version(text: str):
+    return re.sub(SAFE_LETTER_PATTERN, "", text)
