@@ -1,6 +1,5 @@
 import logging
 import re
-import shlex
 import sys
 from pathlib import Path
 
@@ -32,9 +31,9 @@ class MariaDB(BaseBackupTarget):
     ) -> None:
         super().__init__(cron_rule=cron_rule, env_name=env_name)
         self.cron_rule = cron_rule
-        self.user = shlex.quote(user)
-        self.db = shlex.quote(db)
-        self.host = shlex.quote(host)
+        self.user = user
+        self.db = db
+        self.host = host
         self.port = port
         self.password = password
         self.option_file = self._init_option_file()
@@ -64,7 +63,7 @@ class MariaDB(BaseBackupTarget):
 
         try:
             result = core.run_subprocess(
-                f"mariadb --defaults-file={self.option_file} {self.db} "
+                f"mariadb --defaults-file={self.option_file} "
                 "--execute='SELECT version();'",
             )
         except core.CoreSubprocessError as err:
@@ -94,7 +93,7 @@ class MariaDB(BaseBackupTarget):
 
         shell_args = (
             f"mariadb-dump --defaults-file={self.option_file} "
-            f"--result-file={out_file} --verbose {self.db}"
+            f"--result-file={out_file} --verbose"
         )
         log.debug("start mariadbdump in subprocess: %s", shell_args)
         core.run_subprocess(shell_args)
