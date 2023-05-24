@@ -1,5 +1,6 @@
 import logging
 import re
+import shlex
 import sys
 from pathlib import Path
 
@@ -32,14 +33,17 @@ class MySQL(BaseBackupTarget):
         super().__init__(cron_rule=cron_rule, env_name=env_name)
         self.cron_rule = cron_rule
         self.user = user
-        self.port = port
         self.db = db
         self.host = host
+        self.port = port
         self.password = password
         self.option_file = self._init_option_file()
         self.db_version = self._mysql_connection()
 
     def _init_option_file(self) -> Path:
+        def escape(s: str):
+            return s.replace("\\", "\\\\")
+
         name = f"{self.env_name}.my.cnf"
         path = config.BASE_DIR / name
         path.unlink(missing_ok=True)
@@ -49,8 +53,8 @@ class MySQL(BaseBackupTarget):
             file.write(
                 "{}\n{}\n{}\n{}\n{}\n{}".format(
                     "[client]",
-                    f"user={self.user}",
-                    f"password={password}",
+                    f'user="{escape(self.user)}"',
+                    f'password="{escape(password)}"',
                     f"host={self.host}",
                     f"port={self.port}",
                     "protocol=TCP",
@@ -62,8 +66,9 @@ class MySQL(BaseBackupTarget):
         log.debug("mysql_connection start mysql connection")
 
         try:
+            db = shlex.quote(self.db)
             result = core.run_subprocess(
-                f"mysql --defaults-file={self.option_file} {self.db} "
+                f"mysql --defaults-file={self.option_file} {db} "
                 "--execute='SELECT version();'",
             )
         except core.CoreSubprocessError as err:
@@ -87,12 +92,14 @@ class MySQL(BaseBackupTarget):
         return version
 
     def _backup(self):
-        name = f"{self.db}_{self.db_version}"
+        escaped_dbname = core.safe_text_version(self.db)
+        name = f"{escaped_dbname}_{self.db_version}"
         out_file = core.get_new_backup_path(self.env_name, name)
 
+        db = shlex.quote(self.db)
         shell_args = (
             f"mysqldump --defaults-file={self.option_file} "
-            f"--result-file={out_file} --verbose {self.db}"
+            f"--result-file={out_file} --verbose {db}"
         )
         log.debug("start mysqldump in subprocess: %s", shell_args)
         core.run_subprocess(shell_args)

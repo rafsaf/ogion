@@ -7,6 +7,19 @@ from pytest import LogCaptureFixture
 from backuper import config, core
 
 
+@pytest.mark.parametrize(
+    "text,result",
+    [
+        ("asdjklh", "asdjklh"),
+        ("asdjklh#$%^&*(*)", "asdjklh"),
+        (":'/\\asdjklh#$%^&*(*)", "asdjklh"),
+        (":'/\\asdj&^!!!klh#$%^&*(*)", "asdjklh"),
+    ],
+)
+def test_safe_text_version(text: str, result: str):
+    assert core.safe_text_version(text=text) == result
+
+
 def test_run_subprocess_fail(caplog: LogCaptureFixture):
     with pytest.raises(core.CoreSubprocessError):
         core.run_subprocess("exit 1")

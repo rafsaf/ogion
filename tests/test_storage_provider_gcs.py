@@ -4,19 +4,18 @@ from unittest.mock import Mock
 
 import pytest
 from google.cloud import storage
-from pytest import MonkeyPatch
 
 from backuper import config
 from backuper.storage_providers import GoogleCloudStorage
 
 
 @pytest.fixture(autouse=True)
-def mock_google_storage_client(monkeypatch: MonkeyPatch):
+def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(storage, "Client", Mock())
 
 
 def test_gcs_safe_post_fail_gracefully_on_fail_upload(
-    tmp_path: Path, monkeypatch: MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
     sleep_mock = Mock()
     monkeypatch.setattr(time, "sleep", sleep_mock)
@@ -38,7 +37,7 @@ def test_gcs_safe_post_fail_gracefully_on_fail_upload(
 
 
 def test_gcs_post_save_runtime_error_on_fail_upload(
-    tmp_path: Path, monkeypatch: MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
     sleep_mock = Mock()
     monkeypatch.setattr(time, "sleep", sleep_mock)
@@ -61,7 +60,7 @@ def test_gcs_post_save_runtime_error_on_fail_upload(
 
 @pytest.mark.parametrize("gcs_method_name", ["_post_save", "safe_post_save"])
 def test_gcs_post_save_with_google_bucket_upload_path(
-    tmp_path: Path, monkeypatch: MonkeyPatch, gcs_method_name
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name
 ):
     gcs = GoogleCloudStorage()
     bucket_mock = Mock()
@@ -111,7 +110,7 @@ list_blobs_long_no_upload_path = [
 
 @pytest.mark.parametrize("gcs_method_name", ["_clean", "safe_clean"])
 def test_gcs_clean_file_and_short_blob_list(
-    tmp_path: Path, monkeypatch: MonkeyPatch, gcs_method_name
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name
 ):
     gcs = GoogleCloudStorage()
 
@@ -148,7 +147,7 @@ def test_gcs_clean_file_and_short_blob_list(
 
 @pytest.mark.parametrize("gcs_method_name", ["_clean", "safe_clean"])
 def test_gcs_clean_directory_and_long_blob_list(
-    tmp_path: Path, monkeypatch: MonkeyPatch, gcs_method_name
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name
 ):
     gcs = GoogleCloudStorage()
 

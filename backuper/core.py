@@ -1,5 +1,7 @@
 import logging
+import re
 import secrets
+import shlex
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -7,6 +9,8 @@ from pathlib import Path
 from backuper import config
 
 log = logging.getLogger(__name__)
+
+SAFE_LETTER_PATTERN = r"[^A-Za-z0-9_]*"
 
 
 class CoreSubprocessError(Exception):
@@ -49,8 +53,9 @@ def get_new_backup_path(env_name: str, name: str) -> Path:
 def run_create_zip_archive(backup_file: Path) -> Path:
     out_file = Path(f"{backup_file}.zip")
     log.debug("run_create_zip_archive start creating in subprocess: %s", backup_file)
+    zip_escaped_password = shlex.quote(config.ZIP_ARCHIVE_PASSWORD)
     shell_args_create = (
-        f"{config.CONST_ZIP_BIN_7ZZ_PATH} a -p'{config.ZIP_ARCHIVE_PASSWORD}' "
+        f"{config.CONST_ZIP_BIN_7ZZ_PATH} a -p{zip_escaped_password} "
         f"-mx={config.ZIP_ARCHIVE_LEVEL} {out_file} {backup_file}"
     )
     run_subprocess(shell_args_create)
@@ -58,10 +63,13 @@ def run_create_zip_archive(backup_file: Path) -> Path:
 
     log.debug("run_create_zip_archive start integriy test in subprocess: %s", out_file)
     shell_args_integriy = (
-        f"{config.CONST_ZIP_BIN_7ZZ_PATH} t "
-        f"-p{config.ZIP_ARCHIVE_PASSWORD} {out_file}"
+        f"{config.CONST_ZIP_BIN_7ZZ_PATH} t -p{zip_escaped_password} {out_file}"
     )
     integrity_check_result = run_subprocess(shell_args_integriy)
     assert "Everything is Ok" in integrity_check_result
     log.debug("run_create_zip_archive finish integriy test in subprocess: %s", out_file)
     return out_file
+
+
+def safe_text_version(text: str):
+    return re.sub(SAFE_LETTER_PATTERN, "", text)
