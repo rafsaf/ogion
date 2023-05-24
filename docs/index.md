@@ -45,29 +45,24 @@ Everyday 5am backup to Google Cloud Storage of PostgreSQL database defined in th
 # docker-compose.yml
 
 services:
-  postgresql_15:
+  db:
     image: postgres:15
     environment:
-      - POSTGRES_PASSWORD=secret
+      - POSTGRES_PASSWORD=pwd
   backuper:
     image: rafsaf/backuper:latest
-    env_file:
-      - .env.demo
+    environment:
+      - POSTGRESQL_PG15=host=db password=pwd cron_rule=0 0 5 * * port=5432
+      - ZIP_ARCHIVE_PASSWORD=change_me
+      - BACKUP_PROVIDER=gcs
+      - GOOGLE_BUCKET_NAME=my_bucket_name
+      - GOOGLE_BUCKET_UPLOAD_PATH=my_backuper_demo_instance
+      - GOOGLE_SERVICE_ACCOUNT_BASE64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=
 
 ```
 
-And `.env.demo` file would look like (NOTE for this to work, **GOOGLE_SERVICE_ACCOUNT_BASE64** would need to be valid google service account, as described in [this section](/providers/google_cloud_storage/#google_service_account_base64)).
+(NOTE for this to work fully, **GOOGLE_SERVICE_ACCOUNT_BASE64** would need to be valid google service account, as described in [this section](/providers/google_cloud_storage/#google_service_account_base64)).
 
-```bash
-# .env.demo
-
-POSTGRESQL_MY_PG_DB15='{"host": "postgresql_15","port": 5432, "password": "secret", "cron_rule": "0 0 5 * *"}'
-ZIP_ARCHIVE_PASSWORD='change_me'
-BACKUP_PROVIDER='gcs'
-GOOGLE_BUCKET_NAME='my_bucket_name'
-GOOGLE_BUCKET_UPLOAD_PATH='my_backuper_demo_instance'
-GOOGLE_SERVICE_ACCOUNT_BASE64='Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo='
-```
 
 <br>
 <br>
