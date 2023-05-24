@@ -5,7 +5,7 @@
 
 
 ```bash
-POSTGRESQL_SOME_STRING="json encoded database data"
+POSTGRESQL_SOME_STRING="host=... password=... cron_rule=..."
 ```
 
 !!! note
@@ -14,15 +14,20 @@ POSTGRESQL_SOME_STRING="json encoded database data"
 
 ## Postgres environment variables values
 
-Value of variables must be valid JSON encoded strings with following keys:
+Value of variables must be in format (note **one space** between each block of `key=value`):
+<h3> 
+[key1]=[value1] [key2]=[value2] [key3]=[value3] (...)
+</h3>
 
-- **"password": "postgres password"**, *required parameter* (string)
-- **"cron_rule": "\* \* \* \* \*"**, cron expression for backups, *required parameter* see [https://crontab.guru/](https://crontab.guru/) for help (string)
-- **"user": "postgres username"**, defaults to "postgres" (string)
-- **"host": "postgres hostname"**, defaults to "localhost" (string)
-- **"port": 5432**, port defaults to 5432 (integer)
-- **"db": "database name"**, defaults to "postgres" (string)
-- **"max_backups": 7**, max number of backups, if this number is exceeded, oldest one is removed, defaults to environment variable `BACKUP_MAX_NUMBER` (integer)
+### Params
+
+- **password=postgres password**, *required parameter* (string)
+- **cron_rule=\* \* \* \* \***, cron expression for backups, *required parameter* see [https://crontab.guru/](https://crontab.guru/) for help (string)
+- OPTIONAL **user=postgres username**, defaults to "postgres" (string)
+- OPTIONAL **host=postgres hostname**, defaults to "localhost" (string)
+- OPTIONAL **port=5432**, port defaults to 5432 (integer)
+- OPTIONAL **db=database name**, defaults to "postgres" (string)
+- OPTIONAL **max_backups=7**, max number of backups, if this number is exceeded, oldest one is removed, defaults to environment variable `BACKUP_MAX_NUMBER` (integer)
 
 
 
@@ -30,15 +35,15 @@ Value of variables must be valid JSON encoded strings with following keys:
 
 1. Local postgres with backup every single minute
 
-    **POSTGRESQL_FIRST_DB='{"host": "localhost", "port": 5432, "password": "secret", "cron_rule": "\* \* \* \* \*"}'**
+    **POSTGRESQL_FIRST_DB==host=localhost port=5432 password=secret cron_rule=\* \* \* \* \***
 
 2. Postgres in local network with backup on every night (UTC) at 05:00
 
-    **POSTGRESQL_SECOND_DB='{"host": "10.0.0.1", "port": 5432, "user": "foo", "password": "change_me!", "db": "bar", "cron_rule": "0 5 \* \* \*"}'**
+    **POSTGRESQL_SECOND_DB=host=10.0.0.1 port=5432 user=foo password=change_me! db=bar cron_rule=0 5 \* \* \***
 
 3. Postgres in local network with backup on every 6 hours at '15 with max number of backups of 20
 
-    **POSTGRESQL_THIRD_DB='{"host": "192.168.1.5", "port": 5432, "user": "postgres", "password": "change_me_please!", "db": "project", "cron_rule": "15 \*/3 \* \* \*", "max_backups": 20}'**
+    **POSTGRESQL_THIRD_DB=host=192.168.1.5 port=5432 user=postgres password=change_me_please! db=project cron_rule=15 \*/3 \* \* \* max_backups=20**
 
 <br>
 <br>
