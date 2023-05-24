@@ -1,10 +1,10 @@
-import json
 import logging
 import logging.config
 import os
 import re
 from enum import StrEnum
 from pathlib import Path
+from typing import TypeVar
 
 from croniter import croniter
 from pydantic import BaseModel, SecretStr, validator
@@ -219,13 +219,28 @@ class FolderBackupTarget(BackupTarget):
         return abs_path
 
 
-def _validate_backup_target(env_name: str, val: str, target: type[BackupTarget]):
+_BT = TypeVar("_BT", bound=BackupTarget)
+
+
+def _validate_backup_target(env_name: str, env_value: str, target: type[_BT]) -> _BT:
     target_type = target.__name__.lower()
     log.info("validating %s variable: `%s`", target_type, env_name)
-    log.debug("%s=%s", target_type, val)
+    log.debug("%s=%s", target_type, env_value)
     try:
-        db_data_from_env = json.loads(val)
-        res = target(env_name=env_name, **db_data_from_env)
+        env_value_parts = env_value.strip()
+        target_kwargs = {}
+        for field_name in target.__fields__.keys():
+            if env_value_parts.startswith(f"{field_name}="):
+                f = f"{field_name}="
+            else:
+                f = f" {field_name}="
+            if f in env_value_parts:
+                _, val = env_value_parts.split(f, maxsplit=1)
+                for other_field in target.__fields__.keys():
+                    val = val.split(f" {other_field}=")[0]
+                target_kwargs[field_name] = val
+        log.debug("calculated arguments: %s", target_kwargs)
+        res = target(env_name=env_name, **target_kwargs)
     except Exception:
         log.critical("error validating environment variable: `%s`", env_name)
         raise
@@ -234,23 +249,27 @@ def _validate_backup_target(env_name: str, val: str, target: type[BackupTarget])
 
 
 BACKUP_TARGETS: list[BackupTarget] = []
-for env_name, val in os.environ.items():
+for env_name, env_value in os.environ.items():
     env_name = env_name.lower()
     if env_name.startswith(BackupTargetEnum.POSTGRESQL):
         BACKUP_TARGETS.append(
-            _validate_backup_target(env_name, val, PostgreSQLBackupTarget)
+            _validate_backup_target(env_name, env_value, PostgreSQLBackupTarget)
         )
     elif env_name.startswith(BackupTargetEnum.MYSQL):
-        BACKUP_TARGETS.append(_validate_backup_target(env_name, val, MySQLBackupTarget))
+        BACKUP_TARGETS.append(
+            _validate_backup_target(env_name, env_value, MySQLBackupTarget)
+        )
     elif env_name.startswith(BackupTargetEnum.FILE):
-        BACKUP_TARGETS.append(_validate_backup_target(env_name, val, FileBackupTarget))
+        BACKUP_TARGETS.append(
+            _validate_backup_target(env_name, env_value, FileBackupTarget)
+        )
     elif env_name.startswith(BackupTargetEnum.FOLDER):
         BACKUP_TARGETS.append(
-            _validate_backup_target(env_name, val, FolderBackupTarget)
+            _validate_backup_target(env_name, env_value, FolderBackupTarget)
         )
     elif env_name.startswith(BackupTargetEnum.MARIADB):
         BACKUP_TARGETS.append(
-            _validate_backup_target(env_name, val, MariaDBBackupTarget)
+            _validate_backup_target(env_name, env_value, MariaDBBackupTarget)
         )
 
 
