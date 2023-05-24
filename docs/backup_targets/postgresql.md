@@ -35,7 +35,7 @@ Value of variables must be in format (note **one space** between each block of `
 
 1. Local postgres with backup every single minute
 
-    **POSTGRESQL_FIRST_DB==host=localhost port=5432 password=secret cron_rule=\* \* \* \* \***
+    **POSTGRESQL_FIRST_DB=host=localhost port=5432 password=secret cron_rule=\* \* \* \* \***
 
 2. Postgres in local network with backup on every night (UTC) at 05:00
 
