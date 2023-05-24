@@ -10,65 +10,65 @@ services:
   postgres_15:
     image: postgres:15.1
     environment:
-      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - POSTGRES_USER=user
-      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 10015:5432
 
   postgres_14:
     image: postgres:14.6
     environment:
-      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - POSTGRES_USER=user
-      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 10014:5432
 
   postgres_13:
     image: postgres:13.8
     environment:
-      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - POSTGRES_USER=user
-      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 10013:5432
 
   postgres_12:
     image: postgres:12.12
     environment:
-      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - POSTGRES_USER=user
-      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 10012:5432
 
   postgres_11:
     image: postgres:11.16
     environment:
-      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - POSTGRES_USER=user
-      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 10011:5432
 
   mysql_57:
     image: mysql:5.7.42
     environment:
-      - MYSQL_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MYSQL_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MYSQL_USER=user-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MYSQL_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - MYSQL_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[
+      - MYSQL_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[
+      - MYSQL_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - MYSQL_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 10057:3306
 
   mysql_80:
     image: mysql:8.0.33
     environment:
-      - MYSQL_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MYSQL_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MYSQL_USER=user-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MYSQL_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - MYSQL_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[
+      - MYSQL_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[
+      - MYSQL_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - MYSQL_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 10080:3306
 
@@ -76,10 +76,10 @@ services:
     restart: "unless-stopped"
     image: mariadb:10.11.2
     environment:
-      - MARIADB_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_USER=user-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - MARIADB_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 11011:3306
 
@@ -87,10 +87,10 @@ services:
     restart: "unless-stopped"
     image: mariadb:10.6.12
     environment:
-      - MARIADB_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_USER=user-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - MARIADB_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 11006:3306
 
@@ -98,10 +98,10 @@ services:
     restart: "unless-stopped"
     image: mariadb:10.5.19
     environment:
-      - MARIADB_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_USER=user-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - MARIADB_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 11005:3306
 
@@ -109,10 +109,10 @@ services:
     restart: "unless-stopped"
     image: mariadb:10.4.28
     environment:
-      - MARIADB_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_USER=user-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
-      - MARIADB_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[\]}`~'"'"'""
+      - MARIADB_ROOT_PASSWORD=root-password-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_DATABASE=database-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - MARIADB_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
     ports:
       - 11004:3306
 

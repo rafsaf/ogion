@@ -42,7 +42,7 @@ class MySQL(BaseBackupTarget):
 
     def _init_option_file(self) -> Path:
         def escape(s: str):
-            return s.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
+            return s.replace("\\", "\\\\")
 
         name = f"{self.env_name}.my.cnf"
         path = config.BASE_DIR / name
@@ -53,8 +53,8 @@ class MySQL(BaseBackupTarget):
             file.write(
                 "{}\n{}\n{}\n{}\n{}\n{}".format(
                     "[client]",
-                    f"user={escape(self.user)}",
-                    f"password={escape(password)}",
+                    f'user="{escape(self.user)}"',
+                    f'password="{escape(password)}"',
                     f"host={self.host}",
                     f"port={self.port}",
                     "protocol=TCP",

@@ -1,5 +1,6 @@
 import logging
 import re
+import shlex
 import sys
 from pathlib import Path
 
@@ -40,31 +41,34 @@ class MariaDB(BaseBackupTarget):
         self.db_version = self._mariadb_connection()
 
     def _init_option_file(self) -> Path:
+        def escape(s: str):
+            return s.replace("\\", "\\\\")
+
         name = f"{self.env_name}.mariadb.cnf"
         path = config.BASE_DIR / name
         path.unlink(missing_ok=True)
         path.touch(0o600)
         with open(path, "w") as file:
-            password = self.password.get_secret_value()
+            password = escape(self.password.get_secret_value())
             file.write(
                 "{}\n{}\n{}\n{}\n{}\n{}".format(
                     "[client]",
-                    f"user={self.user}",
+                    f'user="{escape(self.user)}"',
                     f"host={self.host}",
                     f"port={self.port}",
                     "protocol=TCP",
-                    f"password={password}" if self.password else "",
+                    f'password="{escape(password)}"' if self.password else "",
                 )
             )
         return path
 
     def _mariadb_connection(self):
         log.debug("mariadb_connection start mariadb connection")
-
         try:
+            db = shlex.quote(self.db)
             result = core.run_subprocess(
-                f"mariadb --defaults-file={self.option_file} "
-                "--execute='SELECT version();'",
+                f"mariadb --defaults-file={self.option_file} {db} "
+                f"--execute='SELECT version();'",
             )
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
@@ -90,10 +94,10 @@ class MariaDB(BaseBackupTarget):
         escaped_dbname = core.safe_text_version(self.db)
         name = f"{escaped_dbname}_{self.db_version}"
         out_file = core.get_new_backup_path(self.env_name, name)
-
+        db = shlex.quote(self.db)
         shell_args = (
             f"mariadb-dump --defaults-file={self.option_file} "
-            f"--result-file={out_file} --verbose"
+            f"--result-file={out_file} --verbose {db}"
         )
         log.debug("start mariadbdump in subprocess: %s", shell_args)
         core.run_subprocess(shell_args)

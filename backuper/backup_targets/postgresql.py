@@ -70,8 +70,8 @@ class PostgreSQL(BaseBackupTarget):
         # it includes symbols with special meaning in any of its parts.
 
         pgpass_file = self._init_pgpass_file()
-        encoded_user = urllib.parse.quote(self.user)
-        encoded_db = urllib.parse.quote(self.db)
+        encoded_user = urllib.parse.quote_plus(self.user)
+        encoded_db = urllib.parse.quote_plus(self.db)
         uri = (
             f"postgresql://{encoded_user}@{self.host}:{self.port}/{encoded_db}?"
             f"passfile={pgpass_file}"
