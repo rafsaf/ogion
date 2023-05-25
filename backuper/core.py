@@ -38,7 +38,7 @@ def run_subprocess(shell_args: str) -> str:
     return p.stdout
 
 
-def get_new_backup_path(env_name: str, name: str) -> Path:
+def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
     base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
     base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
     random_string = secrets.token_urlsafe(3)
@@ -47,6 +47,8 @@ def get_new_backup_path(env_name: str, name: str) -> Path:
         name,
         random_string,
     )
+    if sql:
+        new_file += ".sql"
     return base_dir_path / new_file
 
 

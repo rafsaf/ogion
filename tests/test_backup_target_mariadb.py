@@ -44,6 +44,6 @@ def test_run_mariadb_dump(
     db = MariaDB(**mariadb_target.dict())
     out_backup = db._backup()
 
-    out_file = f"{db.env_name}/20221211_0000_fixed_dbname_{db.db_version}_{CONST_TOKEN_URLSAFE}"
+    out_file = f"{db.env_name}/20221211_0000_fixed_dbname_{db.db_version}_{CONST_TOKEN_URLSAFE}.sql"
     out_path = config.CONST_BACKUP_FOLDER_PATH / out_file
     assert out_backup == out_path

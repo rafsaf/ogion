@@ -94,7 +94,7 @@ class MySQL(BaseBackupTarget):
     def _backup(self):
         escaped_dbname = core.safe_text_version(self.db)
         name = f"{escaped_dbname}_{self.db_version}"
-        out_file = core.get_new_backup_path(self.env_name, name)
+        out_file = core.get_new_backup_path(self.env_name, name, sql=True)
 
         db = shlex.quote(self.db)
         shell_args = (

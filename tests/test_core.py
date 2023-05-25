@@ -50,6 +50,15 @@ def test_get_new_backup_path(caplog: LogCaptureFixture):
     assert caplog.messages == []
 
 
+@freeze_time("2022-12-11")
+def test_get_new_backup_path_sql(caplog: LogCaptureFixture):
+    new_path = core.get_new_backup_path("env_name", "db_string", sql=True)
+    expected_file = "env_name/20221211_0000_db_string_mock.sql"
+    expected_path = config.CONST_BACKUP_FOLDER_PATH / expected_file
+    assert str(new_path) == str(expected_path)
+    assert caplog.messages == []
+
+
 def test_run_create_zip_archive(tmp_path: Path, caplog: LogCaptureFixture):
     fake_backup_file = tmp_path / "fake_backup"
     with open(fake_backup_file, "w") as f:
