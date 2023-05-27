@@ -9,19 +9,20 @@ GOOGLE_BUCKET_UPLOAD_PATH="my_backuper_instance_1"
 GOOGLE_SERVICE_ACCOUNT_BASE64="base64 service account"
 ```
 
-## BACKUP_PROVIDER
+## Reference
+### BACKUP_PROVIDER
 
 `BACKUP_PROVIDER` is case sensitive const backup provider name, for Google Cloud Storage it must be equal to `gcs`.
 
-## GOOGLE_BUCKET_NAME
+### GOOGLE_BUCKET_NAME
 
 `GOOGLE_BUCKET_NAME` is your globally unique bucket name.
 
-## GOOGLE_BUCKET_UPLOAD_PATH
+### GOOGLE_BUCKET_UPLOAD_PATH
 
 `GOOGLE_BUCKET_UPLOAD_PATH` is prefix that **every created backup** will have, for example if it is equal to `my_backuper_instance_1`, paths to backups will look like `my_backuper_instance_1/your_backup_target_eg_postgresql/file123.zip`. Usually this should be something unique for this backuper instance, for example `k8s_foo_backuper`.
 
-## GOOGLE_SERVICE_ACCOUNT_BASE64
+### GOOGLE_SERVICE_ACCOUNT_BASE64
 
 `GOOGLE_SERVICE_ACCOUNT_BASE64` is base64 JSON service account file created in IAM.
 
@@ -55,6 +56,38 @@ cat your_project_name-03189413be28.json | base64 -w 0
 1. Go "IAM and admin" -> "IAM"
 
 2. Find your service account and update its roles
+
+#### Terraform
+
+If using terraform for managing cloud infra, Service Accounts definition will be following:
+
+```bash
+resource "google_service_account" "backuper-my_backuper_instance_1" {
+  account_id   = "backuper-my_backuper_instance_1"
+  display_name = "SA my_backuper_instance_1 for backuper bucket access"
+}
+
+resource "google_project_iam_member" "backuper-my_backuper_instance_1-iam-object-admin" {
+  project = local.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.backuper-my_backuper_instance_1.email}"
+  condition {
+    title      = "object_admin_only_backuper_bucket_specific_path"
+    expression = "resource.name.startsWith(\"projects/_/buckets/my_bucket_name/objects/my_backuper_instance_1\")"
+  }
+}
+resource "google_project_iam_member" "backuper-my_backuper_instance_1-iam-object-viewer" {
+  project = local.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.backuper-my_backuper_instance_1.email}"
+
+  condition {
+    title      = "object_viewer_only_backuper_bucket"
+    expression = "resource.name.startsWith(\"projects/_/buckets/my_bucket_name\")"
+  }
+}
+
+```
 
 <br>
 <br>

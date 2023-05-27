@@ -16,11 +16,13 @@ DISCORD_SUCCESS_WEBHOOK_URL="https://discord.com/api/webhooks/1111111111/long-to
 DISCORD_FAIL_WEBHOOK_URL="https://discord.com/api/webhooks/22222222222222/another-long-token"
 ```
 
-## DISCORD_SUCCESS_WEBHOOK_URL
+## Reference
+
+### DISCORD_SUCCESS_WEBHOOK_URL
 
 URL for success messages.
 
-## DISCORD_FAIL_WEBHOOK_URL
+### DISCORD_FAIL_WEBHOOK_URL
 
 URL For fail messages.
 

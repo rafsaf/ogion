@@ -99,7 +99,8 @@ def shutdown():
     start = time.time()
     deadline = start + timeout_secs
     log.info(
-        "start backuper shutdown, force exit after BACKUPER_SIGTERM_TIMEOUT_SECS=%ss",
+        "start backuper shutdown, force exit after BACKUPER_SIGTERM_TIMEOUT_SECS=%ss, "
+        "use this environment to control it.",
         timeout_secs,
     )
     for thread in threading.enumerate():
@@ -129,7 +130,8 @@ def shutdown():
         sys.exit(0)
     else:
         log.warning(
-            "noooo, force exiting! i am now killing myself with %d daemon threads left running",
+            "noooo, exiting! i am now killing myself with %d daemon threads force killed. "
+            "you can extend this time using environment BACKUPER_SIGTERM_TIMEOUT_SECS.",
             threading.active_count() - 1,
         )
         sys.exit(1)

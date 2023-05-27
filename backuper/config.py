@@ -129,9 +129,7 @@ SUBPROCESS_TIMEOUT_SECS: int = int(os.environ.get("SUBPROCESS_TIMEOUT_SECS", 60 
 BACKUPER_SIGTERM_TIMEOUT_SECS: float = float(
     os.environ.get("BACKUPER_SIGTERM_TIMEOUT_SECS", 30)
 )
-BACKUP_COOLING_SECS: int = int(os.environ.get("BACKUP_COOLING_SECS", 60))
 ZIP_ARCHIVE_LEVEL: int = int(os.environ.get("ZIP_ARCHIVE_LEVEL", 3))
-BACKUP_COOLING_RETRIES: int = int(os.environ.get("BACKUP_COOLING_RETRIES", 1))
 BACKUP_MAX_NUMBER: int = int(os.environ.get("BACKUP_MAX_NUMBER", 7))
 GOOGLE_BUCKET_NAME: str = os.environ.get("GOOGLE_BUCKET_NAME", "")
 GOOGLE_BUCKET_UPLOAD_PATH: str = os.environ.get("GOOGLE_BUCKET_UPLOAD_PATH", "")
