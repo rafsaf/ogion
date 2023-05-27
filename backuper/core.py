@@ -42,7 +42,8 @@ def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
     base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
     base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
     random_string = secrets.token_urlsafe(3)
-    new_file = "{}_{}_{}".format(
+    new_file = "{}_{}_{}_{}".format(
+        env_name,
         datetime.utcnow().strftime("%Y%m%d_%H%M"),
         name,
         random_string,
