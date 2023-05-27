@@ -29,7 +29,7 @@ services:
 
 ### Notes
 
-- For debug set `LOG_LEVEL=DEBUG` and use (container name is backuper):
+- For hard debug you can set `LOG_LEVEL=DEBUG` and use (container name is backuper):
   ```bash
   docker logs backuper
   ```
@@ -90,7 +90,7 @@ spec:
 
 ### Notes
 
-- For debug set `LOG_LEVEL: DEBUG` and use (for brevity random pod name used):
+- For hard debug you can set `LOG_LEVEL: DEBUG` and use (for brevity random pod name used):
   ```bash
   kubectl logs backuper-9c8b8b77d-z5xsc -n backuper
   ```

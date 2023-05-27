@@ -16,8 +16,7 @@ COPY scripts scripts
 COPY bin bin
 RUN /bin/bash scripts/install_apt_libs_and_7zip.sh
 RUN rm -rf scripts bin/7zip
-RUN apt-get remove -y wget lsb-release gpg xz-utils && apt-get autoremove --purge -y        \
-    && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/*.list
+RUN apt-get update -y && apt-get install -y curl wget unzip
 
 ENTRYPOINT ["/bin/bash", "/docker_entrypoint.sh"]
 
