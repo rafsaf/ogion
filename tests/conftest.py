@@ -177,8 +177,6 @@ ALL_MARIADB_DBS_TARGETS: list[MariaDBBackupTarget] = [
 def fixed_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(config, "SUBPROCESS_TIMEOUT_SECS", 1)
     monkeypatch.setattr(config, "LOG_LEVEL", "DEBUG")
-    monkeypatch.setattr(config, "BACKUP_COOLING_SECS", 1)
-    monkeypatch.setattr(config, "BACKUP_COOLING_RETRIES", 0)
     monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 1)
     monkeypatch.setattr(
         config,
