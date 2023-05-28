@@ -61,7 +61,7 @@ services:
 
 ```
 
-(NOTE for this to work fully, **GOOGLE_SERVICE_ACCOUNT_BASE64** would need to be valid google service account, as described in [this section](/providers/google_cloud_storage/#google_service_account_base64)).
+(NOTE for this to work fully, **GOOGLE_SERVICE_ACCOUNT_BASE64** would need to be valid google service account, as described in [this section](https://backuper.rafsaf.pl/providers/google_cloud_storage/#google_service_account_base64)).
 
 
 <br>

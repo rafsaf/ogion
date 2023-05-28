@@ -17,7 +17,7 @@ Backup is made using `pg_dump` ([see def _backup() params](https://github.com/ra
 Follow docs (backuper creates typical SQL file backups, nothing special about them), but command will look something like that:
 
 ```bash
-psql -h localhost -p 5432 -U postgres postgres -W < backup_file.sql
+psql -h localhost -p 5432 -U postgres database_name -W < backup_file.sql
 ```
 
 ## MySQL
