@@ -14,7 +14,7 @@ python = "^3.11"
 [tool.poetry.group.dev.dependencies]
 autoflake = "^1.5"
 black = "^23.3.0"
-coverage = "^7.2.5"
+coverage = "^7.2.7"
 flake8 = "^5.0.4"
 freezegun = "^1.2.2"
 isort = "^5.12.0"
