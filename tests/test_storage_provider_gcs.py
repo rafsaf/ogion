@@ -82,9 +82,12 @@ def test_gcs_post_save_with_google_bucket_upload_path(
         == "test123/fake_env_name/fake_backup.zip"
     )
     assert fake_backup_file_zip_path.exists()
-    bucket_mock.blob.assert_called_once_with("test123/fake_env_name/fake_backup.zip")
+    bucket_mock.blob.assert_called_once_with(
+        "test123/fake_env_name/fake_backup.zip",
+        chunk_size=GoogleCloudStorage.CHUNK_SIZE,
+    )
     single_blob_mock.upload_from_filename.assert_called_once_with(
-        fake_backup_file_zip_path
+        fake_backup_file_zip_path, timeout=120
     )
 
 
