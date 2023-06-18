@@ -17,6 +17,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
 
     NAME = config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE
     MAX_UPLOAD_RETRY = 5
+    CHUNK_SIZE = 25 * 1024 * 1024  # 25MB
 
     def __init__(self) -> None:
         service_account_bytes = base64.b64decode(config.GOOGLE_SERVICE_ACCOUNT_BASE64)
@@ -37,11 +38,13 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
 
         log.info("start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
 
-        blob = self.bucket.blob(backup_dest_in_bucket)
+        blob = self.bucket.blob(
+            backup_dest_in_bucket, chunk_size=GoogleCloudStorage.CHUNK_SIZE
+        )
         retry = 0
         while retry < self.MAX_UPLOAD_RETRY:
             try:
-                blob.upload_from_filename(zip_backup_file)
+                blob.upload_from_filename(zip_backup_file, timeout=120)
                 break
             except Exception as err:
                 log.error(
