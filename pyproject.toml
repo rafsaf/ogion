@@ -22,7 +22,7 @@ markdown-include = "^0.8.1"
 mkdocs = "^1.4.2"
 mkdocs-material = "^9.1.8"
 mkdocstrings = { extras = ["python"], version = "^0.21.2" }
-pre-commit = "^3.2.2"
+pre-commit = "^3.3.3"
 pyinstaller = { version = "^5.10.1", python = ">=3.11,<3.12" }
 pymdown-extensions = "^10.0.1"
 pytest = "^7.3.1"
