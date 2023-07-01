@@ -25,7 +25,7 @@ mkdocstrings = { extras = ["python"], version = "^0.21.2" }
 pre-commit = "^3.2.2"
 pyinstaller = { version = "^5.10.1", python = ">=3.11,<3.12" }
 pymdown-extensions = "^10.0.1"
-pytest = "^7.3.1"
+pytest = "^7.4.0"
 python-dotenv = "^1.0.0"
 pyupgrade = "^3.3.2"
 responses = "^0.23.1"
