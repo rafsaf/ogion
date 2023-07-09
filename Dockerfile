@@ -1,4 +1,4 @@
-FROM python:3.11.3-slim-bullseye AS base
+FROM python:3.11.4-slim-bookworm AS base
 ENV PYTHONUNBUFFERED=1
 ENV SERVICE_NAME="backuper"
 ENV FOLDER_PATH="/var/lib/backuper"
