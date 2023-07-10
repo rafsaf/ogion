@@ -14,7 +14,7 @@ from .conftest import (
 
 
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
-def test_mariadb_connection_success(mariadb_target: config.MariaDBBackupTarget):
+def test_mariadb_connection_success(mariadb_target: config.MariaDBBackupTarget) -> None:
     db = MariaDB(**mariadb_target.dict())
     assert db.db_version == DB_VERSION_BY_ENV_VAR[mariadb_target.env_name]
 
@@ -23,7 +23,7 @@ def test_mariadb_connection_success(mariadb_target: config.MariaDBBackupTarget):
 def test_mariadb_connection_fail(
     mariadb_target: config.MariaDBBackupTarget,
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     with pytest.raises(SystemExit) as system_exit:
         # simulate not existing db port 9999 and connection err
         monkeypatch.setattr(mariadb_target, "port", 9999)
@@ -37,7 +37,7 @@ def test_mariadb_connection_fail(
 def test_run_mariadb_dump(
     mariadb_target: config.MariaDBBackupTarget,
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     mock = Mock(return_value="fixed_dbname")
     monkeypatch.setattr(core, "safe_text_version", mock)
 

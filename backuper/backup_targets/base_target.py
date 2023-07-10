@@ -38,7 +38,8 @@ class BaseBackupTarget(ABC):
             self.cron_rule,
             start_time=now,
         )
-        return cron.get_next(ret_type=datetime)
+        next_backup: datetime = cron.get_next(ret_type=datetime)
+        return next_backup
 
     @final
     def next_backup(self) -> bool:

@@ -5,6 +5,8 @@ import sys
 import threading
 import time
 from threading import Thread
+from types import FrameType
+from typing import NoReturn
 
 from backuper import config, notifications
 from backuper.backup_targets import (
@@ -25,7 +27,7 @@ exit_event = threading.Event()
 log = logging.getLogger(__name__)
 
 
-def quit(sig, frame):
+def quit(sig: int, frame: FrameType | None) -> None:
     log.info("interrupted by %s, shutting down", sig)
     exit_event.set()
 
@@ -94,7 +96,7 @@ def backup_targets() -> list[BaseBackupTarget]:
     return targets
 
 
-def shutdown():
+def shutdown() -> NoReturn:
     timeout_secs = config.BACKUPER_SIGTERM_TIMEOUT_SECS
     start = time.time()
     deadline = start + timeout_secs
@@ -137,7 +139,7 @@ def shutdown():
         sys.exit(1)
 
 
-def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider):
+def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
     backup_file = target.make_backup()
     if not backup_file:
@@ -169,7 +171,7 @@ def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider):
     )
 
 
-def setup_runtime_arguments():
+def setup_runtime_arguments() -> None:
     parser = argparse.ArgumentParser(description="Backuper program")
     parser.add_argument(
         "-s", "--single", action="store_true", help="Only single backup then exit"
@@ -178,7 +180,7 @@ def setup_runtime_arguments():
     config.RUNTIME_SINGLE = args.single
 
 
-def main():
+def main() -> NoReturn:
     signal.signal(signalnum=signal.SIGINT, handler=quit)
     signal.signal(signalnum=signal.SIGTERM, handler=quit)
 

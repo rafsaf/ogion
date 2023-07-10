@@ -3,6 +3,7 @@ import re
 import shlex
 import sys
 import urllib.parse
+from pathlib import Path
 
 from pydantic import SecretStr
 
@@ -27,23 +28,23 @@ class PostgreSQL(BaseBackupTarget):
         db: str,
         cron_rule: str,
         env_name: str,
-        **kwargs,
+        **kwargs: str | int,
     ) -> None:
         super().__init__(cron_rule=cron_rule, env_name=env_name)
-        self.cron_rule = cron_rule
-        self.user = user
-        self.db = db
-        self.host = host
-        self.port = port
-        self.password = password
-        self.escaped_conn_uri = self._get_escaped_conn_uri()
-        self.db_version = self._postgres_connection()
+        self.cron_rule: str = cron_rule
+        self.user: str = user
+        self.db: str = db
+        self.host: str = host
+        self.port: int = port
+        self.password: SecretStr = password
+        self.escaped_conn_uri: str = self._get_escaped_conn_uri()
+        self.db_version: str = self._postgres_connection()
 
-    def _init_pgpass_file(self):
+    def _init_pgpass_file(self) -> Path:
         # https://www.postgresql.org/docs/current/libpq-pgpass.html
         # If an entry needs to contain : or \, escape this character with \.
 
-        def escape(s: str):
+        def escape(s: str) -> str:
             return s.replace("\\", "\\\\").replace(":", "\\:")
 
         name = f"{self.env_name}.pgpass"
@@ -64,7 +65,7 @@ class PostgreSQL(BaseBackupTarget):
         log.debug("content of %s: %s", path, path.read_text())
         return path
 
-    def _get_escaped_conn_uri(self):
+    def _get_escaped_conn_uri(self) -> str:
         # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
         # The connection URI needs to be encoded with percent-encoding if
         # it includes symbols with special meaning in any of its parts.
@@ -79,7 +80,7 @@ class PostgreSQL(BaseBackupTarget):
         escaped_uri = shlex.quote(uri)
         return escaped_uri
 
-    def _postgres_connection(self):
+    def _postgres_connection(self) -> str:
         log.debug("postgres_connection start postgres connection")
 
         try:
@@ -106,7 +107,7 @@ class PostgreSQL(BaseBackupTarget):
         log.debug("postgres_connection calculated version: %s", version)
         return version
 
-    def _backup(self):
+    def _backup(self) -> Path:
         escaped_dbname = core.safe_text_version(self.db)
         name = f"{escaped_dbname}_{self.db_version}"
         out_file = core.get_new_backup_path(self.env_name, name, sql=True)

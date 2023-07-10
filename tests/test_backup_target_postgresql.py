@@ -14,7 +14,9 @@ from .conftest import (
 
 
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
-def test_postgres_connection_success(postgres_target: config.PostgreSQLBackupTarget):
+def test_postgres_connection_success(
+    postgres_target: config.PostgreSQLBackupTarget,
+) -> None:
     db = PostgreSQL(**postgres_target.dict())
     assert db.db_version == DB_VERSION_BY_ENV_VAR[postgres_target.env_name]
 
@@ -23,7 +25,7 @@ def test_postgres_connection_success(postgres_target: config.PostgreSQLBackupTar
 def test_postgres_connection_fail(
     postgres_target: config.PostgreSQLBackupTarget,
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     with pytest.raises(SystemExit) as system_exit:
         # simulate not existing db port 9999 and connection err
         monkeypatch.setattr(postgres_target, "port", 9999)
@@ -37,7 +39,7 @@ def test_postgres_connection_fail(
 def test_run_pg_dump(
     postgres_target: config.PostgreSQLBackupTarget,
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     mock = Mock(return_value="fixed_dbname")
     monkeypatch.setattr(core, "safe_text_version", mock)
 

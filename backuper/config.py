@@ -36,7 +36,7 @@ if LOG_LEVEL not in allowed_logs_levels:
     )
 
 
-def logging_config(log_level: str):
+def logging_config(log_level: str) -> None:
     conf = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -146,7 +146,7 @@ class BackupTarget(BaseModel):
     archive_level: int = ZIP_ARCHIVE_LEVEL
 
     @validator("cron_rule")
-    def cron_rule_is_valid(cls, cron_rule: str):
+    def cron_rule_is_valid(cls, cron_rule: str) -> str:
         if not croniter.is_valid(cron_rule):
             raise ValueError(
                 f"Error in cron_rule expression: `{cron_rule}` is not valid"
@@ -154,7 +154,7 @@ class BackupTarget(BaseModel):
         return cron_rule
 
     @validator("env_name")
-    def env_name_is_valid(cls, env_name: str):
+    def env_name_is_valid(cls, env_name: str) -> str:
         if not CONST_ENV_NAME_REGEX.match(env_name):
             raise ValueError(
                 f"Env variable does not match regex {CONST_ENV_NAME_REGEX}: `{env_name}`"
@@ -194,7 +194,7 @@ class FileBackupTarget(BackupTarget):
     type = BackupTargetEnum.FILE
 
     @validator("abs_path")
-    def abs_path_is_valid(cls, abs_path: Path):
+    def abs_path_is_valid(cls, abs_path: Path) -> Path:
         if not abs_path.is_file() or not abs_path.exists():
             raise ValueError(
                 f"Path {abs_path} is not a file or does not exist\n "
@@ -208,7 +208,7 @@ class FolderBackupTarget(BackupTarget):
     type = BackupTargetEnum.FOLDER
 
     @validator("abs_path")
-    def abs_path_is_valid(cls, abs_path: Path):
+    def abs_path_is_valid(cls, abs_path: Path) -> Path:
         if not abs_path.is_dir() or not abs_path.exists():
             raise ValueError(
                 f"Path {abs_path} is not a dir or does not exist\n "
@@ -271,7 +271,7 @@ for env_name, env_value in os.environ.items():
         )
 
 
-def runtime_configuration():
+def runtime_configuration() -> None:
     if BACKUP_PROVIDER == BackupProviderEnum.GOOGLE_CLOUD_STORAGE:
         if not GOOGLE_BUCKET_NAME:
             raise RuntimeError(

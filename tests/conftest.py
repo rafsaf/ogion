@@ -1,5 +1,6 @@
 import os
 import secrets
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest
@@ -174,7 +175,7 @@ ALL_MARIADB_DBS_TARGETS: list[MariaDBBackupTarget] = [
 
 
 @pytest.fixture(autouse=True)
-def fixed_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def fixed_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(config, "SUBPROCESS_TIMEOUT_SECS", 5)
     monkeypatch.setattr(config, "LOG_LEVEL", "DEBUG")
     monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 1)
@@ -200,16 +201,18 @@ def fixed_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture(autouse=True)
-def fixed_secrets_token_urlsafe(monkeypatch: pytest.MonkeyPatch):
-    def mock_token_urlsafe(nbytes: int):
+def fixed_secrets_token_urlsafe(monkeypatch: pytest.MonkeyPatch) -> None:
+    def mock_token_urlsafe(nbytes: int) -> str:
         return CONST_TOKEN_URLSAFE
 
     monkeypatch.setattr(secrets, "token_urlsafe", mock_token_urlsafe)
 
 
 @pytest.fixture(autouse=True)
-def responses_activate_mock_to_prevent_accidential_requests():
+def responses_activate_mock_to_prevent_accidential_requests() -> (
+    Generator[None, None, None]
+):
     r_mock = responses.RequestsMock()
     r_mock.start()
-    yield
+    yield None
     r_mock.stop()

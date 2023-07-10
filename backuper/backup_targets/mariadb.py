@@ -28,20 +28,20 @@ class MariaDB(BaseBackupTarget):
         db: str,
         cron_rule: str,
         env_name: str,
-        **kwargs,
+        **kwargs: str | int,
     ) -> None:
         super().__init__(cron_rule=cron_rule, env_name=env_name)
-        self.cron_rule = cron_rule
-        self.user = user
-        self.db = db
-        self.host = host
-        self.port = port
-        self.password = password
-        self.option_file = self._init_option_file()
-        self.db_version = self._mariadb_connection()
+        self.cron_rule: str = cron_rule
+        self.user: str = user
+        self.db: str = db
+        self.host: str = host
+        self.port: int = port
+        self.password: SecretStr = password
+        self.option_file: Path = self._init_option_file()
+        self.db_version: str = self._mariadb_connection()
 
     def _init_option_file(self) -> Path:
-        def escape(s: str):
+        def escape(s: str) -> str:
             return s.replace("\\", "\\\\")
 
         name = f"{self.env_name}.mariadb.cnf"
@@ -62,7 +62,7 @@ class MariaDB(BaseBackupTarget):
             )
         return path
 
-    def _mariadb_connection(self):
+    def _mariadb_connection(self) -> str:
         log.debug("mariadb_connection start mariadb connection")
         try:
             db = shlex.quote(self.db)
@@ -90,7 +90,7 @@ class MariaDB(BaseBackupTarget):
         log.debug("mariadb_connection calculated version: %s", version)
         return version
 
-    def _backup(self):
+    def _backup(self) -> Path:
         escaped_dbname = core.safe_text_version(self.db)
         name = f"{escaped_dbname}_{self.db_version}"
         out_file = core.get_new_backup_path(self.env_name, name, sql=True)

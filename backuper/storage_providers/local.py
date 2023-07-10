@@ -24,7 +24,7 @@ class LocalFiles(base_provider.BaseBackupProvider):
             raise
         return str(zip_file)
 
-    def _clean(self, backup_file: Path):
+    def _clean(self, backup_file: Path) -> None:
         if backup_file.is_file():
             backup_file.unlink()
         else:

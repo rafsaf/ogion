@@ -74,5 +74,5 @@ def run_create_zip_archive(backup_file: Path) -> Path:
     return out_file
 
 
-def safe_text_version(text: str):
+def safe_text_version(text: str) -> str:
     return re.sub(SAFE_LETTER_PATTERN, "", text)
