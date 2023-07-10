@@ -6,8 +6,7 @@ from unittest.mock import Mock
 import google.cloud.storage as storage
 import pytest
 
-from backuper import config
-from backuper.main import backup_provider, backup_targets, main, shutdown
+from backuper import config, notifications, main
 
 from .conftest import FILE_1, FOLDER_1, MARIADB_1011, MYSQL_80, POSTGRES_15
 
@@ -23,20 +22,20 @@ def test_backup_targets(monkeypatch: pytest.MonkeyPatch) -> None:
         "BACKUP_TARGETS",
         [POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1],
     )
-    targets = backup_targets()
+    targets = main.backup_targets()
     assert len(targets) == 5
 
 
 def test_backup_provider(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(config, "BACKUP_PROVIDER", "gcs")
-    provider = backup_provider()
+    provider = main.backup_provider()
     assert provider.NAME == "gcs"
 
 
 def test_shutdown_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(config, "BACKUPER_SIGTERM_TIMEOUT_SECS", 0.01)
     with pytest.raises(SystemExit) as system_exit:
-        shutdown()
+        main.shutdown()
     assert system_exit.type == SystemExit
     assert system_exit.value.code == 0
 
@@ -50,7 +49,7 @@ def test_shutdown_not_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
     dt = threading.Thread(target=sleep_005, daemon=True)
     dt.start()
     with pytest.raises(SystemExit) as system_exit:
-        shutdown()
+        main.shutdown()
     assert system_exit.type == SystemExit
     assert system_exit.value.code == 1
     dt.join()
@@ -65,7 +64,7 @@ def test_shutdown_gracefully_with_thread(monkeypatch: pytest.MonkeyPatch) -> Non
     dt = threading.Thread(target=sleep_005, daemon=True)
     dt.start()
     with pytest.raises(SystemExit) as system_exit:
-        shutdown()
+        main.shutdown()
     assert system_exit.type == SystemExit
     assert system_exit.value.code == 0
     dt.join()
@@ -80,7 +79,7 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
         [POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1],
     )
     with pytest.raises(SystemExit) as system_exit:
-        main()
+        main.main()
     assert system_exit.type == SystemExit
     assert system_exit.value.code == 0
 
@@ -97,3 +96,27 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
         assert dir.name in target_envs
         count += 1
     assert count == 5
+
+
+def test_run_backup_fail_message_when_no_backup_file(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        config,
+        "BACKUP_TARGETS",
+        [POSTGRES_15],
+    )
+    target = main.backup_targets()[0]
+    target._backup = Mock(side_effect=ValueError())
+    provider_mock = Mock()
+    send_fail_message_mock = Mock(return_value=None)
+    monkeypatch.setattr(notifications, "send_fail_message", send_fail_message_mock)
+    assert main.run_backup(target=target, provider=provider_mock) is None
+    send_fail_message_mock.assert_called_once()
+
+
+def test_quit(monkeypatch: pytest.MonkeyPatch):
+    exit_mock = Mock()
+    monkeypatch.setattr(main, "exit_event", exit_mock)
+    assert main.quit(1, None) is None
+    exit_mock.set.assert_called_once()
