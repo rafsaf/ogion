@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import pytest
 import responses
@@ -10,7 +11,7 @@ discord_webhook_url = "https://discord.com/api/webhooks/12345/token"
 
 
 @freeze_time("2023-04-27 21:08:05")
-def test_formated_now():
+def test_formated_now() -> None:
     assert notifications._formated_now() == "2023-04-27 21:08:05,000000 UTC"
 
 
@@ -40,7 +41,9 @@ def test_formated_now():
         },
     ],
 )
-def test_notifications_pass(res_kwargs, monkeypatch: pytest.MonkeyPatch):
+def test_notifications_pass(
+    res_kwargs: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
     with responses.RequestsMock() as rsps:
         rsps.add(**res_kwargs)
 
@@ -86,7 +89,9 @@ def test_notifications_pass(res_kwargs, monkeypatch: pytest.MonkeyPatch):
         )
 
 
-def test_notifications_pass_on_connection_errors(monkeypatch: pytest.MonkeyPatch):
+def test_notifications_pass_on_connection_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", discord_webhook_url)
     monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", discord_webhook_url)
 

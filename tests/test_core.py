@@ -16,11 +16,11 @@ from backuper import config, core
         (":'/\\asdj&^!!!klh#$%^&*(*)", "asdjklh"),
     ],
 )
-def test_safe_text_version(text: str, result: str):
+def test_safe_text_version(text: str, result: str) -> None:
     assert core.safe_text_version(text=text) == result
 
 
-def test_run_subprocess_fail(caplog: LogCaptureFixture):
+def test_run_subprocess_fail(caplog: LogCaptureFixture) -> None:
     with pytest.raises(core.CoreSubprocessError):
         core.run_subprocess("exit 1")
     assert caplog.messages == [
@@ -31,7 +31,7 @@ def test_run_subprocess_fail(caplog: LogCaptureFixture):
     ]
 
 
-def test_run_subprocess_success(caplog: LogCaptureFixture):
+def test_run_subprocess_success(caplog: LogCaptureFixture) -> None:
     core.run_subprocess("echo 'welcome'")
     assert caplog.messages == [
         "run_subprocess running: 'echo 'welcome''",
@@ -42,7 +42,7 @@ def test_run_subprocess_success(caplog: LogCaptureFixture):
 
 
 @freeze_time("2022-12-11")
-def test_get_new_backup_path(caplog: LogCaptureFixture):
+def test_get_new_backup_path(caplog: LogCaptureFixture) -> None:
     new_path = core.get_new_backup_path("env_name", "db_string")
     expected_file = "env_name/env_name_20221211_0000_db_string_mock"
     expected_path = config.CONST_BACKUP_FOLDER_PATH / expected_file
@@ -51,7 +51,7 @@ def test_get_new_backup_path(caplog: LogCaptureFixture):
 
 
 @freeze_time("2022-12-11")
-def test_get_new_backup_path_sql(caplog: LogCaptureFixture):
+def test_get_new_backup_path_sql(caplog: LogCaptureFixture) -> None:
     new_path = core.get_new_backup_path("env_name", "db_string", sql=True)
     expected_file = "env_name/env_name_20221211_0000_db_string_mock.sql"
     expected_path = config.CONST_BACKUP_FOLDER_PATH / expected_file
@@ -59,7 +59,7 @@ def test_get_new_backup_path_sql(caplog: LogCaptureFixture):
     assert caplog.messages == []
 
 
-def test_run_create_zip_archive(tmp_path: Path, caplog: LogCaptureFixture):
+def test_run_create_zip_archive(tmp_path: Path, caplog: LogCaptureFixture) -> None:
     fake_backup_file = tmp_path / "fake_backup"
     with open(fake_backup_file, "w") as f:
         f.write("abcdefghijk\n12345")

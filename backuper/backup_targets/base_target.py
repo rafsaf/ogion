@@ -29,6 +29,7 @@ class BaseBackupTarget(ABC):
             return self._backup()
         except Exception as err:
             log.error(err, exc_info=True)
+            return None
 
     @final
     def _get_next_backup_time(self) -> datetime:
@@ -37,7 +38,8 @@ class BaseBackupTarget(ABC):
             self.cron_rule,
             start_time=now,
         )
-        return cron.get_next(ret_type=datetime)
+        next_backup: datetime = cron.get_next(ret_type=datetime)
+        return next_backup
 
     @final
     def next_backup(self) -> bool:
@@ -50,4 +52,4 @@ class BaseBackupTarget(ABC):
 
     @abstractmethod
     def _backup(self) -> Path:
-        return
+        pass

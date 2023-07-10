@@ -1,6 +1,8 @@
-from .base_target import BaseBackupTarget  # noqa
-from .file import File  # noqa
-from .folder import Folder  # noqa
-from .mariadb import MariaDB  # noqa
-from .mysql import MySQL  # noqa
-from .postgresql import PostgreSQL  # noqa
+from .base_target import BaseBackupTarget
+from .file import File
+from .folder import Folder
+from .mariadb import MariaDB
+from .mysql import MySQL
+from .postgresql import PostgreSQL
+
+__all__ = ["BaseBackupTarget", "File", "Folder", "MariaDB", "MySQL", "PostgreSQL"]

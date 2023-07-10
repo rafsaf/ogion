@@ -4,7 +4,7 @@ import shutil
 import time
 from pathlib import Path
 
-from google.cloud import storage
+import google.cloud.storage as storage
 
 from backuper import config, core
 from backuper.storage_providers import base_provider
@@ -64,7 +64,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
-    def _clean(self, backup_file: Path):
+    def _clean(self, backup_file: Path) -> None:
         for backup_path in backup_file.parent.iterdir():
             if backup_path.is_dir():
                 shutil.rmtree(backup_path)

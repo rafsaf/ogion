@@ -19,11 +19,11 @@ class FAIL_REASON(StrEnum):
 log = logging.getLogger(__name__)
 
 
-def _formated_now():
+def _formated_now() -> str:
     return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S,%f UTC")
 
 
-def send_success_message(env_name: str, provider_name: str, upload_path: str):
+def send_success_message(env_name: str, provider_name: str, upload_path: str) -> None:
     now = _formated_now()
     message_to_send = (
         f"{now} [SUCCESS] target `{env_name}` uploading new backup file "
@@ -51,7 +51,7 @@ def send_fail_message(
     provider_name: str,
     reason: FAIL_REASON,
     backup_file: Path | None = None,
-):
+) -> None:
     now = _formated_now()
     if reason == FAIL_REASON.BACKUP_CREATE:
         message_to_send = (

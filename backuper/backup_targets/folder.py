@@ -13,13 +13,13 @@ class Folder(BaseBackupTarget):
         abs_path: Path,
         cron_rule: str,
         env_name: str,
-        **kwargs,
+        **kwargs: str | int,
     ) -> None:
-        self.cron_rule = cron_rule
-        self.folder = abs_path
+        self.cron_rule: str = cron_rule
+        self.folder: Path = abs_path
         super().__init__(cron_rule=cron_rule, env_name=env_name)
 
-    def _backup(self):
+    def _backup(self) -> Path:
         out_file = core.get_new_backup_path(self.env_name, self.folder.name)
 
         shell_args = f"cp -r {self.folder} {out_file}"

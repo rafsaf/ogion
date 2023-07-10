@@ -12,7 +12,7 @@ class BackupTarget(BaseBackupTarget):
 
 
 @freeze_time("2023-05-03 17:58")
-def test_base_backup_target_next_backup():
+def test_base_backup_target_next_backup() -> None:
     target = BackupTarget(cron_rule="* * * * *", env_name="env")
     assert target.cron_rule == "* * * * *"
     assert target.env_name == "env"

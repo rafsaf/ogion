@@ -10,7 +10,7 @@ from .conftest import ALL_MYSQL_DBS_TARGETS, CONST_TOKEN_URLSAFE, DB_VERSION_BY_
 
 
 @pytest.mark.parametrize("mysql_target", ALL_MYSQL_DBS_TARGETS)
-def test_mysql_connection_success(mysql_target: config.MySQLBackupTarget):
+def test_mysql_connection_success(mysql_target: config.MySQLBackupTarget) -> None:
     db = MySQL(**mysql_target.dict())
     assert db.db_version == DB_VERSION_BY_ENV_VAR[mysql_target.env_name]
 
@@ -19,7 +19,7 @@ def test_mysql_connection_success(mysql_target: config.MySQLBackupTarget):
 def test_mysql_connection_fail(
     mysql_target: config.MySQLBackupTarget,
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     with pytest.raises(SystemExit) as system_exit:
         # simulate not existing db port 9999 and connection err
         monkeypatch.setattr(mysql_target, "port", 9999)
@@ -33,7 +33,7 @@ def test_mysql_connection_fail(
 def test_run_mysqldump(
     mysql_target: config.MySQLBackupTarget,
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     mock = Mock(return_value="fixed_dbname")
     monkeypatch.setattr(core, "safe_text_version", mock)
 

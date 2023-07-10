@@ -3,8 +3,8 @@ import threading
 import time
 from unittest.mock import Mock
 
+import google.cloud.storage as storage
 import pytest
-from google.cloud import storage
 
 from backuper import config
 from backuper.main import backup_provider, backup_targets, main, shutdown
@@ -13,11 +13,11 @@ from .conftest import FILE_1, FOLDER_1, MARIADB_1011, MYSQL_80, POSTGRES_15
 
 
 @pytest.fixture(autouse=True)
-def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch):
+def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(storage, "Client", Mock())
 
 
-def test_backup_targets(monkeypatch: pytest.MonkeyPatch):
+def test_backup_targets(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         config,
         "BACKUP_TARGETS",
@@ -27,13 +27,13 @@ def test_backup_targets(monkeypatch: pytest.MonkeyPatch):
     assert len(targets) == 5
 
 
-def test_backup_provider(monkeypatch: pytest.MonkeyPatch):
+def test_backup_provider(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(config, "BACKUP_PROVIDER", "gcs")
     provider = backup_provider()
     assert provider.NAME == "gcs"
 
 
-def test_shutdown_gracefully(monkeypatch: pytest.MonkeyPatch):
+def test_shutdown_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(config, "BACKUPER_SIGTERM_TIMEOUT_SECS", 0.01)
     with pytest.raises(SystemExit) as system_exit:
         shutdown()
@@ -41,10 +41,10 @@ def test_shutdown_gracefully(monkeypatch: pytest.MonkeyPatch):
     assert system_exit.value.code == 0
 
 
-def test_shutdown_not_gracefully(monkeypatch: pytest.MonkeyPatch):
+def test_shutdown_not_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(config, "BACKUPER_SIGTERM_TIMEOUT_SECS", 0.01)
 
-    def sleep_005():
+    def sleep_005() -> None:
         time.sleep(0.05)
 
     dt = threading.Thread(target=sleep_005, daemon=True)
@@ -56,10 +56,10 @@ def test_shutdown_not_gracefully(monkeypatch: pytest.MonkeyPatch):
     dt.join()
 
 
-def test_shutdown_gracefully_with_thread(monkeypatch: pytest.MonkeyPatch):
+def test_shutdown_gracefully_with_thread(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(config, "BACKUPER_SIGTERM_TIMEOUT_SECS", 0.1)
 
-    def sleep_005():
+    def sleep_005() -> None:
         time.sleep(0.05)
 
     dt = threading.Thread(target=sleep_005, daemon=True)
@@ -71,7 +71,7 @@ def test_shutdown_gracefully_with_thread(monkeypatch: pytest.MonkeyPatch):
     dt.join()
 
 
-def test_main(monkeypatch: pytest.MonkeyPatch):
+def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["main.py", "--single"])
     monkeypatch.setattr(config, "BACKUP_PROVIDER", "local")
     monkeypatch.setattr(
