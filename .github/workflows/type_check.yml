@@ -1,4 +1,4 @@
-name: tests
+name: type_check
 on:
   push:
     branches:
@@ -7,7 +7,7 @@ on:
       - "*.*"
 
 jobs:
-  tests:
+  type_check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
