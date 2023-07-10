@@ -52,7 +52,7 @@ source = ["backuper"]
 profile = "black"
 
 [tool.bandit]
-exclude_dirs = ["tests"]
+exclude_dirs = ["tests", "venv", ".venv"]
 skips = ["B404", "B602", "B603"]
 
 [tool.mypy]
