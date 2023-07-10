@@ -26,8 +26,8 @@ class BaseBackupProvider(ABC):
 
     @abstractmethod
     def _post_save(self, backup_file: Path) -> str:
-        return
+        pass
 
     @abstractmethod
     def _clean(self, backup_file: Path) -> None:
-        return
+        pass

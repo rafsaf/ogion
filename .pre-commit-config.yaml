@@ -48,6 +48,16 @@ repos:
     hooks:
       - id: flake8
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v1.4.1"
+    hooks:
+      - id: mypy
+        always_run: true
+        pass_filenames: false
+        entry: mypy .
+        args: [--ignore-missing-imports]
+        additional_dependencies: [types-croniter, types-requests]
+
   - repo: https://github.com/python-poetry/poetry
     rev: "1.5.0"
     hooks:

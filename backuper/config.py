@@ -4,7 +4,7 @@ import os
 import re
 from enum import StrEnum
 from pathlib import Path
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from croniter import croniter
 from pydantic import BaseModel, SecretStr, validator
@@ -226,7 +226,7 @@ def _validate_backup_target(env_name: str, env_value: str, target: type[_BT]) ->
     log.debug("%s=%s", target_type, env_value)
     try:
         env_value_parts = env_value.strip()
-        target_kwargs = {}
+        target_kwargs: dict[str, Any] = {}
         for field_name in target.__fields__.keys():
             if env_value_parts.startswith(f"{field_name}="):
                 f = f"{field_name}="
@@ -238,7 +238,7 @@ def _validate_backup_target(env_name: str, env_value: str, target: type[_BT]) ->
                     val = val.split(f" {other_field}=")[0]
                 target_kwargs[field_name] = val
         log.debug("calculated arguments: %s", target_kwargs)
-        res = target(env_name=env_name, **target_kwargs)
+        res = target(env_name=env_name, **target_kwargs)  # mypy: ignore
     except Exception:
         log.critical("error validating environment variable: `%s`", env_name)
         raise

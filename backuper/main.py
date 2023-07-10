@@ -40,18 +40,18 @@ def backup_provider() -> BaseBackupProvider:
 
 
 def backup_targets() -> list[BaseBackupTarget]:
-    targets = []
+    targets: list[BaseBackupTarget] = []
     for target in config.BACKUP_TARGETS:
         if target.type == config.BackupTargetEnum.POSTGRESQL:
             log.info(
                 "initializing postgres target, connecting to database: `%s`",
                 target.env_name,
             )
-            backup_target = PostgreSQL(**target.dict())
-            targets.append(backup_target)
+            pg_target = PostgreSQL(**target.dict())
+            targets.append(pg_target)
             log.info(
                 "success initializing postgres target db version is %s: `%s`",
-                backup_target.db_version,
+                pg_target.db_version,
                 target.env_name,
             )
         elif target.type == config.BackupTargetEnum.FILE:
@@ -67,11 +67,11 @@ def backup_targets() -> list[BaseBackupTarget]:
                 "initializing mysql target, connecting to database: `%s`",
                 target.env_name,
             )
-            backup_target = MySQL(**target.dict())
-            targets.append(backup_target)
+            mysql_target = MySQL(**target.dict())
+            targets.append(mysql_target)
             log.info(
                 "success initializing mysql target db version is %s: `%s`",
-                backup_target.db_version,
+                mysql_target.db_version,
                 target.env_name,
             )
         elif target.type == config.BackupTargetEnum.MARIADB:
@@ -79,11 +79,11 @@ def backup_targets() -> list[BaseBackupTarget]:
                 "initializing mariadb target, connecting to database: `%s`",
                 target.env_name,
             )
-            backup_target = MariaDB(**target.dict())
-            targets.append(backup_target)
+            maria_target = MariaDB(**target.dict())
+            targets.append(maria_target)
             log.info(
                 "success initializing mariadb target db version is %s: `%s`",
-                backup_target.db_version,
+                maria_target.db_version,
                 target.env_name,
             )
         else:  # pragma: no cover

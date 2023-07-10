@@ -2,8 +2,8 @@ import time
 from pathlib import Path
 from unittest.mock import Mock
 
+import google.cloud.storage
 import pytest
-from google.cloud import storage
 
 from backuper import config
 from backuper.storage_providers import GoogleCloudStorage
@@ -11,7 +11,7 @@ from backuper.storage_providers import GoogleCloudStorage
 
 @pytest.fixture(autouse=True)
 def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(storage, "Client", Mock())
+    monkeypatch.setattr(google.cloud.storage, "Client", Mock())
 
 
 def test_gcs_safe_post_fail_gracefully_on_fail_upload(
