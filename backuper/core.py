@@ -69,7 +69,8 @@ def run_create_zip_archive(backup_file: Path) -> Path:
         f"{config.CONST_ZIP_BIN_7ZZ_PATH} t -p{zip_escaped_password} {out_file}"
     )
     integrity_check_result = run_subprocess(shell_args_integriy)
-    assert "Everything is Ok" in integrity_check_result
+    if "Everything is Ok" not in integrity_check_result:
+        raise AssertionError("zip arichive integrity fatal error")
     log.debug("run_create_zip_archive finish integriy test in subprocess: %s", out_file)
     return out_file
 

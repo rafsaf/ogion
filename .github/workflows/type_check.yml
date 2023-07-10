@@ -1,0 +1,48 @@
+name: tests
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "*.*"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11.4"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+
+      - name: Install dependencies and actiavte virtualenv
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: |
+          poetry install --no-interaction --no-root
+
+      - name: Run flake8
+        run: |
+          poetry run flake8 --count --statistics .
+
+      - name: Run mypy
+        run: |
+          poetry run mypy .
+
+      - name: Run bandit
+        run: |
+          poetry run bandit -r -c pyproject.toml .
