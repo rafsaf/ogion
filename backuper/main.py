@@ -43,6 +43,8 @@ def backup_provider() -> BaseBackupProvider:
 
 def backup_targets() -> list[BaseBackupTarget]:
     targets: list[BaseBackupTarget] = []
+    if not config.BACKUP_TARGETS:
+        raise RuntimeError("Found 0 backup targets, at least 1 is required.")
     for target in config.BACKUP_TARGETS:
         if target.type == config.BackupTargetEnum.POSTGRESQL:
             log.info(
@@ -144,9 +146,10 @@ def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider) -> None:
     backup_file = target.make_backup()
     if not backup_file:
         notifications.send_fail_message(
-            target.env_name,
+            env_name=target.env_name,
             provider_name=provider.NAME,
             reason=notifications.FAIL_REASON.BACKUP_CREATE,
+            backup_file=None,
         )
         return
     upload_path = provider.safe_post_save(backup_file=backup_file)
@@ -159,7 +162,7 @@ def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider) -> None:
         )
     else:
         notifications.send_fail_message(
-            target.env_name,
+            env_name=target.env_name,
             provider_name=provider.NAME,
             reason=notifications.FAIL_REASON.UPLOAD,
             backup_file=backup_file,
@@ -209,5 +212,5 @@ def main() -> NoReturn:
     shutdown()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

@@ -21,13 +21,13 @@ class BaseBackupProvider(ABC):
     def safe_clean(self, backup_file: Path) -> None:
         try:
             return self._clean(backup_file=backup_file)
-        except Exception as err:
+        except Exception as err:  # pragma: no cover
             log.error(err, exc_info=True)
 
     @abstractmethod
-    def _post_save(self, backup_file: Path) -> str:
+    def _post_save(self, backup_file: Path) -> str:  # pragma: no cover
         pass
 
     @abstractmethod
-    def _clean(self, backup_file: Path) -> None:
+    def _clean(self, backup_file: Path) -> None:  # pragma: no cover
         pass

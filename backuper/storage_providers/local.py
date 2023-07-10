@@ -17,11 +17,7 @@ class LocalFiles(base_provider.BaseBackupProvider):
     NAME = config.BackupProviderEnum.LOCAL_FILES
 
     def _post_save(self, backup_file: Path) -> str:
-        try:
-            zip_file = core.run_create_zip_archive(backup_file=backup_file)
-        except core.CoreSubprocessError:
-            log.error("could not create zip_backup_file from %s", backup_file)
-            raise
+        zip_file = core.run_create_zip_archive(backup_file=backup_file)
         return str(zip_file)
 
     def _clean(self, backup_file: Path) -> None:
@@ -41,7 +37,7 @@ class LocalFiles(base_provider.BaseBackupProvider):
                 else:
                     shutil.rmtree(backup_to_remove)
                 log.info("removed path %s", backup_to_remove)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 log.error(
                     "could not remove path %s: %s", backup_to_remove, e, exc_info=True
                 )
