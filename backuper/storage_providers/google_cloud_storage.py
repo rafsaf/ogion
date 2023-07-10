@@ -4,7 +4,7 @@ import shutil
 import time
 from pathlib import Path
 
-from google.cloud.storage import Client
+import google.cloud.storage as storage
 
 from backuper import config, core
 from backuper.storage_providers import base_provider
@@ -24,7 +24,7 @@ class GoogleCloudStorage(base_provider.BaseBackupProvider):
         with open(config.CONST_GOOGLE_SERVICE_ACCOUNT_PATH, "wb") as f:
             f.write(service_account_bytes)
 
-        self.storage_client = Client()
+        self.storage_client = storage.Client()
         self.bucket = self.storage_client.bucket(config.GOOGLE_BUCKET_NAME)
 
     def _post_save(self, backup_file: Path) -> str:
