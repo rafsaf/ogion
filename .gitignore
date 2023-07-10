@@ -6,6 +6,9 @@ bin/7zz
 *.my.cnf
 *.mariadb.cnf
 *.pgpass
+bin/7zip/amd64/MANUAL
+bin/7zip/arm64/MANUAL
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

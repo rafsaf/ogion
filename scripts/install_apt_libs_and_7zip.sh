@@ -91,9 +91,9 @@ then
 else
   mkdir -p $AMD64_DIR
   cd $AMD64_DIR
-  wget --quiet "https://www.7-zip.org/a/7z2201-linux-x64.tar.xz"
-  tar -xf "7z2201-linux-x64.tar.xz"
-  rm -f "7z2201-linux-x64.tar.xz"
+  wget --quiet "https://www.7-zip.org/a/7z2301-linux-x64.tar.xz"
+  tar -xf "7z2301-linux-x64.tar.xz"
+  rm -f "7z2301-linux-x64.tar.xz"
 fi
 
 if [ -f "$ARM64_7ZZ" ]
@@ -102,9 +102,9 @@ then
 else
   mkdir -p $ARM64_DIR
   cd $ARM64_DIR
-  wget --quiet "https://www.7-zip.org/a/7z2201-linux-arm64.tar.xz"
-  tar -xf "7z2201-linux-arm64.tar.xz"
-  rm -f "7z2201-linux-arm64.tar.xz"
+  wget --quiet "https://www.7-zip.org/a/7z2301-linux-arm64.tar.xz"
+  tar -xf "7z2301-linux-arm64.tar.xz"
+  rm -f "7z2301-linux-arm64.tar.xz"
 fi
 
 
