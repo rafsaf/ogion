@@ -29,11 +29,6 @@ RUNTIME_SINGLE: bool = False
 LOG_FOLDER_PATH: Path = Path(os.environ.get("LOG_FOLDER_PATH", BASE_DIR / "logs"))
 LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
-allowed_logs_levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
-if LOG_LEVEL not in allowed_logs_levels:
-    raise RuntimeError(
-        f"error log level must be one of {allowed_logs_levels}, currently: `{LOG_LEVEL}`"
-    )
 
 
 def logging_config(log_level: str) -> None:
@@ -115,15 +110,6 @@ class BackupTargetEnum(StrEnum):
 
 
 BACKUP_PROVIDER = os.environ.get("BACKUP_PROVIDER", BackupProviderEnum.LOCAL_FILES)
-allowed_providers = [
-    BackupProviderEnum.LOCAL_FILES,
-    BackupProviderEnum.GOOGLE_CLOUD_STORAGE,
-]
-if BACKUP_PROVIDER not in allowed_providers:
-    raise RuntimeError(
-        f"error, BACKUP_PROVIDER must be one of {allowed_providers}, currently: `{BACKUP_PROVIDER}`"
-    )
-
 ZIP_ARCHIVE_PASSWORD = os.environ.get("ZIP_ARCHIVE_PASSWORD", "")
 SUBPROCESS_TIMEOUT_SECS: int = int(os.environ.get("SUBPROCESS_TIMEOUT_SECS", 60 * 60))
 BACKUPER_SIGTERM_TIMEOUT_SECS: float = float(
@@ -175,7 +161,7 @@ class MySQLBackupTarget(BackupTarget):
     user: str = "root"
     host: str = "localhost"
     port: int = 3306
-    db: str
+    db: str = "mysql"
     password: SecretStr
     type = BackupTargetEnum.MYSQL
 
@@ -184,7 +170,7 @@ class MariaDBBackupTarget(BackupTarget):
     user: str = "root"
     host: str = "localhost"
     port: int = 3306
-    db: str
+    db: str = "mariadb"
     password: SecretStr
     type = BackupTargetEnum.MARIADB
 
@@ -194,11 +180,11 @@ class FileBackupTarget(BackupTarget):
     type = BackupTargetEnum.FILE
 
     @validator("abs_path")
-    def abs_path_is_valid(cls, abs_path: Path) -> Path:
+    def abs_path_is_valid(cls, abs_path: Path, values: dict[str, Any]) -> Path:
         if not abs_path.is_file() or not abs_path.exists():
             raise ValueError(
                 f"Path {abs_path} is not a file or does not exist\n "
-                f"Error validating environment variable: {env_name}"
+                f"Error validating environment variable: {values['env_name']}"
             )
         return abs_path
 
@@ -208,11 +194,11 @@ class FolderBackupTarget(BackupTarget):
     type = BackupTargetEnum.FOLDER
 
     @validator("abs_path")
-    def abs_path_is_valid(cls, abs_path: Path) -> Path:
+    def abs_path_is_valid(cls, abs_path: Path, values: dict[str, Any]) -> Path:
         if not abs_path.is_dir() or not abs_path.exists():
             raise ValueError(
                 f"Path {abs_path} is not a dir or does not exist\n "
-                f"Error validating environment variable: {env_name}"
+                f"Error validating environment variable: {values['env_name']}"
             )
         return abs_path
 
@@ -246,32 +232,60 @@ def _validate_backup_target(env_name: str, env_value: str, target: type[_BT]) ->
     return res
 
 
-BACKUP_TARGETS: list[BackupTarget] = []
-for env_name, env_value in os.environ.items():
-    env_name = env_name.lower()
-    if env_name.startswith(BackupTargetEnum.POSTGRESQL):
-        BACKUP_TARGETS.append(
-            _validate_backup_target(env_name, env_value, PostgreSQLBackupTarget)
-        )
-    elif env_name.startswith(BackupTargetEnum.MYSQL):
-        BACKUP_TARGETS.append(
-            _validate_backup_target(env_name, env_value, MySQLBackupTarget)
-        )
-    elif env_name.startswith(BackupTargetEnum.FILE):
-        BACKUP_TARGETS.append(
-            _validate_backup_target(env_name, env_value, FileBackupTarget)
-        )
-    elif env_name.startswith(BackupTargetEnum.FOLDER):
-        BACKUP_TARGETS.append(
-            _validate_backup_target(env_name, env_value, FolderBackupTarget)
-        )
-    elif env_name.startswith(BackupTargetEnum.MARIADB):
-        BACKUP_TARGETS.append(
-            _validate_backup_target(env_name, env_value, MariaDBBackupTarget)
-        )
+_targets_lst = list[
+    PostgreSQLBackupTarget
+    | MySQLBackupTarget
+    | FileBackupTarget
+    | FolderBackupTarget
+    | MariaDBBackupTarget
+]
+
+
+def create_backup_targets() -> _targets_lst:
+    targets: _targets_lst = []
+    for env_name, env_value in os.environ.items():
+        env_name = env_name.lower()
+        if env_name.startswith(BackupTargetEnum.POSTGRESQL):
+            targets.append(
+                _validate_backup_target(env_name, env_value, PostgreSQLBackupTarget)
+            )
+        elif env_name.startswith(BackupTargetEnum.MYSQL):
+            targets.append(
+                _validate_backup_target(env_name, env_value, MySQLBackupTarget)
+            )
+        elif env_name.startswith(BackupTargetEnum.FILE):
+            targets.append(
+                _validate_backup_target(env_name, env_value, FileBackupTarget)
+            )
+        elif env_name.startswith(BackupTargetEnum.FOLDER):
+            targets.append(
+                _validate_backup_target(env_name, env_value, FolderBackupTarget)
+            )
+        elif env_name.startswith(BackupTargetEnum.MARIADB):
+            targets.append(
+                _validate_backup_target(env_name, env_value, MariaDBBackupTarget)
+            )
+
+    return targets
+
+
+BACKUP_TARGETS = create_backup_targets()
 
 
 def runtime_configuration() -> None:
+    allowed_logs_levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
+    if LOG_LEVEL not in allowed_logs_levels:
+        raise RuntimeError(
+            f"LOG_LEVEL must be one of {allowed_logs_levels}, currently: `{LOG_LEVEL}`"
+        )
+    allowed_providers = [
+        BackupProviderEnum.LOCAL_FILES,
+        BackupProviderEnum.GOOGLE_CLOUD_STORAGE,
+    ]
+    if BACKUP_PROVIDER not in allowed_providers:
+        raise RuntimeError(
+            f"BACKUP_PROVIDER must be one of {allowed_providers}, currently: `{BACKUP_PROVIDER}`"
+        )
     if BACKUP_PROVIDER == BackupProviderEnum.GOOGLE_CLOUD_STORAGE:
         if not GOOGLE_BUCKET_NAME:
             raise RuntimeError(
@@ -285,6 +299,7 @@ def runtime_configuration() -> None:
             raise RuntimeError(
                 f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `GOOGLE_BUCKET_UPLOAD_PATH`"
             )
+        log.error(GOOGLE_BUCKET_UPLOAD_PATH)
     if ZIP_ARCHIVE_PASSWORD and not CONST_ZIP_BIN_7ZZ_PATH.exists():
         raise RuntimeError(
             f"`{ZIP_ARCHIVE_PASSWORD}` is set but `{CONST_ZIP_BIN_7ZZ_PATH}` binary does not exists, did you forget to create it?"

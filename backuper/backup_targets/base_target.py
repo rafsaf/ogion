@@ -51,5 +51,5 @@ class BaseBackupTarget(ABC):
         return False
 
     @abstractmethod
-    def _backup(self) -> Path:
+    def _backup(self) -> Path:  # pragma: no cover
         pass
