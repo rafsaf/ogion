@@ -21,12 +21,14 @@ RUN apt-get update -y && apt-get install -y curl wget unzip
 ENTRYPOINT ["/bin/bash", "/docker_entrypoint.sh"]
 
 FROM base AS tests
+RUN apt-get update -y && apt-get install -y make
 COPY requirements-dev.txt .
 RUN pip install -r requirements-dev.txt
 COPY pyproject.toml .
 COPY tests tests
 COPY backuper backuper
-CMD ["coverage", "run", "-m", "pytest", "-vv"]
+COPY Makefile .
+CMD ["make", "coverage"]
 
 FROM tests AS pyinstaller
 COPY backuper_cli.py .
