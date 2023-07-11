@@ -9,6 +9,10 @@ log = logging.getLogger(__name__)
 class BaseBackupProvider(ABC):
     NAME = "provider"
 
+    def __init_subclass__(cls, name: str) -> None:
+        cls.NAME = name
+        super().__init_subclass__()
+
     @final
     def safe_post_save(self, backup_file: Path) -> str | None:
         try:

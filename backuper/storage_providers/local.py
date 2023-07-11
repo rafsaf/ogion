@@ -8,13 +8,13 @@ from backuper.storage_providers import base_provider
 log = logging.getLogger(__name__)
 
 
-class LocalFiles(base_provider.BaseBackupProvider):
+class LocalFiles(
+    base_provider.BaseBackupProvider, name=config.BackupProviderEnum.LOCAL_FILES
+):
     """Represent local folder `data` for storing backups.
 
     If docker volume/persistant volume is lost, so are backups.
     """
-
-    NAME = config.BackupProviderEnum.LOCAL_FILES
 
     def _post_save(self, backup_file: Path) -> str:
         zip_file = core.run_create_zip_archive(backup_file=backup_file)

@@ -12,10 +12,12 @@ from backuper.storage_providers import base_provider
 log = logging.getLogger(__name__)
 
 
-class GoogleCloudStorage(base_provider.BaseBackupProvider):
+class GoogleCloudStorage(
+    base_provider.BaseBackupProvider,
+    name=config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE,
+):
     """Represent GCS bucket for storing backups."""
 
-    NAME = config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE
     MAX_UPLOAD_RETRY = 5
     CHUNK_SIZE = 25 * 1024 * 1024  # 25MB
 
