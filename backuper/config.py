@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, TypeVar
 
 from croniter import croniter
-from pydantic import BaseModel, SecretStr, validator
+from pydantic import BaseModel, SecretStr, field_validator, model_validator
 
 BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 
@@ -131,7 +131,7 @@ class BackupTarget(BaseModel):
     max_backups: int = BACKUP_MAX_NUMBER
     archive_level: int = ZIP_ARCHIVE_LEVEL
 
-    @validator("cron_rule")
+    @field_validator("cron_rule")
     def cron_rule_is_valid(cls, cron_rule: str) -> str:
         if not croniter.is_valid(cron_rule):
             raise ValueError(
@@ -139,7 +139,7 @@ class BackupTarget(BaseModel):
             )
         return cron_rule
 
-    @validator("env_name")
+    @field_validator("env_name")
     def env_name_is_valid(cls, env_name: str) -> str:
         if not CONST_ENV_NAME_REGEX.match(env_name):
             raise ValueError(
@@ -154,7 +154,7 @@ class PostgreSQLBackupTarget(BackupTarget):
     port: int = 5432
     db: str = "postgres"
     password: SecretStr
-    type = BackupTargetEnum.POSTGRESQL
+    type: BackupTargetEnum = BackupTargetEnum.POSTGRESQL
 
 
 class MySQLBackupTarget(BackupTarget):
@@ -163,7 +163,7 @@ class MySQLBackupTarget(BackupTarget):
     port: int = 3306
     db: str = "mysql"
     password: SecretStr
-    type = BackupTargetEnum.MYSQL
+    type: BackupTargetEnum = BackupTargetEnum.MYSQL
 
 
 class MariaDBBackupTarget(BackupTarget):
@@ -172,64 +172,64 @@ class MariaDBBackupTarget(BackupTarget):
     port: int = 3306
     db: str = "mariadb"
     password: SecretStr
-    type = BackupTargetEnum.MARIADB
+    type: BackupTargetEnum = BackupTargetEnum.MARIADB
 
 
 class FileBackupTarget(BackupTarget):
     abs_path: Path
-    type = BackupTargetEnum.FILE
+    type: BackupTargetEnum = BackupTargetEnum.FILE
 
-    @validator("abs_path")
-    def abs_path_is_valid(cls, abs_path: Path, values: dict[str, Any]) -> Path:
-        if not abs_path.is_file() or not abs_path.exists():
+    @model_validator(mode="after")  # type: ignore [arg-type]
+    def abs_path_is_valid(self) -> "FileBackupTarget":
+        if not self.abs_path.is_file() or not self.abs_path.exists():
             raise ValueError(
-                f"Path {abs_path} is not a file or does not exist\n "
-                f"Error validating environment variable: {values['env_name']}"
+                f"Path {self.abs_path} is not a file or does not exist\n "
+                f"Error validating environment variable: {self.env_name}"
             )
-        return abs_path
+        return self
 
 
 class FolderBackupTarget(BackupTarget):
     abs_path: Path
-    type = BackupTargetEnum.FOLDER
+    type: BackupTargetEnum = BackupTargetEnum.FOLDER
 
-    @validator("abs_path")
-    def abs_path_is_valid(cls, abs_path: Path, values: dict[str, Any]) -> Path:
-        if not abs_path.is_dir() or not abs_path.exists():
+    @model_validator(mode="after")  # type: ignore [arg-type]
+    def abs_path_is_valid(self) -> "FolderBackupTarget":
+        if not self.abs_path.is_dir() or not self.abs_path.exists():
             raise ValueError(
-                f"Path {abs_path} is not a dir or does not exist\n "
-                f"Error validating environment variable: {values['env_name']}"
+                f"Path {self.abs_path} is not a dir or does not exist\n "
+                f"Error validating environment variable: {self.env_name}"
             )
-        return abs_path
+        return self
 
 
 _BT = TypeVar("_BT", bound=BackupTarget)
 
 
 def _validate_backup_target(env_name: str, env_value: str, target: type[_BT]) -> _BT:
-    target_type = target.__name__.lower()
+    target_type: str = target.__name__.lower()
     log.info("validating %s variable: `%s`", target_type, env_name)
     log.debug("%s=%s", target_type, env_value)
     try:
         env_value_parts = env_value.strip()
-        target_kwargs: dict[str, Any] = {}
-        for field_name in target.__fields__.keys():
+        target_kwargs: dict[str, Any] = {"env_name": env_name}
+        for field_name in target.model_fields.keys():
             if env_value_parts.startswith(f"{field_name}="):
                 f = f"{field_name}="
             else:
                 f = f" {field_name}="
             if f in env_value_parts:
                 _, val = env_value_parts.split(f, maxsplit=1)
-                for other_field in target.__fields__.keys():
+                for other_field in target.model_fields.keys():
                     val = val.split(f" {other_field}=")[0]
                 target_kwargs[field_name] = val
         log.debug("calculated arguments: %s", target_kwargs)
-        res = target(env_name=env_name, **target_kwargs)  # mypy: ignore
+        validated_target = target.model_validate(target_kwargs)
     except Exception:
         log.critical("error validating environment variable: `%s`", env_name)
         raise
     log.info("%s variable ok: `%s`", target_type, env_name)
-    return res
+    return validated_target
 
 
 _targets_lst = list[
