@@ -179,7 +179,7 @@ class FileBackupTarget(BackupTarget):
     abs_path: Path
     type: BackupTargetEnum = BackupTargetEnum.FILE
 
-    @model_validator(mode="after")
+    @model_validator(mode="after")  # type: ignore [arg-type]
     def abs_path_is_valid(self) -> "FileBackupTarget":
         if not self.abs_path.is_file() or not self.abs_path.exists():
             raise ValueError(
@@ -193,7 +193,7 @@ class FolderBackupTarget(BackupTarget):
     abs_path: Path
     type: BackupTargetEnum = BackupTargetEnum.FOLDER
 
-    @model_validator(mode="after")
+    @model_validator(mode="after")  # type: ignore [arg-type]
     def abs_path_is_valid(self) -> "FolderBackupTarget":
         if not self.abs_path.is_dir() or not self.abs_path.exists():
             raise ValueError(
