@@ -3,9 +3,9 @@
   License for use and distribution
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  7-Zip Copyright (C) 1999-2022 Igor Pavlov.
+  7-Zip Copyright (C) 1999-2023 Igor Pavlov.
 
-  The licenses for 7zz file are:
+  The licenses for 7zz and 7zzs files are:
 
          - The "GNU LGPL" as main license for most of the code
          - The "GNU LGPL" with "unRAR license restriction" for some code
