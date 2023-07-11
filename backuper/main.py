@@ -51,7 +51,7 @@ def backup_targets() -> list[BaseBackupTarget]:
                 "initializing postgres target, connecting to database: `%s`",
                 target.env_name,
             )
-            pg_target = PostgreSQL(**target.dict())
+            pg_target = PostgreSQL(**target.model_dump())
             targets.append(pg_target)
             log.info(
                 "success initializing postgres target db version is %s: `%s`",
@@ -60,18 +60,18 @@ def backup_targets() -> list[BaseBackupTarget]:
             )
         elif target.type == config.BackupTargetEnum.FILE:
             log.info("initializing file target: `%s`", target.env_name)
-            targets.append(File(**target.dict()))
+            targets.append(File(**target.model_dump()))
             log.info("success initializing file target: `%s`", target.env_name)
         elif target.type == config.BackupTargetEnum.FOLDER:
             log.info("initializing folder target: `%s`", target.env_name)
-            targets.append(Folder(**target.dict()))
+            targets.append(Folder(**target.model_dump()))
             log.info("success initializing folder target: `%s`", target.env_name)
         elif target.type == config.BackupTargetEnum.MYSQL:
             log.info(
                 "initializing mysql target, connecting to database: `%s`",
                 target.env_name,
             )
-            mysql_target = MySQL(**target.dict())
+            mysql_target = MySQL(**target.model_dump())
             targets.append(mysql_target)
             log.info(
                 "success initializing mysql target db version is %s: `%s`",
@@ -83,7 +83,7 @@ def backup_targets() -> list[BaseBackupTarget]:
                 "initializing mariadb target, connecting to database: `%s`",
                 target.env_name,
             )
-            maria_target = MariaDB(**target.dict())
+            maria_target = MariaDB(**target.model_dump())
             targets.append(maria_target)
             log.info(
                 "success initializing mariadb target db version is %s: `%s`",
@@ -93,7 +93,7 @@ def backup_targets() -> list[BaseBackupTarget]:
         else:  # pragma: no cover
             raise RuntimeError(
                 "panic!!! unsupported backup target",
-                target.dict(),
+                target.model_dump(),
             )
     return targets
 
