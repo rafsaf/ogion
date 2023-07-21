@@ -15,7 +15,9 @@ log = logging.getLogger(__name__)
 VERSION_REGEX = re.compile(r"PostgreSQL \d*\.\d* ")
 
 
-class PostgreSQL(BaseBackupTarget):
+class PostgreSQL(
+    BaseBackupTarget, target_model_name=config.BackupTargetEnum.POSTGRESQL
+):
     # https://www.postgresql.org/docs/current/app-pgdump.html
     # https://www.postgresql.org/docs/current/app-psql.html
 
@@ -104,7 +106,7 @@ class PostgreSQL(BaseBackupTarget):
                 result,
             )
             sys.exit(1)
-        log.debug("postgres_connection calculated version: %s", version)
+        log.info("postgres_connection calculated version: %s", version)
         return version
 
     def _backup(self) -> Path:

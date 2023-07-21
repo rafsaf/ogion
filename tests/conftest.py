@@ -9,31 +9,27 @@ from pydantic import SecretStr
 
 from backuper import config
 from backuper.config import (
-    BackupTargetEnum,
-    FileTargetModel,
-    FolderTargetModel,
+    DirectoryTargetModel,
     MariaDBTargetModel,
     MySQLTargetModel,
     PostgreSQLTargetModel,
+    SingleFileTargetModel,
 )
 
 DOCKER_TESTS: bool = os.environ.get("DOCKER_TESTS", None) is not None
 CONST_TOKEN_URLSAFE = "mock"
-FILE_1 = FileTargetModel(
+FILE_1 = SingleFileTargetModel(
     env_name="singlefile_1",
     cron_rule="* * * * *",
-    type=BackupTargetEnum.FILE,
     abs_path=Path(__file__).absolute().parent / "const/testfile.txt",
 )
-FOLDER_1 = FolderTargetModel(
+FOLDER_1 = DirectoryTargetModel(
     env_name="directory_1",
     cron_rule="* * * * *",
-    type=BackupTargetEnum.FOLDER,
     abs_path=Path(__file__).absolute().parent / "const/testfolder",
 )
 POSTGRES_15 = PostgreSQLTargetModel(
     env_name="postgresql_db_15",
-    type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_15" if DOCKER_TESTS else "localhost",
     port=5432 if DOCKER_TESTS else 10015,
@@ -43,7 +39,6 @@ POSTGRES_15 = PostgreSQLTargetModel(
 )
 POSTGRES_14 = PostgreSQLTargetModel(
     env_name="postgresql_db_14",
-    type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_14" if DOCKER_TESTS else "localhost",
     port=5432 if DOCKER_TESTS else 10014,
@@ -53,7 +48,6 @@ POSTGRES_14 = PostgreSQLTargetModel(
 )
 POSTGRES_13 = PostgreSQLTargetModel(
     env_name="postgresql_db_13",
-    type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_13" if DOCKER_TESTS else "localhost",
     port=5432 if DOCKER_TESTS else 10013,
@@ -63,7 +57,6 @@ POSTGRES_13 = PostgreSQLTargetModel(
 )
 POSTGRES_12 = PostgreSQLTargetModel(
     env_name="postgresql_db_12",
-    type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_12" if DOCKER_TESTS else "localhost",
     port=5432 if DOCKER_TESTS else 10012,
@@ -73,7 +66,6 @@ POSTGRES_12 = PostgreSQLTargetModel(
 )
 POSTGRES_11 = PostgreSQLTargetModel(
     env_name="postgresql_db_11",
-    type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
     host="postgres_11" if DOCKER_TESTS else "localhost",
     port=5432 if DOCKER_TESTS else 10011,
@@ -83,7 +75,6 @@ POSTGRES_11 = PostgreSQLTargetModel(
 )
 MYSQL_57 = MySQLTargetModel(
     env_name="mysql_db_57",
-    type=BackupTargetEnum.MYSQL,
     cron_rule="* * * * *",
     host="mysql_57" if DOCKER_TESTS else "localhost",
     port=3306 if DOCKER_TESTS else 10057,
@@ -93,7 +84,6 @@ MYSQL_57 = MySQLTargetModel(
 )
 MYSQL_80 = MySQLTargetModel(
     env_name="mysql_db_80",
-    type=BackupTargetEnum.MYSQL,
     cron_rule="* * * * *",
     host="mysql_80" if DOCKER_TESTS else "localhost",
     port=3306 if DOCKER_TESTS else 10080,
@@ -103,7 +93,6 @@ MYSQL_80 = MySQLTargetModel(
 )
 MARIADB_1011 = MariaDBTargetModel(
     env_name="mariadb_1011",
-    type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
     host="mariadb_1011" if DOCKER_TESTS else "localhost",
     port=3306 if DOCKER_TESTS else 11011,
@@ -113,7 +102,6 @@ MARIADB_1011 = MariaDBTargetModel(
 )
 MARIADB_1006 = MariaDBTargetModel(
     env_name="mariadb_1006",
-    type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
     host="mariadb_1006" if DOCKER_TESTS else "localhost",
     port=3306 if DOCKER_TESTS else 11006,
@@ -123,7 +111,6 @@ MARIADB_1006 = MariaDBTargetModel(
 )
 MARIADB_1005 = MariaDBTargetModel(
     env_name="mariadb_1005",
-    type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
     host="mariadb_1005" if DOCKER_TESTS else "localhost",
     port=3306 if DOCKER_TESTS else 11005,
@@ -133,7 +120,6 @@ MARIADB_1005 = MariaDBTargetModel(
 )
 MARIADB_1004 = MariaDBTargetModel(
     env_name="mariadb_1004",
-    type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
     host="mariadb_1004" if DOCKER_TESTS else "localhost",
     port=3306 if DOCKER_TESTS else 11004,

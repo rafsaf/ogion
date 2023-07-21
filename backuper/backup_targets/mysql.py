@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 VERSION_REGEX = re.compile(r"\d*\.\d*\.\d*")
 
 
-class MySQL(BaseBackupTarget):
+class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
     # https://dev.mysql.com/doc/refman/8.0/en/option-files.html
     # https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html
     # https://dev.mysql.com/doc/refman/8.0/en/connecting.html
@@ -88,7 +88,7 @@ class MySQL(BaseBackupTarget):
                 result,
             )
             sys.exit(1)
-        log.debug("mysql_connection calculated version: %s", version)
+        log.info("mysql_connection calculated version: %s", version)
         return version
 
     def _backup(self) -> Path:

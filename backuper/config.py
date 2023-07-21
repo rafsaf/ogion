@@ -3,11 +3,18 @@ import logging.config
 import os
 import re
 from enum import StrEnum
+from functools import cached_property
 from pathlib import Path
-from typing import Any, TypeVar, Self
+from typing import Any, Self, TypeVar
 
 from croniter import croniter
-from pydantic import BaseModel, SecretStr, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    SecretStr,
+    computed_field,
+    field_validator,
+    model_validator,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 
@@ -128,7 +135,6 @@ DISCORD_FAIL_WEBHOOK_URL: str = os.environ.get("DISCORD_FAIL_WEBHOOK_URL", "")
 
 class TargetModel(BaseModel):
     env_name: str
-    type: BackupTargetEnum
     cron_rule: str
     max_backups: int = BACKUP_MAX_NUMBER
     archive_level: int = ZIP_ARCHIVE_LEVEL
@@ -149,6 +155,13 @@ class TargetModel(BaseModel):
             )
         return env_name
 
+    @computed_field()
+    @cached_property
+    def target_type(self) -> BackupTargetEnum:
+        cls_name = self.__class__.__name__.lower()
+        target_name = cls_name.removesuffix("targetmodel")
+        return BackupTargetEnum(target_name)
+
 
 class PostgreSQLTargetModel(TargetModel):
     user: str = "postgres"
@@ -156,7 +169,6 @@ class PostgreSQLTargetModel(TargetModel):
     port: int = 5432
     db: str = "postgres"
     password: SecretStr
-    type: BackupTargetEnum = BackupTargetEnum.POSTGRESQL
 
 
 class MySQLTargetModel(TargetModel):
@@ -165,7 +177,6 @@ class MySQLTargetModel(TargetModel):
     port: int = 3306
     db: str = "mysql"
     password: SecretStr
-    type: BackupTargetEnum = BackupTargetEnum.MYSQL
 
 
 class MariaDBTargetModel(TargetModel):
@@ -174,12 +185,10 @@ class MariaDBTargetModel(TargetModel):
     port: int = 3306
     db: str = "mariadb"
     password: SecretStr
-    type: BackupTargetEnum = BackupTargetEnum.MARIADB
 
 
-class FileTargetModel(TargetModel):
+class SingleFileTargetModel(TargetModel):
     abs_path: Path
-    type: BackupTargetEnum = BackupTargetEnum.FILE
 
     @model_validator(mode="after")  # type: ignore [arg-type]
     def abs_path_is_valid(self) -> Self:
@@ -191,9 +200,8 @@ class FileTargetModel(TargetModel):
         return self
 
 
-class FolderTargetModel(TargetModel):
+class DirectoryTargetModel(TargetModel):
     abs_path: Path
-    type: BackupTargetEnum = BackupTargetEnum.FOLDER
 
     @model_validator(mode="after")  # type: ignore [arg-type]
     def abs_path_is_valid(self) -> Self:
@@ -205,13 +213,13 @@ class FolderTargetModel(TargetModel):
         return self
 
 
-_BT = TypeVar("_BT", bound=TargetModel)
+_BM = TypeVar("_BM", bound=BaseModel)
 
 
-def _validate_target_model(env_name: str, env_value: str, target: type[_BT]) -> _BT:
-    target_type: str = target.__name__.lower()
-    log.info("validating %s variable: `%s`", target_type, env_name)
-    log.debug("%s=%s", target_type, env_value)
+def _validate_model(env_name: str, env_value: str, target: type[_BM]) -> _BM:
+    target_name: str = target.__name__.lower()
+    log.info("validating %s variable: `%s`", target_name, env_name)
+    log.debug("%s=%s", target_name, env_value)
     try:
         env_value_parts = env_value.strip()
         target_kwargs: dict[str, Any] = {"env_name": env_name}
@@ -230,41 +238,27 @@ def _validate_target_model(env_name: str, env_value: str, target: type[_BT]) -> 
     except Exception:
         log.critical("error validating environment variable: `%s`", env_name)
         raise
-    log.info("%s variable ok: `%s`", target_type, env_name)
+    log.info("%s variable ok: `%s`", target_name, env_name)
     return validated_target
 
 
-_target_models_lst = list[
-    PostgreSQLTargetModel
-    | MySQLTargetModel
-    | FileTargetModel
-    | FolderTargetModel
-    | MariaDBTargetModel
-]
+def create_target_models() -> list[TargetModel]:
+    target_map: dict[BackupTargetEnum, type[TargetModel]] = {}
+    for target_model in TargetModel.__subclasses__():
+        name = BackupTargetEnum(
+            target_model.__name__.lower().removesuffix("targetmodel")
+        )
+        target_map[name] = target_model
 
-
-def create_target_models() -> _target_models_lst:
-    targets: _target_models_lst = []
+    targets: list[TargetModel] = []
     for env_name, env_value in os.environ.items():
         env_name = env_name.lower()
-        if env_name.startswith(BackupTargetEnum.POSTGRESQL):
-            targets.append(
-                _validate_target_model(env_name, env_value, PostgreSQLTargetModel)
-            )
-        elif env_name.startswith(BackupTargetEnum.MYSQL):
-            targets.append(
-                _validate_target_model(env_name, env_value, MySQLTargetModel)
-            )
-        elif env_name.startswith(BackupTargetEnum.FILE):
-            targets.append(_validate_target_model(env_name, env_value, FileTargetModel))
-        elif env_name.startswith(BackupTargetEnum.FOLDER):
-            targets.append(
-                _validate_target_model(env_name, env_value, FolderTargetModel)
-            )
-        elif env_name.startswith(BackupTargetEnum.MARIADB):
-            targets.append(
-                _validate_target_model(env_name, env_value, MariaDBTargetModel)
-            )
+        log.debug("processing env variable %s", env_name)
+        for target_model_name in target_map:
+            if env_name.startswith(target_model_name):
+                target_model_cls = target_map[target_model_name]
+                targets.append(_validate_model(env_name, env_value, target_model_cls))
+                break
 
     return targets
 

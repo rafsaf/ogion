@@ -9,14 +9,7 @@ from types import FrameType
 from typing import NoReturn
 
 from backuper import config, notifications
-from backuper.backup_targets import (
-    BaseBackupTarget,
-    File,
-    Folder,
-    MariaDB,
-    MySQL,
-    PostgreSQL,
-)
+from backuper.backup_targets.base_target import BaseBackupTarget
 from backuper.storage_providers import (
     BaseBackupProvider,
     GoogleCloudStorage,
@@ -42,53 +35,28 @@ def backup_provider() -> BaseBackupProvider:
 
 
 def backup_targets() -> list[BaseBackupTarget]:
-    targets: list[BaseBackupTarget] = []
-    models = config.create_target_models()
-    if not models:
+    backup_targets_map: dict[config.BackupTargetEnum, type[BaseBackupTarget]] = {}
+    for backup_target in BaseBackupTarget.__subclasses__():
+        backup_targets_map[backup_target.NAME] = backup_target
+
+    backup_targets: list[BaseBackupTarget] = []
+    target_models = config.create_target_models()
+    if not target_models:
         raise RuntimeError("Found 0 backup targets, at least 1 is required.")
-    for target_model in models:
-        if target_model.type == config.BackupTargetEnum.POSTGRESQL:
+
+    log.info("initializating %s backup targets", len(target_models))
+
+    for target_model in target_models:
+        if target_model.target_type in backup_targets_map:
             log.info(
-                "initializing postgres target, connecting to database: `%s`",
+                "initializing target: `%s`",
                 target_model.env_name,
             )
-            pg_target = PostgreSQL(**target_model.model_dump())
-            targets.append(pg_target)
+            backup_target_cls = backup_targets_map[target_model.target_type]
+            log.debug("initializing %s with %s", backup_target_cls, target_model)
+            backup_targets.append(backup_target_cls(**target_model.model_dump()))
             log.info(
-                "success initializing postgres target db version is %s: `%s`",
-                pg_target.db_version,
-                target_model.env_name,
-            )
-        elif target_model.type == config.BackupTargetEnum.FILE:
-            log.info("initializing file target: `%s`", target_model.env_name)
-            targets.append(File(**target_model.model_dump()))
-            log.info("success initializing file target: `%s`", target_model.env_name)
-        elif target_model.type == config.BackupTargetEnum.FOLDER:
-            log.info("initializing folder target: `%s`", target_model.env_name)
-            targets.append(Folder(**target_model.model_dump()))
-            log.info("success initializing folder target: `%s`", target_model.env_name)
-        elif target_model.type == config.BackupTargetEnum.MYSQL:
-            log.info(
-                "initializing mysql target, connecting to database: `%s`",
-                target_model.env_name,
-            )
-            mysql_target = MySQL(**target_model.model_dump())
-            targets.append(mysql_target)
-            log.info(
-                "success initializing mysql target db version is %s: `%s`",
-                mysql_target.db_version,
-                target_model.env_name,
-            )
-        elif target_model.type == config.BackupTargetEnum.MARIADB:
-            log.info(
-                "initializing mariadb target, connecting to database: `%s`",
-                target_model.env_name,
-            )
-            maria_target = MariaDB(**target_model.model_dump())
-            targets.append(maria_target)
-            log.info(
-                "success initializing mariadb target db version is %s: `%s`",
-                maria_target.db_version,
+                "success initializing target: `%s`",
                 target_model.env_name,
             )
         else:  # pragma: no cover
@@ -96,7 +64,7 @@ def backup_targets() -> list[BaseBackupTarget]:
                 "panic!!! unsupported backup target",
                 target_model.model_dump(),
             )
-    return targets
+    return backup_targets
 
 
 def shutdown() -> NoReturn:

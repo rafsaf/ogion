@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 VERSION_REGEX = re.compile(r"\d*\.\d*\.\d*")
 
 
-class MariaDB(BaseBackupTarget):
+class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIADB):
     # https://mariadb.com/kb/en/configuring-mariadb-with-option-files/
     # https://mariadb.com/kb/en/mariadb-dumpmariadbdump/
     # https://mariadb.com/kb/en/connecting-to-mariadb/
@@ -87,7 +87,7 @@ class MariaDB(BaseBackupTarget):
                 result,
             )
             sys.exit(1)
-        log.debug("mariadb_connection calculated version: %s", version)
+        log.info("mariadb_connection calculated version: %s", version)
         return version
 
     def _backup(self) -> Path:

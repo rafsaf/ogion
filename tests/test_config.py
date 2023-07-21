@@ -63,7 +63,7 @@ from backuper import config
             True,
         ),
         (
-            config.FileTargetModel,
+            config.SingleFileTargetModel,
             {
                 "abs_path": Path("/tmp/asdasd/not_existing_asd.txt"),
                 "env_name": "valid",
@@ -72,12 +72,12 @@ from backuper import config
             False,
         ),
         (
-            config.FileTargetModel,
+            config.SingleFileTargetModel,
             {"abs_path": Path(__file__), "env_name": "valid", "cron_rule": "5 5 * * *"},
             True,
         ),
         (
-            config.FolderTargetModel,
+            config.DirectoryTargetModel,
             {
                 "abs_path": Path("/tmp/asdasd/not_existing_asd/folder"),
                 "env_name": "valid",
@@ -86,7 +86,7 @@ from backuper import config
             False,
         ),
         (
-            config.FolderTargetModel,
+            config.DirectoryTargetModel,
             {
                 "abs_path": Path(__file__).parent,
                 "env_name": "valid",
