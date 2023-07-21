@@ -54,23 +54,18 @@ def backup_targets() -> list[BaseBackupTarget]:
     log.info("initializating %s backup targets", len(target_models))
 
     for target_model in target_models:
-        if target_model.target_type in backup_targets_map:
-            log.info(
-                "initializing target: `%s`",
-                target_model.env_name,
-            )
-            backup_target_cls = backup_targets_map[target_model.target_type]
-            log.debug("initializing %s with %s", backup_target_cls, target_model)
-            backup_targets.append(backup_target_cls(**target_model.model_dump()))
-            log.info(
-                "success initializing target: `%s`",
-                target_model.env_name,
-            )
-        else:  # pragma: no cover
-            raise RuntimeError(
-                "panic!!! unsupported backup target",
-                target_model.model_dump(),
-            )
+        log.info(
+            "initializing target: `%s`",
+            target_model.env_name,
+        )
+        backup_target_cls = backup_targets_map[target_model.target_type]
+        log.debug("initializing %s with %s", backup_target_cls, target_model)
+        backup_targets.append(backup_target_cls(**target_model.model_dump()))
+        log.info(
+            "success initializing target: `%s`",
+            target_model.env_name,
+        )
+
     return backup_targets
 
 
