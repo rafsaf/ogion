@@ -3,14 +3,14 @@ from pathlib import Path
 import pytest
 
 from backuper import config
-from backuper.providers import LocalFiles
+from backuper.providers import LocalDebugFiles
 
 
 @pytest.mark.parametrize("method_name", ["_clean", "safe_clean"])
 def test_gcs_clean_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
 ) -> None:
-    local = LocalFiles()
+    local = LocalDebugFiles()
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
@@ -37,7 +37,7 @@ def test_gcs_clean_file(
 def test_gcs_clean_folder(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
 ) -> None:
-    local = LocalFiles()
+    local = LocalDebugFiles()
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()

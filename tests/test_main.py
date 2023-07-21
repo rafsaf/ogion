@@ -92,7 +92,7 @@ def test_shutdown_gracefully_with_thread(monkeypatch: pytest.MonkeyPatch) -> Non
 
 def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["main.py", "--single"])
-    monkeypatch.setattr(config, "BACKUP_PROVIDER", "name=local")
+    monkeypatch.setattr(config, "BACKUP_PROVIDER", "name=debug")
     monkeypatch.setattr(
         core,
         "create_target_models",

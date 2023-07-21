@@ -9,7 +9,7 @@ class ProviderModel(BaseModel):
     name: config.BackupProviderEnum
 
 
-class LocalProviderModel(ProviderModel):
+class DebugProviderModel(ProviderModel):
     pass
 
 

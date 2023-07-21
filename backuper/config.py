@@ -16,7 +16,7 @@ except ImportError:  # pragma: no cover
 
 
 class BackupProviderEnum(StrEnum):
-    LOCAL_FILES = "local"
+    LOCAL_FILES_DEBUG = "debug"
     GOOGLE_CLOUD_STORAGE = "gcs"
 
 

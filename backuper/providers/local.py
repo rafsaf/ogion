@@ -8,9 +8,9 @@ from backuper.providers.base_provider import BaseBackupProvider
 log = logging.getLogger(__name__)
 
 
-class LocalFiles(
+class LocalDebugFiles(
     BaseBackupProvider,
-    name=config.BackupProviderEnum.LOCAL_FILES,
+    name=config.BackupProviderEnum.LOCAL_FILES_DEBUG,
 ):
     """Represent local folder `data` for storing backups.
 
