@@ -170,7 +170,6 @@ def fixed_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         "ZIP_ARCHIVE_PASSWORD",
         'very_unpleasant:password-_-12!@#$%^&*()/;><.,]}{[\\`~\'"\'"\'""',
     )
-    monkeypatch.setattr(config, "GOOGLE_BUCKET_UPLOAD_PATH", "test")
     LOG_FOLDER_PATH = tmp_path / "pytest_logs"
     LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
     monkeypatch.setattr(config, "LOG_FOLDER_PATH", LOG_FOLDER_PATH)
@@ -181,8 +180,6 @@ def fixed_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         config, "CONST_GOOGLE_SERVICE_ACCOUNT_PATH", google_serv_acc_path
     )
-    monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(google_serv_acc_path))
-    config.runtime_configuration()
     config.logging_config("DEBUG")
 
 

@@ -17,6 +17,9 @@ class LocalFiles(
     If docker volume/persistant volume is lost, so are backups.
     """
 
+    def __init__(self, **kwargs: str) -> None:
+        pass
+
     def _post_save(self, backup_file: Path) -> str:
         zip_file = core.run_create_zip_archive(backup_file=backup_file)
         return str(zip_file)

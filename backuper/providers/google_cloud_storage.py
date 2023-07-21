@@ -1,5 +1,6 @@
 import base64
 import logging
+import os
 import shutil
 import time
 from pathlib import Path
@@ -21,19 +22,28 @@ class GoogleCloudStorage(
     MAX_UPLOAD_RETRY = 5
     CHUNK_SIZE = 25 * 1024 * 1024  # 25MB
 
-    def __init__(self) -> None:
-        service_account_bytes = base64.b64decode(config.GOOGLE_SERVICE_ACCOUNT_BASE64)
+    def __init__(
+        self,
+        bucket_name: str,
+        bucket_upload_path: str,
+        service_account_base64: str,
+        **kwargs: str,
+    ) -> None:
+        service_account_bytes = base64.b64decode(service_account_base64)
         with open(config.CONST_GOOGLE_SERVICE_ACCOUNT_PATH, "wb") as f:
             f.write(service_account_bytes)
-
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(
+            config.CONST_GOOGLE_SERVICE_ACCOUNT_PATH
+        )
         self.storage_client = storage.Client()
-        self.bucket = self.storage_client.bucket(config.GOOGLE_BUCKET_NAME)
+        self.bucket = self.storage_client.bucket(bucket_name)
+        self.bucket_upload_path = bucket_upload_path
 
     def _post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
         backup_dest_in_bucket = "{}/{}/{}".format(
-            config.GOOGLE_BUCKET_UPLOAD_PATH,
+            self.bucket_upload_path,
             zip_backup_file.parent.name,
             zip_backup_file.name,
         )
@@ -75,7 +85,7 @@ class GoogleCloudStorage(
             log.info("removed %s from local disk", backup_path)
 
         backup_list_cloud: list[str] = []
-        prefix = f"{config.GOOGLE_BUCKET_UPLOAD_PATH}/{backup_file.parent.name}"
+        prefix = f"{self.bucket_upload_path}/{backup_file.parent.name}"
         for blob in self.storage_client.list_blobs(self.bucket, prefix=prefix):
             backup_list_cloud.append(blob.name)
 

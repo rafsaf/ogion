@@ -40,13 +40,17 @@ def test_empty_backup_targets_raise_runtime_error(
 
 
 def test_backup_provider(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(config, "BACKUP_PROVIDER", "gcs")
+    monkeypatch.setattr(
+        config,
+        "BACKUP_PROVIDER",
+        "name=gcs bucket_name=name bucket_upload_path=test service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
+    )
     provider = main.backup_provider()
     assert provider.NAME == "gcs"
 
 
 def test_shutdown_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(config, "BACKUPER_SIGTERM_TIMEOUT_SECS", 0.01)
+    monkeypatch.setattr(config, "SIGTERM_TIMEOUT_SECS", 0.01)
     with pytest.raises(SystemExit) as system_exit:
         main.shutdown()
     assert system_exit.type == SystemExit
@@ -54,7 +58,7 @@ def test_shutdown_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_shutdown_not_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(config, "BACKUPER_SIGTERM_TIMEOUT_SECS", 0.01)
+    monkeypatch.setattr(config, "SIGTERM_TIMEOUT_SECS", 0.01)
 
     def sleep_005() -> None:
         time.sleep(0.05)
@@ -72,7 +76,7 @@ def test_shutdown_not_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_shutdown_gracefully_with_thread(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(config, "BACKUPER_SIGTERM_TIMEOUT_SECS", 0.1)
+    monkeypatch.setattr(config, "SIGTERM_TIMEOUT_SECS", 0.1)
 
     def sleep_005() -> None:
         time.sleep(0.05)
@@ -88,7 +92,7 @@ def test_shutdown_gracefully_with_thread(monkeypatch: pytest.MonkeyPatch) -> Non
 
 def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["main.py", "--single"])
-    monkeypatch.setattr(config, "BACKUP_PROVIDER", "local")
+    monkeypatch.setattr(config, "BACKUP_PROVIDER", "name=local")
     monkeypatch.setattr(
         core,
         "create_target_models",

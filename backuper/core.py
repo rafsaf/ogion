@@ -12,6 +12,7 @@ from typing import Any, TypeVar
 from pydantic import BaseModel
 
 from backuper import config
+from backuper.models.provider_models import ProviderModel
 from backuper.models.target_models import TargetModel
 
 log = logging.getLogger(__name__)
@@ -86,7 +87,12 @@ def safe_text_version(text: str) -> str:
     return re.sub(SAFE_LETTER_PATTERN, "", text)
 
 
-def _validate_model(env_name: str, env_value: str, target: type[_BM]) -> _BM:
+def _validate_model(
+    env_name: str,
+    env_value: str,
+    target: type[_BM],
+    value_whitespace_split: bool = False,
+) -> _BM:
     target_name: str = target.__name__.lower()
     log.info("validating %s variable: `%s`", target_name, env_name)
     log.debug("%s=%s", target_name, env_value)
@@ -102,6 +108,8 @@ def _validate_model(env_name: str, env_value: str, target: type[_BM]) -> _BM:
                 _, val = env_value_parts.split(f, maxsplit=1)
                 for other_field in target.model_fields.keys():
                     val = val.split(f" {other_field}=")[0]
+                if value_whitespace_split:
+                    val = val.split()[0]
                 target_kwargs[field_name] = val
         log.debug("calculated arguments: %s", target_kwargs)
         validated_target = target.model_validate(target_kwargs)
@@ -131,3 +139,22 @@ def create_target_models() -> list[TargetModel]:
                 break
 
     return targets
+
+
+def create_provider_model() -> ProviderModel:
+    target_map: dict[config.BackupProviderEnum, type[ProviderModel]] = {}
+    for target_model in ProviderModel.__subclasses__():
+        name = config.BackupProviderEnum(
+            target_model.__name__.lower().removesuffix("providermodel")
+        )
+        target_map[name] = target_model
+    log.info("start validating BACKUP_PROVIDER")
+
+    base_provider = _validate_model(
+        "backup_provider",
+        config.BACKUP_PROVIDER,
+        ProviderModel,
+        value_whitespace_split=True,
+    )
+    target_model_cls = target_map[base_provider.name]
+    return _validate_model("backup_provider", config.BACKUP_PROVIDER, target_model_cls)
