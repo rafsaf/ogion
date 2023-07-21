@@ -7,7 +7,7 @@ from unittest.mock import Mock
 import google.cloud.storage as storage
 import pytest
 
-from backuper import config, main, notifications
+from backuper import config, core, main, notifications
 
 from .conftest import FILE_1, FOLDER_1, MARIADB_1011, MYSQL_80, POSTGRES_15
 
@@ -19,7 +19,7 @@ def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_backup_targets(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        config,
+        core,
         "create_target_models",
         Mock(return_value=[POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1]),
     )
@@ -31,7 +31,7 @@ def test_empty_backup_targets_raise_runtime_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        config,
+        core,
         "create_target_models",
         Mock(return_value=[]),
     )
@@ -90,7 +90,7 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["main.py", "--single"])
     monkeypatch.setattr(config, "BACKUP_PROVIDER", "local")
     monkeypatch.setattr(
-        config,
+        core,
         "create_target_models",
         Mock(return_value=[POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1]),
     )
@@ -118,7 +118,7 @@ def test_run_backup_fail_message_when_no_backup_file(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        config,
+        core,
         "create_target_models",
         Mock(return_value=[POSTGRES_15]),
     )
@@ -141,7 +141,7 @@ def test_run_backup_fail_message_when_upload_fail(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        config,
+        core,
         "create_target_models",
         Mock(return_value=[POSTGRES_15]),
     )

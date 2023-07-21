@@ -8,7 +8,7 @@ from threading import Thread
 from types import FrameType
 from typing import NoReturn
 
-from backuper import config, notifications
+from backuper import config, core, notifications
 from backuper.backup_targets.base_target import BaseBackupTarget
 from backuper.providers import BaseBackupProvider, GoogleCloudStorage, LocalFiles
 
@@ -36,7 +36,7 @@ def backup_targets() -> list[BaseBackupTarget]:
         backup_targets_map[backup_target.NAME] = backup_target
 
     backup_targets: list[BaseBackupTarget] = []
-    target_models = config.create_target_models()
+    target_models = core.create_target_models()
     if not target_models:
         raise RuntimeError("Found 0 backup targets, at least 1 is required.")
 
