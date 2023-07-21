@@ -24,7 +24,7 @@ def quit(sig: int, frame: FrameType | None) -> None:
 def backup_provider() -> BaseBackupProvider:
     backup_provider_map: dict[config.BackupProviderEnum, type[BaseBackupProvider]] = {}
     for backup_provider in BaseBackupProvider.__subclasses__():
-        backup_provider_map[backup_provider.NAME] = backup_provider
+        backup_provider_map[backup_provider.NAME] = backup_provider  # type: ignore
 
     provider_model = core.create_provider_model()
     log.info(
@@ -33,18 +33,18 @@ def backup_provider() -> BaseBackupProvider:
     )
     provider_target_cls = backup_provider_map[provider_model.name]
     log.debug("initializing %s with %s", provider_target_cls, provider_model)
-    backup_provider = provider_target_cls(**provider_model.model_dump())
+    res_backup_provider = provider_target_cls(**provider_model.model_dump())
     log.info(
         "success initializing target: `%s`",
         provider_model.name,
     )
-    return backup_provider
+    return res_backup_provider
 
 
 def backup_targets() -> list[BaseBackupTarget]:
     backup_targets_map: dict[config.BackupTargetEnum, type[BaseBackupTarget]] = {}
     for backup_target in BaseBackupTarget.__subclasses__():
-        backup_targets_map[backup_target.NAME] = backup_target
+        backup_targets_map[backup_target.NAME] = backup_target  # type: ignore
 
     backup_targets: list[BaseBackupTarget] = []
     target_models = core.create_target_models()
@@ -156,7 +156,8 @@ def setup_runtime_arguments() -> bool:
         "-s", "--single", action="store_true", help="Only single backup then exit"
     )
     args = parser.parse_args()
-    return args.single
+    single: bool = args.single
+    return single
 
 
 def main() -> NoReturn:

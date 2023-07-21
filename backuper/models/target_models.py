@@ -36,7 +36,7 @@ class TargetModel(BaseModel):
             )
         return env_name
 
-    @computed_field()
+    @computed_field()  # type: ignore
     @cached_property
     def target_type(self) -> config.BackupTargetEnum:
         cls_name = self.__class__.__name__.lower()
