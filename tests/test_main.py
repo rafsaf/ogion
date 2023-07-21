@@ -20,8 +20,8 @@ def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_backup_targets(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         config,
-        "BACKUP_TARGETS",
-        [POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1],
+        "create_target_models",
+        Mock(return_value=[POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1]),
     )
     targets = main.backup_targets()
     assert len(targets) == 5
@@ -32,8 +32,8 @@ def test_empty_backup_targets_raise_runtime_error(
 ) -> None:
     monkeypatch.setattr(
         config,
-        "BACKUP_TARGETS",
-        [],
+        "create_target_models",
+        Mock(return_value=[]),
     )
     with pytest.raises(RuntimeError):
         main.backup_targets()
@@ -91,8 +91,8 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(config, "BACKUP_PROVIDER", "local")
     monkeypatch.setattr(
         config,
-        "BACKUP_TARGETS",
-        [POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1],
+        "create_target_models",
+        Mock(return_value=[POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1]),
     )
     with pytest.raises(SystemExit) as system_exit:
         main.main()
@@ -119,8 +119,8 @@ def test_run_backup_fail_message_when_no_backup_file(
 ) -> None:
     monkeypatch.setattr(
         config,
-        "BACKUP_TARGETS",
-        [POSTGRES_15],
+        "create_target_models",
+        Mock(return_value=[POSTGRES_15]),
     )
     target = main.backup_targets()[0]
     monkeypatch.setattr(target, "_backup", Mock(side_effect=ValueError()))
@@ -142,8 +142,8 @@ def test_run_backup_fail_message_when_upload_fail(
 ) -> None:
     monkeypatch.setattr(
         config,
-        "BACKUP_TARGETS",
-        [POSTGRES_15],
+        "create_target_models",
+        Mock(return_value=[POSTGRES_15]),
     )
     target = main.backup_targets()[0]
     backup_file = Path("/tmp/fake")

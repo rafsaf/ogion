@@ -6,14 +6,14 @@ from freezegun import freeze_time
 from backuper.backup_targets.base_target import BaseBackupTarget
 
 
-class BackupTarget(BaseBackupTarget):
+class TargetModel(BaseBackupTarget):
     def _backup(self) -> Path:
         return Path(__file__)
 
 
 @freeze_time("2023-05-03 17:58")
 def test_base_backup_target_next_backup() -> None:
-    target = BackupTarget(cron_rule="* * * * *", env_name="env")
+    target = TargetModel(cron_rule="* * * * *", env_name="env")
     assert target.cron_rule == "* * * * *"
     assert target.env_name == "env"
     assert target.last_backup_time == datetime(2023, 5, 3, 17, 58)

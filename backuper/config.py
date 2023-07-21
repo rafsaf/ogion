@@ -4,7 +4,7 @@ import os
 import re
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, TypeVar, Self
 
 from croniter import croniter
 from pydantic import BaseModel, SecretStr, field_validator, model_validator
@@ -95,6 +95,8 @@ logging_config(LOG_LEVEL)
 
 log = logging.getLogger(__name__)
 
+log.info("Start configuring backuper")
+
 
 class BackupProviderEnum(StrEnum):
     LOCAL_FILES = "local"
@@ -124,7 +126,7 @@ DISCORD_SUCCESS_WEBHOOK_URL: str = os.environ.get("DISCORD_SUCCESS_WEBHOOK_URL",
 DISCORD_FAIL_WEBHOOK_URL: str = os.environ.get("DISCORD_FAIL_WEBHOOK_URL", "")
 
 
-class BackupTarget(BaseModel):
+class TargetModel(BaseModel):
     env_name: str
     type: BackupTargetEnum
     cron_rule: str
@@ -148,7 +150,7 @@ class BackupTarget(BaseModel):
         return env_name
 
 
-class PostgreSQLBackupTarget(BackupTarget):
+class PostgreSQLTargetModel(TargetModel):
     user: str = "postgres"
     host: str = "localhost"
     port: int = 5432
@@ -157,7 +159,7 @@ class PostgreSQLBackupTarget(BackupTarget):
     type: BackupTargetEnum = BackupTargetEnum.POSTGRESQL
 
 
-class MySQLBackupTarget(BackupTarget):
+class MySQLTargetModel(TargetModel):
     user: str = "root"
     host: str = "localhost"
     port: int = 3306
@@ -166,7 +168,7 @@ class MySQLBackupTarget(BackupTarget):
     type: BackupTargetEnum = BackupTargetEnum.MYSQL
 
 
-class MariaDBBackupTarget(BackupTarget):
+class MariaDBTargetModel(TargetModel):
     user: str = "root"
     host: str = "localhost"
     port: int = 3306
@@ -175,12 +177,12 @@ class MariaDBBackupTarget(BackupTarget):
     type: BackupTargetEnum = BackupTargetEnum.MARIADB
 
 
-class FileBackupTarget(BackupTarget):
+class FileTargetModel(TargetModel):
     abs_path: Path
     type: BackupTargetEnum = BackupTargetEnum.FILE
 
     @model_validator(mode="after")  # type: ignore [arg-type]
-    def abs_path_is_valid(self) -> "FileBackupTarget":
+    def abs_path_is_valid(self) -> Self:
         if not self.abs_path.is_file() or not self.abs_path.exists():
             raise ValueError(
                 f"Path {self.abs_path} is not a file or does not exist\n "
@@ -189,12 +191,12 @@ class FileBackupTarget(BackupTarget):
         return self
 
 
-class FolderBackupTarget(BackupTarget):
+class FolderTargetModel(TargetModel):
     abs_path: Path
     type: BackupTargetEnum = BackupTargetEnum.FOLDER
 
     @model_validator(mode="after")  # type: ignore [arg-type]
-    def abs_path_is_valid(self) -> "FolderBackupTarget":
+    def abs_path_is_valid(self) -> Self:
         if not self.abs_path.is_dir() or not self.abs_path.exists():
             raise ValueError(
                 f"Path {self.abs_path} is not a dir or does not exist\n "
@@ -203,10 +205,10 @@ class FolderBackupTarget(BackupTarget):
         return self
 
 
-_BT = TypeVar("_BT", bound=BackupTarget)
+_BT = TypeVar("_BT", bound=TargetModel)
 
 
-def _validate_backup_target(env_name: str, env_value: str, target: type[_BT]) -> _BT:
+def _validate_target_model(env_name: str, env_value: str, target: type[_BT]) -> _BT:
     target_type: str = target.__name__.lower()
     log.info("validating %s variable: `%s`", target_type, env_name)
     log.debug("%s=%s", target_type, env_value)
@@ -232,44 +234,39 @@ def _validate_backup_target(env_name: str, env_value: str, target: type[_BT]) ->
     return validated_target
 
 
-_targets_lst = list[
-    PostgreSQLBackupTarget
-    | MySQLBackupTarget
-    | FileBackupTarget
-    | FolderBackupTarget
-    | MariaDBBackupTarget
+_target_models_lst = list[
+    PostgreSQLTargetModel
+    | MySQLTargetModel
+    | FileTargetModel
+    | FolderTargetModel
+    | MariaDBTargetModel
 ]
 
 
-def create_backup_targets() -> _targets_lst:
-    targets: _targets_lst = []
+def create_target_models() -> _target_models_lst:
+    targets: _target_models_lst = []
     for env_name, env_value in os.environ.items():
         env_name = env_name.lower()
         if env_name.startswith(BackupTargetEnum.POSTGRESQL):
             targets.append(
-                _validate_backup_target(env_name, env_value, PostgreSQLBackupTarget)
+                _validate_target_model(env_name, env_value, PostgreSQLTargetModel)
             )
         elif env_name.startswith(BackupTargetEnum.MYSQL):
             targets.append(
-                _validate_backup_target(env_name, env_value, MySQLBackupTarget)
+                _validate_target_model(env_name, env_value, MySQLTargetModel)
             )
         elif env_name.startswith(BackupTargetEnum.FILE):
-            targets.append(
-                _validate_backup_target(env_name, env_value, FileBackupTarget)
-            )
+            targets.append(_validate_target_model(env_name, env_value, FileTargetModel))
         elif env_name.startswith(BackupTargetEnum.FOLDER):
             targets.append(
-                _validate_backup_target(env_name, env_value, FolderBackupTarget)
+                _validate_target_model(env_name, env_value, FolderTargetModel)
             )
         elif env_name.startswith(BackupTargetEnum.MARIADB):
             targets.append(
-                _validate_backup_target(env_name, env_value, MariaDBBackupTarget)
+                _validate_target_model(env_name, env_value, MariaDBTargetModel)
             )
 
     return targets
-
-
-BACKUP_TARGETS = create_backup_targets()
 
 
 def runtime_configuration() -> None:
@@ -299,7 +296,6 @@ def runtime_configuration() -> None:
             raise RuntimeError(
                 f"For provider: `{BACKUP_PROVIDER}` you must use environment variable `GOOGLE_BUCKET_UPLOAD_PATH`"
             )
-        log.error(GOOGLE_BUCKET_UPLOAD_PATH)
     if ZIP_ARCHIVE_PASSWORD and not CONST_ZIP_BIN_7ZZ_PATH.exists():
         raise RuntimeError(
             f"`{ZIP_ARCHIVE_PASSWORD}` is set but `{CONST_ZIP_BIN_7ZZ_PATH}` binary does not exists, did you forget to create it?"

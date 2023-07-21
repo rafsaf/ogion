@@ -10,28 +10,28 @@ from pydantic import SecretStr
 from backuper import config
 from backuper.config import (
     BackupTargetEnum,
-    FileBackupTarget,
-    FolderBackupTarget,
-    MariaDBBackupTarget,
-    MySQLBackupTarget,
-    PostgreSQLBackupTarget,
+    FileTargetModel,
+    FolderTargetModel,
+    MariaDBTargetModel,
+    MySQLTargetModel,
+    PostgreSQLTargetModel,
 )
 
 DOCKER_TESTS: bool = os.environ.get("DOCKER_TESTS", None) is not None
 CONST_TOKEN_URLSAFE = "mock"
-FILE_1 = FileBackupTarget(
+FILE_1 = FileTargetModel(
     env_name="singlefile_1",
     cron_rule="* * * * *",
     type=BackupTargetEnum.FILE,
     abs_path=Path(__file__).absolute().parent / "const/testfile.txt",
 )
-FOLDER_1 = FolderBackupTarget(
+FOLDER_1 = FolderTargetModel(
     env_name="directory_1",
     cron_rule="* * * * *",
     type=BackupTargetEnum.FOLDER,
     abs_path=Path(__file__).absolute().parent / "const/testfolder",
 )
-POSTGRES_15 = PostgreSQLBackupTarget(
+POSTGRES_15 = PostgreSQLTargetModel(
     env_name="postgresql_db_15",
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
@@ -41,7 +41,7 @@ POSTGRES_15 = PostgreSQLBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-POSTGRES_14 = PostgreSQLBackupTarget(
+POSTGRES_14 = PostgreSQLTargetModel(
     env_name="postgresql_db_14",
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
@@ -51,7 +51,7 @@ POSTGRES_14 = PostgreSQLBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-POSTGRES_13 = PostgreSQLBackupTarget(
+POSTGRES_13 = PostgreSQLTargetModel(
     env_name="postgresql_db_13",
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
@@ -61,7 +61,7 @@ POSTGRES_13 = PostgreSQLBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-POSTGRES_12 = PostgreSQLBackupTarget(
+POSTGRES_12 = PostgreSQLTargetModel(
     env_name="postgresql_db_12",
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
@@ -71,7 +71,7 @@ POSTGRES_12 = PostgreSQLBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-POSTGRES_11 = PostgreSQLBackupTarget(
+POSTGRES_11 = PostgreSQLTargetModel(
     env_name="postgresql_db_11",
     type=BackupTargetEnum.POSTGRESQL,
     cron_rule="* * * * *",
@@ -81,7 +81,7 @@ POSTGRES_11 = PostgreSQLBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-MYSQL_57 = MySQLBackupTarget(
+MYSQL_57 = MySQLTargetModel(
     env_name="mysql_db_57",
     type=BackupTargetEnum.MYSQL,
     cron_rule="* * * * *",
@@ -91,7 +91,7 @@ MYSQL_57 = MySQLBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-MYSQL_80 = MySQLBackupTarget(
+MYSQL_80 = MySQLTargetModel(
     env_name="mysql_db_80",
     type=BackupTargetEnum.MYSQL,
     cron_rule="* * * * *",
@@ -101,7 +101,7 @@ MYSQL_80 = MySQLBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-MARIADB_1011 = MariaDBBackupTarget(
+MARIADB_1011 = MariaDBTargetModel(
     env_name="mariadb_1011",
     type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
@@ -111,7 +111,7 @@ MARIADB_1011 = MariaDBBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-MARIADB_1006 = MariaDBBackupTarget(
+MARIADB_1006 = MariaDBTargetModel(
     env_name="mariadb_1006",
     type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
@@ -121,7 +121,7 @@ MARIADB_1006 = MariaDBBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-MARIADB_1005 = MariaDBBackupTarget(
+MARIADB_1005 = MariaDBTargetModel(
     env_name="mariadb_1005",
     type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
@@ -131,7 +131,7 @@ MARIADB_1005 = MariaDBBackupTarget(
     db="database-_-12!@#$%^&*()/;><.,]}{[",
     user="user-_-12!@#$%^&*()/;><.,]}{[",
 )
-MARIADB_1004 = MariaDBBackupTarget(
+MARIADB_1004 = MariaDBTargetModel(
     env_name="mariadb_1004",
     type=BackupTargetEnum.MARIADB,
     cron_rule="* * * * *",
@@ -155,18 +155,18 @@ DB_VERSION_BY_ENV_VAR: dict[str, str] = {
     "mariadb_1005": "10.5.19",
     "mariadb_1004": "10.4.28",
 }
-ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLBackupTarget] = [
+ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLTargetModel] = [
     POSTGRES_11,
     POSTGRES_12,
     POSTGRES_13,
     POSTGRES_14,
     POSTGRES_15,
 ]
-ALL_MYSQL_DBS_TARGETS: list[MySQLBackupTarget] = [
+ALL_MYSQL_DBS_TARGETS: list[MySQLTargetModel] = [
     MYSQL_57,
     MYSQL_80,
 ]
-ALL_MARIADB_DBS_TARGETS: list[MariaDBBackupTarget] = [
+ALL_MARIADB_DBS_TARGETS: list[MariaDBTargetModel] = [
     MARIADB_1011,
     MARIADB_1006,
     MARIADB_1005,

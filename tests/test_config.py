@@ -13,37 +13,37 @@ from backuper import config
     "target_cls,target_params,valid",
     [
         (
-            config.BackupTarget,
+            config.TargetModel,
             {"env_name": "VALID", "type": "postgresql", "cron_rule": "* * * * *"},
             True,
         ),
         (
-            config.BackupTarget,
+            config.TargetModel,
             {"env_name": "VALID", "type": "mysql", "cron_rule": "* * * * *"},
             True,
         ),
         (
-            config.BackupTarget,
+            config.TargetModel,
             {"env_name": ":(()", "type": "postgresql", "cron_rule": "* * * * *"},
             False,
         ),
         (
-            config.BackupTarget,
+            config.TargetModel,
             {"env_name": "valid", "type": "postgresql", "cron_rule": "* * ** *"},
             False,
         ),
         (
-            config.BackupTarget,
+            config.TargetModel,
             {"env_name": "valid", "type": "postgresql", "cron_rule": "!"},
             False,
         ),
         (
-            config.PostgreSQLBackupTarget,
+            config.PostgreSQLTargetModel,
             {"password": "secret", "env_name": "valid", "cron_rule": "5 5 * * *"},
             True,
         ),
         (
-            config.MySQLBackupTarget,
+            config.MySQLTargetModel,
             {
                 "password": "secret",
                 "db": "xxx",
@@ -53,7 +53,7 @@ from backuper import config
             True,
         ),
         (
-            config.MariaDBBackupTarget,
+            config.MariaDBTargetModel,
             {
                 "password": "secret",
                 "db": "xxx",
@@ -63,7 +63,7 @@ from backuper import config
             True,
         ),
         (
-            config.FileBackupTarget,
+            config.FileTargetModel,
             {
                 "abs_path": Path("/tmp/asdasd/not_existing_asd.txt"),
                 "env_name": "valid",
@@ -72,12 +72,12 @@ from backuper import config
             False,
         ),
         (
-            config.FileBackupTarget,
+            config.FileTargetModel,
             {"abs_path": Path(__file__), "env_name": "valid", "cron_rule": "5 5 * * *"},
             True,
         ),
         (
-            config.FolderBackupTarget,
+            config.FolderTargetModel,
             {
                 "abs_path": Path("/tmp/asdasd/not_existing_asd/folder"),
                 "env_name": "valid",
@@ -86,7 +86,7 @@ from backuper import config
             False,
         ),
         (
-            config.FolderBackupTarget,
+            config.FolderTargetModel,
             {
                 "abs_path": Path(__file__).parent,
                 "env_name": "valid",
@@ -97,7 +97,7 @@ from backuper import config
     ],
 )
 def test_backup_targets(
-    target_cls: type[config.BackupTarget],
+    target_cls: type[config.TargetModel],
     target_params: dict[str, Any],
     valid: bool,
 ) -> None:
@@ -222,10 +222,10 @@ def test_create_backup_targets(
     items_mock = Mock(return_value=env_lst)
     monkeypatch.setattr(os.environ, "items", items_mock)
     if valid:
-        assert config.create_backup_targets()
+        assert config.create_target_models()
     else:
         with pytest.raises(Exception):
-            config.create_backup_targets()
+            config.create_target_models()
 
 
 def test_runtime_configuration_invalid_log_level(

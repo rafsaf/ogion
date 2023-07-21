@@ -43,57 +43,58 @@ def backup_provider() -> BaseBackupProvider:
 
 def backup_targets() -> list[BaseBackupTarget]:
     targets: list[BaseBackupTarget] = []
-    if not config.BACKUP_TARGETS:
+    models = config.create_target_models()
+    if not models:
         raise RuntimeError("Found 0 backup targets, at least 1 is required.")
-    for target in config.BACKUP_TARGETS:
-        if target.type == config.BackupTargetEnum.POSTGRESQL:
+    for target_model in models:
+        if target_model.type == config.BackupTargetEnum.POSTGRESQL:
             log.info(
                 "initializing postgres target, connecting to database: `%s`",
-                target.env_name,
+                target_model.env_name,
             )
-            pg_target = PostgreSQL(**target.model_dump())
+            pg_target = PostgreSQL(**target_model.model_dump())
             targets.append(pg_target)
             log.info(
                 "success initializing postgres target db version is %s: `%s`",
                 pg_target.db_version,
-                target.env_name,
+                target_model.env_name,
             )
-        elif target.type == config.BackupTargetEnum.FILE:
-            log.info("initializing file target: `%s`", target.env_name)
-            targets.append(File(**target.model_dump()))
-            log.info("success initializing file target: `%s`", target.env_name)
-        elif target.type == config.BackupTargetEnum.FOLDER:
-            log.info("initializing folder target: `%s`", target.env_name)
-            targets.append(Folder(**target.model_dump()))
-            log.info("success initializing folder target: `%s`", target.env_name)
-        elif target.type == config.BackupTargetEnum.MYSQL:
+        elif target_model.type == config.BackupTargetEnum.FILE:
+            log.info("initializing file target: `%s`", target_model.env_name)
+            targets.append(File(**target_model.model_dump()))
+            log.info("success initializing file target: `%s`", target_model.env_name)
+        elif target_model.type == config.BackupTargetEnum.FOLDER:
+            log.info("initializing folder target: `%s`", target_model.env_name)
+            targets.append(Folder(**target_model.model_dump()))
+            log.info("success initializing folder target: `%s`", target_model.env_name)
+        elif target_model.type == config.BackupTargetEnum.MYSQL:
             log.info(
                 "initializing mysql target, connecting to database: `%s`",
-                target.env_name,
+                target_model.env_name,
             )
-            mysql_target = MySQL(**target.model_dump())
+            mysql_target = MySQL(**target_model.model_dump())
             targets.append(mysql_target)
             log.info(
                 "success initializing mysql target db version is %s: `%s`",
                 mysql_target.db_version,
-                target.env_name,
+                target_model.env_name,
             )
-        elif target.type == config.BackupTargetEnum.MARIADB:
+        elif target_model.type == config.BackupTargetEnum.MARIADB:
             log.info(
                 "initializing mariadb target, connecting to database: `%s`",
-                target.env_name,
+                target_model.env_name,
             )
-            maria_target = MariaDB(**target.model_dump())
+            maria_target = MariaDB(**target_model.model_dump())
             targets.append(maria_target)
             log.info(
                 "success initializing mariadb target db version is %s: `%s`",
                 maria_target.db_version,
-                target.env_name,
+                target_model.env_name,
             )
         else:  # pragma: no cover
             raise RuntimeError(
                 "panic!!! unsupported backup target",
-                target.model_dump(),
+                target_model.model_dump(),
             )
     return targets
 
