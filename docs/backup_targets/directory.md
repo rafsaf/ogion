@@ -9,14 +9,14 @@ DIRECTORY_SOME_STRING="abs_path=... cron_rule=..."
 !!! note
     *Any variable that starts with "DIRECTORY".* There can be multiple files paths definition for one backuper instance, for example `DIRECTORY_FOO` and `DIRECTORY_BAR`.
 
-## Directory environment variables values
+## Environment variables values
 
 Value of variables must be in format (note **one space** between each block of `key=value`):
 <h3> 
 [key1]=[value1] [key2]=[value2] [key3]=[value3] (...)
 </h3>
 
-### Params
+## Params
 
 - **abs_path=/path/to/your/dir**, *required parameter* (string)
 - **cron_rule=\* \* \* \* \***, cron expression for backups, *required parameter* see [https://crontab.guru/](https://crontab.guru/) for help (string)

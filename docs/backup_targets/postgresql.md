@@ -12,14 +12,14 @@ POSTGRESQL_SOME_STRING="host=... password=... cron_rule=..."
     *Any variable that starts with "POSTGRESQL".* There can be multiple PostgreSQL databases definition for one backuper instance, for example `POSTGRESQL_MY_FOO_POSTGRES_DB1` and `POSTGRESQL_MY_BAR_POSTGRES_DB2`. Supported versions are: 15, 14, 13, 12, 11.
 
 
-## Postgres environment variables values
+## Environment variables values
 
 Value of variables must be in format (note **one space** between each block of `key=value`):
 <h3> 
 [key1]=[value1] [key2]=[value2] [key3]=[value3] (...)
 </h3>
 
-### Params
+## Params
 
 - **password=postgres password**, *required parameter* (string)
 - **cron_rule=\* \* \* \* \***, cron expression for backups, *required parameter* see [https://crontab.guru/](https://crontab.guru/) for help (string)

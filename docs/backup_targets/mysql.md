@@ -9,14 +9,14 @@ MYSQL_SOME_STRING="host=... password=... cron_rule=..."
 !!! note
     *Any variable that starts with "MYSQL".* There can be multiple MySQL databases definition for one backuper instance, for example `MYSQL_FOO_MY_DB1` and `MYSQL_BAR_MY_DB2`. Supported versions are: 8.0, 5.7.
 
-## MySQL environment variables values
+## Environment variables values
 
 Value of variables must be in format (note **one space** between each block of `key=value`):
 <h3> 
 [key1]=[value1] [key2]=[value2] [key3]=[value3] (...)
 </h3>
 
-### Params
+## Params
 
 - **password=mysql password**, *required parameter* (string)
 - **cron_rule=\* \* \* \* \***, cron expression for backups, *required parameter* see [https://crontab.guru/](https://crontab.guru/) for help (string)
