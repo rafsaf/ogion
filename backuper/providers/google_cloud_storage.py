@@ -7,13 +7,13 @@ from pathlib import Path
 import google.cloud.storage as storage
 
 from backuper import config, core
-from backuper.storage_providers import base_provider
+from backuper.providers.base_provider import BaseBackupProvider
 
 log = logging.getLogger(__name__)
 
 
 class GoogleCloudStorage(
-    base_provider.BaseBackupProvider,
+    BaseBackupProvider,
     name=config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE,
 ):
     """Represent GCS bucket for storing backups."""

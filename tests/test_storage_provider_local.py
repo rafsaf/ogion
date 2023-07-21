@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from backuper import config
-from backuper.storage_providers import LocalFiles
+from backuper.providers import LocalFiles
 
 
 @pytest.mark.parametrize("method_name", ["_clean", "safe_clean"])

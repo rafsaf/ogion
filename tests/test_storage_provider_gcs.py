@@ -6,7 +6,7 @@ import google.cloud.storage as storage
 import pytest
 
 from backuper import config
-from backuper.storage_providers import GoogleCloudStorage
+from backuper.providers import GoogleCloudStorage
 
 
 @pytest.fixture(autouse=True)

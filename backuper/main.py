@@ -10,11 +10,7 @@ from typing import NoReturn
 
 from backuper import config, notifications
 from backuper.backup_targets.base_target import BaseBackupTarget
-from backuper.storage_providers import (
-    BaseBackupProvider,
-    GoogleCloudStorage,
-    LocalFiles,
-)
+from backuper.providers import BaseBackupProvider, GoogleCloudStorage, LocalFiles
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)
