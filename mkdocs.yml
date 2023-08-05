@@ -22,6 +22,7 @@ nav:
   - Backuper: index.md
   - Providers:
       - providers/google_cloud_storage.md
+      - providers/debug.md
   - Backup targets:
       - backup_targets/postgresql.md
       - backup_targets/mysql.md

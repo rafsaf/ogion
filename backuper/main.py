@@ -8,20 +8,9 @@ from threading import Thread
 from types import FrameType
 from typing import NoReturn
 
-from backuper import config, notifications
-from backuper.backup_targets import (
-    BaseBackupTarget,
-    File,
-    Folder,
-    MariaDB,
-    MySQL,
-    PostgreSQL,
-)
-from backuper.storage_providers import (
-    BaseBackupProvider,
-    GoogleCloudStorage,
-    LocalFiles,
-)
+from backuper import config, core, notifications
+from backuper.backup_targets.base_target import BaseBackupTarget
+from backuper.providers import BaseBackupProvider
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)
@@ -33,77 +22,59 @@ def quit(sig: int, frame: FrameType | None) -> None:
 
 
 def backup_provider() -> BaseBackupProvider:
-    if config.BACKUP_PROVIDER == config.BackupProviderEnum.LOCAL_FILES:
-        return LocalFiles()
-    elif config.BACKUP_PROVIDER == config.BackupProviderEnum.GOOGLE_CLOUD_STORAGE:
-        return GoogleCloudStorage()
-    else:  # pragma: no cover
-        raise RuntimeError(f"Unknown provider: `{config.BACKUP_PROVIDER}`")
+    backup_provider_map: dict[config.BackupProviderEnum, type[BaseBackupProvider]] = {}
+    for backup_provider in BaseBackupProvider.__subclasses__():
+        backup_provider_map[backup_provider.NAME] = backup_provider  # type: ignore
+
+    provider_model = core.create_provider_model()
+    log.info(
+        "initializing provider: `%s`",
+        provider_model.name,
+    )
+    provider_target_cls = backup_provider_map[provider_model.name]
+    log.debug("initializing %s with %s", provider_target_cls, provider_model)
+    res_backup_provider = provider_target_cls(**provider_model.model_dump())
+    log.info(
+        "success initializing target: `%s`",
+        provider_model.name,
+    )
+    return res_backup_provider
 
 
 def backup_targets() -> list[BaseBackupTarget]:
-    targets: list[BaseBackupTarget] = []
-    if not config.BACKUP_TARGETS:
+    backup_targets_map: dict[config.BackupTargetEnum, type[BaseBackupTarget]] = {}
+    for backup_target in BaseBackupTarget.__subclasses__():
+        backup_targets_map[backup_target.NAME] = backup_target  # type: ignore
+
+    backup_targets: list[BaseBackupTarget] = []
+    target_models = core.create_target_models()
+    if not target_models:
         raise RuntimeError("Found 0 backup targets, at least 1 is required.")
-    for target in config.BACKUP_TARGETS:
-        if target.type == config.BackupTargetEnum.POSTGRESQL:
-            log.info(
-                "initializing postgres target, connecting to database: `%s`",
-                target.env_name,
-            )
-            pg_target = PostgreSQL(**target.model_dump())
-            targets.append(pg_target)
-            log.info(
-                "success initializing postgres target db version is %s: `%s`",
-                pg_target.db_version,
-                target.env_name,
-            )
-        elif target.type == config.BackupTargetEnum.FILE:
-            log.info("initializing file target: `%s`", target.env_name)
-            targets.append(File(**target.model_dump()))
-            log.info("success initializing file target: `%s`", target.env_name)
-        elif target.type == config.BackupTargetEnum.FOLDER:
-            log.info("initializing folder target: `%s`", target.env_name)
-            targets.append(Folder(**target.model_dump()))
-            log.info("success initializing folder target: `%s`", target.env_name)
-        elif target.type == config.BackupTargetEnum.MYSQL:
-            log.info(
-                "initializing mysql target, connecting to database: `%s`",
-                target.env_name,
-            )
-            mysql_target = MySQL(**target.model_dump())
-            targets.append(mysql_target)
-            log.info(
-                "success initializing mysql target db version is %s: `%s`",
-                mysql_target.db_version,
-                target.env_name,
-            )
-        elif target.type == config.BackupTargetEnum.MARIADB:
-            log.info(
-                "initializing mariadb target, connecting to database: `%s`",
-                target.env_name,
-            )
-            maria_target = MariaDB(**target.model_dump())
-            targets.append(maria_target)
-            log.info(
-                "success initializing mariadb target db version is %s: `%s`",
-                maria_target.db_version,
-                target.env_name,
-            )
-        else:  # pragma: no cover
-            raise RuntimeError(
-                "panic!!! unsupported backup target",
-                target.model_dump(),
-            )
-    return targets
+
+    log.info("initializating %s backup targets", len(target_models))
+
+    for target_model in target_models:
+        log.info(
+            "initializing target: `%s`",
+            target_model.env_name,
+        )
+        backup_target_cls = backup_targets_map[target_model.target_type]
+        log.debug("initializing %s with %s", backup_target_cls, target_model)
+        backup_targets.append(backup_target_cls(**target_model.model_dump()))
+        log.info(
+            "success initializing target: `%s`",
+            target_model.env_name,
+        )
+
+    return backup_targets
 
 
 def shutdown() -> NoReturn:
-    timeout_secs = config.BACKUPER_SIGTERM_TIMEOUT_SECS
+    timeout_secs = config.SIGTERM_TIMEOUT_SECS
     start = time.time()
     deadline = start + timeout_secs
     log.info(
-        "start backuper shutdown, force exit after BACKUPER_SIGTERM_TIMEOUT_SECS=%ss, "
+        "start backuper shutdown, force exit after SIGTERM_TIMEOUT_SECS=%ss, "
         "use this environment to control it.",
         timeout_secs,
     )
@@ -135,7 +106,7 @@ def shutdown() -> NoReturn:
     else:
         log.warning(
             "noooo, exiting! i am now killing myself with %d daemon threads force killed. "
-            "you can extend this time using environment BACKUPER_SIGTERM_TIMEOUT_SECS.",
+            "you can extend this time using environment SIGTERM_TIMEOUT_SECS.",
             threading.active_count() - 1,
         )
         sys.exit(1)
@@ -168,26 +139,27 @@ def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider) -> None:
             backup_file=backup_file,
         )
     log.info(
-        "next planned backup of target `%s` is: %s",
+        "backup finished, next backup of target `%s` is: %s",
         target.env_name,
         target.next_backup_time,
     )
 
 
-def setup_runtime_arguments() -> None:
+def setup_runtime_arguments() -> bool:
     parser = argparse.ArgumentParser(description="Backuper program")
     parser.add_argument(
         "-s", "--single", action="store_true", help="Only single backup then exit"
     )
     args = parser.parse_args()
-    config.RUNTIME_SINGLE = args.single
+    single: bool = args.single
+    return single
 
 
 def main() -> NoReturn:
     signal.signal(signalnum=signal.SIGINT, handler=quit)
     signal.signal(signalnum=signal.SIGTERM, handler=quit)
 
-    setup_runtime_arguments()
+    single_run = setup_runtime_arguments()
 
     provider = backup_provider()
     targets = backup_targets()
@@ -195,7 +167,7 @@ def main() -> NoReturn:
     i = 0
     while not exit_event.is_set():
         for target in targets:
-            if target.next_backup() or config.RUNTIME_SINGLE:
+            if target.next_backup() or single_run:
                 i += 1
                 backup_thread = Thread(
                     target=run_backup,
@@ -205,7 +177,7 @@ def main() -> NoReturn:
                 )
                 backup_thread.start()
                 exit_event.wait(0.5)
-        if config.RUNTIME_SINGLE:
+        if single_run:
             exit_event.set()
         exit_event.wait(5)
 

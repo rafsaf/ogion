@@ -5,6 +5,7 @@ from freezegun import freeze_time
 
 from backuper import config, core
 from backuper.backup_targets import MariaDB
+from backuper.models.target_models import MariaDBTargetModel
 
 from .conftest import (
     ALL_MARIADB_DBS_TARGETS,
@@ -14,14 +15,14 @@ from .conftest import (
 
 
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
-def test_mariadb_connection_success(mariadb_target: config.MariaDBBackupTarget) -> None:
+def test_mariadb_connection_success(mariadb_target: MariaDBTargetModel) -> None:
     db = MariaDB(**mariadb_target.model_dump())
     assert db.db_version == DB_VERSION_BY_ENV_VAR[mariadb_target.env_name]
 
 
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
 def test_mariadb_connection_fail(
-    mariadb_target: config.MariaDBBackupTarget,
+    mariadb_target: MariaDBTargetModel,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     with pytest.raises(SystemExit) as system_exit:
@@ -35,7 +36,7 @@ def test_mariadb_connection_fail(
 @freeze_time("2022-12-11")
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
 def test_run_mariadb_dump(
-    mariadb_target: config.MariaDBBackupTarget,
+    mariadb_target: MariaDBTargetModel,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     mock = Mock(return_value="fixed_dbname")

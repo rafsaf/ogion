@@ -5,6 +5,7 @@ from freezegun import freeze_time
 
 from backuper import config, core
 from backuper.backup_targets import PostgreSQL
+from backuper.models.target_models import PostgreSQLTargetModel
 
 from .conftest import (
     ALL_POSTGRES_DBS_TARGETS,
@@ -15,7 +16,7 @@ from .conftest import (
 
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
 def test_postgres_connection_success(
-    postgres_target: config.PostgreSQLBackupTarget,
+    postgres_target: PostgreSQLTargetModel,
 ) -> None:
     db = PostgreSQL(**postgres_target.model_dump())
     assert db.db_version == DB_VERSION_BY_ENV_VAR[postgres_target.env_name]
@@ -23,7 +24,7 @@ def test_postgres_connection_success(
 
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
 def test_postgres_connection_fail(
-    postgres_target: config.PostgreSQLBackupTarget,
+    postgres_target: PostgreSQLTargetModel,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     with pytest.raises(SystemExit) as system_exit:
@@ -37,7 +38,7 @@ def test_postgres_connection_fail(
 @freeze_time("2022-12-11")
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
 def test_run_pg_dump(
-    postgres_target: config.PostgreSQLBackupTarget,
+    postgres_target: PostgreSQLTargetModel,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     mock = Mock(return_value="fixed_dbname")

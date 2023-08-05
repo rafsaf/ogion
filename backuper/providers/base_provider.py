@@ -3,13 +3,15 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import final
 
+from backuper import config
+
 log = logging.getLogger(__name__)
 
 
 class BaseBackupProvider(ABC):
-    NAME = "provider"
+    NAME: config.BackupProviderEnum
 
-    def __init_subclass__(cls, name: str) -> None:
+    def __init_subclass__(cls, name: config.BackupProviderEnum) -> None:
         cls.NAME = name
         super().__init_subclass__()
 

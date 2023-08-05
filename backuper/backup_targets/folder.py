@@ -1,13 +1,13 @@
 import logging
 from pathlib import Path
 
-from backuper import core
+from backuper import config, core
 from backuper.backup_targets.base_target import BaseBackupTarget
 
 log = logging.getLogger(__name__)
 
 
-class Folder(BaseBackupTarget):
+class Folder(BaseBackupTarget, target_model_name=config.BackupTargetEnum.FOLDER):
     def __init__(
         self,
         abs_path: Path,

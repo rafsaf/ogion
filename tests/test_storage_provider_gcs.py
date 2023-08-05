@@ -6,7 +6,7 @@ import google.cloud.storage as storage
 import pytest
 
 from backuper import config
-from backuper.storage_providers import GoogleCloudStorage
+from backuper.providers import GoogleCloudStorage
 
 
 @pytest.fixture(autouse=True)
@@ -19,7 +19,11 @@ def test_gcs_safe_post_fail_gracefully_on_fail_upload(
 ) -> None:
     sleep_mock = Mock()
     monkeypatch.setattr(time, "sleep", sleep_mock)
-    gcs = GoogleCloudStorage()
+    gcs = GoogleCloudStorage(
+        bucket_name="name",
+        bucket_upload_path="test",
+        service_account_base64="Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
+    )
     bucket_mock = Mock()
     single_blob_mock = Mock()
     single_blob_mock.upload_from_filename.side_effect = ValueError()
@@ -41,7 +45,11 @@ def test_gcs_post_save_runtime_error_on_fail_upload(
 ) -> None:
     sleep_mock = Mock()
     monkeypatch.setattr(time, "sleep", sleep_mock)
-    gcs = GoogleCloudStorage()
+    gcs = GoogleCloudStorage(
+        bucket_name="name",
+        bucket_upload_path="test",
+        service_account_base64="Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
+    )
     bucket_mock = Mock()
     single_blob_mock = Mock()
     single_blob_mock.upload_from_filename.side_effect = ValueError()
@@ -62,7 +70,11 @@ def test_gcs_post_save_runtime_error_on_fail_upload(
 def test_gcs_post_save_with_google_bucket_upload_path(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
 ) -> None:
-    gcs = GoogleCloudStorage()
+    gcs = GoogleCloudStorage(
+        bucket_name="name",
+        bucket_upload_path="test",
+        service_account_base64="Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
+    )
     bucket_mock = Mock()
 
     single_blob_mock = Mock()
@@ -76,7 +88,7 @@ def test_gcs_post_save_with_google_bucket_upload_path(
     with open(fake_backup_file_path, "w") as f:
         f.write("abcdefghijk\n12345")
 
-    monkeypatch.setattr(config, "GOOGLE_BUCKET_UPLOAD_PATH", "test123")
+    monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
     assert (
         getattr(gcs, gcs_method_name)(fake_backup_file_path)
         == "test123/fake_env_name/fake_backup.zip"
@@ -115,7 +127,11 @@ list_blobs_long_no_upload_path: list[BlobInCloudStorage] = [
 def test_gcs_clean_file_and_short_blob_list(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
 ) -> None:
-    gcs = GoogleCloudStorage()
+    gcs = GoogleCloudStorage(
+        bucket_name="name",
+        bucket_upload_path="test",
+        service_account_base64="Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
+    )
 
     bucket_mock = Mock()
     storage_client_mock = Mock()
@@ -134,7 +150,7 @@ def test_gcs_clean_file_and_short_blob_list(
     fake_backup_file_zip_path2 = fake_backup_dir_path / "fake_backup2.zip"
     fake_backup_file_zip_path2.touch()
 
-    monkeypatch.setattr(config, "GOOGLE_BUCKET_UPLOAD_PATH", "test123")
+    monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
     monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 2)
 
     getattr(gcs, gcs_method_name)(fake_backup_file_zip_path)
@@ -152,7 +168,11 @@ def test_gcs_clean_file_and_short_blob_list(
 def test_gcs_clean_directory_and_long_blob_list(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
 ) -> None:
-    gcs = GoogleCloudStorage()
+    gcs = GoogleCloudStorage(
+        bucket_name="name",
+        bucket_upload_path="test",
+        service_account_base64="Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
+    )
 
     bucket_mock = Mock()
     storage_client_mock = Mock()
@@ -177,7 +197,7 @@ def test_gcs_clean_directory_and_long_blob_list(
     fake_backup_file_zip_path4 = fake_backup_dir_path2 / "fake_backup2.zip"
     fake_backup_file_zip_path4.touch()
 
-    monkeypatch.setattr(config, "GOOGLE_BUCKET_UPLOAD_PATH", None)
+    monkeypatch.setattr(gcs, "bucket_upload_path", None)
     monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 2)
 
     getattr(gcs, gcs_method_name)(fake_backup_dir_path)

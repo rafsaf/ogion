@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 from freezegun import freeze_time
@@ -59,7 +61,7 @@ def test_get_new_backup_path_sql(caplog: LogCaptureFixture) -> None:
     assert caplog.messages == []
 
 
-def test_run_create_zip_archive(tmp_path: Path, caplog: LogCaptureFixture) -> None:
+def test_run_create_zip_archive(tmp_path: Path) -> None:
     fake_backup_file = tmp_path / "fake_backup"
     with open(fake_backup_file, "w") as f:
         f.write("abcdefghijk\n12345")
@@ -67,29 +69,123 @@ def test_run_create_zip_archive(tmp_path: Path, caplog: LogCaptureFixture) -> No
     fake_backup_file_out = core.run_create_zip_archive(fake_backup_file)
     assert fake_backup_file_out == tmp_path / "fake_backup.zip"
     assert fake_backup_file_out.exists()
-    assert (
-        caplog.messages[0]
-        == f"run_create_zip_archive start creating in subprocess: {fake_backup_file}"
-    )
-    assert "run_subprocess running:" in caplog.messages[1]
-    assert caplog.messages[2] == "run_subprocess finished with status 0"
-    assert f"Creating archive: {fake_backup_file}.zip" in caplog.messages[3]
-    assert "Everything is Ok" in caplog.messages[3]
-    assert caplog.messages[4] == "run_subprocess stderr: "
-    assert (
-        caplog.messages[5]
-        == f"run_create_zip_archive finished, output: {fake_backup_file_out}"
-    )
-    assert (
-        caplog.messages[6]
-        == f"run_create_zip_archive start integriy test in subprocess: {fake_backup_file_out}"
-    )
-    assert "run_subprocess running:" in caplog.messages[7]
-    assert "run_subprocess finished with status 0" in caplog.messages[8]
-    assert f"Testing archive: {fake_backup_file_out}" in caplog.messages[9]
-    assert "Everything is Ok" in caplog.messages[9]
-    assert "run_subprocess stderr:" in caplog.messages[10]
-    assert (
-        f"run_create_zip_archive finish integriy test in subprocess: {fake_backup_file_out}"
-        == caplog.messages[11]
-    )
+
+
+@pytest.mark.parametrize(
+    "env_lst,valid",
+    [
+        (
+            [
+                (
+                    "POSTGRESQL_FIRST_DB",
+                    "host=localhost port=5432 password=secret cron_rule=* * * * *",
+                ),
+                (
+                    "MYSQL_FIRST_DB",
+                    "host=localhost port=3306 password=secret cron_rule=* * * * *",
+                ),
+            ],
+            True,
+        ),
+        (
+            [
+                (
+                    "MYSQL_SECOND_DB",
+                    "host=10.0.0.1 port=3306 user=foo password=change_me! db=bar cron_rule=0 5 * * *",
+                )
+            ],
+            True,
+        ),
+        (
+            [
+                (
+                    "MARIADB_THIRD_DB",
+                    "host=192.168.1.5 port=3306 user=root password=change_me_please! db=project cron_rule=15 */3 * * * max_backups=20",
+                )
+            ],
+            True,
+        ),
+        (
+            [
+                (
+                    "SINGLEFILE_THIRD",
+                    f"abs_path={Path(__file__)} cron_rule=15 */3 * * * max_backups=20",
+                )
+            ],
+            True,
+        ),
+        (
+            [
+                (
+                    "DIRECTORY_FIRST",
+                    f"abs_path={Path(__file__).parent} cron_rule=15 */3 * * * max_backups=20",
+                )
+            ],
+            True,
+        ),
+        (
+            [
+                (
+                    "POSTGRESQL_FIRST_DB",
+                    "host=localhostport=5432 password=secret cron_rule=* * * * *",
+                ),
+            ],
+            True,
+        ),
+        (
+            [
+                (
+                    "POSTGRESQL_FIRST_DB",
+                    "host=localhost port=axxx password=secret cron_rule=* * * * *",
+                ),
+            ],
+            False,
+        ),
+        (
+            [
+                (
+                    "POSTGRESQL_FIRST_DB",
+                    "host=localhost port=111 passwor=secret cron_rule=* * * * *",
+                ),
+            ],
+            False,
+        ),
+        (
+            [
+                (
+                    "POSTGRESQL_FIRST_DB",
+                    "host=localhost port=111 password=secret cron_rule=* ** * *",
+                ),
+            ],
+            False,
+        ),
+        (
+            [
+                (
+                    "POSTGRESQL_FIRST_DB",
+                    "host=localhost port=5432 password=secretcron_rule=* * * * *",
+                ),
+            ],
+            False,
+        ),
+        (
+            [
+                (
+                    "POSTGRESQL_FIRST_DB",
+                    "host=localhost port5432 password=secret cron_rule=* * * * *",
+                ),
+            ],
+            True,
+        ),
+    ],
+)
+def test_create_backup_targets(
+    env_lst: list[tuple[str, str]], valid: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    items_mock = Mock(return_value=env_lst)
+    monkeypatch.setattr(os.environ, "items", items_mock)
+    if valid:
+        assert core.create_target_models()
+    else:
+        with pytest.raises(Exception):
+            core.create_target_models()

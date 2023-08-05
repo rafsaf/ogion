@@ -15,7 +15,9 @@ log = logging.getLogger(__name__)
 VERSION_REGEX = re.compile(r"PostgreSQL \d*\.\d* ")
 
 
-class PostgreSQL(BaseBackupTarget):
+class PostgreSQL(
+    BaseBackupTarget, target_model_name=config.BackupTargetEnum.POSTGRESQL
+):
     # https://www.postgresql.org/docs/current/app-pgdump.html
     # https://www.postgresql.org/docs/current/app-psql.html
 
@@ -81,15 +83,26 @@ class PostgreSQL(BaseBackupTarget):
         return escaped_uri
 
     def _postgres_connection(self) -> str:
-        log.debug("postgres_connection start postgres connection")
-
+        try:
+            log.debug("check psql installation")
+            psql_version = core.run_subprocess("psql -V")
+            log.debug("output: %s", psql_version)
+        except core.CoreSubprocessError as version_err:  # pragma: no cover
+            log.critical(
+                "psql postgres client is not detected on your system (%s)\n"
+                "check out ready script: "
+                "https://github.com/rafsaf/backuper/blob/main/scripts/install_postgresql_client.sh",
+                version_err,
+            )
+            sys.exit(1)
+        log.debug("start postgres connection")
         try:
             result = core.run_subprocess(
                 f"psql -d {self.escaped_conn_uri} -w --command 'SELECT version();'",
             )
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
-            log.error("postgres_connection unable to connect to database, exiting")
+            log.error("unable to connect to database, exiting")
             sys.exit(1)
 
         version = None
@@ -104,7 +117,7 @@ class PostgreSQL(BaseBackupTarget):
                 result,
             )
             sys.exit(1)
-        log.debug("postgres_connection calculated version: %s", version)
+        log.info("postgres_connection calculated version: %s", version)
         return version
 
     def _backup(self) -> Path:
