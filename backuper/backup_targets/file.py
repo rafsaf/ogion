@@ -6,8 +6,6 @@ from backuper.backup_targets.base_target import BaseBackupTarget
 
 log = logging.getLogger(__name__)
 
-config.BackupTargetEnum.FILE
-
 
 class File(BaseBackupTarget, target_model_name=config.BackupTargetEnum.FILE):
     def __init__(

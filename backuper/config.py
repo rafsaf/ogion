@@ -29,7 +29,7 @@ class BackupTargetEnum(StrEnum):
 
 
 CONST_ENV_NAME_REGEX = re.compile(r"^[A-Za-z_0-9]{1,}$")
-CONST_ZIP_BIN_7ZZ_PATH: Path = BASE_DIR / "bin/7zz"
+CONST_BIN_ZIP_PATH: Path = BASE_DIR / "bin/7zip"
 CONST_BACKUP_FOLDER_PATH: Path = BASE_DIR / "data"
 CONST_GOOGLE_SERVICE_ACCOUNT_PATH: Path = BASE_DIR / "google_auth.json"
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o744, parents=True, exist_ok=True)
@@ -44,11 +44,6 @@ ZIP_ARCHIVE_LEVEL: int = int(os.environ.get("ZIP_ARCHIVE_LEVEL", 3))
 BACKUP_MAX_NUMBER: int = int(os.environ.get("BACKUP_MAX_NUMBER", 7))
 DISCORD_SUCCESS_WEBHOOK_URL: str = os.environ.get("DISCORD_SUCCESS_WEBHOOK_URL", "")
 DISCORD_FAIL_WEBHOOK_URL: str = os.environ.get("DISCORD_FAIL_WEBHOOK_URL", "")
-
-if not CONST_ZIP_BIN_7ZZ_PATH.exists():  # pragma: no cover
-    raise RuntimeError(
-        f"`{CONST_ZIP_BIN_7ZZ_PATH}` binary does not exists, did you forget to create it?"
-    )
 
 
 def logging_config(log_level: str) -> None:

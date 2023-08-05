@@ -62,20 +62,19 @@ def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
 
 
 def run_create_zip_archive(backup_file: Path) -> Path:
+    seven_zip_path = seven_zip_bin_path()
     out_file = Path(f"{backup_file}.zip")
     log.debug("run_create_zip_archive start creating in subprocess: %s", backup_file)
     zip_escaped_password = shlex.quote(config.ZIP_ARCHIVE_PASSWORD)
     shell_args_create = (
-        f"{config.CONST_ZIP_BIN_7ZZ_PATH} a -p{zip_escaped_password} "
+        f"{seven_zip_path} a -p{zip_escaped_password} "
         f"-mx={config.ZIP_ARCHIVE_LEVEL} {out_file} {backup_file}"
     )
     run_subprocess(shell_args_create)
     log.debug("run_create_zip_archive finished, output: %s", out_file)
 
     log.debug("run_create_zip_archive start integriy test in subprocess: %s", out_file)
-    shell_args_integriy = (
-        f"{config.CONST_ZIP_BIN_7ZZ_PATH} t -p{zip_escaped_password} {out_file}"
-    )
+    shell_args_integriy = f"{seven_zip_path} t -p{zip_escaped_password} {out_file}"
     integrity_check_result = run_subprocess(shell_args_integriy)
     if "Everything is Ok" not in integrity_check_result:  # pragma: no cover
         raise AssertionError("zip arichive integrity fatal error")
@@ -158,3 +157,14 @@ def create_provider_model() -> ProviderModel:
     )
     target_model_cls = target_map[base_provider.name]
     return _validate_model("backup_provider", config.BACKUP_PROVIDER, target_model_cls)
+
+
+def seven_zip_bin_path() -> Path:
+    shell_args_cpu_architecture = "dpkg --print-architecture"
+    cpu_arch = run_subprocess(shell_args_cpu_architecture).strip()
+    seven_zip = config.CONST_BIN_ZIP_PATH / f"{cpu_arch}/7zz"
+    if not seven_zip.exists():  # pragma: no cover
+        raise RuntimeError(
+            f"unsuported architecture {cpu_arch}, 7zip not found at {seven_zip}"
+        )
+    return seven_zip

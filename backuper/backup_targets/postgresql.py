@@ -83,15 +83,26 @@ class PostgreSQL(
         return escaped_uri
 
     def _postgres_connection(self) -> str:
-        log.debug("postgres_connection start postgres connection")
-
+        try:
+            log.debug("check psql installation")
+            psql_version = core.run_subprocess("psql -V")
+            log.debug("output: %s", psql_version)
+        except core.CoreSubprocessError as version_err:  # pragma: no cover
+            log.critical(
+                "psql postgres client is not detected on your system (%s)\n"
+                "check out ready script: "
+                "https://github.com/rafsaf/backuper/blob/main/scripts/install_postgresql_client.sh",
+                version_err,
+            )
+            sys.exit(1)
+        log.debug("start postgres connection")
         try:
             result = core.run_subprocess(
                 f"psql -d {self.escaped_conn_uri} -w --command 'SELECT version();'",
             )
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
-            log.error("postgres_connection unable to connect to database, exiting")
+            log.error("unable to connect to database, exiting")
             sys.exit(1)
 
         version = None

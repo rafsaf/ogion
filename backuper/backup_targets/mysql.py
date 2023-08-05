@@ -63,8 +63,19 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
         return path
 
     def _mysql_connection(self) -> str:
-        log.debug("mysql_connection start mysql connection")
-
+        try:
+            log.debug("check mysql installation")
+            mysql_version = core.run_subprocess("mysql -V")
+            log.debug("output: %s", mysql_version)
+        except core.CoreSubprocessError as version_err:  # pragma: no cover
+            log.critical(
+                "mysql client is not detected on your system (%s)\n"
+                "check out ready script: "
+                "https://github.com/rafsaf/backuper/blob/main/scripts/install_mariadb_mysql_client.sh",
+                version_err,
+            )
+            sys.exit(1)
+        log.debug("start mysql connection")
         try:
             db = shlex.quote(self.db)
             result = core.run_subprocess(
@@ -73,7 +84,7 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
             )
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
-            log.error("mysql_connection unable to connect to database, exiting")
+            log.error("unable to connect to database, exiting")
             sys.exit(1)
 
         version = None
