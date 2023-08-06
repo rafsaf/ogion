@@ -5,7 +5,14 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
-
+    groups:
+      dev-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "croniter"
+          - "google-cloud-storage"
+          - "pydantic"
   - package-ecosystem: github-actions
     directory: /
     schedule:
