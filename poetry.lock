@@ -1847,13 +1847,13 @@ files = [
 
 [[package]]
 name = "types-google-cloud-ndb"
-version = "2.1.0.7"
+version = "2.2.0.0"
 description = "Typing stubs for google-cloud-ndb"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-google-cloud-ndb-2.1.0.7.tar.gz", hash = "sha256:e1bd67557515be622d292f33b997b519ec7598d9ef78fd5c1180c75251b1f899"},
-    {file = "types_google_cloud_ndb-2.1.0.7-py3-none-any.whl", hash = "sha256:cc7d017fd9e62aad54a25bc4341f89d0ec4fd38f55cb01116efc3c1af17b0032"},
+    {file = "types-google-cloud-ndb-2.2.0.0.tar.gz", hash = "sha256:1485074019e4ffaf1900e185e5fc861f8f7bd99fb0c6390c040271a2327092b3"},
+    {file = "types_google_cloud_ndb-2.2.0.0-py3-none-any.whl", hash = "sha256:027025dd593aa26a6505c1be7ff42f4acb70580f1a07f4030fb77a3d1869e83d"},
 ]
 
 [[package]]
@@ -2016,4 +2016,4 @@ anyio = ">=3.0.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "7df9617ed3fd911e447cc553c8e1452a1d736ec653519ac1fa769209f950e834"
+content-hash = "6194d383ac780c0d1353c3a573c16815ca7e929285933a2a322911e2c1fb6d64"
