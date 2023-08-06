@@ -71,7 +71,7 @@ class MariaDBTargetModel(TargetModel):
 class SingleFileTargetModel(TargetModel):
     abs_path: Path
 
-    @model_validator(mode="after")  # type: ignore [arg-type]
+    @model_validator(mode="after")
     def abs_path_is_valid(self) -> Self:
         if not self.abs_path.is_file() or not self.abs_path.exists():
             raise ValueError(
@@ -84,7 +84,7 @@ class SingleFileTargetModel(TargetModel):
 class DirectoryTargetModel(TargetModel):
     abs_path: Path
 
-    @model_validator(mode="after")  # type: ignore [arg-type]
+    @model_validator(mode="after")
     def abs_path_is_valid(self) -> Self:
         if not self.abs_path.is_dir() or not self.abs_path.exists():
             raise ValueError(
