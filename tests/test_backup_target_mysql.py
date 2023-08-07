@@ -21,12 +21,10 @@ def test_mysql_connection_fail(
     mysql_target: MySQLTargetModel,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with pytest.raises(SystemExit) as system_exit:
+    with pytest.raises(core.CoreSubprocessError):
         # simulate not existing db port 9999 and connection err
         monkeypatch.setattr(mysql_target, "port", 9999)
         MySQL(**mysql_target.model_dump())
-    assert system_exit.type == SystemExit
-    assert system_exit.value.code == 1
 
 
 @freeze_time("2022-12-11")

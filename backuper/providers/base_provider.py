@@ -16,12 +16,12 @@ class BaseBackupProvider(ABC):
         super().__init_subclass__()
 
     @final
-    def safe_post_save(self, backup_file: Path) -> str | None:
+    def post_save(self, backup_file: Path) -> str | None:
         try:
             return self._post_save(backup_file=backup_file)
         except Exception as err:
             log.error(err, exc_info=True)
-            return None
+            raise
 
     @final
     def safe_clean(self, backup_file: Path) -> None:
