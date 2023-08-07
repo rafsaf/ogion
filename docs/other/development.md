@@ -12,18 +12,14 @@ General knowledge of Git, Python and Docker is assumed.
 ## Setup steps
 
 1. Install python dependencies
-   
+
     `poetry install`
 
 2. Create `.env` file
-   
+
     `cp .env.example .env`
 
-3. To test it locally, you will need mariadb-client and postgresql-client installed and copied good version of 7zip (arm64 or amd64) from bin folder, there is dedicated script that does that:
-
-    `./scripts/install_apt_libs_and_7zip.sh`
-
-    **Be careful with it as it will make changes to your system.**
+3. To run database backups, you will need mariadb-client and postgresql-client installed and copied good version of 7zip (arm64 or amd64) from bin folder, there are dedicated scripts in folder `script` that does that.
 
 4. Setup databases
 
