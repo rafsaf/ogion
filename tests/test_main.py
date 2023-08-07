@@ -7,7 +7,7 @@ from unittest.mock import Mock
 import google.cloud.storage as storage
 import pytest
 
-from backuper import config, core, main, notifications
+from backuper import config, core, main
 
 from .conftest import FILE_1, FOLDER_1, MARIADB_1011, MYSQL_80, POSTGRES_15
 
@@ -130,15 +130,8 @@ def test_run_backup_fail_message_when_no_backup_file(
     monkeypatch.setattr(target, "_backup", Mock(side_effect=ValueError()))
     provider_mock = Mock()
     provider_mock.NAME = "xxx"
-    send_fail_message_mock = Mock(return_value=None)
-    monkeypatch.setattr(notifications, "send_fail_message", send_fail_message_mock)
-    main.run_backup(target=target, provider=provider_mock)
-    send_fail_message_mock.assert_called_once_with(
-        reason=notifications.FAIL_REASON.BACKUP_CREATE,
-        env_name=target.env_name,
-        provider_name="xxx",
-        backup_file=None,
-    )
+    with pytest.raises(ValueError):
+        main.run_backup(target=target, provider=provider_mock)
 
 
 def test_run_backup_fail_message_when_upload_fail(
@@ -156,15 +149,7 @@ def test_run_backup_fail_message_when_upload_fail(
     provider_mock = Mock()
     provider_mock.NAME = "xxx"
     provider_mock.post_save.return_value = None
-    send_fail_message_mock = Mock(return_value=None)
-    monkeypatch.setattr(notifications, "send_fail_message", send_fail_message_mock)
     main.run_backup(target=target, provider=provider_mock)
-    send_fail_message_mock.assert_called_once_with(
-        reason=notifications.FAIL_REASON.UPLOAD,
-        env_name=target.env_name,
-        provider_name="xxx",
-        backup_file=backup_file,
-    )
 
 
 def test_quit(monkeypatch: pytest.MonkeyPatch) -> None:

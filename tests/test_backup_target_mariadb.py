@@ -25,12 +25,10 @@ def test_mariadb_connection_fail(
     mariadb_target: MariaDBTargetModel,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    with pytest.raises(SystemExit) as system_exit:
+    with pytest.raises(core.CoreSubprocessError):
         # simulate not existing db port 9999 and connection err
         monkeypatch.setattr(mariadb_target, "port", 9999)
         MariaDB(**mariadb_target.model_dump())
-    assert system_exit.type == SystemExit
-    assert system_exit.value.code == 1
 
 
 @freeze_time("2022-12-11")

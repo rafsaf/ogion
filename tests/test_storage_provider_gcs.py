@@ -33,7 +33,9 @@ def test_gcs_safe_post_fail_gracefully_on_fail_upload(
     fake_backup_file_path = tmp_path / "fake_backup"
     fake_backup_file_path.touch()
 
-    assert gcs.post_save(fake_backup_file_path) is None
+    with pytest.raises(RuntimeError):
+        gcs.post_save(fake_backup_file_path)
+
     sleep_mock.assert_any_call(1)
     sleep_mock.assert_any_call(2)
     sleep_mock.assert_any_call(4)

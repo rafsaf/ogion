@@ -60,6 +60,9 @@ class NotificationsContext(ContextDecorator):
         return msg
 
     def _send_discord(self, message: str, webhook_url: str) -> None:
+        if not webhook_url:
+            log.debug("skip sending discord notification, no webhook url")
+            return None
         try:
             discord_resp = requests.post(
                 webhook_url,
@@ -72,7 +75,7 @@ class NotificationsContext(ContextDecorator):
         except Exception as err:
             log.error("fatal error send_discord %s: %s", message, err)
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         log.debug("start Notifications context: %s, %s", self.step_name, self.env_name)
 
     def __exit__(
@@ -86,14 +89,12 @@ class NotificationsContext(ContextDecorator):
             log.error("step %s failed, sending notifications", self.step_name)
             fail_message = self._fail_message(traceback=tb)
             log.debug("fail message: %s", fail_message)
-            if config.DISCORD_FAIL_WEBHOOK_URL:
-                self._send_discord(
-                    message=fail_message, webhook_url=config.DISCORD_FAIL_WEBHOOK_URL
-                )
+            self._send_discord(
+                message=fail_message, webhook_url=config.DISCORD_FAIL_WEBHOOK_URL
+            )
         elif self.send_on_success:
             sucess_message = self._success_message()
-            if config.DISCORD_SUCCESS_WEBHOOK_URL:
-                self._send_discord(
-                    message=sucess_message,
-                    webhook_url=config.DISCORD_SUCCESS_WEBHOOK_URL,
-                )
+            self._send_discord(
+                message=sucess_message,
+                webhook_url=config.DISCORD_SUCCESS_WEBHOOK_URL,
+            )

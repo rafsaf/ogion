@@ -4,26 +4,34 @@ from typing import Any
 import pytest
 import responses
 from freezegun import freeze_time
+from unittest.mock import Mock
 
-from backuper import config, notifications
+from backuper import config
+from backuper.notifications import NotificationsContext, PROGRAM_STEP, _formated_now
 
 discord_webhook_url = "https://discord.com/api/webhooks/12345/token"
 
 
 @freeze_time("2023-04-27 21:08:05")
 def test_formated_now() -> None:
-    assert notifications._formated_now() == "2023-04-27 21:08:05,000000 UTC"
+    assert _formated_now() == "2023-04-27 21:08:05,000000 UTC"
 
 
 @pytest.mark.parametrize(
     "res_kwargs",
     [
+        None,
         {
             "method": responses.POST,
             "url": discord_webhook_url,
             "status": 204,
             "content_type": "text/plain",
             "body": "",
+        },
+        {
+            "method": responses.POST,
+            "url": discord_webhook_url,
+            "body": Exception("fail"),
         },
         {
             "method": responses.POST,
@@ -41,74 +49,80 @@ def test_formated_now() -> None:
         },
     ],
 )
-def test_notifications_pass(
-    res_kwargs: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+def test_send_discord_always_none_without_exceptions(
+    res_kwargs: dict[str, Any]
 ) -> None:
     with responses.RequestsMock() as rsps:
-        rsps.add(**res_kwargs)
-
-        monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", discord_webhook_url)
-        monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", discord_webhook_url)
-
-        notifications.send_on_success(
-            env_name="env_name",
-            provider_name="provider_name",
-            upload_path="/upload/path",
-        )
-        notifications.send_fail_message(
-            env_name="env_name",
-            provider_name="provider_name",
-            backup_file=Path("/upload/path"),
-            reason=notifications.FAIL_REASON.BACKUP_CREATE,
-        )
-        notifications.send_fail_message(
-            env_name="env_name",
-            provider_name="provider_name",
-            backup_file=Path("/upload/path"),
-            reason=notifications.FAIL_REASON.UPLOAD,
-        )
-        monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", None)
-        monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", None)
-
-        notifications.send_on_success(
-            env_name="env_name",
-            provider_name="provider_name",
-            upload_path="/upload/path",
-        )
-        notifications.send_fail_message(
-            env_name="env_name",
-            provider_name="provider_name",
-            backup_file=Path("/upload/path"),
-            reason=notifications.FAIL_REASON.BACKUP_CREATE,
-        )
-        notifications.send_fail_message(
-            env_name="env_name",
-            provider_name="provider_name",
-            backup_file=Path("/upload/path"),
-            reason=notifications.FAIL_REASON.UPLOAD,
-        )
+        if res_kwargs:
+            rsps.add(**res_kwargs)
+            webhook_url = res_kwargs["url"]
+        else:
+            webhook_url = ""
+        nc = NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
+        assert nc._send_discord("text", webhook_url) is None
 
 
-def test_notifications_pass_on_connection_errors(
+@pytest.mark.parametrize(
+    "step_name,env_name,send_on_success,exception_text_length",
+    [
+        (PROGRAM_STEP.BACKUP_CREATE, None, True, 5),
+        (PROGRAM_STEP.BACKUP_CREATE, None, False, 5),
+        (PROGRAM_STEP.SETUP_PROVIDER, "test", False, 500),
+        (PROGRAM_STEP.SETUP_TARGETS, "test", True, 5000),
+    ],
+)
+def test_notifications_context_send_valid_notifications_on_function_fail(
     monkeypatch: pytest.MonkeyPatch,
+    step_name: PROGRAM_STEP,
+    env_name: str,
+    send_on_success: bool,
+    exception_text_length: int,
 ) -> None:
-    monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", discord_webhook_url)
-    monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", discord_webhook_url)
+    send_discord_mock = Mock(return_value=None)
+    monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", "https://fail")
+    monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", "https://success")
+    monkeypatch.setattr(NotificationsContext, "_send_discord", send_discord_mock)
 
-    notifications.send_on_success(
-        env_name="env_name",
-        provider_name="provider_name",
-        upload_path="/upload/path",
+    @NotificationsContext(
+        step_name=step_name, env_name=env_name, send_on_success=send_on_success
     )
-    notifications.send_fail_message(
-        env_name="env_name",
-        provider_name="provider_name",
-        backup_file=Path("/upload/path"),
-        reason=notifications.FAIL_REASON.BACKUP_CREATE,
-    )
-    notifications.send_fail_message(
-        env_name="env_name",
-        provider_name="provider_name",
-        backup_file=Path("/upload/path"),
-        reason=notifications.FAIL_REASON.UPLOAD,
-    )
+    def fail_func_under_tests():
+        raise ValueError("t" * exception_text_length)
+
+    with pytest.raises(ValueError):
+        fail_func_under_tests()
+
+    send_discord_mock.assert_called_once()
+    assert send_discord_mock.call_args.kwargs["webhook_url"] == "https://fail"
+    assert "ValueError" in send_discord_mock.call_args.kwargs["message"]
+
+
+@pytest.mark.parametrize(
+    "step_name,env_name",
+    [
+        (PROGRAM_STEP.BACKUP_CREATE, None),
+        (PROGRAM_STEP.BACKUP_CREATE, None),
+        (PROGRAM_STEP.SETUP_PROVIDER, "test"),
+        (PROGRAM_STEP.SETUP_TARGETS, "test"),
+    ],
+)
+def test_notifications_context_send_valid_notifications_on_function_success(
+    monkeypatch: pytest.MonkeyPatch,
+    step_name: PROGRAM_STEP,
+    env_name: str,
+) -> None:
+    send_discord_mock = Mock(return_value=None)
+    monkeypatch.setattr(config, "FAIL_NOTIFICATION_MAX_MSG_LEN", 15)
+    monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", "https://fail")
+    monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", "https://success")
+    monkeypatch.setattr(NotificationsContext, "_send_discord", send_discord_mock)
+
+    @NotificationsContext(step_name=step_name, env_name=env_name, send_on_success=True)
+    def success_func_under_tests():
+        pass
+
+    success_func_under_tests()
+
+    send_discord_mock.assert_called_once()
+    assert send_discord_mock.call_args.kwargs["webhook_url"] == "https://success"
+    assert "[SUCCESS]" in send_discord_mock.call_args.kwargs["message"]
