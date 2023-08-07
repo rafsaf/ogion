@@ -17,7 +17,9 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
-
+  - tables
+  - toc:
+      toc_depth: "2"
 nav:
   - Backuper: index.md
   - Providers:

@@ -2,8 +2,6 @@
 
 In general, use docker image `rafsaf/backuper` (here [available tags on dockerhub](https://hub.docker.com/r/rafsaf/backuper/tags)), it supports both `amd64` and `arm64` architectures. Standard way would be to run it with docker compose or as a kubernetes deployment. If not sure, use `latest`.
 
-For below examples, we will use tag `1.0`
-
 ## Docker Compose
 
 ### Docker compose file
@@ -14,17 +12,14 @@ For below examples, we will use tag `1.0`
 services:
   backuper:
     container_name: backuper
-    image: rafsaf/backuper:1.0
+    image: rafsaf/backuper:latest
     environment:
       - POSTGRESQL_DB1=...
       - MYSQL_DB2=...
       - MARIADB_DB3=...
 
       - ZIP_ARCHIVE_PASSWORD=change_me
-      - BACKUP_PROVIDER=gcs
-      - GOOGLE_BUCKET_NAME=my_bucket_name
-      - GOOGLE_BUCKET_UPLOAD_PATH=my_backuper_demo_instance
-      - GOOGLE_SERVICE_ACCOUNT_BASE64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=
+      - BACKUP_PROVIDER=name=gcs bucket_name=my_bucket_name bucket_upload_path=my_backuper_instance_1 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=
 ```
 
 ### Notes
@@ -60,10 +55,7 @@ stringData:
   MYSQL_DB2: ...
   MARIADB_DB3: ...
   ZIP_ARCHIVE_PASSWORD: change_me
-  BACKUP_PROVIDER: gcs
-  GOOGLE_BUCKET_NAME: my_bucket_name
-  GOOGLE_BUCKET_UPLOAD_PATH: my_backuper_demo_instance
-  GOOGLE_SERVICE_ACCOUNT_BASE64: Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=
+  BACKUP_PROVIDER: "name=gcs bucket_name=my_bucket_name bucket_upload_path=my_backuper_instance_1 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -81,7 +73,7 @@ spec:
         app: backuper
     spec:
       containers:
-        - image: rafsaf/backuper:1.0
+        - image: rafsaf/backuper:latest
           name: backuper
           envFrom:
             - secretRef:
