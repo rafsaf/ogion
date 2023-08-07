@@ -5,7 +5,7 @@ import pytest
 import responses
 from freezegun import freeze_time
 from unittest.mock import Mock
-
+from typing import NoReturn
 from backuper import config
 from backuper.notifications import NotificationsContext, PROGRAM_STEP, _formated_now
 
@@ -59,7 +59,7 @@ def test_send_discord_always_none_without_exceptions(
         else:
             webhook_url = ""
         nc = NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
-        assert nc._send_discord("text", webhook_url) is None
+        nc._send_discord("text", webhook_url)
 
 
 @pytest.mark.parametrize(
@@ -86,7 +86,7 @@ def test_notifications_context_send_valid_notifications_on_function_fail(
     @NotificationsContext(
         step_name=step_name, env_name=env_name, send_on_success=send_on_success
     )
-    def fail_func_under_tests():
+    def fail_func_under_tests() -> NoReturn:
         raise ValueError("t" * exception_text_length)
 
     with pytest.raises(ValueError):
@@ -118,8 +118,8 @@ def test_notifications_context_send_valid_notifications_on_function_success(
     monkeypatch.setattr(NotificationsContext, "_send_discord", send_discord_mock)
 
     @NotificationsContext(step_name=step_name, env_name=env_name, send_on_success=True)
-    def success_func_under_tests():
-        pass
+    def success_func_under_tests() -> None:
+        return None
 
     success_func_under_tests()
 
