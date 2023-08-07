@@ -30,12 +30,12 @@ class BaseBackupTarget(ABC):
         super().__init_subclass__()
 
     @final
-    def make_backup(self) -> Path | None:
+    def make_backup(self) -> Path:
         try:
             return self._backup()
         except Exception as err:
             log.error(err, exc_info=True)
-            return None
+            raise
 
     @final
     def _get_next_backup_time(self) -> datetime:

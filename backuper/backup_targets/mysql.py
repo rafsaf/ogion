@@ -1,7 +1,6 @@
 import logging
 import re
 import shlex
-import sys
 from pathlib import Path
 
 from pydantic import SecretStr
@@ -74,7 +73,7 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
                 "https://github.com/rafsaf/backuper/blob/main/scripts/install_mariadb_mysql_client.sh",
                 version_err,
             )
-            sys.exit(1)
+            raise
         log.debug("start mysql connection")
         try:
             db = shlex.quote(self.db)
@@ -85,7 +84,7 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
             log.error("unable to connect to database, exiting")
-            sys.exit(1)
+            raise
 
         version = None
         matches = VERSION_REGEX.finditer(result)
@@ -94,11 +93,9 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
             version = match.group(0)
             break
         if version is None:  # pragma: no cover
-            log.error(
-                "mysql_connection error processing sql result, version unknown: %s",
-                result,
-            )
-            sys.exit(1)
+            msg = f"mysql_connection error processing sql result, version unknown: {result}"
+            log.error(msg)
+            raise ValueError(msg)
         log.info("mysql_connection calculated version: %s", version)
         return version
 

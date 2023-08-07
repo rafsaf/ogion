@@ -155,7 +155,7 @@ def test_run_backup_fail_message_when_upload_fail(
     monkeypatch.setattr(target, "make_backup", backup_mock)
     provider_mock = Mock()
     provider_mock.NAME = "xxx"
-    provider_mock.safe_post_save.return_value = None
+    provider_mock.post_save.return_value = None
     send_fail_message_mock = Mock(return_value=None)
     monkeypatch.setattr(notifications, "send_fail_message", send_fail_message_mock)
     main.run_backup(target=target, provider=provider_mock)

@@ -8,8 +8,9 @@ from threading import Thread
 from types import FrameType
 from typing import NoReturn
 
-from backuper import config, core, notifications
+from backuper import config, core
 from backuper.backup_targets.base_target import BaseBackupTarget
+from backuper.notifications import PROGRAM_STEP, NotificationsContext
 from backuper.providers import BaseBackupProvider
 
 exit_event = threading.Event()
@@ -21,6 +22,7 @@ def quit(sig: int, frame: FrameType | None) -> None:
     exit_event.set()
 
 
+@NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
 def backup_provider() -> BaseBackupProvider:
     backup_provider_map: dict[config.BackupProviderEnum, type[BaseBackupProvider]] = {}
     for backup_provider in BaseBackupProvider.__subclasses__():
@@ -41,6 +43,7 @@ def backup_provider() -> BaseBackupProvider:
     return res_backup_provider
 
 
+@NotificationsContext(step_name=PROGRAM_STEP.SETUP_TARGETS)
 def backup_targets() -> list[BaseBackupTarget]:
     backup_targets_map: dict[config.BackupTargetEnum, type[BaseBackupTarget]] = {}
     for backup_target in BaseBackupTarget.__subclasses__():
@@ -114,30 +117,17 @@ def shutdown() -> NoReturn:
 
 def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
-    backup_file = target.make_backup()
-    if not backup_file:
-        notifications.send_fail_message(
-            env_name=target.env_name,
-            provider_name=provider.NAME,
-            reason=notifications.FAIL_REASON.BACKUP_CREATE,
-            backup_file=None,
-        )
-        return
-    upload_path = provider.safe_post_save(backup_file=backup_file)
-    if upload_path:
-        provider.safe_clean(backup_file=backup_file)
-        notifications.send_success_message(
-            env_name=target.env_name,
-            provider_name=provider.NAME,
-            upload_path=upload_path,
-        )
-    else:
-        notifications.send_fail_message(
-            env_name=target.env_name,
-            provider_name=provider.NAME,
-            reason=notifications.FAIL_REASON.UPLOAD,
-            backup_file=backup_file,
-        )
+    with NotificationsContext(
+        step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name
+    ):
+        backup_file = target.make_backup()
+    with NotificationsContext(
+        step_name=PROGRAM_STEP.UPLOAD,
+        env_name=target.env_name,
+        send_on_success=True,
+    ):
+        provider.post_save(backup_file=backup_file)
+
     log.info(
         "backup finished, next backup of target `%s` is: %s",
         target.env_name,

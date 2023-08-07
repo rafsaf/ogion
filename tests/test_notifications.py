@@ -50,7 +50,7 @@ def test_notifications_pass(
         monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", discord_webhook_url)
         monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", discord_webhook_url)
 
-        notifications.send_success_message(
+        notifications.send_on_success(
             env_name="env_name",
             provider_name="provider_name",
             upload_path="/upload/path",
@@ -70,7 +70,7 @@ def test_notifications_pass(
         monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", None)
         monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", None)
 
-        notifications.send_success_message(
+        notifications.send_on_success(
             env_name="env_name",
             provider_name="provider_name",
             upload_path="/upload/path",
@@ -95,7 +95,7 @@ def test_notifications_pass_on_connection_errors(
     monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", discord_webhook_url)
     monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", discord_webhook_url)
 
-    notifications.send_success_message(
+    notifications.send_on_success(
         env_name="env_name",
         provider_name="provider_name",
         upload_path="/upload/path",

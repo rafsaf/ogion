@@ -2,79 +2,98 @@
 https://discord.com/developers/docs/resources/webhook#execute-webhook
 """
 import logging
+import traceback
+from contextlib import ContextDecorator
 from datetime import datetime
 from enum import StrEnum
-from pathlib import Path
+from types import TracebackType
 
 import requests
 
 from backuper import config
 
-
-class FAIL_REASON(StrEnum):
-    BACKUP_CREATE = "backup_create"
-    UPLOAD = "upload"
-
-
 log = logging.getLogger(__name__)
+
+
+class PROGRAM_STEP(StrEnum):
+    SETUP_PROVIDER = "backup provider setup"
+    SETUP_TARGETS = "backup targets setup"
+    BACKUP_CREATE = "backup create"
+    UPLOAD = "upload to provider"
 
 
 def _formated_now() -> str:
     return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S,%f UTC")
 
 
-def send_success_message(env_name: str, provider_name: str, upload_path: str) -> None:
-    now = _formated_now()
-    message_to_send = (
-        f"{now} [SUCCESS] target `{env_name}` uploading new backup file "
-        f"to provider {provider_name} with upload path {upload_path}"
-    )
-    try:
-        if config.DISCORD_SUCCESS_WEBHOOK_URL:
-            discord_success_res = requests.post(
-                config.DISCORD_SUCCESS_WEBHOOK_URL,
-                json={"content": message_to_send},
-                headers={"Content-Type": "application/json"},
-                timeout=5,
-            )
-            if discord_success_res.status_code != 204:
-                log.error(
-                    "Sent fail message `%s` to DISCORD_SUCCESS_WEBHOOK_URL",
-                    message_to_send,
-                )
-    except Exception as err:
-        log.error("fatal error when sending %s: %s", message_to_send, err)
+class NotificationsContext(ContextDecorator):
+    def __init__(
+        self,
+        step_name: PROGRAM_STEP,
+        env_name: str | None = None,
+        send_on_success: bool = False,
+    ) -> None:
+        self.step_name: PROGRAM_STEP = step_name
+        self.env_name = env_name
+        self.send_on_success = send_on_success
 
-
-def send_fail_message(
-    env_name: str,
-    provider_name: str,
-    reason: FAIL_REASON,
-    backup_file: Path | None = None,
-) -> None:
-    now = _formated_now()
-    if reason == FAIL_REASON.BACKUP_CREATE:
+    def _success_message(self) -> str:
+        now = _formated_now()
         message_to_send = (
-            f"{now} [FAIL] target `{env_name}` uploading backup file "
-            f"{backup_file} to provider {provider_name}"
+            f"[SUCCESS] {now} target `{self.env_name}` uploaded new backup file "
         )
-    elif reason == FAIL_REASON.UPLOAD:
-        message_to_send = f"{now} [FAIL] target `{env_name}` creating new backup file"
-    else:  # pragma: no cover
-        raise RuntimeError("panic!!! unexpected reason", reason)
+        return message_to_send
 
-    try:
-        if config.DISCORD_FAIL_WEBHOOK_URL:
-            discord_fail_res = requests.post(
-                config.DISCORD_FAIL_WEBHOOK_URL,
-                json={"content": message_to_send},
+    def _fail_message(self, traceback: str) -> str:
+        now = _formated_now()
+        msg = f"[FAIL] {now}\nSTEP: {self.step_name}\n"
+        if self.env_name:
+            msg += f"TARGET: {self.env_name}\n"
+
+        traceback_length = len(traceback)
+        limit = config.FAIL_NOTIFICATION_MAX_MSG_LEN
+        if traceback_length < limit:
+            reason = traceback
+        else:
+            reason = f"{traceback[:limit]}...({traceback_length - limit} more chars)"
+        msg += f"REASON:\n```\n{reason}\n```"
+        return msg
+
+    def _send_discord(self, message: str, webhook_url: str) -> None:
+        try:
+            discord_resp = requests.post(
+                webhook_url,
+                json={"content": message},
                 headers={"Content-Type": "application/json"},
                 timeout=5,
             )
-            if discord_fail_res.status_code != 204:
-                log.error(
-                    "Sent fail message `%s` to DISCORD_FAIL_WEBHOOK_URL",
-                    message_to_send,
+            if discord_resp.status_code != 204:
+                log.error("failed send_discord `%s` to %s", message, webhook_url)
+        except Exception as err:
+            log.error("fatal error send_discord %s: %s", message, err)
+
+    def __enter__(self):
+        log.debug("start Notifications context: %s, %s", self.step_name, self.env_name)
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_traceback: TracebackType | None,
+    ) -> None:
+        if exc_type and exc_val:
+            tb = "".join(traceback.format_exception(None, exc_val, exc_traceback))
+            log.error("step %s failed, sending notifications", self.step_name)
+            fail_message = self._fail_message(traceback=tb)
+            log.debug("fail message: %s", fail_message)
+            if config.DISCORD_FAIL_WEBHOOK_URL:
+                self._send_discord(
+                    message=fail_message, webhook_url=config.DISCORD_FAIL_WEBHOOK_URL
                 )
-    except Exception as err:
-        log.error("fatal error when sending %s: %s", message_to_send, err)
+        elif self.send_on_success:
+            sucess_message = self._success_message()
+            if config.DISCORD_SUCCESS_WEBHOOK_URL:
+                self._send_discord(
+                    message=sucess_message,
+                    webhook_url=config.DISCORD_SUCCESS_WEBHOOK_URL,
+                )

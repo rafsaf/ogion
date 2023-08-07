@@ -1,7 +1,6 @@
 import logging
 import re
 import shlex
-import sys
 import urllib.parse
 from pathlib import Path
 
@@ -94,7 +93,7 @@ class PostgreSQL(
                 "https://github.com/rafsaf/backuper/blob/main/scripts/install_postgresql_client.sh",
                 version_err,
             )
-            sys.exit(1)
+            raise
         log.debug("start postgres connection")
         try:
             result = core.run_subprocess(
@@ -103,7 +102,7 @@ class PostgreSQL(
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
             log.error("unable to connect to database, exiting")
-            sys.exit(1)
+            raise
 
         version = None
         matches = VERSION_REGEX.finditer(result)
@@ -112,11 +111,9 @@ class PostgreSQL(
             version = match.group(0).strip().split(" ")[1]
             break
         if version is None:  # pragma: no cover
-            log.error(
-                "postgres_connection error processing pg result, version unknown: %s",
-                result,
-            )
-            sys.exit(1)
+            msg = f"postgres_connection error processing sql result, version unknown: {result}"
+            log.error(msg)
+            raise ValueError(msg)
         log.info("postgres_connection calculated version: %s", version)
         return version
 

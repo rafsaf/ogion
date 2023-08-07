@@ -33,7 +33,7 @@ def test_gcs_safe_post_fail_gracefully_on_fail_upload(
     fake_backup_file_path = tmp_path / "fake_backup"
     fake_backup_file_path.touch()
 
-    assert gcs.safe_post_save(fake_backup_file_path) is None
+    assert gcs.post_save(fake_backup_file_path) is None
     sleep_mock.assert_any_call(1)
     sleep_mock.assert_any_call(2)
     sleep_mock.assert_any_call(4)
@@ -66,7 +66,7 @@ def test_gcs_post_save_runtime_error_on_fail_upload(
     sleep_mock.assert_called_with(8)
 
 
-@pytest.mark.parametrize("gcs_method_name", ["_post_save", "safe_post_save"])
+@pytest.mark.parametrize("gcs_method_name", ["_post_save", "post_save"])
 def test_gcs_post_save_with_google_bucket_upload_path(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
 ) -> None:

@@ -1,7 +1,6 @@
 import logging
 import re
 import shlex
-import sys
 from pathlib import Path
 
 from pydantic import SecretStr
@@ -74,7 +73,7 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
                 "https://github.com/rafsaf/backuper/blob/main/scripts/install_mariadb_mysql_client.sh",
                 version_err,
             )
-            sys.exit(1)
+            raise
         log.debug("start mariadb connection")
         try:
             db = shlex.quote(self.db)
@@ -85,7 +84,7 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
         except core.CoreSubprocessError as conn_err:
             log.error(conn_err, exc_info=True)
             log.error("unable to connect to database, exiting")
-            sys.exit(1)
+            raise
 
         version = None
         matches = VERSION_REGEX.finditer(result)
@@ -94,11 +93,9 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
             version = match.group(0)
             break
         if version is None:  # pragma: no cover
-            log.error(
-                "mariadb_connection error processing sql result, version unknown: %s",
-                result,
-            )
-            sys.exit(1)
+            msg = f"mariadb_connection error processing sql result, version unknown: {result}"
+            log.error(msg)
+            raise ValueError(msg)
         log.info("mariadb_connection calculated version: %s", version)
         return version
 
