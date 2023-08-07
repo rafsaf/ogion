@@ -1,13 +1,12 @@
-from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
+from unittest.mock import Mock
 
 import pytest
 import responses
 from freezegun import freeze_time
-from unittest.mock import Mock
-from typing import NoReturn
+
 from backuper import config
-from backuper.notifications import NotificationsContext, PROGRAM_STEP, _formated_now
+from backuper.notifications import PROGRAM_STEP, NotificationsContext, _formated_now
 
 discord_webhook_url = "https://discord.com/api/webhooks/12345/token"
 
