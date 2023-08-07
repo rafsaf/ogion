@@ -37,7 +37,7 @@ def backup_provider() -> BaseBackupProvider:
     log.debug("initializing %s with %s", provider_target_cls, provider_model)
     res_backup_provider = provider_target_cls(**provider_model.model_dump())
     log.info(
-        "success initializing target: `%s`",
+        "success initializing provider: `%s`",
         provider_model.name,
     )
     return res_backup_provider
@@ -78,7 +78,7 @@ def shutdown() -> NoReturn:
     deadline = start + timeout_secs
     log.info(
         "start backuper shutdown, force exit after SIGTERM_TIMEOUT_SECS=%ss, "
-        "use this environment to control it.",
+        "use this environment to control it, see https://backuper.rafsaf.pl/configuration/.",
         timeout_secs,
     )
     for thread in threading.enumerate():
@@ -121,6 +121,11 @@ def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider) -> None:
         step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name
     ):
         backup_file = target.make_backup()
+    log.info(
+        "backup file created: %s, starting post save upload to provider %s",
+        backup_file,
+        provider.NAME,
+    )
     with NotificationsContext(
         step_name=PROGRAM_STEP.UPLOAD,
         env_name=target.env_name,
@@ -129,7 +134,7 @@ def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider) -> None:
         provider.post_save(backup_file=backup_file)
 
     log.info(
-        "backup finished, next backup of target `%s` is: %s",
+        "backup and upload finished, next backup of target `%s` is: %s",
         target.env_name,
         target.next_backup_time,
     )
@@ -146,6 +151,7 @@ def setup_runtime_arguments() -> bool:
 
 
 def main() -> NoReturn:
+    log.info("start backuper configuration...")
     signal.signal(signalnum=signal.SIGINT, handler=quit)
     signal.signal(signalnum=signal.SIGTERM, handler=quit)
 
@@ -154,16 +160,17 @@ def main() -> NoReturn:
     provider = backup_provider()
     targets = backup_targets()
 
-    i = 0
+    log.info("backuper configuration finished")
+
     while not exit_event.is_set():
         for target in targets:
             if target.next_backup() or single_run:
-                i += 1
+                pretty_env_name = target.env_name.replace("_", "-")
                 backup_thread = Thread(
                     target=run_backup,
                     args=(target, provider),
                     daemon=True,
-                    name=f"{target.env_name}-{i}",
+                    name=f"Thread-{pretty_env_name}",
                 )
                 backup_thread.start()
                 exit_event.wait(0.5)

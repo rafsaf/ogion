@@ -147,7 +147,7 @@ def create_provider_model() -> ProviderModel:
             target_model.__name__.lower().removesuffix("providermodel")
         )
         target_map[name] = target_model
-    log.info("start validating BACKUP_PROVIDER")
+    log.info("start validating BACKUP_PROVIDER environment variable")
 
     base_provider = _validate_model(
         "backup_provider",
