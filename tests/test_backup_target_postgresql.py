@@ -5,7 +5,7 @@ from freezegun import freeze_time
 
 from backuper import config, core
 from backuper.backup_targets import PostgreSQL
-from backuper.models.target_models import PostgreSQLTargetModel
+from backuper.models.backup_target_models import PostgreSQLTargetModel
 
 from .conftest import (
     ALL_POSTGRES_DBS_TARGETS,

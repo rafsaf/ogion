@@ -8,15 +8,15 @@ from backuper import config
 log = logging.getLogger(__name__)
 
 
-class BaseBackupProvider(ABC):
-    NAME: config.BackupProviderEnum
+class BaseUploadProvider(ABC):
+    NAME: config.UploadProviderEnum
 
-    def __init_subclass__(cls, name: config.BackupProviderEnum) -> None:
+    def __init_subclass__(cls, name: config.UploadProviderEnum) -> None:
         cls.NAME = name
         super().__init_subclass__()
 
     @final
-    def post_save(self, backup_file: Path) -> str | None:
+    def post_save(self, backup_file: Path) -> str:
         try:
             return self._post_save(backup_file=backup_file)
         except Exception as err:

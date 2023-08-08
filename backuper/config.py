@@ -15,7 +15,7 @@ except ImportError:  # pragma: no cover
     pass
 
 
-class BackupProviderEnum(StrEnum):
+class UploadProviderEnum(StrEnum):
     LOCAL_FILES_DEBUG = "debug"
     GOOGLE_CLOUD_STORAGE = "gcs"
 

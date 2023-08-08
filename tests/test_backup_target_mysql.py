@@ -5,7 +5,7 @@ from freezegun import freeze_time
 
 from backuper import config, core
 from backuper.backup_targets import MySQL
-from backuper.models.target_models import MySQLTargetModel
+from backuper.models.backup_target_models import MySQLTargetModel
 
 from .conftest import ALL_MYSQL_DBS_TARGETS, CONST_TOKEN_URLSAFE, DB_VERSION_BY_ENV_VAR
 

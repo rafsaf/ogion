@@ -8,7 +8,7 @@ import responses
 from pydantic import SecretStr
 
 from backuper import config
-from backuper.models.target_models import (
+from backuper.models.backup_target_models import (
     DirectoryTargetModel,
     MariaDBTargetModel,
     MySQLTargetModel,

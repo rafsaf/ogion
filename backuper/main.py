@@ -11,7 +11,7 @@ from typing import NoReturn
 from backuper import config, core
 from backuper.backup_targets.base_target import BaseBackupTarget
 from backuper.notifications import PROGRAM_STEP, NotificationsContext
-from backuper.providers import BaseBackupProvider
+from backuper.upload_providers import BaseUploadProvider
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)
@@ -23,9 +23,9 @@ def quit(sig: int, frame: FrameType | None) -> None:
 
 
 @NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
-def backup_provider() -> BaseBackupProvider:
-    backup_provider_map: dict[config.BackupProviderEnum, type[BaseBackupProvider]] = {}
-    for backup_provider in BaseBackupProvider.__subclasses__():
+def backup_provider() -> BaseUploadProvider:
+    backup_provider_map: dict[config.UploadProviderEnum, type[BaseUploadProvider]] = {}
+    for backup_provider in BaseUploadProvider.__subclasses__():
         backup_provider_map[backup_provider.NAME] = backup_provider  # type: ignore
 
     provider_model = core.create_provider_model()
@@ -115,7 +115,7 @@ def shutdown() -> NoReturn:
         sys.exit(1)
 
 
-def run_backup(target: BaseBackupTarget, provider: BaseBackupProvider) -> None:
+def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
     with NotificationsContext(
         step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name

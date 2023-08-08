@@ -5,7 +5,7 @@ from freezegun import freeze_time
 
 from backuper import config, core
 from backuper.backup_targets import MariaDB
-from backuper.models.target_models import MariaDBTargetModel
+from backuper.models.backup_target_models import MariaDBTargetModel
 
 from .conftest import (
     ALL_MARIADB_DBS_TARGETS,

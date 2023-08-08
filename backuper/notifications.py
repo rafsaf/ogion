@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 class PROGRAM_STEP(StrEnum):
-    SETUP_PROVIDER = "backup provider setup"
+    SETUP_PROVIDER = "upload provider setup"
     SETUP_TARGETS = "backup targets setup"
     BACKUP_CREATE = "backup create"
     UPLOAD = "upload to provider"

@@ -3,14 +3,14 @@ import shutil
 from pathlib import Path
 
 from backuper import config, core
-from backuper.providers.base_provider import BaseBackupProvider
+from backuper.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
 
-class LocalDebugFiles(
-    BaseBackupProvider,
-    name=config.BackupProviderEnum.LOCAL_FILES_DEBUG,
+class UploadProviderLocalDebug(
+    BaseUploadProvider,
+    name=config.UploadProviderEnum.LOCAL_FILES_DEBUG,
 ):
     """Represent local folder `data` for storing backups.
 

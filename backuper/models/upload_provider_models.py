@@ -6,7 +6,7 @@ from backuper import config
 
 
 class ProviderModel(BaseModel):
-    name: config.BackupProviderEnum
+    name: config.UploadProviderEnum
 
 
 class DebugProviderModel(ProviderModel):
@@ -15,8 +15,10 @@ class DebugProviderModel(ProviderModel):
 
 class GCSProviderModel(ProviderModel):
     bucket_name: str
-    bucket_upload_path: str | None = None
+    bucket_upload_path: str
     service_account_base64: str
+    chunk_size_mb: int = 100
+    chunk_timeout_secs: int = 60
 
     @field_validator("service_account_base64")
     def process_service_account_base64(cls, service_account_base64: str) -> str:
