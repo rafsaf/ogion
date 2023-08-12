@@ -1,4 +1,3 @@
-import time
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -14,7 +13,7 @@ def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(storage, "Client", Mock())
 
 
-def get_test_gcs():
+def get_test_gcs() -> UploadProviderGCS:
     return UploadProviderGCS(
         bucket_name="name",
         bucket_upload_path="test",
@@ -69,7 +68,8 @@ def test_gcs_post_save_with_google_bucket_upload_path(
     single_blob_mock.upload_from_filename.assert_called_once_with(
         fake_backup_file_zip_path,
         timeout=gcs.chunk_timeout_secs,
-        retry=gcs._retry,
+        if_generation_match=0,
+        checksum="crc32c",
     )
 
 
