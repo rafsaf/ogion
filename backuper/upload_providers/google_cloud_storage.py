@@ -61,7 +61,7 @@ class UploadProviderGCS(
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
-    def _clean(self, backup_file: Path) -> None:
+    def _clean(self, backup_file: Path, max_backups: int) -> None:
         for backup_path in backup_file.parent.iterdir():
             if backup_path.is_dir():
                 shutil.rmtree(backup_path)
@@ -76,7 +76,7 @@ class UploadProviderGCS(
 
         # remove oldest
         backup_list_cloud.sort(reverse=True)
-        while len(backup_list_cloud) > config.BACKUP_MAX_NUMBER:
+        while len(backup_list_cloud) > max_backups:
             backup_to_remove = backup_list_cloud.pop()
             blob = self.bucket.blob(backup_to_remove)
             blob.delete()

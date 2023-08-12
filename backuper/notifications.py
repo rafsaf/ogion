@@ -20,10 +20,21 @@ class PROGRAM_STEP(StrEnum):
     SETUP_TARGETS = "backup targets setup"
     BACKUP_CREATE = "backup create"
     UPLOAD = "upload to provider"
+    CLEANUP = "cleanup old backups"
 
 
 def _formated_now() -> str:
     return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S,%f UTC")
+
+
+def _limit_message(message: str, limit: int) -> str:
+    limit = max(100, limit)
+    if len(message) <= limit:
+        return message
+
+    truncate_text = f"...(truncated to {limit} chars)"
+    truncate_message = message[: limit - len(truncate_text)]
+    return truncate_message + truncate_text
 
 
 class NotificationsContext(ContextDecorator):
@@ -44,29 +55,31 @@ class NotificationsContext(ContextDecorator):
         )
         return message_to_send
 
-    def _fail_message(self, traceback: str) -> str:
+    def _fail_message(
+        self,
+        exc_type: type[BaseException],
+        exc_val: BaseException,
+        exc_traceback: TracebackType,
+    ) -> str:
         now = _formated_now()
-        msg = f"[FAIL] {now}\nSTEP: {self.step_name}\n"
+        msg = f"[FAIL] {now}\nStep: {self.step_name}\n"
         if self.env_name:
-            msg += f"TARGET: {self.env_name}\n"
+            msg += f"Target: {self.env_name}\n"
+        msg += f"Exception Type: {exc_type}\n"
+        msg += f"Exception Value: {exc_val}\n"
 
-        traceback_length = len(traceback)
-        limit = config.FAIL_NOTIFICATION_MAX_MSG_LEN
-        if traceback_length < limit:
-            reason = traceback
-        else:
-            reason = f"{traceback[:limit]}...({traceback_length - limit} more chars)"
-        msg += f"REASON:\n```\n{reason}\n```"
+        tb = "".join(traceback.format_exception(exc_type, exc_val, exc_traceback))
+        msg += f"\n{tb}\n"
         return msg
 
-    def _send_discord(self, message: str, webhook_url: str) -> None:
+    def _send_discord(self, message: str, webhook_url: str, limit_chars: int) -> None:
         if not webhook_url:
             log.debug("skip sending discord notification, no webhook url")
             return None
         try:
             discord_resp = requests.post(
                 webhook_url,
-                json={"content": message},
+                json={"content": _limit_message(message=message, limit=limit_chars)},
                 headers={"Content-Type": "application/json"},
                 timeout=5,
             )
@@ -84,17 +97,21 @@ class NotificationsContext(ContextDecorator):
         exc_val: BaseException | None,
         exc_traceback: TracebackType | None,
     ) -> None:
-        if exc_type and exc_val:
-            tb = "".join(traceback.format_exception(None, exc_val, exc_traceback))
+        if exc_type and exc_val and exc_traceback:
             log.error("step %s failed, sending notifications", self.step_name)
-            fail_message = self._fail_message(traceback=tb)
+            fail_message = self._fail_message(
+                exc_type=exc_type, exc_val=exc_val, exc_traceback=exc_traceback
+            )
             log.debug("fail message: %s", fail_message)
             self._send_discord(
-                message=fail_message, webhook_url=config.DISCORD_FAIL_WEBHOOK_URL
+                message=fail_message,
+                webhook_url=config.DISCORD_FAIL_WEBHOOK_URL,
+                limit_chars=config.DISCORD_NOTIFICATION_MAX_MSG_LEN,
             )
         elif self.send_on_success:
             sucess_message = self._success_message()
             self._send_discord(
                 message=sucess_message,
                 webhook_url=config.DISCORD_SUCCESS_WEBHOOK_URL,
+                limit_chars=config.DISCORD_NOTIFICATION_MAX_MSG_LEN,
             )

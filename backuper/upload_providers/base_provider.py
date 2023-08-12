@@ -24,16 +24,17 @@ class BaseUploadProvider(ABC):
             raise
 
     @final
-    def safe_clean(self, backup_file: Path) -> None:
+    def safe_clean(self, backup_file: Path, max_backups: int) -> None:
         try:
-            return self._clean(backup_file=backup_file)
-        except Exception as err:  # pragma: no cover
+            return self._clean(backup_file=backup_file, max_backups=max_backups)
+        except Exception as err:
             log.error(err, exc_info=True)
+            raise
 
     @abstractmethod
     def _post_save(self, backup_file: Path) -> str:  # pragma: no cover
         pass
 
     @abstractmethod
-    def _clean(self, backup_file: Path) -> None:  # pragma: no cover
+    def _clean(self, backup_file: Path, max_backups: int) -> None:  # pragma: no cover
         pass

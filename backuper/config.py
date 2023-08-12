@@ -40,13 +40,13 @@ BACKUP_PROVIDER = os.environ.get("BACKUP_PROVIDER", "")
 ZIP_ARCHIVE_PASSWORD = os.environ.get("ZIP_ARCHIVE_PASSWORD", "")
 SUBPROCESS_TIMEOUT_SECS: int = int(os.environ.get("SUBPROCESS_TIMEOUT_SECS", 60 * 60))
 SIGTERM_TIMEOUT_SECS: float = float(os.environ.get("SIGTERM_TIMEOUT_SECS", 30))
-FAIL_NOTIFICATION_MAX_MSG_LEN: int = int(
-    os.environ.get("FAIL_NOTIFICATION_MAX_MSG_LEN", 1000)
-)
 ZIP_ARCHIVE_LEVEL: int = int(os.environ.get("ZIP_ARCHIVE_LEVEL", 3))
 BACKUP_MAX_NUMBER: int = int(os.environ.get("BACKUP_MAX_NUMBER", 7))
 DISCORD_SUCCESS_WEBHOOK_URL: str = os.environ.get("DISCORD_SUCCESS_WEBHOOK_URL", "")
 DISCORD_FAIL_WEBHOOK_URL: str = os.environ.get("DISCORD_FAIL_WEBHOOK_URL", "")
+DISCORD_NOTIFICATION_MAX_MSG_LEN: int = int(
+    os.environ.get("DISCORD_NOTIFICATION_MAX_MSG_LEN", 1000)
+)
 
 
 def logging_config(log_level: str) -> None:

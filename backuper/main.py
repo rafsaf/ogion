@@ -129,9 +129,15 @@ def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
     with NotificationsContext(
         step_name=PROGRAM_STEP.UPLOAD,
         env_name=target.env_name,
-        send_on_success=True,
     ):
         provider.post_save(backup_file=backup_file)
+
+    with NotificationsContext(
+        step_name=PROGRAM_STEP.CLEANUP,
+        env_name=target.env_name,
+        send_on_success=True,
+    ):
+        provider.safe_clean(backup_file=backup_file, max_backups=target.max_backups)
 
     log.info(
         "backup and upload finished, next backup of target `%s` is: %s",

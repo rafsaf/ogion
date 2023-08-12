@@ -13,11 +13,14 @@ class Folder(BaseBackupTarget, target_model_name=config.BackupTargetEnum.FOLDER)
         abs_path: Path,
         cron_rule: str,
         env_name: str,
+        max_backups: int,
         **kwargs: str | int,
     ) -> None:
         self.cron_rule: str = cron_rule
         self.folder: Path = abs_path
-        super().__init__(cron_rule=cron_rule, env_name=env_name)
+        super().__init__(
+            cron_rule=cron_rule, env_name=env_name, max_backups=max_backups
+        )
 
     def _backup(self) -> Path:
         out_file = core.get_new_backup_path(self.env_name, self.folder.name)

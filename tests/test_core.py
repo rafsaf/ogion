@@ -78,6 +78,24 @@ def test_run_create_zip_archive(tmp_path: Path) -> None:
             [
                 (
                     "POSTGRESQL_FIRST_DB",
+                    "host=localhost port=5432 password=secret cron_rule=* * * * * archive_level=9",
+                ),
+            ],
+            True,
+        ),
+        (
+            [
+                (
+                    "POSTGRESQL_FIRST_DB",
+                    "host=localhost port=5432 password=secret cron_rule=* * * * * archive_level=10",
+                ),
+            ],
+            False,
+        ),
+        (
+            [
+                (
+                    "POSTGRESQL_FIRST_DB",
                     "host=localhost port=5432 password=secret cron_rule=* * * * *",
                 ),
                 (

@@ -6,7 +6,12 @@ import responses
 from freezegun import freeze_time
 
 from backuper import config
-from backuper.notifications import PROGRAM_STEP, NotificationsContext, _formated_now
+from backuper.notifications import (
+    PROGRAM_STEP,
+    NotificationsContext,
+    _formated_now,
+    _limit_message,
+)
 
 discord_webhook_url = "https://discord.com/api/webhooks/12345/token"
 
@@ -14,6 +19,19 @@ discord_webhook_url = "https://discord.com/api/webhooks/12345/token"
 @freeze_time("2023-04-27 21:08:05")
 def test_formated_now() -> None:
     assert _formated_now() == "2023-04-27 21:08:05,000000 UTC"
+
+
+def test_limit_message_full_text_if_below_limit() -> None:
+    assert _limit_message(message="short message", limit=200) == "short message"
+
+
+def test_limit_message_limited_text_if_behind_limit() -> None:
+    long_text = "a" * 1500
+    trunc_text = "...(truncated to 678 chars)"
+    assert (
+        _limit_message(message=long_text, limit=678)
+        == "a" * (678 - len(trunc_text)) + trunc_text
+    )
 
 
 @pytest.mark.parametrize(
@@ -58,7 +76,7 @@ def test_send_discord_always_none_without_exceptions(
         else:
             webhook_url = ""
         nc = NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
-        nc._send_discord("text", webhook_url)
+        nc._send_discord("text", webhook_url, limit_chars=150)
 
 
 @pytest.mark.parametrize(
@@ -111,7 +129,7 @@ def test_notifications_context_send_valid_notifications_on_function_success(
     env_name: str,
 ) -> None:
     send_discord_mock = Mock(return_value=None)
-    monkeypatch.setattr(config, "FAIL_NOTIFICATION_MAX_MSG_LEN", 15)
+    monkeypatch.setattr(config, "DISCORD_NOTIFICATION_MAX_MSG_LEN", 150)
     monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", "https://fail")
     monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", "https://success")
     monkeypatch.setattr(NotificationsContext, "_send_discord", send_discord_mock)

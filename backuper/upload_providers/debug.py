@@ -24,7 +24,7 @@ class UploadProviderLocalDebug(
         zip_file = core.run_create_zip_archive(backup_file=backup_file)
         return str(zip_file)
 
-    def _clean(self, backup_file: Path) -> None:
+    def _clean(self, backup_file: Path, max_backups: int) -> None:
         if backup_file.is_file():
             backup_file.unlink()
         else:
@@ -33,7 +33,7 @@ class UploadProviderLocalDebug(
         for backup_path in backup_file.parent.iterdir():
             files.append(str(backup_path.absolute()))
         files.sort(reverse=True)
-        while len(files) > config.BACKUP_MAX_NUMBER:
+        while len(files) > max_backups:
             backup_to_remove = Path(files.pop())
             try:
                 if backup_to_remove.is_file():

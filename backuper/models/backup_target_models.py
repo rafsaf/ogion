@@ -20,6 +20,12 @@ class TargetModel(BaseModel):
     max_backups: int = config.BACKUP_MAX_NUMBER
     archive_level: int = config.ZIP_ARCHIVE_LEVEL
 
+    @field_validator("archive_level")
+    def archive_level_is_valid(cls, archive_level: int) -> int:
+        if not 1 <= archive_level <= 9:
+            raise ValueError("Error in archive_level: must be 1 <= archive_level <= 9")
+        return archive_level
+
     @field_validator("cron_rule")
     def cron_rule_is_valid(cls, cron_rule: str) -> str:
         if not croniter.is_valid(cron_rule):

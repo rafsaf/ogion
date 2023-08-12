@@ -4,7 +4,6 @@ from unittest.mock import Mock
 import google.cloud.storage as storage
 import pytest
 
-from backuper import config
 from backuper.upload_providers import UploadProviderGCS
 
 
@@ -117,9 +116,8 @@ def test_gcs_clean_file_and_short_blob_list(
     fake_backup_file_zip_path2.touch()
 
     monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
-    monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 2)
 
-    getattr(gcs, gcs_method_name)(fake_backup_file_zip_path)
+    getattr(gcs, gcs_method_name)(fake_backup_file_zip_path, 2)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_zip_path.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -160,9 +158,8 @@ def test_gcs_clean_directory_and_long_blob_list(
     fake_backup_file_zip_path4.touch()
 
     monkeypatch.setattr(gcs, "bucket_upload_path", None)
-    monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 2)
 
-    getattr(gcs, gcs_method_name)(fake_backup_dir_path)
+    getattr(gcs, gcs_method_name)(fake_backup_dir_path, 2)
     assert not fake_backup_dir_path.exists()
     assert not fake_backup_file_zip_path.exists()
     assert not fake_backup_file_zip_path2.exists()

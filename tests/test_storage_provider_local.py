@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 
-from backuper import config
 from backuper.upload_providers import UploadProviderLocalDebug
 
 
@@ -23,9 +22,7 @@ def test_gcs_clean_file(
     fake_backup_file_zip_path3 = fake_backup_dir_path / "fake_backup3.zip"
     fake_backup_file_zip_path3.touch()
 
-    monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 2)
-
-    getattr(local, method_name)(fake_backup_file_path4)
+    getattr(local, method_name)(fake_backup_file_path4, 2)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_path4.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -50,9 +47,7 @@ def test_gcs_clean_folder(
     fake_backup_file_zip_path3 = fake_backup_dir_path / "fake_backup3.zip"
     fake_backup_file_zip_path3.mkdir()
 
-    monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 2)
-
-    getattr(local, method_name)(fake_backup_file_path4)
+    getattr(local, method_name)(fake_backup_file_path4, 2)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_path4.exists()
     assert not fake_backup_file_zip_path2.exists()
