@@ -18,11 +18,10 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
   - tables
-  - toc:
-      toc_depth: "2"
+
 nav:
   - Backuper: index.md
-  - Providers:
+  - Upload providers:
       - providers/google_cloud_storage.md
       - providers/debug.md
   - Backup targets:
@@ -41,6 +40,8 @@ nav:
       - other/development.md
 
 plugins:
+  - search:
+      lang: en
   - mkdocstrings:
       default_handler: python
       handlers:
