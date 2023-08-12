@@ -53,3 +53,7 @@ plugins:
 watch:
   - docs
   - mkdocs.yml
+
+extra:
+  version:
+    provider: mike

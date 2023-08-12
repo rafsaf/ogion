@@ -78,7 +78,7 @@ def shutdown() -> NoReturn:
     deadline = start + timeout_secs
     log.info(
         "start backuper shutdown, force exit after SIGTERM_TIMEOUT_SECS=%ss, "
-        "use this environment to control it, see https://backuper.rafsaf.pl/configuration/.",
+        "use this environment to control it, see https://backuper.rafsaf.pl/latest/configuration/.",
         timeout_secs,
     )
     for thread in threading.enumerate():
