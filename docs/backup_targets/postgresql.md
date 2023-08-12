@@ -24,7 +24,7 @@ POSTGRESQL_SOME_STRING="host=... password=... cron_rule=..."
 | host        | string               | PostgreSQL database hostname.                                                                                                                                                               | localhost         |
 | port        | int                  | PostgreSQL database port.                                                                                                                                                                   | 5432              |
 | db          | string               | PostgreSQL database name.                                                                                                                                                                   | postgres          |
-| max_backups | int                  | Max number of backups stored in upload provider, if this number is exceeded, oldest one is removed, by default enviornment variable BACKUP_MAX_NUMBER, see [Configuration](/configuration). | BACKUP_MAX_NUMBER |
+| max_backups | int                  | Max number of backups stored in upload provider, if this number is exceeded, oldest one is removed, by default enviornment variable BACKUP_MAX_NUMBER, see [Configuration](./../configuration.md). | BACKUP_MAX_NUMBER |
 
 
 ## Examples

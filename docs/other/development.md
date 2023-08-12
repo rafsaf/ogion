@@ -37,5 +37,15 @@ To play with documentation, after dependencies are in place installed with poetr
 
 `mkdocs serve` will start development server.
 
+## Docs release
+
+Mike is used for docs versioning: [https://github.com/jimporter/mike](https://github.com/jimporter/mike)
+
+After new release is triggered, manual command needs to be run (eg. tag 0.1) and then generated commit pushed to origin:
+
+```bash
+mike deploy --push --update-aliases 0.1 latest
+```
+
 <br>
 <br>

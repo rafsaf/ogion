@@ -24,7 +24,7 @@ MYSQL_SOME_STRING="host=... password=... cron_rule=..."
 | host        | string               | MySQL database hostname.                                                                                                                                                                    | localhost         |
 | port        | int                  | MySQL database port.                                                                                                                                                                        | 3306              |
 | db          | string               | MySQL database name.                                                                                                                                                                        | mysql             |
-| max_backups | int                  | Max number of backups stored in upload provider, if this number is exceeded, oldest one is removed, by default enviornment variable BACKUP_MAX_NUMBER, see [Configuration](/configuration). | BACKUP_MAX_NUMBER |
+| max_backups | int                  | Max number of backups stored in upload provider, if this number is exceeded, oldest one is removed, by default enviornment variable BACKUP_MAX_NUMBER, see [Configuration](./../configuration.md). | BACKUP_MAX_NUMBER |
 
 
 ## Examples
