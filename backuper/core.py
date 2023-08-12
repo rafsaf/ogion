@@ -12,8 +12,8 @@ from typing import Any, TypeVar
 from pydantic import BaseModel
 
 from backuper import config
-from backuper.models.provider_models import ProviderModel
-from backuper.models.target_models import TargetModel
+from backuper.models.backup_target_models import TargetModel
+from backuper.models.upload_provider_models import ProviderModel
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def run_subprocess(shell_args: str) -> str:
         log.error("run_subprocess failed with status %s", p.returncode)
         log.error("run_subprocess stdout: %s", p.stdout)
         log.error("run_subprocess stderr: %s", p.stderr)
-        raise CoreSubprocessError()
+        raise CoreSubprocessError(p.stderr)
 
     log.debug("run_subprocess finished with status %s", p.returncode)
     log.debug("run_subprocess stdout: %s", p.stdout)
@@ -141,9 +141,9 @@ def create_target_models() -> list[TargetModel]:
 
 
 def create_provider_model() -> ProviderModel:
-    target_map: dict[config.BackupProviderEnum, type[ProviderModel]] = {}
+    target_map: dict[config.UploadProviderEnum, type[ProviderModel]] = {}
     for target_model in ProviderModel.__subclasses__():
-        name = config.BackupProviderEnum(
+        name = config.UploadProviderEnum(
             target_model.__name__.lower().removesuffix("providermodel")
         )
         target_map[name] = target_model

@@ -3,7 +3,7 @@ authors = ["Rafał Safin <rafal.safin@rafsaf.pl>"]
 description = "A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms."
 license = "GNU GPLv3"
 name = "backuper"
-version = "2.0"
+version = "3.0"
 
 [tool.poetry.dependencies]
 croniter = "^1.3.7"

@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from backuper.models.target_models import (
+from backuper.models.backup_target_models import (
     DirectoryTargetModel,
     MariaDBTargetModel,
     MySQLTargetModel,

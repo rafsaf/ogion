@@ -2,12 +2,14 @@ import sys
 import threading
 import time
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock
 
 import google.cloud.storage as storage
 import pytest
 
-from backuper import config, core, main
+from backuper import config, core, main, notifications
+from backuper.upload_providers.debug import UploadProviderLocalDebug
 
 from .conftest import FILE_1, FOLDER_1, MARIADB_1011, MYSQL_80, POSTGRES_15
 
@@ -118,25 +120,26 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
     assert count == 5
 
 
-def test_run_backup_fail_message_when_no_backup_file(
+@pytest.mark.parametrize(
+    "make_backup_side_effect,post_save_side_effect,safe_clean_side_effect",
+    [
+        (ValueError(), None, None),
+        (None, ValueError(), None),
+        (None, None, ValueError()),
+    ],
+)
+def test_run_backup_notifications_fail_message_is_fired_when_it_fails(
+    make_backup_side_effect: Any | None,
+    post_save_side_effect: Any | None,
+    safe_clean_side_effect: Any | None,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    fail_message_mock = Mock()
     monkeypatch.setattr(
-        core,
-        "create_target_models",
-        Mock(return_value=[POSTGRES_15]),
+        notifications.NotificationsContext,
+        "_fail_message",
+        fail_message_mock,
     )
-    target = main.backup_targets()[0]
-    monkeypatch.setattr(target, "_backup", Mock(side_effect=ValueError()))
-    provider_mock = Mock()
-    provider_mock.NAME = "xxx"
-    with pytest.raises(ValueError):
-        main.run_backup(target=target, provider=provider_mock)
-
-
-def test_run_backup_fail_message_when_upload_fail(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
     monkeypatch.setattr(
         core,
         "create_target_models",
@@ -144,12 +147,15 @@ def test_run_backup_fail_message_when_upload_fail(
     )
     target = main.backup_targets()[0]
     backup_file = Path("/tmp/fake")
-    backup_mock = Mock(return_value=backup_file)
-    monkeypatch.setattr(target, "make_backup", backup_mock)
-    provider_mock = Mock()
-    provider_mock.NAME = "xxx"
-    provider_mock.post_save.return_value = None
-    main.run_backup(target=target, provider=provider_mock)
+    backup_mock = Mock(return_value=backup_file, side_effect=make_backup_side_effect)
+    monkeypatch.setattr(target, "_backup", backup_mock)
+    provider = UploadProviderLocalDebug()
+    monkeypatch.setattr(provider, "_post_save", Mock(side_effect=post_save_side_effect))
+    monkeypatch.setattr(provider, "_clean", Mock(side_effect=safe_clean_side_effect))
+
+    with pytest.raises(ValueError):
+        main.run_backup(target=target, provider=provider)
+    fail_message_mock.assert_called_once()
 
 
 def test_quit(monkeypatch: pytest.MonkeyPatch) -> None:

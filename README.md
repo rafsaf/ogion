@@ -20,6 +20,7 @@ A tool for performing scheduled database backups and transferring encrypted data
 ## Supported upload providers
 
 - Google Cloud Storage bucket
+- Debug (local)
 
 ## Notifications
 
@@ -58,7 +59,7 @@ services:
 
 ```
 
-(NOTE this will use provider [debug](https://backuper.rafsaf.pl/providers/debug/) that store backups locally in the container.
+(NOTE this will use provider [debug](https://backuper.rafsaf.pl/providers/debug/) that store backups locally in the container).
 
 
 <br>

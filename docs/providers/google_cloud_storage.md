@@ -1,41 +1,41 @@
+---
+hide:
+  - toc
+---
+
 # Google Cloud Storage
 
-Make use of Google Cloud Storage bucket.
-
-## Configuration
+## Environment variable
 
 ```bash
 BACKUP_PROVIDER="name=gcs bucket_name=my_bucket_name bucket_upload_path=my_backuper_instance_1 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="
 ```
 
-## Environment variables values
+Uses Google Cloud Storage bucket for storing backups.
 
-Value of variables must be in format (note **one space** between each block of `key=value`):
-
-<h3> 
-[key1]=[value1] [key2]=[value2] [key3]=[value3] (...)
-</h3>
-
+!!! note
+    _There can be only one upload provider defined per app, using **BACKUP_PROVIDER** environemnt variable_. It's type is guessed by using `name`, in this case `name=gcs`. Params must be included in value, splited by single space for example "value1=1 value2=foo".
 ## Params
 
-- **name=gcs**, _required parameter_ (string)
-- **bucket_name=some bucket name**, your globally unique bucket name (string)
-- **service_account_base64=base64 service account**, base64 JSON service account file created in IAM.
+| Name                   | Type                 | Description                                                                                                                                                                                                                                                                                                        | Default |
+| :--------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
+| name                   | string[**requried**] | Must be set literaly to string `gcs` to use Google Cloud Storage.                                                                                                                                                                                                                                                  | -       |
+| bucket_name            | string[**requried**] | Your globally unique bucket name.                                                                                                                                                                                                                                                                                  | -       |
+| bucket_upload_path     | string[**requried**] | Prefix that **every created backup** will have, for example if it is equal to `my_backuper_instance_1`, paths to backups will look like `my_backuper_instance_1/your_backup_target_eg_postgresql/file123.zip`. Usually this should be something unique for this backuper instance, for example `k8s_foo_backuper`. | -       |
+| service_account_base64 | string[**requried**] | Base64 JSON service account file created in IAM, with write and read access permissions to bucket, see _Resources_ below.                                                                                                                                                                                          | -       |
+| chunk_size_mb          | int                  | The size of a chunk of data transfered to GCS, consider lower value only if for example your internet connection is slow or you know what you are doing, 100MB is google default.                                                                                                                                  | 100     |
+| chunk_timeout_secs     | int                  | The chunk of data transfered to GCS upload timeout, consider higher value only if for example your internet connection is slow or you know what you are doing, 60s is google default.                                                                                                                              | 60      |
 
-  Give it following roles so it will have **read access for whole bucket "my_bucket_name"** and **admin access for only path prefix "my_backuper_instance_1" in bucket "my_bucket_name"**:
+## Examples
 
-  1. **Storage Object Admin** (with IAM condition: NAME starts with `projects/_/buckets/my_bucket_name/objects/my_backuper_instance_1`)
-  2. **Storage Object Viewer** (with IAM condition: NAME starts with `projects/_/buckets/my_bucket_name`)
+```bash
+# 1. Bucket pets-bucket
+BACKUP_PROVIDER='name=gcs bucket_name=pets-bucket bucket_upload_path=pets_backuper service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo='
 
-  After sucessfully creating service account, create new private key with JSON type and download it. File similar to `your_project_name-03189413be28.json` will appear in your Downloads.
+# 2. Bucket birds with smaller chunk size
+BACKUP_PROVIDER='name=gcs bucket_name=birds bucket_upload_path=birds_backuper chunk_size_mb=25 chunk_timeout_secs=120 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo='
+```
 
-  To get base64 (without any new lines) from it, use command:
-
-  ```bash
-  cat your_project_name-03189413be28.json | base64 -w 0
-  ```
-
-- OPTIONAL **bucket_upload_path=backuper instance name**, prefix that **every created backup** will have, for example if it is equal to `my_backuper_instance_1`, paths to backups will look like `my_backuper_instance_1/your_backup_target_eg_postgresql/file123.zip`. Usually this should be something unique for this backuper instance, for example `k8s_foo_backuper` (string)
 
 ## Resources
 
@@ -47,15 +47,28 @@ Value of variables must be in format (note **one space** between each block of `
 
 [https://cloud.google.com/iam/docs/service-accounts-create](https://cloud.google.com/iam/docs/service-accounts-create)
 
-#### Giving it required roles
+#### Giving it required roles to service account
 
 1. Go "IAM and admin" -> "IAM"
 
 2. Find your service account and update its roles
 
+Give it following roles so it will have **read access for whole bucket "my_bucket_name"** and **admin access for only path prefix "my_backuper_instance_1" in bucket "my_bucket_name"**:
+
+1. **Storage Object Admin** (with IAM condition: NAME starts with `projects/_/buckets/my_bucket_name/objects/my_backuper_instance_1`)
+2. **Storage Object Viewer** (with IAM condition: NAME starts with `projects/_/buckets/my_bucket_name`)
+
+After sucessfully creating service account, create new private key with JSON type and download it. File similar to `your_project_name-03189413be28.json` will appear in your Downloads.
+
+To get base64 (without any new lines) from it, use command:
+
+```bash
+cat your_project_name-03189413be28.json | base64 -w 0
+```
+
 #### Terraform
 
-If using terraform for managing cloud infra, Service Accounts definition will be following:
+If using terraform for managing cloud infra, Service Accounts definition can be following:
 
 ```bash
 resource "google_service_account" "backuper-my_backuper_instance_1" {

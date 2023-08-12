@@ -18,7 +18,6 @@ class TargetModel(BaseModel):
     env_name: str
     cron_rule: str
     max_backups: int = config.BACKUP_MAX_NUMBER
-    archive_level: int = config.ZIP_ARCHIVE_LEVEL
 
     @field_validator("cron_rule")
     def cron_rule_is_valid(cls, cron_rule: str) -> str:

@@ -2,15 +2,14 @@ from pathlib import Path
 
 import pytest
 
-from backuper import config
-from backuper.providers import LocalDebugFiles
+from backuper.upload_providers import UploadProviderLocalDebug
 
 
 @pytest.mark.parametrize("method_name", ["_clean", "safe_clean"])
 def test_gcs_clean_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
 ) -> None:
-    local = LocalDebugFiles()
+    local = UploadProviderLocalDebug()
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
@@ -23,9 +22,7 @@ def test_gcs_clean_file(
     fake_backup_file_zip_path3 = fake_backup_dir_path / "fake_backup3.zip"
     fake_backup_file_zip_path3.touch()
 
-    monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 2)
-
-    getattr(local, method_name)(fake_backup_file_path4)
+    getattr(local, method_name)(fake_backup_file_path4, 2)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_path4.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -37,7 +34,7 @@ def test_gcs_clean_file(
 def test_gcs_clean_folder(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
 ) -> None:
-    local = LocalDebugFiles()
+    local = UploadProviderLocalDebug()
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
@@ -50,9 +47,7 @@ def test_gcs_clean_folder(
     fake_backup_file_zip_path3 = fake_backup_dir_path / "fake_backup3.zip"
     fake_backup_file_zip_path3.mkdir()
 
-    monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 2)
-
-    getattr(local, method_name)(fake_backup_file_path4)
+    getattr(local, method_name)(fake_backup_file_path4, 2)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_path4.exists()
     assert not fake_backup_file_zip_path2.exists()

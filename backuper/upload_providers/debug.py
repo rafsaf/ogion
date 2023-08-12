@@ -3,14 +3,14 @@ import shutil
 from pathlib import Path
 
 from backuper import config, core
-from backuper.providers.base_provider import BaseBackupProvider
+from backuper.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
 
-class LocalDebugFiles(
-    BaseBackupProvider,
-    name=config.BackupProviderEnum.LOCAL_FILES_DEBUG,
+class UploadProviderLocalDebug(
+    BaseUploadProvider,
+    name=config.UploadProviderEnum.LOCAL_FILES_DEBUG,
 ):
     """Represent local folder `data` for storing backups.
 
@@ -24,7 +24,7 @@ class LocalDebugFiles(
         zip_file = core.run_create_zip_archive(backup_file=backup_file)
         return str(zip_file)
 
-    def _clean(self, backup_file: Path) -> None:
+    def _clean(self, backup_file: Path, max_backups: int) -> None:
         if backup_file.is_file():
             backup_file.unlink()
         else:
@@ -33,7 +33,7 @@ class LocalDebugFiles(
         for backup_path in backup_file.parent.iterdir():
             files.append(str(backup_path.absolute()))
         files.sort(reverse=True)
-        while len(files) > config.BACKUP_MAX_NUMBER:
+        while len(files) > max_backups:
             backup_to_remove = Path(files.pop())
             try:
                 if backup_to_remove.is_file():

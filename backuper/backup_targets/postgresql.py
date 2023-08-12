@@ -29,9 +29,12 @@ class PostgreSQL(
         db: str,
         cron_rule: str,
         env_name: str,
+        max_backups: int,
         **kwargs: str | int,
     ) -> None:
-        super().__init__(cron_rule=cron_rule, env_name=env_name)
+        super().__init__(
+            cron_rule=cron_rule, env_name=env_name, max_backups=max_backups
+        )
         self.cron_rule: str = cron_rule
         self.user: str = user
         self.db: str = db
