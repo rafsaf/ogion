@@ -32,7 +32,7 @@ def _limit_message(message: str, limit: int) -> str:
     if len(message) <= limit:
         return message
 
-    truncate_text = f"...(truncated to {limit} chars)"
+    truncate_text = f"...\n\n(truncated to {limit} chars)"
     truncate_message = message[: limit - len(truncate_text)]
     return truncate_message + truncate_text
 

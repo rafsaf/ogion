@@ -27,7 +27,7 @@ def test_limit_message_full_text_if_below_limit() -> None:
 
 def test_limit_message_limited_text_if_behind_limit() -> None:
     long_text = "a" * 1500
-    trunc_text = "...(truncated to 678 chars)"
+    trunc_text = "...\n\n(truncated to 678 chars)"
     assert (
         _limit_message(message=long_text, limit=678)
         == "a" * (678 - len(trunc_text)) + trunc_text
