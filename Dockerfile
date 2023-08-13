@@ -1,6 +1,7 @@
 FROM python:3.11.4-slim-bookworm AS base
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV ROOT_MODE="false"
 ENV SERVICE_NAME="backuper"
 ENV FOLDER_PATH="/var/lib/backuper"
 ENV LOG_FOLDER_PATH="/var/log/backuper"
@@ -13,13 +14,12 @@ RUN addgroup --gid 1001 --system $SERVICE_NAME && \
 RUN python -m venv /venv
 ENV PATH="/venv/bin:$PATH"
 
-COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 COPY scripts scripts
 COPY bin bin
 RUN /bin/bash scripts/install_postgresql_client.sh
 RUN /bin/bash scripts/install_mariadb_mysql_client.sh
 RUN rm -rf scripts
-
+COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 
 ENTRYPOINT ["/bin/bash", "/docker_entrypoint.sh"]
 
