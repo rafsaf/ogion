@@ -121,7 +121,7 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.parametrize(
-    "make_backup_side_effect,post_save_side_effect,safe_clean_side_effect",
+    "make_backup_side_effect,post_save_side_effect,clean_side_effect",
     [
         (ValueError(), None, None),
         (None, ValueError(), None),
@@ -131,7 +131,7 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_run_backup_notifications_fail_message_is_fired_when_it_fails(
     make_backup_side_effect: Any | None,
     post_save_side_effect: Any | None,
-    safe_clean_side_effect: Any | None,
+    clean_side_effect: Any | None,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fail_message_mock = Mock()
@@ -151,7 +151,7 @@ def test_run_backup_notifications_fail_message_is_fired_when_it_fails(
     monkeypatch.setattr(target, "_backup", backup_mock)
     provider = UploadProviderLocalDebug()
     monkeypatch.setattr(provider, "_post_save", Mock(side_effect=post_save_side_effect))
-    monkeypatch.setattr(provider, "_clean", Mock(side_effect=safe_clean_side_effect))
+    monkeypatch.setattr(provider, "_clean", Mock(side_effect=clean_side_effect))
 
     with pytest.raises(ValueError):
         main.run_backup(target=target, provider=provider)

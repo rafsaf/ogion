@@ -25,8 +25,8 @@ class Folder(BaseBackupTarget, target_model_name=config.BackupTargetEnum.FOLDER)
     def _backup(self) -> Path:
         out_file = core.get_new_backup_path(self.env_name, self.folder.name)
 
-        shell_args = f"cp -r {self.folder} {out_file}"
-        log.debug("start cp -r in subprocess: %s", shell_args)
-        core.run_subprocess(shell_args)
-        log.debug("finished cp -r, output: %s", out_file)
+        shell_create_dir_symlink = f"ln -s {self.folder} {out_file}"
+        log.debug("start ln in subprocess: %s", shell_create_dir_symlink)
+        core.run_subprocess(shell_create_dir_symlink)
+        log.debug("finished ln, output: %s", out_file)
         return out_file

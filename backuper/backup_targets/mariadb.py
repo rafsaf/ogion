@@ -107,11 +107,11 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
         name = f"{escaped_dbname}_{self.db_version}"
         out_file = core.get_new_backup_path(self.env_name, name, sql=True)
         db = shlex.quote(self.db)
-        shell_args = (
+        shell_mariadb_dump_db = (
             f"mariadb-dump --defaults-file={self.option_file} "
             f"--result-file={out_file} --verbose {db}"
         )
-        log.debug("start mariadbdump in subprocess: %s", shell_args)
-        core.run_subprocess(shell_args)
+        log.debug("start mariadbdump in subprocess: %s", shell_mariadb_dump_db)
+        core.run_subprocess(shell_mariadb_dump_db)
         log.debug("finished mariadbdump, output: %s", out_file)
         return out_file

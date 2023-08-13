@@ -25,8 +25,8 @@ class File(BaseBackupTarget, target_model_name=config.BackupTargetEnum.FILE):
     def _backup(self) -> Path:
         out_file = core.get_new_backup_path(self.env_name, self.file.name)
 
-        shell_args = f"cp -f {self.file} {out_file}"
-        log.debug("start cp -f in subprocess: %s", shell_args)
-        core.run_subprocess(shell_args)
-        log.debug("finished cp -f, output: %s", out_file)
+        shell_create_file_symlink = f"ln -s {self.file} {out_file}"
+        log.debug("start ln in subprocess: %s", shell_create_file_symlink)
+        core.run_subprocess(shell_create_file_symlink)
+        log.debug("finished ln, output: %s", out_file)
         return out_file

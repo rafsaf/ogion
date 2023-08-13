@@ -5,7 +5,7 @@ import pytest
 from backuper.upload_providers import UploadProviderLocalDebug
 
 
-@pytest.mark.parametrize("method_name", ["_clean", "safe_clean"])
+@pytest.mark.parametrize("method_name", ["_clean", "clean"])
 def test_gcs_clean_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
 ) -> None:
@@ -30,7 +30,7 @@ def test_gcs_clean_file(
     assert fake_backup_file_zip_path4.exists()
 
 
-@pytest.mark.parametrize("method_name", ["_clean", "safe_clean"])
+@pytest.mark.parametrize("method_name", ["_clean", "clean"])
 def test_gcs_clean_folder(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
 ) -> None:

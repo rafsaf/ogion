@@ -1,7 +1,6 @@
 import base64
 import logging
 import os
-import shutil
 from pathlib import Path
 
 import google.cloud.storage as storage
@@ -63,10 +62,7 @@ class UploadProviderGCS(
 
     def _clean(self, backup_file: Path, max_backups: int) -> None:
         for backup_path in backup_file.parent.iterdir():
-            if backup_path.is_dir():
-                shutil.rmtree(backup_path)
-            else:
-                backup_path.unlink()
+            core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
 
         backup_list_cloud: list[str] = []
