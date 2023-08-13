@@ -108,11 +108,11 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
         out_file = core.get_new_backup_path(self.env_name, name, sql=True)
 
         db = shlex.quote(self.db)
-        shell_args = (
+        shell_mysqldump_db = (
             f"mysqldump --defaults-file={self.option_file} "
             f"--result-file={out_file} --verbose {db}"
         )
-        log.debug("start mysqldump in subprocess: %s", shell_args)
-        core.run_subprocess(shell_args)
+        log.debug("start mysqldump in subprocess: %s", shell_mysqldump_db)
+        core.run_subprocess(shell_mysqldump_db)
         log.debug("finished mysqldump, output: %s", out_file)
         return out_file

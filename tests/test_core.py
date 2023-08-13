@@ -61,7 +61,11 @@ def test_get_new_backup_path_sql(caplog: LogCaptureFixture) -> None:
     assert caplog.messages == []
 
 
-def test_run_create_zip_archive(tmp_path: Path) -> None:
+@pytest.mark.parametrize("integrity", ["false", "true"])
+def test_run_create_zip_archive(
+    tmp_path: Path, integrity: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(config, "ZIP_SKIP_INTEGRITY_CHECK", integrity)
     fake_backup_file = tmp_path / "fake_backup"
     with open(fake_backup_file, "w") as f:
         f.write("abcdefghijk\n12345")

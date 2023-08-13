@@ -1,5 +1,4 @@
 import logging
-import shutil
 from pathlib import Path
 
 from backuper import config, core
@@ -25,10 +24,7 @@ class UploadProviderLocalDebug(
         return str(zip_file)
 
     def _clean(self, backup_file: Path, max_backups: int) -> None:
-        if backup_file.is_file():
-            backup_file.unlink()
-        else:
-            shutil.rmtree(backup_file)
+        core.remove_path(backup_file)
         files: list[str] = []
         for backup_path in backup_file.parent.iterdir():
             files.append(str(backup_path.absolute()))
@@ -36,10 +32,7 @@ class UploadProviderLocalDebug(
         while len(files) > max_backups:
             backup_to_remove = Path(files.pop())
             try:
-                if backup_to_remove.is_file():
-                    backup_to_remove.unlink()
-                else:
-                    shutil.rmtree(backup_to_remove)
+                core.remove_path(backup_to_remove)
                 log.info("removed path %s", backup_to_remove)
             except Exception as e:  # pragma: no cover
                 log.error(

@@ -24,7 +24,7 @@ class BaseUploadProvider(ABC):
             raise
 
     @final
-    def safe_clean(self, backup_file: Path, max_backups: int) -> None:
+    def clean(self, backup_file: Path, max_backups: int) -> None:
         try:
             return self._clean(backup_file=backup_file, max_backups=max_backups)
         except Exception as err:

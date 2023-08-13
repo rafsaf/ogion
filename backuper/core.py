@@ -4,6 +4,7 @@ import os
 import re
 import secrets
 import shlex
+import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -46,6 +47,14 @@ def run_subprocess(shell_args: str) -> str:
     return p.stdout
 
 
+def remove_path(path: Path) -> None:
+    if path.exists():
+        if path.is_file() or path.is_symlink():
+            path.unlink()
+        else:
+            shutil.rmtree(path=path)
+
+
 def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
     base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
     base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
@@ -64,21 +73,34 @@ def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
 def run_create_zip_archive(backup_file: Path) -> Path:
     seven_zip_path = seven_zip_bin_path()
     out_file = Path(f"{backup_file}.zip")
-    log.debug("run_create_zip_archive start creating in subprocess: %s", backup_file)
+    log.info("start creating zip archive in subprocess: %s", backup_file)
     zip_escaped_password = shlex.quote(config.ZIP_ARCHIVE_PASSWORD)
-    shell_args_create = (
+    shell_create_7zip_archive = (
         f"{seven_zip_path} a -p{zip_escaped_password} "
         f"-mx={config.ZIP_ARCHIVE_LEVEL} {out_file} {backup_file}"
     )
-    run_subprocess(shell_args_create)
-    log.debug("run_create_zip_archive finished, output: %s", out_file)
+    run_subprocess(shell_create_7zip_archive)
+    log.info("finished zip archive creating")
 
-    log.debug("run_create_zip_archive start integriy test in subprocess: %s", out_file)
-    shell_args_integriy = f"{seven_zip_path} t -p{zip_escaped_password} {out_file}"
-    integrity_check_result = run_subprocess(shell_args_integriy)
+    if config.ZIP_SKIP_INTEGRITY_CHECK != "false":
+        return out_file
+
+    log.info(
+        (
+            "start zip archive integriy test on %s in subprocess, "
+            "you can control it using ZIP_SKIP_INTEGRITY_CHECK"
+        ),
+        out_file,
+    )
+    shell_7zip_archive_integriy_check = (
+        f"{seven_zip_path} t -p{zip_escaped_password} {out_file}"
+    )
+    integrity_check_result = run_subprocess(shell_7zip_archive_integriy_check)
     if "Everything is Ok" not in integrity_check_result:  # pragma: no cover
-        raise AssertionError("zip arichive integrity fatal error")
-    log.debug("run_create_zip_archive finish integriy test in subprocess: %s", out_file)
+        raise AssertionError(
+            "zip arichive integrity test on %s: %s", out_file, integrity_check_result
+        )
+    log.info("finished zip archive integriy test")
     return out_file
 
 
@@ -160,8 +182,8 @@ def create_provider_model() -> ProviderModel:
 
 
 def seven_zip_bin_path() -> Path:
-    shell_args_cpu_architecture = "dpkg --print-architecture"
-    cpu_arch = run_subprocess(shell_args_cpu_architecture).strip()
+    shell_get_cpu_architecture = "dpkg --print-architecture"
+    cpu_arch = run_subprocess(shell_get_cpu_architecture).strip()
     seven_zip = config.CONST_BIN_ZIP_PATH / f"{cpu_arch}/7zz"
     if not seven_zip.exists():  # pragma: no cover
         raise RuntimeError(

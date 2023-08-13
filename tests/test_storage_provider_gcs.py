@@ -92,7 +92,7 @@ list_blobs_long_no_upload_path: list[BlobInCloudStorage] = [
 ]
 
 
-@pytest.mark.parametrize("gcs_method_name", ["_clean", "safe_clean"])
+@pytest.mark.parametrize("gcs_method_name", ["_clean", "clean"])
 def test_gcs_clean_file_and_short_blob_list(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
 ) -> None:
@@ -128,7 +128,7 @@ def test_gcs_clean_file_and_short_blob_list(
     single_blob_mock.delete.assert_called_once_with()
 
 
-@pytest.mark.parametrize("gcs_method_name", ["_clean", "safe_clean"])
+@pytest.mark.parametrize("gcs_method_name", ["_clean", "clean"])
 def test_gcs_clean_directory_and_long_blob_list(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
 ) -> None:
