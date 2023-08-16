@@ -20,6 +20,7 @@ A tool for performing scheduled database backups and transferring encrypted data
 ## Supported upload providers
 
 - Google Cloud Storage bucket
+- AWS S3 bucket
 - Debug (local)
 
 ## Notifications

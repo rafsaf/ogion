@@ -23,6 +23,7 @@ nav:
   - Backuper: index.md
   - Upload providers:
       - providers/google_cloud_storage.md
+      - providers/aws_s3.md
       - providers/debug.md
   - Backup targets:
       - backup_targets/postgresql.md
