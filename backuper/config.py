@@ -18,6 +18,7 @@ except ImportError:  # pragma: no cover
 class UploadProviderEnum(StrEnum):
     LOCAL_FILES_DEBUG = "debug"
     GOOGLE_CLOUD_STORAGE = "gcs"
+    AWS_S3 = "aws"
 
 
 class BackupTargetEnum(StrEnum):

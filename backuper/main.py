@@ -9,7 +9,7 @@ from types import FrameType
 from typing import NoReturn
 
 from backuper import config, core
-from backuper.backup_targets.base_target import BaseBackupTarget
+from backuper.backup_targets import BaseBackupTarget
 from backuper.notifications import PROGRAM_STEP, NotificationsContext
 from backuper.upload_providers import BaseUploadProvider
 

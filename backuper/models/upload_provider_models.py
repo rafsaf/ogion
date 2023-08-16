@@ -24,3 +24,12 @@ class GCSProviderModel(ProviderModel):
     def process_service_account_base64(cls, service_account_base64: str) -> str:
         base64.b64decode(service_account_base64)
         return service_account_base64
+
+
+class AWSProviderModel(ProviderModel):
+    bucket_name: str
+    bucket_upload_path: str
+    key_id: str
+    key_secret: str
+    region: str
+    max_bandwidth: int | None = None
