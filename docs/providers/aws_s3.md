@@ -46,7 +46,7 @@ BACKUP_PROVIDER='name=aws bucket_name=birds bucket_upload_path=birds_backuper ke
 
 #### Giving IAM user required permissions
 
-Assuming your bucket name is `my_bucket_name` and upload path `test-upload-path`, 4 permissions are needed for IAM user (s3:ListBucket, s3:PutObject, s3:GetObject, s3:DeleteObject):
+Assuming your bucket name is `my_bucket_name` and upload path `test-upload-path`, 3 permissions are needed for IAM user (s3:ListBucket, s3:PutObject, s3:DeleteObject):
 
 ```json
 {
@@ -68,7 +68,6 @@ Assuming your bucket name is `my_bucket_name` and upload path `test-upload-path`
 			"Effect": "Allow",
 			"Action": [
 				"s3:PutObject",
-				"s3:GetObject",
 				"s3:DeleteObject"
 			],
 			"Resource": "arn:aws:s3:::my_bucket_name/test-upload-path/*"
