@@ -86,7 +86,9 @@ class UploadProviderAWS(
             delete_response = self.bucket.delete_objects(
                 Delete={"Objects": items_to_delete, "Quiet": False}
             )
-            if "Errors" in delete_response and delete_response["Errors"]:
+            if (
+                "Errors" in delete_response and delete_response["Errors"]
+            ):  # pragma: no cover
                 raise RuntimeError(
                     "Fail to delete backups from aws s3: %s", delete_response["Errors"]
                 )
