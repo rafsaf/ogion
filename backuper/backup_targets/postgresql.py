@@ -124,7 +124,7 @@ class PostgreSQL(
         escaped_dbname = core.safe_text_version(self.db)
         name = f"{escaped_dbname}_{self.db_version}"
         out_file = core.get_new_backup_path(self.env_name, name, sql=True)
-        shell_pg_dump_db = f"pg_dump -v -O -d {self.escaped_conn_uri} -f {out_file}"
+        shell_pg_dump_db = f"pg_dump --clean --if-exists -v -O -d {self.escaped_conn_uri} -f {out_file}"
         log.debug("start pg_dump in subprocess: %s", shell_pg_dump_db)
         core.run_subprocess(shell_pg_dump_db)
         log.debug("finished pg_dump, output: %s", out_file)

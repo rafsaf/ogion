@@ -15,7 +15,7 @@ VERSION_REGEX = re.compile(r"\d*\.\d*\.\d*")
 
 class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIADB):
     # https://mariadb.com/kb/en/configuring-mariadb-with-option-files/
-    # https://mariadb.com/kb/en/mariadb-dumpmariadbdump/
+    # https://mariadb.com/kb/en/mariadb-dump/
     # https://mariadb.com/kb/en/connecting-to-mariadb/
 
     def __init__(
