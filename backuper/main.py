@@ -72,8 +72,8 @@ def backup_targets() -> list[BaseBackupTarget]:
     return backup_targets
 
 
-def shutdown() -> NoReturn:
-    timeout_secs = config.SIGTERM_TIMEOUT_SECS
+def shutdown() -> NoReturn:  # pragma: no cover
+    timeout_secs = config.options.SIGTERM_TIMEOUT_SECS
     start = time.time()
     deadline = start + timeout_secs
     log.info(
@@ -158,8 +158,6 @@ def setup_runtime_arguments() -> bool:
 
 def main() -> NoReturn:
     log.info("start backuper configuration...")
-    signal.signal(signalnum=signal.SIGINT, handler=quit)
-    signal.signal(signalnum=signal.SIGTERM, handler=quit)
 
     single_run = setup_runtime_arguments()
 
@@ -188,4 +186,7 @@ def main() -> NoReturn:
 
 
 if __name__ == "__main__":  # pragma: no cover
+    signal.signal(signalnum=signal.SIGINT, handler=quit)
+    signal.signal(signalnum=signal.SIGTERM, handler=quit)
+
     main()

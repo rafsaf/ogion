@@ -38,13 +38,25 @@ types-requests = "^2.31.0.2"
 types-google-cloud-ndb = "^2.2.0.0"
 bandit = "^1.7.5"
 mike = "^1.1.2"
+pytest-cov = "^4.1.0"
+pytest-xdist = "^3.3.1"
+pytest-env = "^1.0.1"
 
 [tool.pytest.ini_options]
-addopts = "-v"
+addopts = "-v --cov --cov-report term-missing --cov-fail-under 100 -n auto"
 filterwarnings = [
   "ignore:Deprecated call to `pkg_resources.declare_namespace\\('google:DeprecationWarning",
   "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
 ]
+env = [
+  "SUBPROCESS_TIMEOUT_SECS=5",
+  "LOG_LEVEL=DEBUG",
+  "BACKUP_MAX_NUMBER=1",
+  "BACKUP_PROVIDER=",
+  "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#$%^&*()/;><.,][`~'",
+  "LOG_FOLDER_PATH=/tmp/pytest_backuper_env_vars_hook_logs_folder",
+]
+
 minversion = "6.0"
 
 [tool.coverage.run]

@@ -37,8 +37,7 @@ RUN rm -f requirements-dev.txt
 COPY pyproject.toml .
 COPY tests tests
 COPY backuper backuper
-COPY Makefile .
-CMD ["make", "coverage"]
+CMD ["pytest"]
 
 FROM tests AS pyinstaller
 COPY backuper_cli.py .

@@ -33,7 +33,7 @@ def run_subprocess(shell_args: str) -> str:
         capture_output=True,
         text=True,
         shell=True,
-        timeout=config.SUBPROCESS_TIMEOUT_SECS,
+        timeout=config.options.SUBPROCESS_TIMEOUT_SECS,
     )
     if p.returncode:
         log.error("run_subprocess failed with status %s", p.returncode)
@@ -74,15 +74,17 @@ def run_create_zip_archive(backup_file: Path) -> Path:
     seven_zip_path = seven_zip_bin_path()
     out_file = Path(f"{backup_file}.zip")
     log.info("start creating zip archive in subprocess: %s", backup_file)
-    zip_escaped_password = shlex.quote(config.ZIP_ARCHIVE_PASSWORD)
+    zip_escaped_password = shlex.quote(
+        config.options.ZIP_ARCHIVE_PASSWORD.get_secret_value()
+    )
     shell_create_7zip_archive = (
         f"{seven_zip_path} a -p{zip_escaped_password} "
-        f"-mx={config.ZIP_ARCHIVE_LEVEL} {out_file} {backup_file}"
+        f"-mx={config.options.ZIP_ARCHIVE_LEVEL} {out_file} {backup_file}"
     )
     run_subprocess(shell_create_7zip_archive)
     log.info("finished zip archive creating")
 
-    if config.ZIP_SKIP_INTEGRITY_CHECK != "false":
+    if config.options.ZIP_SKIP_INTEGRITY_CHECK:
         return out_file
 
     log.info(
@@ -173,12 +175,14 @@ def create_provider_model() -> ProviderModel:
 
     base_provider = _validate_model(
         "backup_provider",
-        config.BACKUP_PROVIDER,
+        config.options.BACKUP_PROVIDER,
         ProviderModel,
         value_whitespace_split=True,
     )
     target_model_cls = target_map[base_provider.name]
-    return _validate_model("backup_provider", config.BACKUP_PROVIDER, target_model_cls)
+    return _validate_model(
+        "backup_provider", config.options.BACKUP_PROVIDER, target_model_cls
+    )
 
 
 def seven_zip_bin_path() -> Path:

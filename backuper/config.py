@@ -1,10 +1,10 @@
 import logging
 import logging.config
-import os
 import re
 from enum import StrEnum
 from pathlib import Path
 from typing import Literal
+
 from pydantic import Field, HttpUrl, SecretStr
 from pydantic_settings import BaseSettings
 
@@ -14,8 +14,10 @@ CONST_BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 CONST_ENV_NAME_REGEX = re.compile(r"^[A-Za-z_0-9]{1,}$")
 CONST_BIN_ZIP_PATH: Path = CONST_BASE_DIR / "bin/7zip"
 CONST_BACKUP_FOLDER_PATH: Path = CONST_BASE_DIR / "data"
-CONST_GOOGLE_SERVICE_ACCOUNT_PATH: Path = CONST_BASE_DIR / "google_auth.json"
-CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o744, parents=True, exist_ok=True)
+CONST_CONFIG_FOLDER_PATH: Path = CONST_BASE_DIR / "conf"
+CONST_GOOGLE_SERVICE_ACCOUNT_PATH: Path = CONST_CONFIG_FOLDER_PATH / "google_auth.json"
+CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
+CONST_CONFIG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 
 try:
     from dotenv import load_dotenv
@@ -45,8 +47,8 @@ class Settings(BaseSettings):
     BACKUP_PROVIDER: str
     ZIP_ARCHIVE_PASSWORD: SecretStr
     ZIP_SKIP_INTEGRITY_CHECK: bool = False
-    SUBPROCESS_TIMEOUT_SECS: int = Field(ge=30, default=60 * 60)
-    SIGTERM_TIMEOUT_SECS: int = Field(ge=0, default=30)
+    SUBPROCESS_TIMEOUT_SECS: float = Field(ge=5, le=3600 * 24, default=3600)
+    SIGTERM_TIMEOUT_SECS: float = Field(ge=0, le=3600 * 24, default=30)
     ZIP_ARCHIVE_LEVEL: int = Field(ge=1, le=9, default=3)
     BACKUP_MAX_NUMBER: int = Field(ge=1, le=998, default=7)
     DISCORD_SUCCESS_WEBHOOK_URL: HttpUrl | None = None
@@ -58,6 +60,7 @@ options = Settings()  # type: ignore
 
 
 def logging_config(log_level: _log_levels) -> None:
+    options.LOG_FOLDER_PATH.mkdir(0o700, parents=True, exist_ok=True)
     conf = {
         "version": 1,
         "disable_existing_loggers": False,

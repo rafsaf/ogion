@@ -3,11 +3,9 @@ data/*
 gpg_public.key.pub
 google_auth.json
 bin/7zz
-*.my.cnf
-*.mariadb.cnf
-*.pgpass
 bin/7zip/amd64/MANUAL
 bin/7zip/arm64/MANUAL
+conf/*
 
 
 # Byte-compiled / optimized / DLL files

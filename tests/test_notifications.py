@@ -96,8 +96,10 @@ def test_notifications_context_send_valid_notifications_on_function_fail(
     exception_text_length: int,
 ) -> None:
     send_discord_mock = Mock(return_value=None)
-    monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", "https://fail")
-    monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", "https://success")
+    monkeypatch.setattr(config.options, "DISCORD_FAIL_WEBHOOK_URL", "https://fail")
+    monkeypatch.setattr(
+        config.options, "DISCORD_SUCCESS_WEBHOOK_URL", "https://success"
+    )
     monkeypatch.setattr(NotificationsContext, "_send_discord", send_discord_mock)
 
     @NotificationsContext(
@@ -129,9 +131,11 @@ def test_notifications_context_send_valid_notifications_on_function_success(
     env_name: str,
 ) -> None:
     send_discord_mock = Mock(return_value=None)
-    monkeypatch.setattr(config, "DISCORD_NOTIFICATION_MAX_MSG_LEN", 150)
-    monkeypatch.setattr(config, "DISCORD_FAIL_WEBHOOK_URL", "https://fail")
-    monkeypatch.setattr(config, "DISCORD_SUCCESS_WEBHOOK_URL", "https://success")
+    monkeypatch.setattr(config.options, "DISCORD_NOTIFICATION_MAX_MSG_LEN", 150)
+    monkeypatch.setattr(config.options, "DISCORD_FAIL_WEBHOOK_URL", "https://fail")
+    monkeypatch.setattr(
+        config.options, "DISCORD_SUCCESS_WEBHOOK_URL", "https://success"
+    )
     monkeypatch.setattr(NotificationsContext, "_send_discord", send_discord_mock)
 
     @NotificationsContext(step_name=step_name, env_name=env_name, send_on_success=True)

@@ -9,6 +9,7 @@ from enum import StrEnum
 from types import TracebackType
 
 import requests
+from pydantic import HttpUrl
 
 from backuper import config
 
@@ -72,13 +73,15 @@ class NotificationsContext(ContextDecorator):
         msg += f"\n{tb}\n"
         return msg
 
-    def _send_discord(self, message: str, webhook_url: str, limit_chars: int) -> None:
+    def _send_discord(
+        self, message: str, webhook_url: str | HttpUrl | None, limit_chars: int
+    ) -> None:
         if not webhook_url:
             log.debug("skip sending discord notification, no webhook url")
             return None
         try:
             discord_resp = requests.post(
-                webhook_url,
+                str(webhook_url),
                 json={"content": _limit_message(message=message, limit=limit_chars)},
                 headers={"Content-Type": "application/json"},
                 timeout=5,
@@ -105,13 +108,13 @@ class NotificationsContext(ContextDecorator):
             log.debug("fail message: %s", fail_message)
             self._send_discord(
                 message=fail_message,
-                webhook_url=config.DISCORD_FAIL_WEBHOOK_URL,
-                limit_chars=config.DISCORD_NOTIFICATION_MAX_MSG_LEN,
+                webhook_url=config.options.DISCORD_FAIL_WEBHOOK_URL,
+                limit_chars=config.options.DISCORD_NOTIFICATION_MAX_MSG_LEN,
             )
         elif self.send_on_success:
             sucess_message = self._success_message()
             self._send_discord(
                 message=sucess_message,
-                webhook_url=config.DISCORD_SUCCESS_WEBHOOK_URL,
-                limit_chars=config.DISCORD_NOTIFICATION_MAX_MSG_LEN,
+                webhook_url=config.options.DISCORD_SUCCESS_WEBHOOK_URL,
+                limit_chars=config.options.DISCORD_NOTIFICATION_MAX_MSG_LEN,
             )
