@@ -161,26 +161,15 @@ ALL_MARIADB_DBS_TARGETS: list[MariaDBTargetModel] = [
 
 
 @pytest.fixture(autouse=True)
-def fixed_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(config, "SUBPROCESS_TIMEOUT_SECS", 5)
-    monkeypatch.setattr(config, "LOG_LEVEL", "DEBUG")
-    monkeypatch.setattr(config, "BACKUP_MAX_NUMBER", 1)
-    monkeypatch.setattr(
-        config,
-        "ZIP_ARCHIVE_PASSWORD",
-        'very_unpleasant:password-_-12!@#$%^&*()/;><.,]}{[\\`~\'"\'"\'""',
-    )
-    LOG_FOLDER_PATH = tmp_path / "pytest_logs"
-    LOG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
-    monkeypatch.setattr(config, "LOG_FOLDER_PATH", LOG_FOLDER_PATH)
-    CONST_BACKUP_FOLDER_PATH = tmp_path / "pytest_data"
-    monkeypatch.setattr(config, "CONST_BACKUP_FOLDER_PATH", CONST_BACKUP_FOLDER_PATH)
-    CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
+def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    backup_folder_path = tmp_path / "pytest_data"
+    monkeypatch.setattr(config, "CONST_BACKUP_FOLDER_PATH", backup_folder_path)
+    backup_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
+
     google_serv_acc_path = tmp_path / "pytest_google_auth"
     monkeypatch.setattr(
         config, "CONST_GOOGLE_SERVICE_ACCOUNT_PATH", google_serv_acc_path
     )
-    config.logging_config("DEBUG")
 
 
 @pytest.fixture(autouse=True)

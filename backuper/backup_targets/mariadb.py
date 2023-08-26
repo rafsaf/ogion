@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import re
 import shlex
@@ -46,22 +47,23 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
         def escape(s: str) -> str:
             return s.replace("\\", "\\\\")
 
-        name = f"{self.env_name}.mariadb.cnf"
-        path = config.BASE_DIR / name
-        path.unlink(missing_ok=True)
+        password = self.password.get_secret_value()
+        text = "{}\n{}\n{}\n{}\n{}\n{}".format(
+            "[client]",
+            f'user="{escape(self.user)}"',
+            f"host={self.host}",
+            f"port={self.port}",
+            "protocol=TCP",
+            f'password="{escape(password)}"' if self.password else "",
+        )
+        md5_hash = hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()
+        name = f"{self.env_name}.{md5_hash}.mariadb.cnf"
+
+        path = config.CONST_CONFIG_FOLDER_PATH / name
         path.touch(0o600)
         with open(path, "w") as file:
-            password = escape(self.password.get_secret_value())
-            file.write(
-                "{}\n{}\n{}\n{}\n{}\n{}".format(
-                    "[client]",
-                    f'user="{escape(self.user)}"',
-                    f"host={self.host}",
-                    f"port={self.port}",
-                    "protocol=TCP",
-                    f'password="{escape(password)}"' if self.password else "",
-                )
-            )
+            file.write(text)
+
         return path
 
     def _mariadb_connection(self) -> str:

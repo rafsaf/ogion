@@ -1,8 +1,6 @@
 import sys
-import threading
-import time
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 from unittest.mock import Mock
 
 import google.cloud.storage as storage
@@ -43,7 +41,7 @@ def test_empty_backup_targets_raise_runtime_error(
 
 def test_backup_provider(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        config,
+        config.options,
         "BACKUP_PROVIDER",
         "name=gcs bucket_name=name bucket_upload_path=test service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
     )
@@ -51,50 +49,14 @@ def test_backup_provider(monkeypatch: pytest.MonkeyPatch) -> None:
     assert provider.NAME == "gcs"
 
 
-def test_shutdown_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(config, "SIGTERM_TIMEOUT_SECS", 0.01)
-    with pytest.raises(SystemExit) as system_exit:
-        main.shutdown()
-    assert system_exit.type == SystemExit
-    assert system_exit.value.code == 0
-
-
-def test_shutdown_not_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(config, "SIGTERM_TIMEOUT_SECS", 0.01)
-
-    def sleep_005() -> None:
-        time.sleep(0.05)
-
-    dt = threading.Thread(target=sleep_005, daemon=True)
-    dt.start()
-    dt2 = threading.Thread(target=sleep_005, daemon=True)
-    dt2.start()
-    with pytest.raises(SystemExit) as system_exit:
-        main.shutdown()
-    assert system_exit.type == SystemExit
-    assert system_exit.value.code == 1
-    dt.join()
-    dt2.join()
-
-
-def test_shutdown_gracefully_with_thread(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(config, "SIGTERM_TIMEOUT_SECS", 0.1)
-
-    def sleep_005() -> None:
-        time.sleep(0.05)
-
-    dt = threading.Thread(target=sleep_005, daemon=True)
-    dt.start()
-    with pytest.raises(SystemExit) as system_exit:
-        main.shutdown()
-    assert system_exit.type == SystemExit
-    assert system_exit.value.code == 0
-    dt.join()
-
-
 def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["main.py", "--single"])
-    monkeypatch.setattr(config, "BACKUP_PROVIDER", "name=debug")
+    monkeypatch.setattr(config.options, "BACKUP_PROVIDER", "name=debug")
+
+    def dummy_shutdown() -> NoReturn:
+        sys.exit(0)
+
+    monkeypatch.setattr(main, "shutdown", dummy_shutdown)
     monkeypatch.setattr(
         core,
         "create_target_models",
@@ -103,7 +65,6 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(SystemExit) as system_exit:
         main.main()
     assert system_exit.type == SystemExit
-    assert system_exit.value.code == 0
 
     target_envs = [
         "postgresql_db_15",

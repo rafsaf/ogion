@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import re
 import shlex
@@ -51,21 +52,21 @@ class PostgreSQL(
         def escape(s: str) -> str:
             return s.replace("\\", "\\\\").replace(":", "\\:")
 
-        name = f"{self.env_name}.pgpass"
-        path = config.BASE_DIR / name
-        path.unlink(missing_ok=True)
+        password = self.password.get_secret_value()
+        text = "{}:{}:{}:{}:{}\n".format(
+            self.host,
+            self.port,
+            escape(self.db),
+            escape(self.user),
+            escape(password),
+        )
+        md5_hash = hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()
+        name = f"{self.env_name}.{md5_hash}.pgpass"
+
+        path = config.CONST_CONFIG_FOLDER_PATH / name
         path.touch(0o600)
         with open(path, "w") as file:
-            password = self.password.get_secret_value()
-            file.write(
-                "{}:{}:{}:{}:{}\n".format(
-                    self.host,
-                    self.port,
-                    escape(self.db),
-                    escape(self.user),
-                    escape(password),
-                )
-            )
+            file.write(text)
         log.debug("content of %s: %s", path, path.read_text())
         return path
 
