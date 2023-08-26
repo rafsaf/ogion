@@ -14,7 +14,10 @@ log = logging.getLogger(__name__)
 class BaseBackupTarget(ABC):
     NAME: config.BackupTargetEnum
 
-    def __init__(self, cron_rule: str, env_name: str, max_backups: int) -> None:
+    def __init__(
+        self, cron_rule: str, env_name: str, max_backups: int, settings: config.Settings
+    ) -> None:
+        self.settings: config.Settings = settings
         self.cron_rule: str = cron_rule
         self.env_name: str = env_name
         self.max_backups: int = max_backups

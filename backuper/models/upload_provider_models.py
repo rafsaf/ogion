@@ -7,6 +7,7 @@ from backuper import config
 
 class ProviderModel(BaseModel):
     name: config.UploadProviderEnum
+    settings: config.Settings
 
 
 class DebugProviderModel(ProviderModel):

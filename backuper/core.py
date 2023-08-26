@@ -26,14 +26,14 @@ class CoreSubprocessError(Exception):
     pass
 
 
-def run_subprocess(shell_args: str) -> str:
+def run_subprocess(shell_args: str, subprocess_timeout_secs: int) -> str:
     log.debug("run_subprocess running: '%s'", shell_args)
     p = subprocess.run(
         shell_args,
         capture_output=True,
         text=True,
         shell=True,
-        timeout=config.SUBPROCESS_TIMEOUT_SECS,
+        timeout=subprocess_timeout_secs,
     )
     if p.returncode:
         log.error("run_subprocess failed with status %s", p.returncode)
@@ -56,8 +56,8 @@ def remove_path(path: Path) -> None:
 
 
 def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
-    base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
-    base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
+    CONST_BASE_DIR_path = config.CONST_BACKUP_FOLDER_PATH / env_name
+    CONST_BASE_DIR_path.mkdir(mode=0o700, exist_ok=True, parents=True)
     random_string = secrets.token_urlsafe(3)
     new_file = "{}_{}_{}_{}".format(
         env_name,
@@ -67,22 +67,31 @@ def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
     )
     if sql:
         new_file += ".sql"
-    return base_dir_path / new_file
+    return CONST_BASE_DIR_path / new_file
 
 
-def run_create_zip_archive(backup_file: Path) -> Path:
-    seven_zip_path = seven_zip_bin_path()
+def run_create_zip_archive(
+    backup_file: Path,
+    archive_password: str,
+    archive_level: int,
+    skip_check: bool,
+    subprocess_timeout_secs: int,
+) -> Path:
+    seven_zip_path = seven_zip_bin_path(subprocess_timeout_secs)
     out_file = Path(f"{backup_file}.zip")
     log.info("start creating zip archive in subprocess: %s", backup_file)
-    zip_escaped_password = shlex.quote(config.ZIP_ARCHIVE_PASSWORD)
+    zip_escaped_password = shlex.quote(archive_password)
     shell_create_7zip_archive = (
         f"{seven_zip_path} a -p{zip_escaped_password} "
-        f"-mx={config.ZIP_ARCHIVE_LEVEL} {out_file} {backup_file}"
+        f"-mx={archive_level} {out_file} {backup_file}"
     )
-    run_subprocess(shell_create_7zip_archive)
+    run_subprocess(
+        shell_args=shell_create_7zip_archive,
+        subprocess_timeout_secs=subprocess_timeout_secs,
+    )
     log.info("finished zip archive creating")
 
-    if config.ZIP_SKIP_INTEGRITY_CHECK != "false":
+    if skip_check:
         return out_file
 
     log.info(
@@ -95,7 +104,10 @@ def run_create_zip_archive(backup_file: Path) -> Path:
     shell_7zip_archive_integriy_check = (
         f"{seven_zip_path} t -p{zip_escaped_password} {out_file}"
     )
-    integrity_check_result = run_subprocess(shell_7zip_archive_integriy_check)
+    integrity_check_result = run_subprocess(
+        shell_args=shell_7zip_archive_integriy_check,
+        subprocess_timeout_secs=subprocess_timeout_secs,
+    )
     if "Everything is Ok" not in integrity_check_result:  # pragma: no cover
         raise AssertionError(
             "zip arichive integrity test on %s: %s", out_file, integrity_check_result
@@ -112,6 +124,7 @@ def _validate_model(
     env_name: str,
     env_value: str,
     target: type[_BM],
+    settings: config.Settings,
     value_whitespace_split: bool = False,
 ) -> _BM:
     target_name: str = target.__name__.lower()
@@ -119,7 +132,7 @@ def _validate_model(
     log.debug("%s=%s", target_name, env_value)
     try:
         env_value_parts = env_value.strip()
-        target_kwargs: dict[str, Any] = {"env_name": env_name}
+        target_kwargs: dict[str, Any] = {"env_name": env_name, "settings": settings}
         for field_name in target.model_fields.keys():
             if env_value_parts.startswith(f"{field_name}="):
                 f = f"{field_name}="
@@ -141,7 +154,7 @@ def _validate_model(
     return validated_target
 
 
-def create_target_models() -> list[TargetModel]:
+def create_target_models(settings: config.Settings) -> list[TargetModel]:
     target_map: dict[config.BackupTargetEnum, type[TargetModel]] = {}
     for target_model in TargetModel.__subclasses__():
         name = config.BackupTargetEnum(
@@ -156,13 +169,17 @@ def create_target_models() -> list[TargetModel]:
         for target_model_name in target_map:
             if env_name.startswith(target_model_name):
                 target_model_cls = target_map[target_model_name]
-                targets.append(_validate_model(env_name, env_value, target_model_cls))
+                targets.append(
+                    _validate_model(env_name, env_value, target_model_cls, settings)
+                )
                 break
 
     return targets
 
 
-def create_provider_model() -> ProviderModel:
+def create_provider_model(
+    backup_provider: str, settings: config.Settings
+) -> ProviderModel:
     target_map: dict[config.UploadProviderEnum, type[ProviderModel]] = {}
     for target_model in ProviderModel.__subclasses__():
         name = config.UploadProviderEnum(
@@ -173,17 +190,23 @@ def create_provider_model() -> ProviderModel:
 
     base_provider = _validate_model(
         "backup_provider",
-        config.BACKUP_PROVIDER,
+        backup_provider,
         ProviderModel,
+        settings,
         value_whitespace_split=True,
     )
     target_model_cls = target_map[base_provider.name]
-    return _validate_model("backup_provider", config.BACKUP_PROVIDER, target_model_cls)
+    return _validate_model(
+        "backup_provider", backup_provider, target_model_cls, settings
+    )
 
 
-def seven_zip_bin_path() -> Path:
+def seven_zip_bin_path(subprocess_timeout_secs: int) -> Path:
     shell_get_cpu_architecture = "dpkg --print-architecture"
-    cpu_arch = run_subprocess(shell_get_cpu_architecture).strip()
+    cpu_arch = run_subprocess(
+        shell_args=shell_get_cpu_architecture,
+        subprocess_timeout_secs=subprocess_timeout_secs,
+    ).strip()
     seven_zip = config.CONST_BIN_ZIP_PATH / f"{cpu_arch}/7zz"
     if not seven_zip.exists():  # pragma: no cover
         raise RuntimeError(

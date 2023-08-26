@@ -22,13 +22,14 @@ def quit(sig: int, frame: FrameType | None) -> None:
     exit_event.set()
 
 
-@NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
-def backup_provider() -> BaseUploadProvider:
+def backup_provider(
+    backup_provider_env: str, settings: config.Settings
+) -> BaseUploadProvider:
     backup_provider_map: dict[config.UploadProviderEnum, type[BaseUploadProvider]] = {}
     for backup_provider in BaseUploadProvider.__subclasses__():
         backup_provider_map[backup_provider.NAME] = backup_provider  # type: ignore
 
-    provider_model = core.create_provider_model()
+    provider_model = core.create_provider_model(backup_provider_env, settings)
     log.info(
         "initializing provider: `%s`",
         provider_model.name,
@@ -43,14 +44,13 @@ def backup_provider() -> BaseUploadProvider:
     return res_backup_provider
 
 
-@NotificationsContext(step_name=PROGRAM_STEP.SETUP_TARGETS)
-def backup_targets() -> list[BaseBackupTarget]:
+def backup_targets(settings: config.Settings) -> list[BaseBackupTarget]:
     backup_targets_map: dict[config.BackupTargetEnum, type[BaseBackupTarget]] = {}
     for backup_target in BaseBackupTarget.__subclasses__():
         backup_targets_map[backup_target.NAME] = backup_target  # type: ignore
 
     backup_targets: list[BaseBackupTarget] = []
-    target_models = core.create_target_models()
+    target_models = core.create_target_models(settings=settings)
     if not target_models:
         raise RuntimeError("Found 0 backup targets, at least 1 is required.")
 
@@ -72,8 +72,7 @@ def backup_targets() -> list[BaseBackupTarget]:
     return backup_targets
 
 
-def shutdown() -> NoReturn:
-    timeout_secs = config.SIGTERM_TIMEOUT_SECS
+def shutdown(timeout_secs: int) -> NoReturn:
     start = time.time()
     deadline = start + timeout_secs
     log.info(
@@ -115,10 +114,14 @@ def shutdown() -> NoReturn:
         sys.exit(1)
 
 
-def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
+def run_backup(
+    target: BaseBackupTarget, provider: BaseUploadProvider, settings: config.Settings
+) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
     with NotificationsContext(
-        step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name
+        step_name=PROGRAM_STEP.BACKUP_CREATE,
+        settings=settings,
+        env_name=target.env_name,
     ):
         backup_file = target.make_backup()
     log.info(
@@ -128,12 +131,14 @@ def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
     )
     with NotificationsContext(
         step_name=PROGRAM_STEP.UPLOAD,
+        settings=settings,
         env_name=target.env_name,
     ):
         provider.post_save(backup_file=backup_file)
 
     with NotificationsContext(
         step_name=PROGRAM_STEP.CLEANUP,
+        settings=settings,
         env_name=target.env_name,
         send_on_success=True,
     ):
@@ -161,10 +166,18 @@ def main() -> NoReturn:
     signal.signal(signalnum=signal.SIGINT, handler=quit)
     signal.signal(signalnum=signal.SIGTERM, handler=quit)
 
+    settings = config.Settings()  # type: ignore
+    config.logging_config(settings.LOG_LEVEL, settings.LOG_FOLDER_PATH)
+
     single_run = setup_runtime_arguments()
 
-    provider = backup_provider()
-    targets = backup_targets()
+    with NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER, settings=settings):
+        provider = backup_provider(
+            backup_provider_env=settings.BACKUP_PROVIDER, settings=settings
+        )
+
+    with NotificationsContext(step_name=PROGRAM_STEP.SETUP_TARGETS, settings=settings):
+        targets = backup_targets(settings=settings)
 
     log.info("backuper configuration finished")
 
@@ -184,7 +197,7 @@ def main() -> NoReturn:
             exit_event.set()
         exit_event.wait(5)
 
-    shutdown()
+    shutdown(timeout_secs=settings.SIGTERM_TIMEOUT_SECS)
 
 
 if __name__ == "__main__":  # pragma: no cover

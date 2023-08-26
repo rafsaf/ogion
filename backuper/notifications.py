@@ -41,11 +41,13 @@ class NotificationsContext(ContextDecorator):
     def __init__(
         self,
         step_name: PROGRAM_STEP,
+        settings: config.Settings,
         env_name: str | None = None,
         send_on_success: bool = False,
     ) -> None:
         self.step_name: PROGRAM_STEP = step_name
         self.env_name = env_name
+        self.settings = settings
         self.send_on_success = send_on_success
 
     def _success_message(self) -> str:
@@ -72,7 +74,9 @@ class NotificationsContext(ContextDecorator):
         msg += f"\n{tb}\n"
         return msg
 
-    def _send_discord(self, message: str, webhook_url: str, limit_chars: int) -> None:
+    def _send_discord(
+        self, message: str, webhook_url: str | None, limit_chars: int
+    ) -> None:
         if not webhook_url:
             log.debug("skip sending discord notification, no webhook url")
             return None
@@ -105,13 +109,13 @@ class NotificationsContext(ContextDecorator):
             log.debug("fail message: %s", fail_message)
             self._send_discord(
                 message=fail_message,
-                webhook_url=config.DISCORD_FAIL_WEBHOOK_URL,
-                limit_chars=config.DISCORD_NOTIFICATION_MAX_MSG_LEN,
+                webhook_url=str(self.settings.DISCORD_FAIL_WEBHOOK_URL),
+                limit_chars=self.settings.DISCORD_NOTIFICATION_MAX_MSG_LEN,
             )
         elif self.send_on_success:
             sucess_message = self._success_message()
             self._send_discord(
                 message=sucess_message,
-                webhook_url=config.DISCORD_SUCCESS_WEBHOOK_URL,
-                limit_chars=config.DISCORD_NOTIFICATION_MAX_MSG_LEN,
+                webhook_url=str(self.settings.DISCORD_SUCCESS_WEBHOOK_URL),
+                limit_chars=self.settings.DISCORD_NOTIFICATION_MAX_MSG_LEN,
             )

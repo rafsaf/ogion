@@ -3,13 +3,16 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import final
 
-from backuper import config
+from backuper import config, core
 
 log = logging.getLogger(__name__)
 
 
 class BaseUploadProvider(ABC):
     NAME: config.UploadProviderEnum
+
+    def __init__(self, settings: config.Settings) -> None:
+        self.settings: config.Settings = settings
 
     def __init_subclass__(cls, name: config.UploadProviderEnum) -> None:
         cls.NAME = name
@@ -38,3 +41,12 @@ class BaseUploadProvider(ABC):
     @abstractmethod
     def _clean(self, backup_file: Path, max_backups: int) -> None:  # pragma: no cover
         pass
+
+    def create_zip_archive(self, backup_file: Path) -> Path:
+        return core.run_create_zip_archive(
+            backup_file=backup_file,
+            archive_password=self.settings.ZIP_ARCHIVE_PASSWORD.get_secret_value(),
+            archive_level=self.settings.ZIP_ARCHIVE_LEVEL,
+            skip_check=self.settings.ZIP_SKIP_INTEGRITY_CHECK,
+            subprocess_timeout_secs=self.settings.SUBPROCESS_TIMEOUT_SECS,
+        )

@@ -24,8 +24,10 @@ class UploadProviderGCS(
         service_account_base64: str,
         chunk_size_mb: int,
         chunk_timeout_secs: int,
+        settings: config.Settings,
         **kwargs: str,
     ) -> None:
+        super().__init__(settings)
         service_account_bytes = base64.b64decode(service_account_base64)
         with open(config.CONST_GOOGLE_SERVICE_ACCOUNT_PATH, "wb") as f:
             f.write(service_account_bytes)
@@ -39,7 +41,7 @@ class UploadProviderGCS(
         self.chunk_timeout_secs = chunk_timeout_secs
 
     def _post_save(self, backup_file: Path) -> str:
-        zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
+        zip_backup_file = self.create_zip_archive(backup_file)
 
         backup_dest_in_bucket = "{}/{}/{}".format(
             self.bucket_upload_path,

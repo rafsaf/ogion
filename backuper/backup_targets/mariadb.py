@@ -28,10 +28,14 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
         cron_rule: str,
         env_name: str,
         max_backups: int,
+        settings: config.Settings,
         **kwargs: str | int,
     ) -> None:
         super().__init__(
-            cron_rule=cron_rule, env_name=env_name, max_backups=max_backups
+            cron_rule=cron_rule,
+            env_name=env_name,
+            max_backups=max_backups,
+            settings=settings,
         )
         self.cron_rule: str = cron_rule
         self.user: str = user
@@ -47,7 +51,7 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
             return s.replace("\\", "\\\\")
 
         name = f"{self.env_name}.mariadb.cnf"
-        path = config.BASE_DIR / name
+        path = config.CONST_BASE_DIR / name
         path.unlink(missing_ok=True)
         path.touch(0o600)
         with open(path, "w") as file:
@@ -67,7 +71,9 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
     def _mariadb_connection(self) -> str:
         try:
             log.debug("check mariadb installation")
-            mariadb_version = core.run_subprocess("mariadb -V")
+            mariadb_version = core.run_subprocess(
+                "mariadb -V", self.settings.SUBPROCESS_TIMEOUT_SECS
+            )
             log.debug("output: %s", mariadb_version)
         except core.CoreSubprocessError as version_err:  # pragma: no cover
             log.critical(
@@ -81,8 +87,11 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
         try:
             db = shlex.quote(self.db)
             result = core.run_subprocess(
-                f"mariadb --defaults-file={self.option_file} {db} "
-                f"--execute='SELECT version();'",
+                shell_args=(
+                    f"mariadb --defaults-file={self.option_file} {db} "
+                    f"--execute='SELECT version();'"
+                ),
+                subprocess_timeout_secs=self.settings.SUBPROCESS_TIMEOUT_SECS,
             )
         except core.CoreSubprocessError as conn_err:
             log.error(conn_err, exc_info=True)
@@ -112,6 +121,8 @@ class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIAD
             f"--result-file={out_file} --verbose {db}"
         )
         log.debug("start mariadbdump in subprocess: %s", shell_mariadb_dump_db)
-        core.run_subprocess(shell_mariadb_dump_db)
+        core.run_subprocess(
+            shell_mariadb_dump_db, self.settings.SUBPROCESS_TIMEOUT_SECS
+        )
         log.debug("finished mariadbdump, output: %s", out_file)
         return out_file

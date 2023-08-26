@@ -5,6 +5,7 @@ from typing import Self
 from croniter import croniter
 from pydantic import (
     BaseModel,
+    Field,
     SecretStr,
     computed_field,
     field_validator,
@@ -17,7 +18,8 @@ from backuper import config
 class TargetModel(BaseModel):
     env_name: str
     cron_rule: str
-    max_backups: int = config.BACKUP_MAX_NUMBER
+    max_backups: int = Field(ge=1, le=998)
+    settings: config.Settings
 
     @field_validator("cron_rule")
     def cron_rule_is_valid(cls, cron_rule: str) -> str:

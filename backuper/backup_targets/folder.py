@@ -14,12 +14,16 @@ class Folder(BaseBackupTarget, target_model_name=config.BackupTargetEnum.FOLDER)
         cron_rule: str,
         env_name: str,
         max_backups: int,
+        settings: config.Settings,
         **kwargs: str | int,
     ) -> None:
         self.cron_rule: str = cron_rule
         self.folder: Path = abs_path
         super().__init__(
-            cron_rule=cron_rule, env_name=env_name, max_backups=max_backups
+            cron_rule=cron_rule,
+            env_name=env_name,
+            max_backups=max_backups,
+            settings=settings,
         )
 
     def _backup(self) -> Path:
@@ -27,6 +31,8 @@ class Folder(BaseBackupTarget, target_model_name=config.BackupTargetEnum.FOLDER)
 
         shell_create_dir_symlink = f"ln -s {self.folder} {out_file}"
         log.debug("start ln in subprocess: %s", shell_create_dir_symlink)
-        core.run_subprocess(shell_create_dir_symlink)
+        core.run_subprocess(
+            shell_create_dir_symlink, self.settings.SUBPROCESS_TIMEOUT_SECS
+        )
         log.debug("finished ln, output: %s", out_file)
         return out_file

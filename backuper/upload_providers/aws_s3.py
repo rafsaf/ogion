@@ -1,11 +1,12 @@
 import logging
 from pathlib import Path
+from typing import Any, TypedDict
 
 import boto3
-from typing import Any, TypedDict
+from boto3.s3.transfer import TransferConfig
+
 from backuper import config, core
 from backuper.upload_providers.base_provider import BaseUploadProvider
-from boto3.s3.transfer import TransferConfig
 
 log = logging.getLogger(__name__)
 
@@ -28,8 +29,10 @@ class UploadProviderAWS(
         key_secret: str,
         region: str,
         max_bandwidth: int | None,
+        settings: config.Settings,
         **kwargs: str,
     ) -> None:
+        super().__init__(settings)
         self.bucket_upload_path = bucket_upload_path
         self.max_bandwidth = max_bandwidth
 
@@ -44,7 +47,7 @@ class UploadProviderAWS(
         self.transfer_config = TransferConfig(max_bandwidth=self.max_bandwidth)
 
     def _post_save(self, backup_file: Path) -> str:
-        zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
+        zip_backup_file = self.create_zip_archive(backup_file)
 
         backup_dest_in_bucket = "{}/{}/{}".format(
             self.bucket_upload_path,

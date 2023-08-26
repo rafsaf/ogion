@@ -30,10 +30,14 @@ class PostgreSQL(
         cron_rule: str,
         env_name: str,
         max_backups: int,
+        settings: config.Settings,
         **kwargs: str | int,
     ) -> None:
         super().__init__(
-            cron_rule=cron_rule, env_name=env_name, max_backups=max_backups
+            cron_rule=cron_rule,
+            env_name=env_name,
+            max_backups=max_backups,
+            settings=settings,
         )
         self.cron_rule: str = cron_rule
         self.user: str = user
@@ -52,7 +56,7 @@ class PostgreSQL(
             return s.replace("\\", "\\\\").replace(":", "\\:")
 
         name = f"{self.env_name}.pgpass"
-        path = config.BASE_DIR / name
+        path = config.CONST_BASE_DIR / name
         path.unlink(missing_ok=True)
         path.touch(0o600)
         with open(path, "w") as file:
@@ -87,7 +91,9 @@ class PostgreSQL(
     def _postgres_connection(self) -> str:
         try:
             log.debug("check psql installation")
-            psql_version = core.run_subprocess("psql -V")
+            psql_version = core.run_subprocess(
+                "psql -V", self.settings.SUBPROCESS_TIMEOUT_SECS
+            )
             log.debug("output: %s", psql_version)
         except core.CoreSubprocessError as version_err:  # pragma: no cover
             log.critical(
@@ -100,7 +106,10 @@ class PostgreSQL(
         log.debug("start postgres connection")
         try:
             result = core.run_subprocess(
-                f"psql -d {self.escaped_conn_uri} -w --command 'SELECT version();'",
+                shell_args=(
+                    f"psql -d {self.escaped_conn_uri} -w --command 'SELECT version();'"
+                ),
+                subprocess_timeout_secs=self.settings.SUBPROCESS_TIMEOUT_SECS,
             )
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
@@ -126,6 +135,6 @@ class PostgreSQL(
         out_file = core.get_new_backup_path(self.env_name, name, sql=True)
         shell_pg_dump_db = f"pg_dump --clean --if-exists -v -O -d {self.escaped_conn_uri} -f {out_file}"
         log.debug("start pg_dump in subprocess: %s", shell_pg_dump_db)
-        core.run_subprocess(shell_pg_dump_db)
+        core.run_subprocess(shell_pg_dump_db, self.settings.SUBPROCESS_TIMEOUT_SECS)
         log.debug("finished pg_dump, output: %s", out_file)
         return out_file
