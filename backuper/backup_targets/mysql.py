@@ -47,7 +47,7 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
             return s.replace("\\", "\\\\")
 
         name = f"{self.env_name}.my.cnf"
-        path = config.BASE_DIR / name
+        path = config.CONST_BASE_DIR / name
         path.unlink(missing_ok=True)
         path.touch(0o600)
         with open(path, "w") as file:
