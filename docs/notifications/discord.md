@@ -16,11 +16,11 @@ You should generate webhooks like `"https://discord.com/api/webhooks/1111111111/
 
 ## Environemt variables
 
-| Name                             | Type | Description                                     | Default |
-| :------------------------------- | :--- | :---------------------------------------------- | :------ |
-| DISCORD_SUCCESS_WEBHOOK_URL      | url  | URL for success messages.                       | -       |
-| DISCORD_FAIL_WEBHOOK_URL         | url  | URL for fail messages.                          | -       |
-| DISCORD_NOTIFICATION_MAX_MSG_LEN | int  | Maximum length of messages send to discord API. | 1500    |
+| Name                             | Type     | Description                                                                                       | Default |
+| :------------------------------- | :------- | :------------------------------------------------------------------------------------------------ | :------ |
+| DISCORD_SUCCESS_WEBHOOK_URL      | http url | URL for success messages.                                                                         | -       |
+| DISCORD_FAIL_WEBHOOK_URL         | http url | URL for fail messages.                                                                            | -       |
+| DISCORD_NOTIFICATION_MAX_MSG_LEN | int      | Maximum length of messages send to discord API. Sensible default used. Min `150` and max `10000`. | 1500    |
 
 ## Examples:
 
