@@ -10,10 +10,8 @@ from pydantic_settings import BaseSettings
 _log_levels = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 CONST_BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
-CONST_BIN_ZIP_PATH: Path = CONST_BASE_DIR / "bin/7zip"
 CONST_BACKUP_FOLDER_PATH: Path = CONST_BASE_DIR / "data"
 CONST_CONFIG_FOLDER_PATH: Path = CONST_BASE_DIR / "conf"
-CONST_GOOGLE_SERVICE_ACCOUNT_PATH: Path = CONST_CONFIG_FOLDER_PATH / "google_auth.json"
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_CONFIG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 

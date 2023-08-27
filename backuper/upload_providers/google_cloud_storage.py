@@ -27,11 +27,11 @@ class UploadProviderGCS(
         **kwargs: str,
     ) -> None:
         service_account_bytes = base64.b64decode(service_account_base64)
-        with open(config.CONST_GOOGLE_SERVICE_ACCOUNT_PATH, "wb") as f:
+        sa_path = config.CONST_CONFIG_FOLDER_PATH / "google_auth.json"
+        with open(sa_path, "wb") as f:
             f.write(service_account_bytes)
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(
-            config.CONST_GOOGLE_SERVICE_ACCOUNT_PATH
-        )
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(sa_path)
+
         self.storage_client = storage.Client()
         self.bucket = self.storage_client.bucket(bucket_name)
         self.bucket_upload_path = bucket_upload_path

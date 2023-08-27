@@ -7,6 +7,7 @@ import shlex
 import shutil
 import subprocess
 from datetime import datetime, timedelta
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -187,10 +188,11 @@ def create_provider_model() -> ProviderModel:
     )
 
 
+@lru_cache
 def seven_zip_bin_path() -> Path:
     shell_get_cpu_architecture = "dpkg --print-architecture"
     cpu_arch = run_subprocess(shell_get_cpu_architecture).strip()
-    seven_zip = config.CONST_BIN_ZIP_PATH / f"{cpu_arch}/7zz"
+    seven_zip = config.CONST_BASE_DIR / f"bin/7zip/{cpu_arch}/7zzs"
     if not seven_zip.exists():  # pragma: no cover
         raise RuntimeError(
             f"unsuported architecture {cpu_arch}, 7zip not found at {seven_zip}"
