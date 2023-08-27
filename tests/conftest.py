@@ -165,11 +165,9 @@ def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     backup_folder_path = tmp_path / "pytest_data"
     monkeypatch.setattr(config, "CONST_BACKUP_FOLDER_PATH", backup_folder_path)
     backup_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
-
-    google_serv_acc_path = tmp_path / "pytest_google_auth"
-    monkeypatch.setattr(
-        config, "CONST_GOOGLE_SERVICE_ACCOUNT_PATH", google_serv_acc_path
-    )
+    config_folder_path = tmp_path / "pytest_config"
+    monkeypatch.setattr(config, "CONST_CONFIG_FOLDER_PATH", config_folder_path)
+    config_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
 
 
 @pytest.fixture(autouse=True)
