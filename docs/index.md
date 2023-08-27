@@ -65,7 +65,7 @@ services:
 
 The author actively uses backuper (with GCS) for one production project [plemiona-planer.pl](https://plemiona-planer.pl) postgres database (both PRD and STG) and for bunch of homelab projects including self hosted Firefly III mariadb, Grafana postgres, KeyCloak postgres, Nextcloud postgres and configuration file, Minecraft server files, and two other postgres dbs for some demo projects.
 
-See how it looks for PRD ~2GB size database:
+See how it looks for ~2GB size database:
 
 
 ![](./images/backuper_gcp_example_twp-min.jpg)
