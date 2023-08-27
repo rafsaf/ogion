@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     SIGTERM_TIMEOUT_SECS: float = Field(ge=0, le=3600 * 24, default=30)
     ZIP_ARCHIVE_LEVEL: int = Field(ge=1, le=9, default=3)
     BACKUP_MAX_NUMBER: int = Field(ge=1, le=998, default=7)
-    BACKUP_MIN_RETENTION_DAYS: int = Field(ge=1, le=36600, default=3)
+    BACKUP_MIN_RETENTION_DAYS: int = Field(ge=0, le=36600, default=3)
     DISCORD_SUCCESS_WEBHOOK_URL: HttpUrl | None = None
     DISCORD_FAIL_WEBHOOK_URL: HttpUrl | None = None
     DISCORD_NOTIFICATION_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)

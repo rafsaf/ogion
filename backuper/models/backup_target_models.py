@@ -20,7 +20,7 @@ class TargetModel(BaseModel):
     cron_rule: str
     max_backups: int = Field(ge=1, le=998, default=config.options.BACKUP_MAX_NUMBER)
     min_retention_days: int = Field(
-        ge=1, le=36600, default=config.options.BACKUP_MIN_RETENTION_DAYS
+        ge=0, le=36600, default=config.options.BACKUP_MIN_RETENTION_DAYS
     )
 
     @field_validator("cron_rule")
