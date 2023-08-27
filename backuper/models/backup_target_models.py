@@ -5,6 +5,7 @@ from typing import Self
 from croniter import croniter
 from pydantic import (
     BaseModel,
+    Field,
     SecretStr,
     computed_field,
     field_validator,
@@ -15,9 +16,12 @@ from backuper import config
 
 
 class TargetModel(BaseModel):
-    env_name: str
+    env_name: str = Field(pattern=r"^[A-Za-z_0-9]{1,}$")
     cron_rule: str
-    max_backups: int = config.options.BACKUP_MAX_NUMBER
+    max_backups: int = Field(ge=1, le=998, default=config.options.BACKUP_MAX_NUMBER)
+    min_retention_days: int = Field(
+        ge=1, le=36600, default=config.options.BACKUP_MIN_RETENTION_DAYS
+    )
 
     @field_validator("cron_rule")
     def cron_rule_is_valid(cls, cron_rule: str) -> str:
@@ -26,14 +30,6 @@ class TargetModel(BaseModel):
                 f"Error in cron_rule expression: `{cron_rule}` is not valid"
             )
         return cron_rule
-
-    @field_validator("env_name")
-    def env_name_is_valid(cls, env_name: str) -> str:
-        if not config.CONST_ENV_NAME_REGEX.match(env_name):
-            raise ValueError(
-                f"Env variable does not match regex {config.CONST_ENV_NAME_REGEX}: `{env_name}`"
-            )
-        return env_name
 
     @computed_field()  # type: ignore
     @cached_property

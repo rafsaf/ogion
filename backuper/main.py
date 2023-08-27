@@ -137,7 +137,11 @@ def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
         env_name=target.env_name,
         send_on_success=True,
     ):
-        provider.clean(backup_file=backup_file, max_backups=target.max_backups)
+        provider.clean(
+            backup_file=backup_file,
+            max_backups=target.max_backups,
+            min_retention_days=target.min_retention_days,
+        )
 
     log.info(
         "backup and upload finished, next backup of target `%s` is: %s",

@@ -14,12 +14,16 @@ class File(BaseBackupTarget, target_model_name=config.BackupTargetEnum.FILE):
         cron_rule: str,
         env_name: str,
         max_backups: int,
+        min_retention_days: int,
         **kwargs: str | int,
     ) -> None:
         self.cron_rule: str = cron_rule
         self.file: Path = abs_path
         super().__init__(
-            cron_rule=cron_rule, env_name=env_name, max_backups=max_backups
+            cron_rule=cron_rule,
+            env_name=env_name,
+            max_backups=max_backups,
+            min_retention_days=min_retention_days,
         )
 
     def _backup(self) -> Path:

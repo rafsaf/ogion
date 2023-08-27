@@ -24,9 +24,15 @@ class BaseUploadProvider(ABC):
             raise
 
     @final
-    def clean(self, backup_file: Path, max_backups: int) -> None:
+    def clean(
+        self, backup_file: Path, max_backups: int, min_retention_days: int
+    ) -> None:
         try:
-            return self._clean(backup_file=backup_file, max_backups=max_backups)
+            return self._clean(
+                backup_file=backup_file,
+                max_backups=max_backups,
+                min_retention_days=min_retention_days,
+            )
         except Exception as err:
             log.error(err, exc_info=True)
             raise
@@ -36,5 +42,7 @@ class BaseUploadProvider(ABC):
         pass
 
     @abstractmethod
-    def _clean(self, backup_file: Path, max_backups: int) -> None:  # pragma: no cover
+    def _clean(
+        self, backup_file: Path, max_backups: int, min_retention_days: int
+    ) -> None:  # pragma: no cover
         pass

@@ -1,11 +1,12 @@
 import logging
 from pathlib import Path
+from typing import Any, TypedDict
 
 import boto3
-from typing import Any, TypedDict
+from boto3.s3.transfer import TransferConfig
+
 from backuper import config, core
 from backuper.upload_providers.base_provider import BaseUploadProvider
-from boto3.s3.transfer import TransferConfig
 
 log = logging.getLogger(__name__)
 
@@ -63,7 +64,9 @@ class UploadProviderAWS(
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
-    def _clean(self, backup_file: Path, max_backups: int) -> None:
+    def _clean(
+        self, backup_file: Path, max_backups: int, min_retention_days: int
+    ) -> None:
         for backup_path in backup_file.parent.iterdir():
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
@@ -79,6 +82,18 @@ class UploadProviderAWS(
 
         while len(backup_list_cloud) > max_backups:
             backup_to_remove = backup_list_cloud.pop()
+            file_name = backup_to_remove.split("/")[-1]
+            if core.file_before_retention_period_ends(
+                backup_name=file_name, min_retention_days=min_retention_days
+            ):
+                log.info(
+                    "there are more backups than max_backups (%s/%s), "
+                    "but oldest cannot be removed due to min retention days",
+                    len(backup_list_cloud),
+                    max_backups,
+                )
+                break
+
             items_to_delete.append({"Key": backup_to_remove})
             log.info("backup %s will be deleted from aws s3 bucket", backup_to_remove)
 
@@ -92,4 +107,7 @@ class UploadProviderAWS(
                 raise RuntimeError(
                     "Fail to delete backups from aws s3: %s", delete_response["Errors"]
                 )
-            log.info("backups were successfully deleted from aws s3 bucket")
+            log.info(
+                "%s backups were successfully deleted from aws s3 bucket",
+                len(items_to_delete),
+            )

@@ -60,7 +60,9 @@ class UploadProviderGCS(
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
-    def _clean(self, backup_file: Path, max_backups: int) -> None:
+    def _clean(
+        self, backup_file: Path, max_backups: int, min_retention_days: int
+    ) -> None:
         for backup_path in backup_file.parent.iterdir():
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
@@ -74,6 +76,18 @@ class UploadProviderGCS(
         backup_list_cloud.sort(reverse=True)
         while len(backup_list_cloud) > max_backups:
             backup_to_remove = backup_list_cloud.pop()
+            file_name = backup_to_remove.split("/")[-1]
+            if core.file_before_retention_period_ends(
+                backup_name=file_name, min_retention_days=min_retention_days
+            ):
+                log.info(
+                    "there are more backups than max_backups (%s/%s), "
+                    "but oldest cannot be removed due to min retention days",
+                    len(backup_list_cloud),
+                    max_backups,
+                )
+                break
+
             blob = self.bucket.blob(backup_to_remove)
             blob.delete()
             log.info("deleted backup %s from google cloud storage", backup_to_remove)

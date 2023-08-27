@@ -14,10 +14,13 @@ log = logging.getLogger(__name__)
 class BaseBackupTarget(ABC):
     NAME: config.BackupTargetEnum
 
-    def __init__(self, cron_rule: str, env_name: str, max_backups: int) -> None:
+    def __init__(
+        self, cron_rule: str, env_name: str, max_backups: int, min_retention_days: int
+    ) -> None:
         self.cron_rule: str = cron_rule
         self.env_name: str = env_name
         self.max_backups: int = max_backups
+        self.min_retention_days: int = min_retention_days
         self.last_backup_time: datetime = datetime.utcnow()
         self.next_backup_time: datetime = self._get_next_backup_time()
         log.info(

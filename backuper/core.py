@@ -6,7 +6,7 @@ import secrets
 import shlex
 import shutil
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -18,7 +18,9 @@ from backuper.models.upload_provider_models import ProviderModel
 
 log = logging.getLogger(__name__)
 
-SAFE_LETTER_PATTERN = r"[^A-Za-z0-9_]*"
+SAFE_LETTER_PATTERN = re.compile(r"[^A-Za-z0-9_]*")
+DATETIME_BACKUP_FILE_PATTERN = re.compile(r"_[0-9]{8}_[0-9]{4}_")
+
 _BM = TypeVar("_BM", bound=BaseModel)
 
 
@@ -194,3 +196,25 @@ def seven_zip_bin_path() -> Path:
             f"unsuported architecture {cpu_arch}, 7zip not found at {seven_zip}"
         )
     return seven_zip
+
+
+def file_before_retention_period_ends(
+    backup_name: str, min_retention_days: int
+) -> bool:
+    now = datetime.utcnow()
+    matches = DATETIME_BACKUP_FILE_PATTERN.finditer(backup_name)
+
+    datetime_str = ""
+    for match in matches:
+        datetime_str = match.group(0)
+        break
+    if not datetime_str:  # pragma: no cover
+        raise ValueError(
+            f"unexpected backup file name, could not parse datetime: {backup_name}"
+        )
+    backup_datetime = datetime.strptime(datetime_str, "_%Y%m%d_%H%M_")
+    delete_not_before = backup_datetime + timedelta(days=min_retention_days)
+
+    if now < delete_not_before:
+        return True
+    return False
