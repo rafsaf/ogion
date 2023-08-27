@@ -4,6 +4,7 @@ from typing import Any, TypedDict
 
 import boto3
 from boto3.s3.transfer import TransferConfig
+from pydantic import SecretStr
 
 from backuper import config, core
 from backuper.upload_providers.base_provider import BaseUploadProvider
@@ -26,7 +27,7 @@ class UploadProviderAWS(
         bucket_name: str,
         bucket_upload_path: str,
         key_id: str,
-        key_secret: str,
+        key_secret: SecretStr,
         region: str,
         max_bandwidth: int | None,
         **kwargs: str,
@@ -38,7 +39,7 @@ class UploadProviderAWS(
             "s3",
             region_name=region,
             aws_access_key_id=key_id,
-            aws_secret_access_key=key_secret,
+            aws_secret_access_key=key_secret.get_secret_value(),
         )
 
         self.bucket = s3.Bucket(bucket_name)

@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import boto3
 import pytest
 from freezegun import freeze_time
+from pydantic import SecretStr
 
 from backuper.upload_providers import UploadProviderAWS
 
@@ -18,7 +19,7 @@ def get_test_aws() -> UploadProviderAWS:
         bucket_name="name",
         bucket_upload_path="test123",
         key_id="id",
-        key_secret="secret",
+        key_secret=SecretStr("secret"),
         region="fake region",
         max_bandwidth=None,
     )

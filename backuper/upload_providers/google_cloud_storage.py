@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 import google.cloud.storage as storage
+from pydantic import SecretStr
 
 from backuper import config, core
 from backuper.upload_providers.base_provider import BaseUploadProvider
@@ -21,12 +22,14 @@ class UploadProviderGCS(
         self,
         bucket_name: str,
         bucket_upload_path: str,
-        service_account_base64: str,
+        service_account_base64: SecretStr,
         chunk_size_mb: int,
         chunk_timeout_secs: int,
         **kwargs: str,
     ) -> None:
-        service_account_bytes = base64.b64decode(service_account_base64)
+        service_account_bytes = base64.b64decode(
+            service_account_base64.get_secret_value()
+        )
         sa_path = config.CONST_CONFIG_FOLDER_PATH / "google_auth.json"
         with open(sa_path, "wb") as f:
             f.write(service_account_bytes)

@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import google.cloud.storage as storage
 import pytest
 from freezegun import freeze_time
+from pydantic import SecretStr
 
 from backuper.upload_providers import UploadProviderGCS
 
@@ -17,7 +18,7 @@ def get_test_gcs() -> UploadProviderGCS:
     return UploadProviderGCS(
         bucket_name="name",
         bucket_upload_path="test",
-        service_account_base64="Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
+        service_account_base64=SecretStr("Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="),
         chunk_size_mb=100,
         chunk_timeout_secs=100,
     )
