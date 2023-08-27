@@ -2,10 +2,6 @@
 
 A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms.
 
-| WARNING                                                                                                                                                                                                                                                    |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| While this project aims to be a reliable backup tool and can help protect your hobby 5GB Postgres database from evaporation, it is **NOT** suitable for enterprise production systems with huge databases and application workloads. You have been warned. |
-
 ## Documentation
 - [https://backuper.rafsaf.pl](https://backuper.rafsaf.pl)
 
@@ -30,7 +26,7 @@ A tool for performing scheduled database backups and transferring encrypted data
 
 ## Deployment strategies
 
-Dockerhub: [https://hub.docker.com/r/rafsaf/backuper](https://hub.docker.com/r/rafsaf/backuper)
+Using docker image: `rafsaf/backuper:latest`, see all tags on [dockerhub](https://hub.docker.com/r/rafsaf/backuper/tags)
 
 - docker (docker compose) container
 - kubernetes deployment
@@ -63,6 +59,14 @@ services:
 
 (NOTE this will use provider [debug](https://backuper.rafsaf.pl/providers/debug/) that store backups locally in the container).
 
+## Real world usage
+
+The author actively uses backuper (with GCS) for one production project [plemiona-planer.pl](https://plemiona-planer.pl) postgres database (both PRD and STG) and for bunch of homelab projects including self hosted Firefly III mariadb, Grafana postgres, KeyCloak postgres, Nextcloud postgres and configuration file, Minecraft server files, and two other postgres dbs for some demo projects.
+
+See how it looks for PRD ~2GB size database:
+
+
+![](./images/backuper_gcp_example_twp-min.jpg)
 
 <br>
 <br>
