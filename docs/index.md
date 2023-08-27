@@ -1,6 +1,8 @@
 # Backuper
 
-A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms.
+A tool for performing scheduled database backups and transferring encrypted data to secure public clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms.
+
+Backups are in `zip` format using [7-zip](https://www.7-zip.org/), with strong AES-256 encryption under the hood.
 
 ## Documentation
 - [https://backuper.rafsaf.pl](https://backuper.rafsaf.pl)
