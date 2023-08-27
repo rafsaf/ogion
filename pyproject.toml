@@ -12,6 +12,8 @@ pydantic = "^2.2.1"
 python = "^3.11"
 boto3 = "^1.28.34"
 pydantic-settings = "^2.0.3"
+azure-storage-blob = "^12.17.0"
+azure-identity = "^1.14.0"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "^2.2"

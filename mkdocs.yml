@@ -24,6 +24,7 @@ nav:
   - Upload providers:
       - providers/google_cloud_storage.md
       - providers/aws_s3.md
+      - providers/azure.md
       - providers/debug.md
   - Backup targets:
       - backup_targets/postgresql.md
