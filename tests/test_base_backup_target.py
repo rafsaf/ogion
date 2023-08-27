@@ -13,7 +13,9 @@ def test_base_backup_target_next_backup() -> None:
         def _backup(self) -> Path:
             return Path(__file__)
 
-    target = TargetModel(cron_rule="* * * * *", env_name="env", max_backups=1)
+    target = TargetModel(
+        cron_rule="* * * * *", env_name="env", max_backups=1, min_retention_days=1
+    )
     assert target.cron_rule == "* * * * *"
     assert target.env_name == "env"
     assert target.last_backup_time == datetime(2023, 5, 3, 17, 58)

@@ -1,7 +1,9 @@
 from pathlib import Path
 from unittest.mock import Mock
+
 import boto3
 import pytest
+from freezegun import freeze_time
 
 from backuper.upload_providers import UploadProviderAWS
 
@@ -68,12 +70,12 @@ class ItemInS3:
 
 
 items_lst: list[ItemInS3] = [
-    ItemInS3("test123/fake_env_name/file_20230427_0105.zip"),
-    ItemInS3("test123/fake_env_name/file_20230127_0105.zip"),
-    ItemInS3("test123/fake_env_name/file_20230426_0105.zip"),
-    ItemInS3("test123/fake_env_name/file_20230227_0105.zip"),
-    ItemInS3("test123/fake_env_name/file_20230425_0105.zip"),
-    ItemInS3("test123/fake_env_name/file_20230327_0105.zip"),
+    ItemInS3("test123/fake_env_name/file_20230427_0105_dummy_xfcs.zip"),
+    ItemInS3("test123/fake_env_name/file_20230127_0105_dummy_xfcs.zip"),
+    ItemInS3("test123/fake_env_name/file_20230426_0105_dummy_xfcs.zip"),
+    ItemInS3("test123/fake_env_name/file_20230227_0105_dummy_xfcs.zip.zip"),
+    ItemInS3("test123/fake_env_name/file_20230425_0105_dummy_xfcs.zip.zip"),
+    ItemInS3("test123/fake_env_name/file_20230327_0105_dummy_xfcs.zip.zip"),
 ]
 
 
@@ -103,7 +105,7 @@ def test_aws_clean_method_with_file_list(tmp_path: Path, aws_method_name: str) -
     fake_backup_file_zip_path2 = fake_backup_dir_path / "fake_backup2.zip"
     fake_backup_file_zip_path2.touch()
 
-    getattr(aws, aws_method_name)(fake_backup_file_zip_path, 2)
+    getattr(aws, aws_method_name)(fake_backup_file_zip_path, 2, 1)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_zip_path.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -111,11 +113,33 @@ def test_aws_clean_method_with_file_list(tmp_path: Path, aws_method_name: str) -
     aws.bucket.delete_objects.assert_called_once_with(
         Delete={
             "Objects": [
-                {"Key": "test123/fake_env_name/file_20230127_0105.zip"},
-                {"Key": "test123/fake_env_name/file_20230227_0105.zip"},
-                {"Key": "test123/fake_env_name/file_20230327_0105.zip"},
-                {"Key": "test123/fake_env_name/file_20230425_0105.zip"},
+                {"Key": "test123/fake_env_name/file_20230127_0105_dummy_xfcs.zip"},
+                {"Key": "test123/fake_env_name/file_20230227_0105_dummy_xfcs.zip.zip"},
+                {"Key": "test123/fake_env_name/file_20230327_0105_dummy_xfcs.zip.zip"},
+                {"Key": "test123/fake_env_name/file_20230425_0105_dummy_xfcs.zip.zip"},
             ],
             "Quiet": False,
         }
     )
+
+
+@freeze_time("2023-08-27")
+@pytest.mark.parametrize("aws_method_name", ["_clean", "clean"])
+def test_aws_clean_respects_min_retention_days_param_and_not_delete_any_file(
+    tmp_path: Path, aws_method_name: str
+) -> None:
+    aws = get_test_aws()
+
+    bucket_mock = Mock()
+    aws.bucket = bucket_mock
+    bucket_mock.objects.filter.return_value = items_lst
+    bucket_mock.delete_objects.return_value = {}
+
+    fake_backup_dir_path = tmp_path / "fake_env_name"
+    fake_backup_dir_path.mkdir()
+    fake_backup_file_path = fake_backup_dir_path / "fake_backup"
+    fake_backup_file_path.touch()
+
+    getattr(aws, aws_method_name)(fake_backup_file_path, 2, 3650)
+
+    aws.bucket.delete_objects.assert_not_called()

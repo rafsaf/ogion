@@ -45,6 +45,7 @@ After new release is triggered, manual command needs to be run (eg. tag 0.1) and
 
 ```bash
 mike deploy --push --update-aliases 0.1 latest
+mike set-default --push 0.1
 ```
 
 <br>
