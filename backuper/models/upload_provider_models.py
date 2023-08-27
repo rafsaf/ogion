@@ -35,3 +35,8 @@ class AWSProviderModel(ProviderModel):
     key_secret: SecretStr
     region: str
     max_bandwidth: int | None = None
+
+
+class AzureProviderModel(ProviderModel):
+    container_name: str
+    connect_string: SecretStr

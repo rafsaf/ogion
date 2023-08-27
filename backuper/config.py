@@ -27,6 +27,7 @@ class UploadProviderEnum(StrEnum):
     LOCAL_FILES_DEBUG = "debug"
     GOOGLE_CLOUD_STORAGE = "gcs"
     AWS_S3 = "aws"
+    AZURE = "azure"
 
 
 class BackupTargetEnum(StrEnum):
