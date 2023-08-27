@@ -21,6 +21,7 @@ A tool for performing scheduled database backups and transferring encrypted data
 
 - Google Cloud Storage bucket
 - AWS S3 bucket
+- Azure Blob Storage
 - Debug (local)
 
 ## Notifications
