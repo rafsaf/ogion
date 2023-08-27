@@ -25,10 +25,10 @@ class UploadProviderAzure(
         self.container_name = container_name
         self.connect_str = connect_string
 
-        self.blob_service_client = BlobServiceClient.from_connection_string(
+        blob_service_client = BlobServiceClient.from_connection_string(
             connect_string.get_secret_value()
         )
-        self.container_client = self.blob_service_client.get_container_client(
+        self.container_client = blob_service_client.get_container_client(
             container=self.container_name
         )
 
@@ -39,8 +39,8 @@ class UploadProviderAzure(
             zip_backup_file.parent.name,
             zip_backup_file.name,
         )
-        blob_client = self.blob_service_client.get_blob_client(
-            container=self.container_name, blob=backup_dest_in_azure_container
+        blob_client = self.container_client.get_blob_client(
+            blob=backup_dest_in_azure_container
         )
 
         log.info(
