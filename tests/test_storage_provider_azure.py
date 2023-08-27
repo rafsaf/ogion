@@ -18,11 +18,15 @@ def get_test_azure() -> UploadProviderAzure:
     return UploadProviderAzure(container_name="test", connect_string=SecretStr("any"))
 
 
-def test_azure_post_save_fails_on_fail_upload(tmp_path: Path) -> None:
+def test_azure_post_save_fails_on_fail_upload(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     azure = get_test_azure()
     blob_client_mock = Mock()
     blob_client_mock.upload_blob.side_effect = ValueError()
-    azure.container_client.get_blob_client.return_value = blob_client_mock
+    container_client_mock = Mock()
+    container_client_mock.get_blob_client.return_value = blob_client_mock
+    monkeypatch.setattr(azure, "container_client", container_client_mock)
 
     fake_backup_file_path = tmp_path / "fake_backup"
     fake_backup_file_path.touch()
@@ -32,11 +36,13 @@ def test_azure_post_save_fails_on_fail_upload(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize("azure_method_name", ["_post_save", "post_save"])
 def test_azure_post_save_with_bucket_upload_path(
-    tmp_path: Path, azure_method_name: str
+    tmp_path: Path, azure_method_name: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     azure = get_test_azure()
     blob_client_mock = Mock()
-    azure.container_client.get_blob_client.return_value = blob_client_mock
+    container_client_mock = Mock()
+    container_client_mock.get_blob_client.return_value = blob_client_mock
+    monkeypatch.setattr(azure, "container_client", container_client_mock)
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
@@ -79,7 +85,9 @@ def test_azure_clean_file_and_short_blob_list(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, azure_method_name: str
 ) -> None:
     azure = get_test_azure()
-    azure.container_client.list_blobs.return_value = list_blobs_short
+    container_client_mock = Mock()
+    container_client_mock.list_blobs.return_value = list_blobs_short
+    monkeypatch.setattr(azure, "container_client", container_client_mock)
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
@@ -93,7 +101,7 @@ def test_azure_clean_file_and_short_blob_list(
     assert not fake_backup_file_zip_path.exists()
     assert not fake_backup_file_zip_path2.exists()
 
-    azure.container_client.delete_blob.assert_called_once_with(
+    container_client_mock.delete_blob.assert_called_once_with(
         blob="fake_env_name/file_19990427_0108_dummy_xfcs.zip"
     )
 
@@ -103,7 +111,9 @@ def test_azure_clean_directory_and_long_blob_list(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, azure_method_name: str
 ) -> None:
     azure = get_test_azure()
-    azure.container_client.list_blobs.return_value = list_blobs_long
+    container_client_mock = Mock()
+    container_client_mock.list_blobs.return_value = list_blobs_long
+    monkeypatch.setattr(azure, "container_client", container_client_mock)
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
@@ -115,16 +125,16 @@ def test_azure_clean_directory_and_long_blob_list(
     assert not fake_backup_dir_path.exists()
     assert not fake_backup_file_zip_path.exists()
 
-    azure.container_client.delete_blob.assert_any_call(
+    container_client_mock.delete_blob.assert_any_call(
         blob="fake_env_name/file_20230127_0105_dummy_xfcs.zip"
     )
-    azure.container_client.delete_blob.assert_any_call(
+    container_client_mock.delete_blob.assert_any_call(
         blob="fake_env_name/file_20230227_0105_dummy_xfcs.zip.zip"
     )
-    azure.container_client.delete_blob.assert_any_call(
+    container_client_mock.delete_blob.assert_any_call(
         blob="fake_env_name/file_20230425_0105_dummy_xfcs.zip.zip"
     )
-    azure.container_client.delete_blob.assert_any_call(
+    container_client_mock.delete_blob.assert_any_call(
         blob="fake_env_name/file_20230327_0105_dummy_xfcs.zip.zip"
     )
 
@@ -135,7 +145,9 @@ def test_azure_clean_respects_min_retention_days_param_and_not_delete_any_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, azure_method_name: str
 ) -> None:
     azure = get_test_azure()
-    azure.container_client.list_blobs.return_value = list_blobs_long
+    container_client_mock = Mock()
+    container_client_mock.list_blobs.return_value = list_blobs_long
+    monkeypatch.setattr(azure, "container_client", container_client_mock)
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
@@ -144,4 +156,4 @@ def test_azure_clean_respects_min_retention_days_param_and_not_delete_any_file(
 
     getattr(azure, azure_method_name)(fake_backup_dir_path, 2, 30 * 365)
 
-    azure.container_client.delete_blob.assert_not_called()
+    container_client_mock.delete_blob.assert_not_called()
