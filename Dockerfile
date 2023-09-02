@@ -1,4 +1,4 @@
-FROM python:3.11.4-slim-bookworm AS base
+FROM python:3.11.5-slim-bookworm AS base
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV ROOT_MODE="false"
