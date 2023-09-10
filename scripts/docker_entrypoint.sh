@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 echo "ROOT_MODE: $ROOT_MODE"
 
 if [ "$ROOT_MODE" = "false" ] 

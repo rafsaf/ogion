@@ -7,7 +7,6 @@ import shlex
 import shutil
 import subprocess
 from datetime import datetime, timedelta
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -74,14 +73,13 @@ def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
 
 
 def run_create_zip_archive(backup_file: Path) -> Path:
-    seven_zip_path = seven_zip_bin_path()
     out_file = Path(f"{backup_file}.zip")
     log.info("start creating zip archive in subprocess: %s", backup_file)
     zip_escaped_password = shlex.quote(
         config.options.ZIP_ARCHIVE_PASSWORD.get_secret_value()
     )
     shell_create_7zip_archive = (
-        f"{seven_zip_path} a -p{zip_escaped_password} "
+        f"{config.options.seven_zip_bin_path} a -p{zip_escaped_password} "
         f"-mx={config.options.ZIP_ARCHIVE_LEVEL} {out_file} {backup_file}"
     )
     run_subprocess(shell_create_7zip_archive)
@@ -98,7 +96,7 @@ def run_create_zip_archive(backup_file: Path) -> Path:
         out_file,
     )
     shell_7zip_archive_integriy_check = (
-        f"{seven_zip_path} t -p{zip_escaped_password} {out_file}"
+        f"{config.options.seven_zip_bin_path} t -p{zip_escaped_password} {out_file}"
     )
     integrity_check_result = run_subprocess(shell_7zip_archive_integriy_check)
     if "Everything is Ok" not in integrity_check_result:  # pragma: no cover
@@ -186,18 +184,6 @@ def create_provider_model() -> ProviderModel:
     return _validate_model(
         "backup_provider", config.options.BACKUP_PROVIDER, target_model_cls
     )
-
-
-@lru_cache
-def seven_zip_bin_path() -> Path:
-    shell_get_cpu_architecture = "dpkg --print-architecture"
-    cpu_arch = run_subprocess(shell_get_cpu_architecture).strip()
-    seven_zip = config.CONST_BASE_DIR / f"bin/7zip/{cpu_arch}/7zzs"
-    if not seven_zip.exists():  # pragma: no cover
-        raise RuntimeError(
-            f"unsuported architecture {cpu_arch}, 7zip not found at {seven_zip}"
-        )
-    return seven_zip
 
 
 def file_before_retention_period_ends(
