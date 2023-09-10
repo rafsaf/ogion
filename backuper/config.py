@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     DISCORD_FAIL_WEBHOOK_URL: HttpUrl | None = None
     DISCORD_NOTIFICATION_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
 
-    @computed_field
+    @computed_field  # type: ignore[misc]
     @cached_property
     def seven_zip_bin_path(self) -> Path:
         return CONST_BASE_DIR / f"bin/7zip/{self.CPU_ARCH}/7zzs"
