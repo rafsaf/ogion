@@ -17,14 +17,13 @@ COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 ENTRYPOINT ["/bin/sh", "/docker_entrypoint.sh"]
 
 FROM base as poetry
-RUN apk add build-base
+RUN apk add build-base libffi-dev
 RUN pip install poetry==1.5.1
 COPY poetry.lock pyproject.toml ./
 RUN poetry export -o /requirements.txt --without-hashes
 RUN poetry export -o /requirements-dev.txt --without-hashes --with dev
 
 FROM base AS tests
-RUN apk add make
 COPY --from=poetry /requirements-dev.txt .
 RUN pip install -r requirements-dev.txt
 RUN rm -f requirements-dev.txt
