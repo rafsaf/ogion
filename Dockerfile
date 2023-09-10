@@ -17,6 +17,7 @@ COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 ENTRYPOINT ["/bin/sh", "/docker_entrypoint.sh"]
 
 FROM base as poetry
+RUN apk add build-base
 RUN pip install poetry==1.5.1
 COPY poetry.lock pyproject.toml ./
 RUN poetry export -o /requirements.txt --without-hashes
