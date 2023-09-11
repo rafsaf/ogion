@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     @computed_field  # type: ignore[misc]
     @cached_property
     def seven_zip_bin_path(self) -> Path:
-        return CONST_BASE_DIR / f"bin/7zip/{self.CPU_ARCH}/7zzs"
+        return CONST_BASE_DIR / f"backuper/bin/7zip/{self.CPU_ARCH}/7zzs"
 
 
 options = Settings()  # type: ignore
