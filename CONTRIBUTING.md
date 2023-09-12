@@ -35,7 +35,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
     `cp .env.example .env`
 
-4. To run database backups, you will need mariadb-client and postgresql-client installed, there are dedicated scripts in folder `script` that can do that (or install using `apt` for example).
+4. To run database backups, you will need `mariadb-client` and `postgresql-client` installed, there are dedicated scripts in folder `/scripts` that can do that (or install using `apt` for example).
 
 5. Setup databases
 
@@ -66,7 +66,7 @@ directly in the container exists:
 - amd64: `docker compose run --rm --build backuper_tests_amd64`
 - arm64 (slow, qemu) `docker compose run --rm --build backuper_tests_arm64`
 
-To run tests vs arm64 you will need to follow steps in https://docs.docker.com/build/building/multi-platform/.
+To run tests vs `arm64` you will need to follow steps in https://docs.docker.com/build/building/multi-platform/.
 
 Note, exactly above is being run inside runners in tests github action.
 
