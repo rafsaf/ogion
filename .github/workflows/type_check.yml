@@ -1,4 +1,4 @@
-name: type_check
+name: type-check
 on:
   push:
     branches:
@@ -8,6 +8,10 @@ on:
 
 jobs:
   type_check:
+    strategy:
+      matrix:
+        check: ["ruff check", "mypy --check", "black --check"]
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -15,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11.4"
+          python-version: "3.11.5"
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -35,14 +39,6 @@ jobs:
         run: |
           poetry install --no-interaction --no-root
 
-      - name: Run flake8
+      - name: Run ${{ matrix.check }}
         run: |
-          poetry run flake8 --count --statistics .
-
-      - name: Run mypy
-        run: |
-          poetry run mypy .
-
-      - name: Run bandit
-        run: |
-          poetry run bandit -r -c pyproject.toml .
+          poetry run ${{ matrix.check }} .

@@ -30,18 +30,20 @@ class CoreSubprocessError(Exception):
 
 def run_subprocess(shell_args: str) -> str:
     log.debug("run_subprocess running: '%s'", shell_args)
-    p = subprocess.run(
-        shell_args,
-        capture_output=True,
-        text=True,
-        shell=True,
-        timeout=config.options.SUBPROCESS_TIMEOUT_SECS,
-    )
-    if p.returncode:
-        log.error("run_subprocess failed with status %s", p.returncode)
-        log.error("run_subprocess stdout: %s", p.stdout)
-        log.error("run_subprocess stderr: %s", p.stderr)
-        raise CoreSubprocessError(p.stderr)
+    try:
+        p = subprocess.run(
+            shell_args,
+            capture_output=True,
+            text=True,
+            shell=True,
+            timeout=config.options.SUBPROCESS_TIMEOUT_SECS,
+            check=True,
+        )
+    except subprocess.CalledProcessError as process_error:
+        log.error("run_subprocess failed with status %s", process_error.returncode)
+        log.error("run_subprocess stdout: %s", process_error.stdout)
+        log.error("run_subprocess stderr: %s", process_error.stderr)
+        raise CoreSubprocessError(process_error.stderr)
 
     log.debug("run_subprocess finished with status %s", p.returncode)
     log.debug("run_subprocess stdout: %s", p.stdout)
@@ -154,12 +156,14 @@ def create_target_models() -> list[TargetModel]:
 
     targets: list[TargetModel] = []
     for env_name, env_value in os.environ.items():
-        env_name = env_name.lower()
-        log.debug("processing env variable %s", env_name)
+        env_name_lowercase = env_name.lower()
+        log.debug("processing env variable %s", env_name_lowercase)
         for target_model_name in target_map:
-            if env_name.startswith(target_model_name):
+            if env_name_lowercase.startswith(target_model_name):
                 target_model_cls = target_map[target_model_name]
-                targets.append(_validate_model(env_name, env_value, target_model_cls))
+                targets.append(
+                    _validate_model(env_name_lowercase, env_value, target_model_cls)
+                )
                 break
 
     return targets

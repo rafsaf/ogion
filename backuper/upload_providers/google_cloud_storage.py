@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 
-import google.cloud.storage as storage
+from google.cloud import storage
 from pydantic import SecretStr
 
 from backuper import config, core

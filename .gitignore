@@ -1,12 +1,6 @@
 # backuper
 data/*
-gpg_public.key.pub
-google_auth.json
-bin/7zz
-bin/7zip/amd64/MANUAL
-bin/7zip/arm64/MANUAL
 conf/*
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -134,6 +128,9 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# ruff
+.ruff_cache
 
 # Pyre type checker
 .pyre/
