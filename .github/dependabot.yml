@@ -17,6 +17,7 @@ updates:
           - "pydantic"
           - "boto3"
           - "pydantic-settings"
+          - "azure-storage-blob"
           - "azure-identity"
 
   - package-ecosystem: github-actions
