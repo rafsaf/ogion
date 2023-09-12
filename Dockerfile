@@ -1,4 +1,4 @@
-FROM python:3.11.5-alpine AS base
+FROM python:3.11.5-slim-bookworm AS base
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV ROOT_MODE="false"
@@ -7,9 +7,9 @@ ENV FOLDER_PATH="/var/lib/backuper"
 ENV LOG_FOLDER_PATH="/var/log/backuper"
 WORKDIR ${FOLDER_PATH}
 
-RUN apk update && apk add wget unzip postgresql-client mariadb-client mariadb-connector-c runuser build-base libffi-dev
-RUN addgroup --gid 1001 --system $SERVICE_NAME && \
-    adduser -D -G $SERVICE_NAME --shell /bin/false --uid 1001 $SERVICE_NAME
+RUN apt-get -y update && apt-get -y install wget unzip postgresql-client mariadb-client
+RUN addgroup --gid 1001 --system ${SERVICE_NAME} && \
+    adduser --gid 1001 --shell /bin/false --disabled-password --uid 1001 ${SERVICE_NAME}
 
 FROM base as poetry
 RUN pip install poetry==1.5.1
@@ -42,7 +42,6 @@ COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 ENTRYPOINT ["/bin/sh", "/docker_entrypoint.sh"]
 
 FROM common AS build
-RUN apk del build-base libffi-dev
 CMD ["python", "-m", "backuper.main"] 
 
 FROM common AS tests
