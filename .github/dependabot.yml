@@ -15,6 +15,9 @@ updates:
           - "croniter"
           - "google-cloud-storage"
           - "pydantic"
+          - "boto3"
+          - "pydantic-settings"
+          - "azure-identity"
 
   - package-ecosystem: github-actions
     directory: /
