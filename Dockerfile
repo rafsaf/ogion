@@ -15,18 +15,9 @@ FROM base as poetry
 RUN pip install poetry==1.5.1
 COPY poetry.lock pyproject.toml ./
 RUN poetry export -o /requirements.txt --without-hashes
-RUN poetry export -o /requirements-dev.txt --without-hashes --with dev
+RUN poetry export -o /requirements-tests.txt --without-hashes --with tests
 
-FROM base AS tests
-COPY --from=poetry /requirements-dev.txt .
-RUN pip install -r requirements-dev.txt
-RUN rm -f requirements-dev.txt
-COPY pyproject.toml .
-COPY tests tests
-COPY backuper backuper
-CMD ["pytest"]
-
-FROM base AS build
+FROM base as common
 COPY --from=poetry /requirements.txt .
 RUN pip install -r requirements.txt
 RUN rm -f requirements.txt
@@ -45,8 +36,18 @@ RUN remove_arch=$(arch | sed s/aarch64/amd64/ | sed s/x86_64/arm64/) \
 # rm 7zip 7zz dynamic linked version binary
 RUN target_arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
     && rm -f backuper/bin/7zip/${target_arch}/7zz
-RUN apk del build-base libffi-dev
+
 COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 
 ENTRYPOINT ["/bin/sh", "/docker_entrypoint.sh"]
+
+FROM common AS build
+RUN apk del build-base libffi-dev
 CMD ["python", "-m", "backuper.main"] 
+
+FROM common AS tests
+COPY --from=poetry /requirements-tests.txt .
+RUN pip install -r requirements-tests.txt
+COPY pyproject.toml .
+COPY tests tests
+CMD ["pytest"]
