@@ -16,26 +16,20 @@ azure-storage-blob = "^12.17.0"
 azure-identity = "^1.14.0"
 
 [tool.poetry.group.dev.dependencies]
-autoflake = "^2.2"
 black = "^23.9.1"
 coverage = "^7.3.1"
-flake8 = "^6.1.0"
-isort = "^5.12.0"
 markdown-include = "^0.8.1"
 mkdocs = "^1.4.2"
 mkdocs-material = "^9.2.8"
 mkdocstrings = { extras = ["python"], version = "^0.23.0" }
 pre-commit = "^3.4.0"
-pyinstaller = { version = "^5.13.2", python = ">=3.11,<3.12" }
 pymdown-extensions = "^10.3"
-pyupgrade = "^3.10.1"
-watchfiles = "^0.20.0"
 mypy = "^1.5.1"
 types-croniter = "^1.4.0.1"
 types-requests = "^2.31.0.2"
 types-google-cloud-ndb = "^2.2.0.0"
-bandit = "^1.7.5"
 mike = "^1.1.2"
+ruff = "^0.0.288"
 
 [tool.poetry.group.tests.dependencies]
 freezegun = "^1.2.2"
@@ -61,19 +55,18 @@ env = [
   "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#$%^&*()/;><.,][`~'",
   "LOG_FOLDER_PATH=/tmp/pytest_backuper_env_vars_hook_logs_folder",
 ]
-
 minversion = "6.0"
+
+[tool.ruff]
+# pycodestyle, pyflakes, isort, pylint, pyupgrade
+select = ["E", "W", "F", "I", "PL", "UP"]
+ignore = ["E501"]
+[tool.ruff.pylint]
+max-args = 12
 
 [tool.coverage.run]
 omit = []
 source = ["backuper"]
-
-[tool.isort]
-profile = "black"
-
-[tool.bandit]
-exclude_dirs = ["tests", "venv", ".venv"]
-skips = ["B404", "B602", "B603"]
 
 [tool.mypy]
 python_version = "3.11"

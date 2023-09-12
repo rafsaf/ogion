@@ -1,11 +1,13 @@
-name: push image to dockerhub on release
+name: dev-build
 on:
-  release:
+  workflow_run:
+    workflows: ["tests"]
+    branches: [main]
     types:
-      - created
+      - completed
 
 jobs:
-  push_latest_image_to_dockerhub:
+  push_dev_images_to_dockerhub:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -32,5 +34,5 @@ jobs:
           file: Dockerfile
           context: .
           push: true
-          tags: rafsaf/backuper:${{ github.ref_name }},rafsaf/backuper:latest
+          tags: rafsaf/backuper:dev
           platforms: linux/amd64,linux/arm64

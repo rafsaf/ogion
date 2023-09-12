@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 
-import google.cloud.storage as storage
+import google.cloud.storage as cloud_storage
 from pydantic import SecretStr
 
 from backuper import config, core
@@ -35,7 +35,7 @@ class UploadProviderGCS(
             f.write(service_account_bytes)
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(sa_path)
 
-        self.storage_client = storage.Client()
+        self.storage_client = cloud_storage.Client()
         self.bucket = self.storage_client.bucket(bucket_name)
         self.bucket_upload_path = bucket_upload_path
         self.chunk_size_bytes = chunk_size_mb * 1024 * 1024

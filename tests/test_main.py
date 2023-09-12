@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Any, NoReturn
 from unittest.mock import Mock
 
-import google.cloud.storage as storage
 import pytest
+from google.cloud import storage
 
 from backuper import config, core, main, notifications
 from backuper.upload_providers.debug import UploadProviderLocalDebug
@@ -18,13 +18,14 @@ def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_backup_targets(monkeypatch: pytest.MonkeyPatch) -> None:
+    models = [POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1]
     monkeypatch.setattr(
         core,
         "create_target_models",
-        Mock(return_value=[POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1]),
+        Mock(return_value=models),
     )
     targets = main.backup_targets()
-    assert len(targets) == 5
+    assert len(targets) == len(models)
 
 
 def test_empty_backup_targets_raise_runtime_error(
@@ -78,7 +79,7 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
         assert dir.is_dir()
         assert dir.name in target_envs
         count += 1
-    assert count == 5
+    assert count == len(target_envs)
 
 
 @pytest.mark.parametrize(

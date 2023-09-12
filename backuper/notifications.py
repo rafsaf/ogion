@@ -15,6 +15,8 @@ from backuper import config
 
 log = logging.getLogger(__name__)
 
+CODE_204 = 204
+
 
 class PROGRAM_STEP(StrEnum):
     SETUP_PROVIDER = "upload provider setup"
@@ -86,7 +88,7 @@ class NotificationsContext(ContextDecorator):
                 headers={"Content-Type": "application/json"},
                 timeout=5,
             )
-            if discord_resp.status_code != 204:
+            if discord_resp.status_code != CODE_204:
                 log.error("failed send_discord `%s` to %s", message, webhook_url)
         except Exception as err:
             log.error("fatal error send_discord %s: %s", message, err)

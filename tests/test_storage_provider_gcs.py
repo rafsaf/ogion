@@ -1,9 +1,9 @@
 from pathlib import Path
 from unittest.mock import Mock
 
-import google.cloud.storage as storage
 import pytest
 from freezegun import freeze_time
+from google.cloud import storage
 from pydantic import SecretStr
 
 from backuper.upload_providers import UploadProviderGCS
