@@ -37,9 +37,6 @@ nav:
   - Deployment: deployment.md
   - Configuration: configuration.md
   - How to restore?: how_to_restore.md
-  - Other:
-      - other/history.md
-      - other/development.md
 
 plugins:
   - search:
