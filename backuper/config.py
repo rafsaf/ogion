@@ -1,10 +1,11 @@
 import logging
 import logging.config
 from enum import StrEnum
+from functools import cached_property
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, HttpUrl, SecretStr
+from pydantic import Field, HttpUrl, SecretStr, computed_field
 from pydantic_settings import BaseSettings
 
 _log_levels = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -44,6 +45,9 @@ class Settings(BaseSettings):
     BACKUP_PROVIDER: str
     ZIP_ARCHIVE_PASSWORD: SecretStr
     ZIP_SKIP_INTEGRITY_CHECK: bool = False
+    CPU_ARCH: Literal["amd64", "arm64"] = Field(
+        default="amd64", alias_priority=2, alias="BACKUPER_CPU_ARCHITECTURE"
+    )
     SUBPROCESS_TIMEOUT_SECS: float = Field(ge=5, le=3600 * 24, default=3600)
     SIGTERM_TIMEOUT_SECS: float = Field(ge=0, le=3600 * 24, default=30)
     ZIP_ARCHIVE_LEVEL: int = Field(ge=1, le=9, default=3)
@@ -52,6 +56,11 @@ class Settings(BaseSettings):
     DISCORD_SUCCESS_WEBHOOK_URL: HttpUrl | None = None
     DISCORD_FAIL_WEBHOOK_URL: HttpUrl | None = None
     DISCORD_NOTIFICATION_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
+
+    @computed_field  # type: ignore[misc]
+    @cached_property
+    def seven_zip_bin_path(self) -> Path:
+        return CONST_BASE_DIR / f"backuper/bin/7zip/{self.CPU_ARCH}/7zzs"
 
 
 options = Settings()  # type: ignore

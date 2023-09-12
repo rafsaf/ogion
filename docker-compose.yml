@@ -3,8 +3,11 @@
 # docker compose up -d postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004
 # run tests amd64
 # docker compose run --rm --build backuper_tests_amd64
-# run tests arm64
+# run tests arm64 see https://docs.docker.com/build/building/multi-platform/
 # docker compose run --rm --build backuper_tests_arm64
+# run acceptance test with AWS then GCP then Azure in .env
+# docker compose run --rm --build backuper_acceptance_test_amd64 
+# docker compose run --rm --build backuper_acceptance_test_arm64
 
 services:
   postgres_15:
@@ -168,3 +171,74 @@ services:
     environment:
       - DOCKER_TESTS=true
       - ZIP_ARCHIVE_PASSWORD=password
+
+  backuper_acceptance_test:
+    restart: "no"
+    network_mode: "host"
+    depends_on:
+      - postgres_15
+      - postgres_14
+      - postgres_13
+      - postgres_12
+      - postgres_11
+      - mysql_57
+      - mysql_80
+      - mariadb_1011
+      - mariadb_1006
+      - mariadb_1005
+      - mariadb_1004
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+      target: build
+    command: python -m backuper.main --single
+    env_file:
+      - .env
+
+  backuper_acceptance_test_amd64:
+    restart: "no"
+    network_mode: "host"
+    platform: linux/amd64
+    depends_on:
+      - postgres_15
+      - postgres_14
+      - postgres_13
+      - postgres_12
+      - postgres_11
+      - mysql_57
+      - mysql_80
+      - mariadb_1011
+      - mariadb_1006
+      - mariadb_1005
+      - mariadb_1004
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+      target: build
+    command: python -m backuper.main --single
+    env_file:
+      - .env
+
+  backuper_acceptance_test_arm64:
+    restart: "no"
+    network_mode: "host"
+    platform: linux/arm64
+    depends_on:
+      - postgres_15
+      - postgres_14
+      - postgres_13
+      - postgres_12
+      - postgres_11
+      - mysql_57
+      - mysql_80
+      - mariadb_1011
+      - mariadb_1006
+      - mariadb_1005
+      - mariadb_1004
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+      target: build
+    command: python -m backuper.main --single
+    env_file:
+      - .env
