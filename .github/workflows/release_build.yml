@@ -31,6 +31,7 @@ jobs:
         with:
           file: Dockerfile
           context: .
+          target: build
           push: true
           tags: rafsaf/backuper:${{ github.ref_name }},rafsaf/backuper:latest
           platforms: linux/amd64,linux/arm64

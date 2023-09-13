@@ -42,12 +42,12 @@ COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 
 ENTRYPOINT ["/bin/sh", "/docker_entrypoint.sh"]
 
-FROM common AS build
-CMD ["python", "-m", "backuper.main"] 
-
 FROM common AS tests
 COPY --from=poetry /requirements-tests.txt .
 RUN pip install -r requirements-tests.txt
 COPY pyproject.toml .
 COPY tests tests
 CMD ["pytest"]
+
+FROM common AS build
+CMD ["python", "-m", "backuper.main"] 

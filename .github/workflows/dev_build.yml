@@ -33,6 +33,7 @@ jobs:
         with:
           file: Dockerfile
           context: .
+          target: build
           push: true
           tags: rafsaf/backuper:dev
           platforms: linux/amd64,linux/arm64
