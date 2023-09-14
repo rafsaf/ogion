@@ -1,5 +1,6 @@
 import logging
 import logging.config
+import socket
 from enum import StrEnum
 from functools import cached_property
 from pathlib import Path
@@ -44,6 +45,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: _log_levels = "INFO"
     BACKUP_PROVIDER: str
     ZIP_ARCHIVE_PASSWORD: SecretStr
+    INSTANCE_NAME: str = ""
     ZIP_SKIP_INTEGRITY_CHECK: bool = False
     CPU_ARCH: Literal["amd64", "arm64"] = Field(
         default="amd64", alias_priority=2, alias="BACKUPER_CPU_ARCHITECTURE"
@@ -53,14 +55,30 @@ class Settings(BaseSettings):
     ZIP_ARCHIVE_LEVEL: int = Field(ge=1, le=9, default=3)
     BACKUP_MAX_NUMBER: int = Field(ge=1, le=998, default=7)
     BACKUP_MIN_RETENTION_DAYS: int = Field(ge=0, le=36600, default=3)
-    DISCORD_SUCCESS_WEBHOOK_URL: HttpUrl | None = None
-    DISCORD_FAIL_WEBHOOK_URL: HttpUrl | None = None
+    DISCORD_WEBHOOK_URL: HttpUrl | None = None
     DISCORD_NOTIFICATION_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_FROM_ADDR: str = ""
+    SMTP_PASSWORD: SecretStr = SecretStr("")
+    SMTP_TO_ADDRS: str = ""
 
     @computed_field  # type: ignore[misc]
     @cached_property
     def seven_zip_bin_path(self) -> Path:
         return CONST_BASE_DIR / f"backuper/bin/7zip/{self.CPU_ARCH}/7zzs"
+
+    @computed_field
+    @property
+    def backuper_instance(self) -> str:
+        if self.INSTANCE_NAME:
+            return self.INSTANCE_NAME
+        return socket.gethostname()
+
+    @computed_field
+    @property
+    def smtp_addresses(self) -> list[str]:
+        return self.SMTP_TO_ADDRS.split(",")
 
 
 options = Settings()  # type: ignore
