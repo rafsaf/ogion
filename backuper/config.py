@@ -68,15 +68,15 @@ class Settings(BaseSettings):
     def seven_zip_bin_path(self) -> Path:
         return CONST_BASE_DIR / f"backuper/bin/7zip/{self.CPU_ARCH}/7zzs"
 
-    @computed_field
-    @property
+    @computed_field  # type: ignore[misc]
+    @cached_property
     def backuper_instance(self) -> str:
         if self.INSTANCE_NAME:
             return self.INSTANCE_NAME
         return socket.gethostname()
 
-    @computed_field
-    @property
+    @computed_field  # type: ignore[misc]
+    @cached_property
     def smtp_addresses(self) -> list[str]:
         return self.SMTP_TO_ADDRS.split(",")
 
