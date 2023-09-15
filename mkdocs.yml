@@ -35,6 +35,7 @@ nav:
   - Notifications:
       - notifications/discord.md
       - notifications/smtp.md
+      - notifications/slack.md
   - Deployment: deployment.md
   - Configuration: configuration.md
   - How to restore?: how_to_restore.md
