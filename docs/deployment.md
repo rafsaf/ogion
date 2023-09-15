@@ -28,11 +28,15 @@ services:
   ```bash
   docker logs backuper
   ```
-- There is dedicated flag --single that **ignores cron, make all databases backups and exits**. To use it when having already running container, use:
+- There is runtime flag `--single` that **ignores cron, make all databases backups and exits**. To use it when having already running container, use:
   ```bash
   docker compose run --rm backuper python -m backuper.main --single
   ```
   BE CAREFUL, if your setup if fine, this will upload backup files to cloud provider, so costs may apply.
+- There is runtime flag `--debug-notifications` that **setup notifications, raise dummy exception and exits**. This can help ensure notifications are working:
+  ```bash
+  docker compose run --rm backuper python -m backuper.main --debug-notifications
+  ```
 
 ## Kubernetes
 
@@ -86,11 +90,14 @@ spec:
   ```bash
   kubectl logs backuper-9c8b8b77d-z5xsc -n backuper
   ```
-- There is dedicated flag --single that **ignores cron, make all databases backups and exits**. To use it when having already running container, use:
+- There is runtime flag `--single` that **ignores cron, make all databases backups and exits**. To use it when having already running container, use:
   ```bash
   kubectl exec --stdin --tty backuper-9c8b8b77d-z5xsc -n backuper -- runuser -u backuper -- python -m backuper.main --single
   ``` 
   BE CAREFUL, if your setup if fine, this will upload backup files to cloud provider, so costs may apply.
-
+- There is runtime flag `--debug-notifications` that **setup notifications, raise dummy exception and exits**. This can help ensure notifications are working:
+  ```bash
+  kubectl exec --stdin --tty backuper-9c8b8b77d-z5xsc -n backuper -- runuser -u backuper -- python -m backuper.main --debug-notifications
+  ```
 <br>
 <br>

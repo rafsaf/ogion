@@ -1,11 +1,12 @@
 import logging
 import logging.config
+import socket
 from enum import StrEnum
 from functools import cached_property
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import Field, HttpUrl, SecretStr, computed_field
+from pydantic import Field, HttpUrl, SecretStr, computed_field, model_validator
 from pydantic_settings import BaseSettings
 
 _log_levels = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -37,6 +38,7 @@ class BackupTargetEnum(StrEnum):
     MARIADB = "mariadb"
     FILE = "singlefile"
     FOLDER = "directory"
+    TEST = "test"
 
 
 class Settings(BaseSettings):
@@ -44,6 +46,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: _log_levels = "INFO"
     BACKUP_PROVIDER: str
     ZIP_ARCHIVE_PASSWORD: SecretStr
+    INSTANCE_NAME: str = socket.gethostname()
     ZIP_SKIP_INTEGRITY_CHECK: bool = False
     CPU_ARCH: Literal["amd64", "arm64"] = Field(
         default="amd64", alias_priority=2, alias="BACKUPER_CPU_ARCHITECTURE"
@@ -53,14 +56,32 @@ class Settings(BaseSettings):
     ZIP_ARCHIVE_LEVEL: int = Field(ge=1, le=9, default=3)
     BACKUP_MAX_NUMBER: int = Field(ge=1, le=998, default=7)
     BACKUP_MIN_RETENTION_DAYS: int = Field(ge=0, le=36600, default=3)
-    DISCORD_SUCCESS_WEBHOOK_URL: HttpUrl | None = None
-    DISCORD_FAIL_WEBHOOK_URL: HttpUrl | None = None
-    DISCORD_NOTIFICATION_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
+    DISCORD_WEBHOOK_URL: HttpUrl | None = None
+    DISCORD_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_FROM_ADDR: str = ""
+    SMTP_PASSWORD: SecretStr = SecretStr("")
+    SMTP_TO_ADDRS: str = ""
 
     @computed_field  # type: ignore[misc]
     @cached_property
     def seven_zip_bin_path(self) -> Path:
         return CONST_BASE_DIR / f"backuper/bin/7zip/{self.CPU_ARCH}/7zzs"
+
+    @computed_field  # type: ignore[misc]
+    @cached_property
+    def smtp_addresses(self) -> list[str]:
+        return self.SMTP_TO_ADDRS.split(",")
+
+    @model_validator(mode="after")
+    def check_smtp_setup(self) -> Self:
+        smtp_settings = [self.SMTP_HOST, self.SMTP_FROM_ADDR, self.SMTP_TO_ADDRS]
+        if any(smtp_settings) != all(smtp_settings):  # pragma: no cover
+            raise ValueError(
+                "parameters SMTP_HOST, SMTP_FROM_ADDR, SMTP_TO_ADDRS must be all either set or not."
+            )
+        return self
 
 
 options = Settings()  # type: ignore

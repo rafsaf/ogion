@@ -4,13 +4,17 @@ import signal
 import sys
 import threading
 import time
+from dataclasses import dataclass
 from threading import Thread
 from types import FrameType
 from typing import NoReturn
 
 from backuper import config, core
 from backuper.backup_targets import BaseBackupTarget
-from backuper.notifications import PROGRAM_STEP, NotificationsContext
+from backuper.notifications.notifications_context import (
+    PROGRAM_STEP,
+    NotificationsContext,
+)
 from backuper.upload_providers import BaseUploadProvider
 
 exit_event = threading.Event()
@@ -135,7 +139,6 @@ def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
     with NotificationsContext(
         step_name=PROGRAM_STEP.CLEANUP,
         env_name=target.env_name,
-        send_on_success=True,
     ):
         provider.clean(
             backup_file=backup_file,
@@ -150,20 +153,37 @@ def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
     )
 
 
-def setup_runtime_arguments() -> bool:
+@dataclass
+class RuntimeArgs:
+    single: bool
+    debug_notifications: bool
+
+
+def setup_runtime_arguments() -> RuntimeArgs:
     parser = argparse.ArgumentParser(description="Backuper program")
     parser.add_argument(
         "-s", "--single", action="store_true", help="Only single backup then exit"
     )
-    args = parser.parse_args()
-    single: bool = args.single
-    return single
+    parser.add_argument(
+        "-n",
+        "--debug-notifications",
+        action="store_true",
+        help="Check if notifications setup is working",
+    )
+    return RuntimeArgs(**vars(parser.parse_args()))
 
 
 def main() -> NoReturn:
     log.info("start backuper configuration...")
 
-    single_run = setup_runtime_arguments()
+    runtime_args = setup_runtime_arguments()
+
+    if runtime_args.debug_notifications:
+        try:
+            with NotificationsContext(step_name=PROGRAM_STEP.DEBUG_NOTIFICATIONS):
+                raise ValueError("hi! this is notifications debug exception")
+        except Exception:
+            sys.exit(0)
 
     provider = backup_provider()
     targets = backup_targets()
@@ -172,7 +192,7 @@ def main() -> NoReturn:
 
     while not exit_event.is_set():
         for target in targets:
-            if target.next_backup() or single_run:
+            if target.next_backup() or runtime_args.single:
                 pretty_env_name = target.env_name.replace("_", "-")
                 backup_thread = Thread(
                     target=run_backup,
@@ -182,7 +202,7 @@ def main() -> NoReturn:
                 )
                 backup_thread.start()
                 exit_event.wait(0.5)
-        if single_run:
+        if runtime_args.single:
             exit_event.set()
         exit_event.wait(5)
 

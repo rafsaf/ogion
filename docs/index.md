@@ -25,6 +25,7 @@ Backups are in `zip` format using [7-zip](https://www.7-zip.org/), with strong A
 ## Notifications
 
 - Discord
+- Email (SMTP)
 
 ## Deployment strategies
 

@@ -1,9 +1,9 @@
 from pathlib import Path
 from unittest.mock import Mock
 
+import google.cloud.storage as cloud_storage
 import pytest
 from freezegun import freeze_time
-from google.cloud import storage
 from pydantic import SecretStr
 
 from backuper.upload_providers import UploadProviderGCS
@@ -11,7 +11,7 @@ from backuper.upload_providers import UploadProviderGCS
 
 @pytest.fixture(autouse=True)
 def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(storage, "Client", Mock())
+    monkeypatch.setattr(cloud_storage, "Client", Mock())
 
 
 def get_test_gcs() -> UploadProviderGCS:

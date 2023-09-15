@@ -9,7 +9,7 @@ from backuper.backup_targets.base_target import BaseBackupTarget
 
 @freeze_time("2023-05-03 17:58")
 def test_base_backup_target_next_backup() -> None:
-    class TargetModel(BaseBackupTarget, target_model_name=config.BackupTargetEnum.FILE):
+    class TargetModel(BaseBackupTarget, target_model_name=config.BackupTargetEnum.TEST):
         def _backup(self) -> Path:
             return Path(__file__)
 
