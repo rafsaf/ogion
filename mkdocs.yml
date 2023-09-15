@@ -34,6 +34,7 @@ nav:
       - backup_targets/directory.md
   - Notifications:
       - notifications/discord.md
+      - notifications/smtp.md
   - Deployment: deployment.md
   - Configuration: configuration.md
   - How to restore?: how_to_restore.md

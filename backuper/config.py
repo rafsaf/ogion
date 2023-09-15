@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     BACKUP_MAX_NUMBER: int = Field(ge=1, le=998, default=7)
     BACKUP_MIN_RETENTION_DAYS: int = Field(ge=0, le=36600, default=3)
     DISCORD_WEBHOOK_URL: HttpUrl | None = None
-    DISCORD_NOTIFICATION_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
+    DISCORD_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
     SMTP_HOST: str = ""
     SMTP_PORT: int = 587
     SMTP_FROM_ADDR: str = ""

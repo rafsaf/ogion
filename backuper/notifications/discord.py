@@ -21,7 +21,7 @@ class Discord(NotificationSystem):
         log.info("sending discord notification")
 
         content = self.limit_message(
-            message=message, limit=config.options.DISCORD_NOTIFICATION_MAX_MSG_LEN
+            message=message, limit=config.options.DISCORD_MAX_MSG_LEN
         )
 
         with requests.session() as session:
