@@ -4,9 +4,9 @@ import socket
 from enum import StrEnum
 from functools import cached_property
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import Field, HttpUrl, SecretStr, computed_field
+from pydantic import Field, HttpUrl, SecretStr, computed_field, model_validator
 from pydantic_settings import BaseSettings
 
 _log_levels = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -73,6 +73,15 @@ class Settings(BaseSettings):
     @cached_property
     def smtp_addresses(self) -> list[str]:
         return self.SMTP_TO_ADDRS.split(",")
+
+    @model_validator(mode="after")
+    def check_smtp_setup(self) -> Self:
+        smtp_settings = [self.SMTP_HOST, self.SMTP_FROM_ADDR, self.SMTP_TO_ADDRS]
+        if any(smtp_settings) != all(smtp_settings):  # pragma: no cover
+            raise ValueError(
+                "parameters SMTP_HOST, SMTP_FROM_ADDR, SMTP_TO_ADDRS must be all either set or not."
+            )
+        return self
 
 
 options = Settings()  # type: ignore
