@@ -26,6 +26,7 @@ Backups are in `zip` format using [7-zip](https://www.7-zip.org/), with strong A
 
 - Discord
 - Email (SMTP)
+- Slack
 
 ## Deployment strategies
 

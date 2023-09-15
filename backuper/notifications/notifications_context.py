@@ -11,6 +11,7 @@ from types import TracebackType
 
 from backuper import config
 from backuper.notifications.discord import Discord
+from backuper.notifications.slack import Slack
 from backuper.notifications.smtp import SMTP
 
 log = logging.getLogger(__name__)
@@ -56,6 +57,7 @@ class NotificationsContext(ContextDecorator):
         with ThreadPoolExecutor() as executor:
             executor.submit(Discord().send, message)
             executor.submit(SMTP().send, message)
+            executor.submit(Slack().send, message)
 
     def __enter__(self) -> None:
         log.debug("start notifications context: %s, %s", self.step_name, self.env_name)
