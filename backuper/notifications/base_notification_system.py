@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 class NotificationSystem(ABC):
     @abstractmethod
-    def _send(self, message: str) -> bool:
+    def _send(self, message: str) -> bool:  # pragma: no cover
         pass
 
     @final

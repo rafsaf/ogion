@@ -3,10 +3,11 @@ from pathlib import Path
 from typing import Any, NoReturn
 from unittest.mock import Mock
 
+import google.cloud.storage as cloud_storage
 import pytest
-from google.cloud import storage
 
-from backuper import config, core, main, notifications
+from backuper import config, core, main
+from backuper.notifications.notifications_context import NotificationsContext
 from backuper.upload_providers.debug import UploadProviderLocalDebug
 
 from .conftest import FILE_1, FOLDER_1, MARIADB_1011, MYSQL_80, POSTGRES_15
@@ -14,7 +15,7 @@ from .conftest import FILE_1, FOLDER_1, MARIADB_1011, MYSQL_80, POSTGRES_15
 
 @pytest.fixture(autouse=True)
 def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(storage, "Client", Mock())
+    monkeypatch.setattr(cloud_storage, "Client", Mock())
 
 
 def test_backup_targets(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -50,7 +51,7 @@ def test_backup_provider(monkeypatch: pytest.MonkeyPatch) -> None:
     assert provider.NAME == "gcs"
 
 
-def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["main.py", "--single"])
     monkeypatch.setattr(config.options, "BACKUP_PROVIDER", "name=debug")
 
@@ -82,6 +83,14 @@ def test_main(monkeypatch: pytest.MonkeyPatch) -> None:
     assert count == len(target_envs)
 
 
+def test_main_debug_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(sys, "argv", ["main.py", "--debug-notifications"])
+
+    with pytest.raises(SystemExit) as system_exit:
+        main.main()
+    assert system_exit.type == SystemExit
+
+
 @pytest.mark.parametrize(
     "make_backup_side_effect,post_save_side_effect,clean_side_effect",
     [
@@ -97,11 +106,7 @@ def test_run_backup_notifications_fail_message_is_fired_when_it_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fail_message_mock = Mock()
-    monkeypatch.setattr(
-        notifications.NotificationsContext,
-        "_fail_message",
-        fail_message_mock,
-    )
+    monkeypatch.setattr(NotificationsContext, "create_fail_message", fail_message_mock)
     monkeypatch.setattr(
         core,
         "create_target_models",

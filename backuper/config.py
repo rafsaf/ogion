@@ -38,6 +38,7 @@ class BackupTargetEnum(StrEnum):
     MARIADB = "mariadb"
     FILE = "singlefile"
     FOLDER = "directory"
+    TEST = "test"
 
 
 class Settings(BaseSettings):
@@ -45,7 +46,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: _log_levels = "INFO"
     BACKUP_PROVIDER: str
     ZIP_ARCHIVE_PASSWORD: SecretStr
-    INSTANCE_NAME: str = ""
+    INSTANCE_NAME: str = socket.gethostname()
     ZIP_SKIP_INTEGRITY_CHECK: bool = False
     CPU_ARCH: Literal["amd64", "arm64"] = Field(
         default="amd64", alias_priority=2, alias="BACKUPER_CPU_ARCHITECTURE"
@@ -67,13 +68,6 @@ class Settings(BaseSettings):
     @cached_property
     def seven_zip_bin_path(self) -> Path:
         return CONST_BASE_DIR / f"backuper/bin/7zip/{self.CPU_ARCH}/7zzs"
-
-    @computed_field  # type: ignore[misc]
-    @cached_property
-    def backuper_instance(self) -> str:
-        if self.INSTANCE_NAME:
-            return self.INSTANCE_NAME
-        return socket.gethostname()
 
     @computed_field  # type: ignore[misc]
     @cached_property

@@ -42,7 +42,7 @@ class NotificationsContext(ContextDecorator):
     ) -> str:
         now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S,%f UTC")
         msg = f"[FAIL] {now}\nStep: {self.step_name}\n"
-        msg += f"Backuper Host: {config.options.backuper_instance}\n"
+        msg += f"Backuper Host: {config.options.INSTANCE_NAME}\n"
         if self.env_name:
             msg += f"Target: {self.env_name}\n"
         msg += f"Exception Type: {exc_type}\n"
@@ -52,7 +52,7 @@ class NotificationsContext(ContextDecorator):
         msg += f"\n{tb}\n"
         return msg
 
-    def send_all(self, message: str):
+    def send_all(self, message: str) -> None:
         with ThreadPoolExecutor() as executor:
             executor.submit(Discord().send, message)
             executor.submit(SMTP().send, message)

@@ -21,7 +21,7 @@ class SMTP(NotificationSystem):
         email_message = (
             f"FROM: {config.options.SMTP_FROM_ADDR}"
             + "\n"
-            + f"SUBJECT: {config.options.backuper_instance}"
+            + f"SUBJECT: {config.options.INSTANCE_NAME}"
             + "\n\n"
             + message
         )
