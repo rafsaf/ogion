@@ -143,13 +143,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.45"
+version = "1.31.49"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.45-py3-none-any.whl", hash = "sha256:cceb150cff1d7f7a6faf655510a8384eb4505a33b430495fe1744d03a70dc66a"},
-    {file = "botocore-1.31.45.tar.gz", hash = "sha256:85ff64a0ac2705c4ba36268c3b2dbc1184062e9cf729a89dd66c2f54f730fc79"},
+    {file = "botocore-1.31.49-py3-none-any.whl", hash = "sha256:7d64cb45154e4f34f3a45f551e118caad7379ae831565639e0afe5b2af126c61"},
+    {file = "botocore-1.31.49.tar.gz", hash = "sha256:95e9716f27f67d4207f260ab0ea157603ca544d3b82c5f21728b1c732bec1817"},
 ]
 
 [package.dependencies]
@@ -528,18 +528,19 @@ testing = ["hatch", "pre-commit", "pytest", "tox"]
 
 [[package]]
 name = "filelock"
-version = "3.12.3"
+version = "3.12.4"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "filelock-3.12.3-py3-none-any.whl", hash = "sha256:f067e40ccc40f2b48395a80fcbd4728262fab54e232e090a4063ab804179efeb"},
-    {file = "filelock-3.12.3.tar.gz", hash = "sha256:0ecc1dd2ec4672a10c8550a8182f1bd0c0a5088470ecd5a125e45f49472fac3d"},
+    {file = "filelock-3.12.4-py3-none-any.whl", hash = "sha256:08c21d87ded6e2b9da6728c3dff51baf1dcecf973b768ef35bcbc3447edb9ad4"},
+    {file = "filelock-3.12.4.tar.gz", hash = "sha256:2e6f249f1f3654291606e046b09f1fd5eac39b360664c27f5aad072012f8bcbd"},
 ]
 
 [package.extras]
 docs = ["furo (>=2023.7.26)", "sphinx (>=7.1.2)", "sphinx-autodoc-typehints (>=1.24)"]
 testing = ["covdefaults (>=2.3)", "coverage (>=7.3)", "diff-cover (>=7.7)", "pytest (>=7.4)", "pytest-cov (>=4.1)", "pytest-mock (>=3.11.1)", "pytest-timeout (>=2.1)"]
+typing = ["typing-extensions (>=4.7.1)"]
 
 [[package]]
 name = "freezegun"
@@ -788,13 +789,13 @@ colorama = ">=0.4"
 
 [[package]]
 name = "identify"
-version = "2.5.28"
+version = "2.5.29"
 description = "File identification library for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "identify-2.5.28-py2.py3-none-any.whl", hash = "sha256:87816de144bf46d161bd5b3e8f5596b16cade3b80be537087334b26bc5c177f3"},
-    {file = "identify-2.5.28.tar.gz", hash = "sha256:94bb59643083ebd60dc996d043497479ee554381fbc5307763915cda49b0e78f"},
+    {file = "identify-2.5.29-py2.py3-none-any.whl", hash = "sha256:24437fbf6f4d3fe6efd0eb9d67e24dd9106db99af5ceb27996a5f7895f24bf1b"},
+    {file = "identify-2.5.29.tar.gz", hash = "sha256:d43d52b86b15918c137e3a74fff5224f60385cd0e9c38e99d07c257f02f151a5"},
 ]
 
 [package.extras]
@@ -1104,13 +1105,13 @@ python-legacy = ["mkdocstrings-python-legacy (>=0.2.1)"]
 
 [[package]]
 name = "mkdocstrings-python"
-version = "1.6.3"
+version = "1.7.0"
 description = "A Python handler for mkdocstrings."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocstrings_python-1.6.3-py3-none-any.whl", hash = "sha256:e5d6b6f6cb595f16e47e22ea2baee3c1bdb501e178872d4924e38d858f8c5a38"},
-    {file = "mkdocstrings_python-1.6.3.tar.gz", hash = "sha256:c11dc2c7bcb120fad9f582840fa032ff4a19d370d77057737ca44c4d3e404e10"},
+    {file = "mkdocstrings_python-1.7.0-py3-none-any.whl", hash = "sha256:85c5f009a5a0ebb6076b7818c82a2bb0eebd0b54662628fa8b25ee14a6207951"},
+    {file = "mkdocstrings_python-1.7.0.tar.gz", hash = "sha256:5dac2712bd38a3ff0812b8650a68b232601d1474091b380a8b5bc102c8c0d80a"},
 ]
 
 [package.dependencies]
@@ -1288,13 +1289,13 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "portalocker"
-version = "2.7.0"
+version = "2.8.2"
 description = "Wraps the portalocker recipe for easy usage"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.8"
 files = [
-    {file = "portalocker-2.7.0-py2.py3-none-any.whl", hash = "sha256:a07c5b4f3985c3cf4798369631fb7011adb498e2a46d8440efc75a8f29a0f983"},
-    {file = "portalocker-2.7.0.tar.gz", hash = "sha256:032e81d534a88ec1736d03f780ba073f047a06c478b06e2937486f334e955c51"},
+    {file = "portalocker-2.8.2-py3-none-any.whl", hash = "sha256:cfb86acc09b9aa7c3b43594e19be1345b9d16af3feb08bf92f23d4dce513a28e"},
+    {file = "portalocker-2.8.2.tar.gz", hash = "sha256:2b035aa7828e46c58e9b31390ee1f169b98e1066ab10b9a6a861fe7e25ee4f33"},
 ]
 
 [package.dependencies]
@@ -1303,7 +1304,7 @@ pywin32 = {version = ">=226", markers = "platform_system == \"Windows\""}
 [package.extras]
 docs = ["sphinx (>=1.7.1)"]
 redis = ["redis"]
-tests = ["pytest (>=5.4.1)", "pytest-cov (>=2.8.1)", "pytest-mypy (>=0.8.0)", "pytest-timeout (>=2.1.0)", "redis", "sphinx (>=6.0.0)"]
+tests = ["pytest (>=5.4.1)", "pytest-cov (>=2.8.1)", "pytest-mypy (>=0.8.0)", "pytest-timeout (>=2.1.0)", "redis", "sphinx (>=6.0.0)", "types-redis"]
 
 [[package]]
 name = "pre-commit"
@@ -1938,28 +1939,28 @@ pyasn1 = ">=0.1.3"
 
 [[package]]
 name = "ruff"
-version = "0.0.289"
+version = "0.0.290"
 description = "An extremely fast Python linter, written in Rust."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "ruff-0.0.289-py3-none-macosx_10_7_x86_64.whl", hash = "sha256:c9a89d748e90c840bac9c37afe90cf13a5bfd460ca02ea93dad9d7bee3af03b4"},
-    {file = "ruff-0.0.289-py3-none-macosx_10_9_x86_64.macosx_11_0_arm64.macosx_10_9_universal2.whl", hash = "sha256:7f7396c6ea01ba332a6ad9d47642bac25d16bd2076aaa595b001f58b2f32ff05"},
-    {file = "ruff-0.0.289-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7180de86c8ecd39624dec1699136f941c07e723201b4ce979bec9e7c67b40ad2"},
-    {file = "ruff-0.0.289-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:73f37c65508203dd01a539926375a10243769c20d4fcab3fa6359cd3fbfc54b7"},
-    {file = "ruff-0.0.289-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:1c14abcd7563b5c80be2dd809eeab20e4aa716bf849860b60a22d87ddf19eb88"},
-    {file = "ruff-0.0.289-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:91b6d63b6b46d4707916472c91baa87aa0592e73f62a80ff55efdf6c0668cfd6"},
-    {file = "ruff-0.0.289-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:6479b8c4be3c36046c6c92054762b276fa0fddb03f6b9a310fbbf4c4951267fd"},
-    {file = "ruff-0.0.289-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:c5424318c254bcb091cb67e140ec9b9f7122074e100b06236f252923fb41e767"},
-    {file = "ruff-0.0.289-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4daa90865796aedcedf0d8897fdd4cd09bf0ddd3504529a4ccf211edcaff3c7d"},
-    {file = "ruff-0.0.289-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:8057e8ab0016c13b9419bad119e854f881e687bd96bc5e2d52c8baac0f278a44"},
-    {file = "ruff-0.0.289-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:7eebfab2e6a6991908ff1bf82f2dc1e5095fc7e316848e62124526837b445f4d"},
-    {file = "ruff-0.0.289-py3-none-musllinux_1_2_i686.whl", hash = "sha256:ebc7af550018001a7fb39ca22cdce20e1a0de4388ea4a007eb5c822f6188c297"},
-    {file = "ruff-0.0.289-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:6e4e6eccb753efe760ba354fc8e9f783f6bba71aa9f592756f5bd0d78db898ed"},
-    {file = "ruff-0.0.289-py3-none-win32.whl", hash = "sha256:bbb3044f931c09cf17dbe5b339896eece0d6ac10c9a86e172540fcdb1974f2b7"},
-    {file = "ruff-0.0.289-py3-none-win_amd64.whl", hash = "sha256:6d043c5456b792be2615a52f16056c3cf6c40506ce1f2d6f9d3083cfcb9eeab6"},
-    {file = "ruff-0.0.289-py3-none-win_arm64.whl", hash = "sha256:04a720bcca5e987426bb14ad8b9c6f55e259ea774da1cbeafe71569744cfd20a"},
-    {file = "ruff-0.0.289.tar.gz", hash = "sha256:2513f853b0fc42f0339b7ab0d2751b63ce7a50a0032d2689b54b2931b3b866d7"},
+    {file = "ruff-0.0.290-py3-none-macosx_10_7_x86_64.whl", hash = "sha256:0e2b09ac4213b11a3520221083866a5816616f3ae9da123037b8ab275066fbac"},
+    {file = "ruff-0.0.290-py3-none-macosx_10_9_x86_64.macosx_11_0_arm64.macosx_10_9_universal2.whl", hash = "sha256:4ca6285aa77b3d966be32c9a3cd531655b3d4a0171e1f9bf26d66d0372186767"},
+    {file = "ruff-0.0.290-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:35e3550d1d9f2157b0fcc77670f7bb59154f223bff281766e61bdd1dd854e0c5"},
+    {file = "ruff-0.0.290-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:d748c8bd97874f5751aed73e8dde379ce32d16338123d07c18b25c9a2796574a"},
+    {file = "ruff-0.0.290-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:982af5ec67cecd099e2ef5e238650407fb40d56304910102d054c109f390bf3c"},
+    {file = "ruff-0.0.290-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:bbd37352cea4ee007c48a44c9bc45a21f7ba70a57edfe46842e346651e2b995a"},
+    {file = "ruff-0.0.290-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:1d9be6351b7889462912e0b8185a260c0219c35dfd920fb490c7f256f1d8313e"},
+    {file = "ruff-0.0.290-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:75cdc7fe32dcf33b7cec306707552dda54632ac29402775b9e212a3c16aad5e6"},
+    {file = "ruff-0.0.290-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:eb07f37f7aecdbbc91d759c0c09870ce0fb3eed4025eebedf9c4b98c69abd527"},
+    {file = "ruff-0.0.290-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:2ab41bc0ba359d3f715fc7b705bdeef19c0461351306b70a4e247f836b9350ed"},
+    {file = "ruff-0.0.290-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:150bf8050214cea5b990945b66433bf9a5e0cef395c9bc0f50569e7de7540c86"},
+    {file = "ruff-0.0.290-py3-none-musllinux_1_2_i686.whl", hash = "sha256:75386ebc15fe5467248c039f5bf6a0cfe7bfc619ffbb8cd62406cd8811815fca"},
+    {file = "ruff-0.0.290-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:ac93eadf07bc4ab4c48d8bb4e427bf0f58f3a9c578862eb85d99d704669f5da0"},
+    {file = "ruff-0.0.290-py3-none-win32.whl", hash = "sha256:461fbd1fb9ca806d4e3d5c745a30e185f7cf3ca77293cdc17abb2f2a990ad3f7"},
+    {file = "ruff-0.0.290-py3-none-win_amd64.whl", hash = "sha256:f1f49f5ec967fd5778813780b12a5650ab0ebcb9ddcca28d642c689b36920796"},
+    {file = "ruff-0.0.290-py3-none-win_arm64.whl", hash = "sha256:ae5a92dfbdf1f0c689433c223f8dac0782c2b2584bd502dfdbc76475669f1ba1"},
+    {file = "ruff-0.0.290.tar.gz", hash = "sha256:949fecbc5467bb11b8db810a7fa53c7e02633856ee6bd1302b2f43adcd71b88d"},
 ]
 
 [[package]]
@@ -2066,13 +2067,13 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.7.1"
-description = "Backported and Experimental Type Hints for Python 3.7+"
+version = "4.8.0"
+description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.7.1-py3-none-any.whl", hash = "sha256:440d5dd3af93b060174bf433bccd69b0babc3b15b1a8dca43789fd7f61514b36"},
-    {file = "typing_extensions-4.7.1.tar.gz", hash = "sha256:b75ddc264f0ba5615db7ba217daeb99701ad295353c45f9e95963337ceeeffb2"},
+    {file = "typing_extensions-4.8.0-py3-none-any.whl", hash = "sha256:8f92fc8806f9a6b641eaa5318da32b44d401efaac0f6678c9bc448ba3605faa0"},
+    {file = "typing_extensions-4.8.0.tar.gz", hash = "sha256:df8e4339e9cb77357558cbdbceca33c303714cf861d1eef15e1070055ae8b7ef"},
 ]
 
 [[package]]
@@ -2167,4 +2168,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "4b716413159b6487fc0ce9162c1d78a7f797b8b1c13df357d4adc451314b2442"
+content-hash = "55a70579a44f11c217a850765a5651ddf3ddbd11c33a0702155972198e55756a"
