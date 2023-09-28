@@ -54,6 +54,7 @@ plugins:
 watch:
   - docs
   - mkdocs.yml
+  - README.md
 
 extra:
   version:
