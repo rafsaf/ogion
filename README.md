@@ -1,3 +1,25 @@
+<a href="https://github.com/rafsaf/backuper/blob/main/LICENSE" target="_blank">
+    <img src="https://img.shields.io/github/license/rafsaf/backuper" alt="License">
+</a>
+<a href="https://docs.python.org/3/whatsnew/3.11.html" target="_blank">
+    <img src="https://img.shields.io/badge/python-3.11-blue" alt="Python">
+</a>
+<a href="https://github.com/psf/black" target="_blank">
+    <img src="https://img.shields.io/badge/code%20style-black-lightgrey" alt="Black">
+</a>
+<a href="https://github.com/rafsaf/backuper/actions/workflows/tests.yml" target="_blank">
+    <img src="https://github.com/rafsaf/backuper/actions/workflows/tests.yml/badge.svg" alt="Tests">
+</a>
+<a href="https://github.com/rafsaf/backuper/actions/workflows/type_check.yml" target="_blank">
+    <img src="https://github.com/rafsaf/backuper/actions/workflows/type_check.yml/badge.svg" alt="Type check">
+</a>
+<a href="https://github.com/rafsaf/backuper/actions/workflows/dev_build.yml" target="_blank">
+    <img src="https://github.com/rafsaf/backuper/actions/workflows/dev_build.yml/badge.svg" alt="Dev build">
+</a>
+<a href="https://github.com/rafsaf/backuper/actions/workflows/release_build.yml" target="_blank">
+    <img src="https://github.com/rafsaf/backuper/actions/workflows/release_build.yml/badge.svg" alt="Release build">
+</a>
+
 # Backuper
 
 A tool for performing scheduled database backups and transferring encrypted data to secure public clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms.
