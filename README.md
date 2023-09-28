@@ -64,7 +64,7 @@ Using docker image: `rafsaf/backuper:latest`, see all tags on [dockerhub](https:
 
 ## Example
 
-Everyday 5am backup to Google Cloud Storage of PostgreSQL database defined in the same file and running in docker container.
+Everyday 5am backup of PostgreSQL database defined in the same file and running in docker container.
 
 ```yml
 # docker-compose.yml
