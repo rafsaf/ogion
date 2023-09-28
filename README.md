@@ -92,7 +92,7 @@ The author actively uses backuper (with GCS) for one production project [plemion
 See how it looks for ~2GB size database:
 
 
-![](docs/images/backuper_gcp_example_twp-min.jpg)
+![backuper_gcp_example_twp-min.jpg](https://raw.githubusercontent.com/rafsaf/backuper/main/docs/images/backuper_gcp_example_twp-min.jpg)
 
 <br>
 <br>
