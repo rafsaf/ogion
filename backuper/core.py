@@ -6,7 +6,7 @@ import secrets
 import shlex
 import shutil
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -62,12 +62,11 @@ def remove_path(path: Path) -> None:
 def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
     base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
     base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
-    random_string = secrets.token_urlsafe(3)
-    new_file = "{}_{}_{}_{}".format(
-        env_name,
-        datetime.utcnow().strftime("%Y%m%d_%H%M"),
-        name,
-        random_string,
+    new_file = (
+        f"{env_name}_"
+        f"{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M')}_"
+        f"{name}_"
+        f"{secrets.token_urlsafe(3)}"
     )
     if sql:
         new_file += ".sql"
@@ -193,7 +192,7 @@ def create_provider_model() -> ProviderModel:
 def file_before_retention_period_ends(
     backup_name: str, min_retention_days: int
 ) -> bool:
-    now = datetime.utcnow()
+    now = datetime.now()
     matches = DATETIME_BACKUP_FILE_PATTERN.finditer(backup_name)
 
     datetime_str = ""

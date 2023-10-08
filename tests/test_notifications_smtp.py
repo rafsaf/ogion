@@ -9,7 +9,7 @@ from backuper.notifications import smtp
 
 
 def test_smtp_skip_when_no_webhook_url() -> None:
-    assert smtp.SMTP().send(message="text") is False
+    assert not smtp.SMTP().send(message="text")
 
 
 def test_smtp_work_on_smtp_client_mock(monkeypatch: pytest.MonkeyPatch) -> None:
