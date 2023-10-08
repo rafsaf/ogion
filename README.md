@@ -1,8 +1,8 @@
 <a href="https://github.com/rafsaf/backuper/blob/main/LICENSE" target="_blank">
     <img src="https://img.shields.io/github/license/rafsaf/backuper" alt="License">
 </a>
-<a href="https://docs.python.org/3/whatsnew/3.11.html" target="_blank">
-    <img src="https://img.shields.io/badge/python-3.11-blue" alt="Python">
+<a href="https://docs.python.org/3/whatsnew/3.12.html" target="_blank">
+    <img src="https://img.shields.io/badge/python-3.12-blue" alt="Python">
 </a>
 <a href="https://github.com/psf/black" target="_blank">
     <img src="https://img.shields.io/badge/code%20style-black-lightgrey" alt="Black">
@@ -27,6 +27,7 @@ A tool for performing scheduled database backups and transferring encrypted data
 Backups are in `zip` format using [7-zip](https://www.7-zip.org/), with strong AES-256 encryption under the hood.
 
 ## Documentation
+
 - [https://backuper.rafsaf.pl](https://backuper.rafsaf.pl)
 
 ## Supported backup targets
@@ -80,7 +81,6 @@ services:
       - POSTGRESQL_PG15=host=db password=pwd cron_rule=0 0 5 * * port=5432
       - ZIP_ARCHIVE_PASSWORD=change_me
       - BACKUP_PROVIDER=name=debug
-
 ```
 
 (NOTE this will use provider [debug](https://backuper.rafsaf.pl/providers/debug/) that store backups locally in the container).
@@ -90,7 +90,6 @@ services:
 The author actively uses backuper (with GCS) for one production project [plemiona-planer.pl](https://plemiona-planer.pl) postgres database (both PRD and STG) and for bunch of homelab projects including self hosted Firefly III mariadb, Grafana postgres, KeyCloak postgres, Nextcloud postgres and configuration file, Minecraft server files, and two other postgres dbs for some demo projects.
 
 See how it looks for ~2GB size database:
-
 
 ![backuper_gcp_example_twp-min.jpg](https://raw.githubusercontent.com/rafsaf/backuper/main/docs/images/backuper_gcp_example_twp-min.jpg)
 

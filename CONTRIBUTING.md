@@ -15,7 +15,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 ## Project requirements
 
-- Python 3.11.
+- Python 3.12.
 - Poetry [https://python-poetry.org/](https://python-poetry.org/).
 - Docker and docker compose plugin [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/).
 - Debian/Ubuntu are known to work.
@@ -25,32 +25,31 @@ Both upload providers and backup targets were created with possibility to easly 
 
 1. Install python dependencies
 
-    `poetry install`
+   `poetry install`
 
 2. Install pre-commit hooks.
 
-    `pre-commit install`
+   `pre-commit install`
 
 3. Create `.env` file
 
-    `cp .env.example .env`
+   `cp .env.example .env`
 
 4. To run database backups, you will need `mariadb-client` and `postgresql-client` installed, there are dedicated scripts in folder `/scripts` that can do that (or install using `apt` for example).
 
 5. Setup databases
 
-    `docker compose up -d postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004`
+   `docker compose up -d postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004`
 
 6. You can run backuper (`--single` here to make all backups immediatly and then exit):
 
-    `python -m backuper.main --single`
+   `python -m backuper.main --single`
 
-## Docs 
+## Docs
 
 To play with documentation, after dependencies are in place installed with poetry:
 
 `mkdocs serve` will start development server.
-
 
 ## Testing
 
@@ -60,7 +59,7 @@ existing ones in order to target your changes.
 
 You can run all the test cases locally by invoking `pytest`.
 
-Since the code is closely related to docker container environment, setup to run pytest 
+Since the code is closely related to docker container environment, setup to run pytest
 directly in the container exists:
 
 - amd64: `docker compose run --rm --build backuper_tests_amd64`
@@ -77,7 +76,6 @@ The tests folder includes tests for cloud providers integrations, but for obviou
 For `Debug` provider acceptance tests, existing `.env.example` can be ok for `.env` file. To test other providers, you will need to change `BACKUP_PROVIDER` environment variable accordingly.
 
 Then `docker compose run --rm --build backuper_acceptance_test_amd64` (or even for arm64 `docker compose run --rm --build backuper_acceptance_test_arm64`) will use target `build` and your local `.env` file.
-
 
 ## Coding conventions
 

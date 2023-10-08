@@ -171,7 +171,7 @@ def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     options = config.Settings(
         LOG_LEVEL="DEBUG",
         BACKUP_PROVIDER="name=debug",
-        ZIP_ARCHIVE_PASSWORD="pass",
+        ZIP_ARCHIVE_PASSWORD=SecretStr("pass"),
         INSTANCE_NAME="tests",
         ZIP_SKIP_INTEGRITY_CHECK=False,
         SUBPROCESS_TIMEOUT_SECS=5,
