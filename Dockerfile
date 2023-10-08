@@ -1,4 +1,4 @@
-FROM python:3.11.5-slim-bookworm AS base
+FROM python:3.12.0-slim-bookworm AS base
 ARG PYTHONUNBUFFERED=1
 ARG PIP_DISABLE_PIP_VERSION_CHECK=1
 ARG PIP_NO_CACHE_DIR=1
@@ -8,12 +8,16 @@ ENV FOLDER_PATH="/var/lib/backuper"
 ENV LOG_FOLDER_PATH="/var/log/backuper"
 WORKDIR ${FOLDER_PATH}
 
-RUN apt-get -y update && apt-get -y install wget unzip postgresql-client mariadb-client
+RUN apt-get -y update && apt-get -y install wget unzip gpg
+COPY scripts scripts
+RUN ./scripts/install_mariadb_client.sh
+RUN ./scripts/install_postgresql_client.sh
+RUN apt-get -y remove gpg
 RUN addgroup --gid 1001 --system ${SERVICE_NAME} && \
     adduser --gid 1001 --shell /bin/false --disabled-password --uid 1001 ${SERVICE_NAME}
 
 FROM base as poetry
-RUN pip install poetry==1.5.1
+RUN pip install poetry==1.6.1
 COPY poetry.lock pyproject.toml ./
 RUN poetry export -o /requirements.txt --without-hashes
 RUN poetry export -o /requirements-tests.txt --without-hashes --with tests
@@ -24,10 +28,10 @@ RUN pip install -r requirements.txt
 RUN rm -f requirements.txt
 # reduce size of botocore lib, see https://github.com/boto/botocore/issues/1543
 RUN mkdir /tmp/data \
-    && cp -r /usr/local/lib/python3.11/site-packages/botocore/data/s3 /tmp/data/ \ 
-    && cp -f /usr/local/lib/python3.11/site-packages/botocore/data/*.json /tmp/data \
-    && rm -rf /usr/local/lib/python3.11/site-packages/botocore/data \
-    && cp -r /tmp/data /usr/local/lib/python3.11/site-packages/botocore/ \
+    && cp -r /usr/local/lib/python3.12/site-packages/botocore/data/s3 /tmp/data/ \ 
+    && cp -f /usr/local/lib/python3.12/site-packages/botocore/data/*.json /tmp/data \
+    && rm -rf /usr/local/lib/python3.12/site-packages/botocore/data \
+    && cp -r /tmp/data /usr/local/lib/python3.12/site-packages/botocore/ \
     && rm -rf /tmp/data
 
 COPY backuper backuper

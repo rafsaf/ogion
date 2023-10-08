@@ -3,6 +3,7 @@
 #
 # https://www.7-zip.org/download.html
 #########################################################################
+#!/bin/sh
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 AMD64_DIR="$SCRIPT_DIR/../backuper/bin/7zip/amd64"

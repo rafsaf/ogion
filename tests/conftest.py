@@ -168,6 +168,28 @@ def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     config_folder_path = tmp_path / "pytest_config"
     monkeypatch.setattr(config, "CONST_CONFIG_FOLDER_PATH", config_folder_path)
     config_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    options = config.Settings(
+        LOG_LEVEL="DEBUG",
+        BACKUP_PROVIDER="name=debug",
+        ZIP_ARCHIVE_PASSWORD=SecretStr("pass"),
+        INSTANCE_NAME="tests",
+        ZIP_SKIP_INTEGRITY_CHECK=False,
+        SUBPROCESS_TIMEOUT_SECS=5,
+        SIGTERM_TIMEOUT_SECS=1,
+        ZIP_ARCHIVE_LEVEL=1,
+        BACKUP_MAX_NUMBER=2,
+        BACKUP_MIN_RETENTION_DAYS=0,
+        DISCORD_WEBHOOK_URL=None,
+        DISCORD_MAX_MSG_LEN=1500,
+        SLACK_WEBHOOK_URL=None,
+        SLACK_MAX_MSG_LEN=1500,
+        SMTP_HOST="",
+        SMTP_PORT=587,
+        SMTP_FROM_ADDR="",
+        SMTP_PASSWORD=SecretStr(""),
+        SMTP_TO_ADDRS="",
+    )
+    monkeypatch.setattr(config, "options", options)
 
 
 @pytest.fixture(autouse=True)
