@@ -62,7 +62,7 @@ services:
 
   postgres_11:
     restart: "no"
-    image: postgres:11.21
+    image: postgres:11.21-bookworm
     environment:
       - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
       - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
