@@ -39,7 +39,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 5. Setup databases
 
-   `docker compose up -d postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004`
+   `docker compose up -d postgres_16 postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004`
 
 6. You can run backuper (`--single` here to make all backups immediatly and then exit):
 

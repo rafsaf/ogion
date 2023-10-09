@@ -1,6 +1,6 @@
 # also used in GH workflows
 # set up dbs 
-# docker compose up -d postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004
+# docker compose up -d postgres_16 postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004
 # run tests amd64
 # docker compose run --rm --build backuper_tests_amd64
 # run tests arm64 see https://docs.docker.com/build/building/multi-platform/
@@ -10,9 +10,19 @@
 # docker compose run --rm --build backuper_acceptance_test_arm64
 
 services:
+  postgres_16:
+    restart: "no"
+    image: postgres:16.0
+    environment:
+      - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
+      - POSTGRES_DB=database-_-12!@#$%^&*()/;><.,]}{[
+    ports:
+      - 10016:5432
+
   postgres_15:
     restart: "no"
-    image: postgres:15.1
+    image: postgres:15.4
     environment:
       - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
       - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
@@ -22,7 +32,7 @@ services:
 
   postgres_14:
     restart: "no"
-    image: postgres:14.6
+    image: postgres:14.9
     environment:
       - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
       - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
@@ -32,7 +42,7 @@ services:
 
   postgres_13:
     restart: "no"
-    image: postgres:13.8
+    image: postgres:13.12
     environment:
       - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
       - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
@@ -42,7 +52,7 @@ services:
 
   postgres_12:
     restart: "no"
-    image: postgres:12.12
+    image: postgres:12.16
     environment:
       - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
       - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
@@ -52,7 +62,7 @@ services:
 
   postgres_11:
     restart: "no"
-    image: postgres:11.16
+    image: postgres:11.21
     environment:
       - POSTGRES_PASSWORD=password-_-12!@#$%^&*()/;><.,]}{[
       - POSTGRES_USER=user-_-12!@#$%^&*()/;><.,]}{[
@@ -130,6 +140,7 @@ services:
     restart: "no"
     platform: linux/amd64
     depends_on:
+      - postgres_16
       - postgres_15
       - postgres_14
       - postgres_13
@@ -153,6 +164,7 @@ services:
     restart: "no"
     platform: linux/arm64
     depends_on:
+      - postgres_16
       - postgres_15
       - postgres_14
       - postgres_13
@@ -176,6 +188,7 @@ services:
     restart: "no"
     network_mode: "host"
     depends_on:
+      - postgres_16
       - postgres_15
       - postgres_14
       - postgres_13
@@ -200,6 +213,7 @@ services:
     network_mode: "host"
     platform: linux/amd64
     depends_on:
+      - postgres_16
       - postgres_15
       - postgres_14
       - postgres_13
@@ -224,6 +238,7 @@ services:
     network_mode: "host"
     platform: linux/arm64
     depends_on:
+      - postgres_16
       - postgres_15
       - postgres_14
       - postgres_13

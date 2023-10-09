@@ -28,6 +28,15 @@ FOLDER_1 = DirectoryTargetModel(
     cron_rule="* * * * *",
     abs_path=Path(__file__).absolute().parent / "const/testfolder",
 )
+POSTGRES_16 = PostgreSQLTargetModel(
+    env_name="postgresql_db_15",
+    cron_rule="* * * * *",
+    host="postgres_16" if DOCKER_TESTS else "localhost",
+    port=5432 if DOCKER_TESTS else 10016,
+    password=SecretStr("password-_-12!@#$%^&*()/;><.,]}{["),
+    db="database-_-12!@#$%^&*()/;><.,]}{[",
+    user="user-_-12!@#$%^&*()/;><.,]}{[",
+)
 POSTGRES_15 = PostgreSQLTargetModel(
     env_name="postgresql_db_15",
     cron_rule="* * * * *",
@@ -129,11 +138,11 @@ MARIADB_1004 = MariaDBTargetModel(
 )
 
 DB_VERSION_BY_ENV_VAR: dict[str, str] = {
-    "postgresql_db_15": "15.1",
-    "postgresql_db_14": "14.6",
+    "postgresql_db_15": "15.4",
+    "postgresql_db_14": "14.9",
     "postgresql_db_13": "13.8",
-    "postgresql_db_12": "12.12",
-    "postgresql_db_11": "11.16",
+    "postgresql_db_12": "12.16",
+    "postgresql_db_11": "11.21",
     "mysql_db_80": "8.0.33",
     "mysql_db_57": "5.7.42",
     "mariadb_1011": "10.11.2",
@@ -147,6 +156,7 @@ ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLTargetModel] = [
     POSTGRES_13,
     POSTGRES_14,
     POSTGRES_15,
+    POSTGRES_16,
 ]
 ALL_MYSQL_DBS_TARGETS: list[MySQLTargetModel] = [
     MYSQL_57,
