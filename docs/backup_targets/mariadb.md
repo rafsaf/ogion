@@ -12,7 +12,7 @@ MARIADB_SOME_STRING="host=... password=... cron_rule=..."
 ```
 
 !!! note
-    _Any environment variable that starts with "**MARIADB_**" will be handled as MariaDB._ There can be multiple files paths definition for one backuper instance, for example `MARIADB_FOO_MY_DB1` and `MARIADB_BAR_MY_DB2`. Supported versions are: 10.11, 10.6, 10.5, 10.4. Params must be included in value, splited by single space for example `"value1=1 value2=foo"`.
+    _Any environment variable that starts with "**MARIADB_**" will be handled as MariaDB._ There can be multiple files paths definition for one backuper instance, for example `MARIADB_FOO_MY_DB1` and `MARIADB_BAR_MY_DB2`. Supported versions are: 11.1, 10.11, 10.6, 10.5, 10.4. Params must be included in value, splited by single space for example `"value1=1 value2=foo"`.
 
 ## Params
 
