@@ -109,6 +109,15 @@ MYSQL_81 = MySQLTargetModel(
     db="database-_-12!@#%^&*()/;><.,]}{[",
     user="user-_-12!@#%^&*()/;><.,]}{[",
 )
+MARIADB_1101 = MariaDBTargetModel(
+    env_name="mariadb_1101",
+    cron_rule="* * * * *",
+    host="mariadb_1101" if DOCKER_TESTS else "localhost",
+    port=3306 if DOCKER_TESTS else 11101,
+    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
+    db="database-_-12!@#%^&*()/;><.,]}{[",
+    user="user-_-12!@#%^&*()/;><.,]}{[",
+)
 MARIADB_1011 = MariaDBTargetModel(
     env_name="mariadb_1011",
     cron_rule="* * * * *",
@@ -156,6 +165,7 @@ DB_VERSION_BY_ENV_VAR: dict[str, str] = {
     "mysql_db_81": "8.1.0",
     "mysql_db_80": "8.0.34",
     "mysql_db_57": "5.7.42",
+    "mariadb_1101": "11.1.2",
     "mariadb_1011": "10.11.2",
     "mariadb_1006": "10.6.12",
     "mariadb_1005": "10.5.19",
@@ -175,6 +185,7 @@ ALL_MYSQL_DBS_TARGETS: list[MySQLTargetModel] = [
     MYSQL_81,
 ]
 ALL_MARIADB_DBS_TARGETS: list[MariaDBTargetModel] = [
+    MARIADB_1101,
     MARIADB_1011,
     MARIADB_1006,
     MARIADB_1005,

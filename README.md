@@ -34,7 +34,7 @@ Backups are in `zip` format using [7-zip](https://www.7-zip.org/), with strong A
 
 - PostgreSQL (tested on 16, 15, 14, 13, 12, 11)
 - MySQL (tested on 8.1, 8.0, 5.7)
-- MariaDB (tested on 10.11, 10.6, 10.5, 10.4)
+- MariaDB (tested on 11.1, 10.11, 10.6, 10.5, 10.4)
 - Single file
 - Directory
 

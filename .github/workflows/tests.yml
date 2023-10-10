@@ -30,7 +30,7 @@ jobs:
         run: touch .env
 
       - name: Download and start db containers
-        run: docker compose up -d postgres_16 postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mysql_81 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004
+        run: docker compose up -d postgres_16 postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mysql_81 mariadb_1101 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004
 
       - name: Build image and run tests in container
         run: docker compose run --rm --build backuper_tests_${{ matrix.arch }}

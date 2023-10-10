@@ -1,6 +1,6 @@
 # also used in GH workflows
 # set up dbs 
-# docker compose up -d postgres_16 postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mysql_81 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004
+# docker compose up -d postgres_16 postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mysql_81 mariadb_1101 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004
 # run tests amd64
 # docker compose run --rm --build backuper_tests_amd64
 # run tests arm64 see https://docs.docker.com/build/building/multi-platform/
@@ -103,6 +103,17 @@ services:
     ports:
       - 10081:3306
 
+  mariadb_1101:
+    restart: "no"
+    image: mariadb:11.1.2
+    environment:
+      - MARIADB_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+      - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
+      - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
+      - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
+    ports:
+      - 11101:3306
+
   mariadb_1011:
     restart: "no"
     image: mariadb:10.11.2
@@ -160,6 +171,7 @@ services:
       - mysql_57
       - mysql_80
       - mysql_81
+      - mariadb_1101
       - mariadb_1011
       - mariadb_1006
       - mariadb_1005
@@ -185,6 +197,7 @@ services:
       - mysql_57
       - mysql_80
       - mysql_81
+      - mariadb_1101
       - mariadb_1011
       - mariadb_1006
       - mariadb_1005
@@ -210,6 +223,7 @@ services:
       - mysql_57
       - mysql_80
       - mysql_81
+      - mariadb_1101
       - mariadb_1011
       - mariadb_1006
       - mariadb_1005
@@ -236,6 +250,7 @@ services:
       - mysql_57
       - mysql_80
       - mysql_81
+      - mariadb_1101
       - mariadb_1011
       - mariadb_1006
       - mariadb_1005
@@ -262,6 +277,7 @@ services:
       - mysql_57
       - mysql_80
       - mysql_81
+      - mariadb_1101
       - mariadb_1011
       - mariadb_1006
       - mariadb_1005
