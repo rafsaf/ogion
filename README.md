@@ -33,7 +33,7 @@ Backups are in `zip` format using [7-zip](https://www.7-zip.org/), with strong A
 ## Supported backup targets
 
 - PostgreSQL (tested on 16, 15, 14, 13, 12, 11)
-- MySQL (tested on 8.0, 5.7)
+- MySQL (tested on 8.1, 8.0, 5.7)
 - MariaDB (tested on 10.11, 10.6, 10.5, 10.4)
 - Single file
 - Directory

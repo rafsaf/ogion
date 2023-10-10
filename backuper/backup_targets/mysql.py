@@ -115,7 +115,7 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
 
         db = shlex.quote(self.db)
         shell_mysqldump_db = (
-            f"mysqldump --defaults-file={self.option_file} "
+            f"mariadb-dump --defaults-file={self.option_file} "
             f"--result-file={out_file} --verbose {db}"
         )
         log.debug("start mysqldump in subprocess: %s", shell_mysqldump_db)
