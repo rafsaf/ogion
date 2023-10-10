@@ -52,7 +52,7 @@ env = [
   "LOG_LEVEL=DEBUG",
   "BACKUP_MAX_NUMBER=1",
   "BACKUP_PROVIDER=",
-  "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#$%^&*()/;><.,][`~'",
+  "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#%^&*()/;><.,][`~'",
   "LOG_FOLDER_PATH=/tmp/pytest_backuper_env_vars_hook_logs_folder",
 ]
 minversion = "6.0"
