@@ -29,7 +29,7 @@ jobs:
       - name: Build and push backuper image
         uses: docker/build-push-action@v5
         with:
-          file: Dockerfile
+          file: docker/Dockerfile
           context: .
           target: build
           push: true

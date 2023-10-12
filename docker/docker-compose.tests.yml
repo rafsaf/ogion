@@ -1,0 +1,40 @@
+# also used in GH workflows
+# set up dbs 
+# docker compose up -d postgres_16 postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mysql_81 mariadb_1101 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004
+# run tests amd64
+# docker compose run --rm --build backuper_tests_amd64
+# run tests arm64 see https://docs.docker.com/build/building/multi-platform/
+# docker compose run --rm --build backuper_tests_arm64
+# run acceptance test with AWS then GCP then Azure in .env
+# docker compose run --rm --build backuper_acceptance_test_amd64 
+# docker compose run --rm --build backuper_acceptance_test_arm64
+
+services:
+  backuper_tests_amd64:
+    restart: "no"
+    networks:
+      - backuper
+    platform: linux/amd64
+    build:
+      context: ./../
+      dockerfile: docker/Dockerfile
+      target: tests
+    environment:
+      - DOCKER_TESTS=true
+      - ZIP_ARCHIVE_PASSWORD=password
+
+  backuper_tests_arm64:
+    restart: "no"
+    networks:
+      - backuper
+    platform: linux/arm64
+    build:
+      context: ./../
+      dockerfile: docker/Dockerfile
+      target: tests
+    environment:
+      - DOCKER_TESTS=true
+      - ZIP_ARCHIVE_PASSWORD=password
+
+networks:
+  backuper:
