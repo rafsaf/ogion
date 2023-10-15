@@ -12,10 +12,10 @@ tests_arm64:
 	docker compose -f docker/docker-compose.tests.yml run --rm backuper_tests_arm64
 
 acceptance_tests_amd64:
-	docker compose -f docker/docker-compose.tests.yml run --rm backuper_acceptance_test_amd64
+	docker compose -f docker/docker-compose.acceptance.yml run --rm backuper_acceptance_test_amd64
 
 acceptance_tests_arm64:
-	docker compose -f docker/docker-compose.tests.yml run --rm backuper_acceptance_test_arm64
+	docker compose -f docker/docker-compose.acceptance.yml run --rm backuper_acceptance_test_arm64
 
 update_compose_db_file:
 	poetry run python backuper/tools/compose_file_generator.py > docker/docker-compose.dbs.yml
