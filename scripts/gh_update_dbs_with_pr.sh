@@ -14,7 +14,7 @@ else
     branch="update-docker-compose-dbs-$timestamp"
     git config user.name "GitHub Actions Bot"
     git config user.email "<>"
-    git checkout $branch
+    git checkout -b $branch
     git add .
     git commit -m 'update docker-compose.dbs.yml file'
     git push -u origin $branch
