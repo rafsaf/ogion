@@ -13,6 +13,9 @@ else
     timestamp=$(date +%s)
     branch="update-docker-compose-dbs-$timestamp"
     msg="update docker-compose.dbs.yml file"
+    git config user.name "GitHub Actions Bot"
+    git config user.email "<>"
+    git status
     git branch $branch
     git commit -am $msg
     git push -u origin $branch
