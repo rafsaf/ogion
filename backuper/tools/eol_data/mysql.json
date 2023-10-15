@@ -7,7 +7,7 @@
         "link": null,
         "support": true,
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "8.0",
@@ -17,7 +17,7 @@
         "link": null,
         "support": "2025-04-30",
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "5.7",
@@ -27,7 +27,7 @@
         "link": null,
         "support": "2020-10-31",
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "5.6",
@@ -37,7 +37,7 @@
         "link": null,
         "support": "2018-02-28",
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     },
     {
         "cycle": "5.5",
@@ -47,6 +47,6 @@
         "link": null,
         "support": "2015-12-31",
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     }
 ]

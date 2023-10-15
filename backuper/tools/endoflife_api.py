@@ -1,12 +1,14 @@
-from pydantic import BaseModel, Field, computed_field
-from datetime import datetime, timezone
-import requests
 import json
+from datetime import datetime, timezone
 from pathlib import Path
+
+import requests
+from pydantic import BaseModel, Field, computed_field
 
 API_URL = "https://endoflife.date/api/"
 SCRIPT_DIR = Path(__file__).resolve().parent.absolute()
 EOL_DATA_DIR = SCRIPT_DIR / "eol_data"
+STATUS_200 = 200
 
 
 class EOLApiProductCycle(BaseModel):
@@ -20,7 +22,7 @@ class EOLApiProductCycle(BaseModel):
 
     @computed_field
     @property
-    def valid(self) -> bool:
+    def before_eol(self) -> bool:
         now = datetime.now(timezone.utc)
         if isinstance(self.eol, str):
             eol_date = datetime.strptime(self.eol, "%Y-%m-%d").replace(
@@ -45,7 +47,7 @@ class EOLApiProduct(BaseModel):
 
 def get_eol_data(product_name: str) -> None:
     res = requests.get(f"{API_URL}{product_name}.json")
-    if res.status_code != 200:
+    if res.status_code != STATUS_200:
         raise ValueError(f"unknown api response: {res.text}")
 
     api_product = EOLApiProduct(cycles=res.json())
@@ -53,7 +55,11 @@ def get_eol_data(product_name: str) -> None:
         json.dump(api_product.model_dump(by_alias=True)["cycles"], f, indent=4)
 
 
-if __name__ == "__main__":
+def update_eol_files() -> None:
     get_eol_data("mariadb")
     get_eol_data("postgresql")
     get_eol_data("mysql")
+
+
+if __name__ == "__main__":
+    update_eol_files()

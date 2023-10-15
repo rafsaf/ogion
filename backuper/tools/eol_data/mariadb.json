@@ -7,7 +7,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "11.0",
@@ -17,7 +17,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "10.11",
@@ -27,7 +27,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "10.10",
@@ -37,7 +37,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "10.9",
@@ -47,7 +47,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     },
     {
         "cycle": "10.8",
@@ -57,7 +57,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     },
     {
         "cycle": "10.7",
@@ -67,7 +67,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     },
     {
         "cycle": "10.6",
@@ -77,7 +77,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "10.5",
@@ -87,7 +87,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "10.4",
@@ -97,7 +97,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": true
+        "before_eol": true
     },
     {
         "cycle": "10.3",
@@ -107,7 +107,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     },
     {
         "cycle": "10.2",
@@ -117,7 +117,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     },
     {
         "cycle": "10.1",
@@ -127,7 +127,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     },
     {
         "cycle": "10.0",
@@ -137,7 +137,7 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     },
     {
         "cycle": "5.5",
@@ -147,6 +147,6 @@
         "link": null,
         "support": null,
         "discontinued": null,
-        "valid": false
+        "before_eol": false
     }
 ]
