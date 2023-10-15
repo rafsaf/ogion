@@ -1,8 +1,6 @@
 #!/bin/sh
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-DB_COMPOSE_FILE="$SCRIPT_DIR/../docker/docker-compose.dbs.yml"
+DB_COMPOSE_FILE="docker/docker-compose.dbs.yml"
 
-cd $SCRIPT_DIR/../
 git config user.name "GitHub Actions Bot"
 git config user.email "<>"
 git status
