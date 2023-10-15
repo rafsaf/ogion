@@ -12,7 +12,7 @@ else
     echo "file changed"
     timestamp=$(date +%s)
     branch="update-docker-compose-dbs-$timestamp"
-    msg="update docker-compose.dbs.yml file"
+    msg="'update docker-compose.dbs.yml file'"
     git config user.name "GitHub Actions Bot"
     git config user.email "<>"
     git status
