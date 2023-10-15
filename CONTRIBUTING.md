@@ -39,7 +39,9 @@ Both upload providers and backup targets were created with possibility to easly 
 
 5. Setup databases
 
-   `docker compose up -d postgres_16 postgres_15 postgres_14 postgres_13 postgres_12 postgres_11 mysql_57 mysql_80 mysql_81 mariadb_1011 mariadb_1006 mariadb_1005 mariadb_1004`
+   `make docker_dbs_setup_up`
+
+   Note, file `docker/docker-compose.dbs.yml` is automatically updated weekly keeping always latest tag per release cycle and adding new releases and removing those after EOL.
 
 6. You can run backuper (`--single` here to make all backups immediatly and then exit):
 
@@ -62,8 +64,8 @@ You can run all the test cases locally by invoking `pytest`.
 Since the code is closely related to docker container environment, setup to run pytest
 directly in the container exists:
 
-- amd64: `docker compose run --rm --build backuper_tests_amd64`
-- arm64 (slow, qemu) `docker compose run --rm --build backuper_tests_arm64`
+- amd64: `make tests_amd64`
+- arm64 (slow, qemu) `make tests_arm64`
 
 To run tests vs `arm64` you will need to follow steps in https://docs.docker.com/build/building/multi-platform/.
 
@@ -75,7 +77,7 @@ The tests folder includes tests for cloud providers integrations, but for obviou
 
 For `Debug` provider acceptance tests, existing `.env.example` can be ok for `.env` file. To test other providers, you will need to change `BACKUP_PROVIDER` environment variable accordingly.
 
-Then `docker compose run --rm --build backuper_acceptance_test_amd64` (or even for arm64 `docker compose run --rm --build backuper_acceptance_test_arm64`) will use target `build` and your local `.env` file.
+Then `acceptance_tests_amd64` (or even for arm64 `acceptance_tests_arm64`) will use target `build` and your local `.env` file.
 
 ## Coding conventions
 
