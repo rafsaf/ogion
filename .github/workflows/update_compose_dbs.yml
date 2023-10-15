@@ -35,6 +35,7 @@ jobs:
 
       - name: Check update
         run: |
+          make update_compose_db_file
           ./scripts/gh_update_dbs_with_pr.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -3,7 +3,6 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 DB_COMPOSE_FILE="$SCRIPT_DIR/../docker/docker-compose.dbs.yml"
 
 cd $SCRIPT_DIR/../
-make update_compose_db_file
 DIFF=$(git diff $DB_COMPOSE_FILE)
 if [ "$DIFF" = "" ]
 then
