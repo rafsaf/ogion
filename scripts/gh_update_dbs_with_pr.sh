@@ -16,7 +16,8 @@ else
     git config user.email "<>"
     git status
     git branch $branch
-    git commit -am 'update docker-compose.dbs.yml file'
+    git add .
+    git commit -m 'update docker-compose.dbs.yml file'
     git push -u origin $branch
     gh pr create -B main -H $branch --title 'update docker-compose.dbs.yml file' --body 'Created by Github action'
 fi
