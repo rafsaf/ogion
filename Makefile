@@ -18,4 +18,4 @@ acceptance_tests_arm64:
 	docker compose -f docker/docker-compose.tests.yml run --rm backuper_acceptance_test_arm64
 
 update_compose_db_file:
-	python backuper/tools/compose_file_generator.py > docker/docker-compose.dbs.yml
+	poetry run python backuper/tools/compose_file_generator.py > docker/docker-compose.dbs.yml
