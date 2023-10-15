@@ -5,6 +5,7 @@ on:
     - cron: "12 6,18 * * *"
 permissions:
   contents: write
+  pull-requests: write
 jobs:
   update_compose_dbs:
     runs-on: ubuntu-latest
