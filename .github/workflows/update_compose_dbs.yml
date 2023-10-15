@@ -2,7 +2,7 @@ name: update-compose-dbs
 on:
   workflow_dispatch:
   schedule:
-    - cron: "12 6,18 * * *"
+    - cron: "12 11 */7 * *"
 permissions:
   contents: write
   pull-requests: write
