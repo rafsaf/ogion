@@ -1,15 +1,27 @@
 import json
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 import yaml
-from compose_db_models import ComposeDatabase
-from endoflife_api import (
-    EOL_DATA_DIR,
-    EOLApiProduct,
-    EOLApiProductCycle,
-    update_eol_files,
-)
+
+try:
+    import backuper  # noqa
+except ImportError:
+    from compose_db_models import ComposeDatabase
+    from endoflife_api import (
+        EOL_DATA_DIR,
+        EOLApiProduct,
+        EOLApiProductCycle,
+        update_eol_files,
+    )
+else:
+    from backuper.tools.compose_db_models import ComposeDatabase
+    from backuper.tools.endoflife_api import (
+        EOL_DATA_DIR,
+        EOLApiProduct,
+        EOLApiProductCycle,
+        update_eol_files,
+    )
 
 DB_PWD = "password-_-12!@#%^&*()/;><.,]}{["
 DB_NAME = "database-_-12!@#%^&*()/;><.,]}{["
@@ -24,6 +36,7 @@ def mariadb_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
         name=name,
         restart="no",
         networks=[DEFAULT_NETWORK],
+        version=cycle.latest,
         image=f"mariadb:{cycle.latest}",
         ports=[f"{host_port}:3306"],
         environment=[
@@ -44,6 +57,7 @@ def mysql_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
         name=name,
         restart="no",
         networks=[DEFAULT_NETWORK],
+        version=cycle.latest,
         image=f"mysql:{cycle.latest}",
         ports=[f"{host_port}:3306"],
         environment=[
@@ -64,10 +78,11 @@ def postgres_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
         name=name,
         restart="no",
         networks=[DEFAULT_NETWORK],
+        version=cycle.latest,
         image=f"postgres:{cycle.latest}-bookworm",
         ports=[f"{host_port}:5432"],
         environment=[
-            f"POSTGRES_PASSWORD=root-{DB_PWD}",
+            f"POSTGRES_PASSWORD={DB_PWD}",
             f"POSTGRES_DB={DB_NAME}",
             f"POSTGRES_USER={DB_USERNAME}",
         ],
@@ -88,21 +103,28 @@ def handle_file(
     return [cycle_func(cycle) for cycle in before_eol_cycles]
 
 
-def db_compose_data() -> list[ComposeDatabase]:
-    res: list[ComposeDatabase] = []
-    res += handle_file(EOL_DATA_DIR / "mariadb.json", mariadb_db_generator)
-    res += handle_file(EOL_DATA_DIR / "postgresql.json", postgres_db_generator)
-    res += handle_file(EOL_DATA_DIR / "mysql.json", mysql_db_generator)
-    return res
+def db_compose_mariadb_data() -> list[ComposeDatabase]:
+    return handle_file(EOL_DATA_DIR / "mariadb.json", mariadb_db_generator)
+
+
+def db_compose_postgresql_data() -> list[ComposeDatabase]:
+    return handle_file(EOL_DATA_DIR / "postgresql.json", postgres_db_generator)
+
+
+def db_compose_mysql_data() -> list[ComposeDatabase]:
+    return handle_file(EOL_DATA_DIR / "mysql.json", mysql_db_generator)
 
 
 if __name__ == "__main__":
     update_eol_files()
-    data = {"services": {}, "networks": {"backuper": {}}}
-    compose_data = db_compose_data()
+    data: dict[str, Any] = {"services": {}, "networks": {"backuper": {}}}
+    compose_data: list[ComposeDatabase] = []
+    compose_data += db_compose_mariadb_data()
+    compose_data += db_compose_postgresql_data()
+    compose_data += db_compose_mysql_data()
     for compose_db_data in compose_data:
         data["services"][compose_db_data.name] = compose_db_data.model_dump(
-            exclude={"name"}
+            exclude={"name", "version"}
         )
     yml_data = yaml.safe_dump(data, indent=2)
     print(yml_data)

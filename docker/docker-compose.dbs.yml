@@ -123,7 +123,7 @@ services:
     restart: 'no'
   backuper_postgres_11:
     environment:
-    - POSTGRES_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
     image: postgres:11.21-bookworm
@@ -134,7 +134,7 @@ services:
     restart: 'no'
   backuper_postgres_12:
     environment:
-    - POSTGRES_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
     image: postgres:12.16-bookworm
@@ -145,7 +145,7 @@ services:
     restart: 'no'
   backuper_postgres_13:
     environment:
-    - POSTGRES_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
     image: postgres:13.12-bookworm
@@ -156,7 +156,7 @@ services:
     restart: 'no'
   backuper_postgres_14:
     environment:
-    - POSTGRES_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
     image: postgres:14.9-bookworm
@@ -167,7 +167,7 @@ services:
     restart: 'no'
   backuper_postgres_15:
     environment:
-    - POSTGRES_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
     image: postgres:15.4-bookworm
@@ -178,7 +178,7 @@ services:
     restart: 'no'
   backuper_postgres_16:
     environment:
-    - POSTGRES_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
     image: postgres:16.0-bookworm

@@ -10,7 +10,13 @@ from backuper import config, core, main
 from backuper.notifications.notifications_context import NotificationsContext
 from backuper.upload_providers.debug import UploadProviderLocalDebug
 
-from .conftest import FILE_1, FOLDER_1, MARIADB_1011, MYSQL_80, POSTGRES_15
+from .conftest import (
+    FILE_1,
+    FOLDER_1,
+    ALL_MARIADB_DBS_TARGETS,
+    ALL_MYSQL_DBS_TARGETS,
+    ALL_POSTGRES_DBS_TARGETS,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -19,7 +25,12 @@ def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_backup_targets(monkeypatch: pytest.MonkeyPatch) -> None:
-    models = [POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1]
+    models = (
+        ALL_MARIADB_DBS_TARGETS
+        + ALL_MYSQL_DBS_TARGETS
+        + ALL_POSTGRES_DBS_TARGETS
+        + [FILE_1, FOLDER_1]
+    )
     monkeypatch.setattr(
         core,
         "create_target_models",
@@ -59,10 +70,16 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
         sys.exit(0)
 
     monkeypatch.setattr(main, "shutdown", dummy_shutdown)
+    models = (
+        ALL_MARIADB_DBS_TARGETS
+        + ALL_MYSQL_DBS_TARGETS
+        + ALL_POSTGRES_DBS_TARGETS
+        + [FILE_1, FOLDER_1]
+    )
     monkeypatch.setattr(
         core,
         "create_target_models",
-        Mock(return_value=[POSTGRES_15, MYSQL_80, MARIADB_1011, FILE_1, FOLDER_1]),
+        Mock(return_value=models),
     )
     with pytest.raises(SystemExit) as system_exit:
         main.main()
@@ -110,7 +127,7 @@ def test_run_backup_notifications_fail_message_is_fired_when_it_fails(
     monkeypatch.setattr(
         core,
         "create_target_models",
-        Mock(return_value=[POSTGRES_15]),
+        Mock(return_value=[ALL_POSTGRES_DBS_TARGETS[0]]),
     )
     target = main.backup_targets()[0]
     backup_file = Path("/tmp/fake")
