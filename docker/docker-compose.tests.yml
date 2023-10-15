@@ -1,0 +1,29 @@
+services:
+  backuper_tests_amd64:
+    restart: "no"
+    networks:
+      - backuper
+    platform: linux/amd64
+    build:
+      context: ./../
+      dockerfile: docker/Dockerfile
+      target: tests
+    environment:
+      - DOCKER_TESTS=true
+      - ZIP_ARCHIVE_PASSWORD=password
+
+  backuper_tests_arm64:
+    restart: "no"
+    networks:
+      - backuper
+    platform: linux/arm64
+    build:
+      context: ./../
+      dockerfile: docker/Dockerfile
+      target: tests
+    environment:
+      - DOCKER_TESTS=true
+      - ZIP_ARCHIVE_PASSWORD=password
+
+networks:
+  backuper:

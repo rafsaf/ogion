@@ -2,6 +2,7 @@ import os
 import secrets
 from collections.abc import Generator
 from pathlib import Path
+from typing import Type, TypeVar
 
 import pytest
 import responses
@@ -15,9 +16,52 @@ from backuper.models.backup_target_models import (
     PostgreSQLTargetModel,
     SingleFileTargetModel,
 )
+from backuper.tools.compose_db_models import ComposeDatabase
+from backuper.tools.compose_file_generator import (
+    DB_NAME,
+    DB_PWD,
+    DB_USERNAME,
+    db_compose_mariadb_data,
+    db_compose_mysql_data,
+    db_compose_postgresql_data,
+)
+
+TM = TypeVar("TM")
+
+
+def _to_target_model(
+    compose_db: ComposeDatabase,
+    model: Type[TM],
+) -> TM:
+    DB_VERSION_BY_ENV_VAR[compose_db.name] = compose_db.version
+    return model(  # type: ignore[call-arg]
+        env_name=compose_db.name,
+        cron_rule="* * * * *",
+        host=compose_db.name if DOCKER_TESTS else "localhost",
+        port=int(compose_db.ports[0].split(":")[1])
+        if DOCKER_TESTS
+        else int(compose_db.ports[0].split(":")[0]),
+        password=SecretStr(DB_PWD),
+        db=DB_NAME,
+        user=DB_USERNAME,
+    )
+
 
 DOCKER_TESTS: bool = os.environ.get("DOCKER_TESTS", None) is not None
 CONST_TOKEN_URLSAFE = "mock"
+DB_VERSION_BY_ENV_VAR: dict[str, str] = {}
+ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLTargetModel] = [
+    _to_target_model(compose_db, PostgreSQLTargetModel)
+    for compose_db in db_compose_postgresql_data()
+]
+ALL_MYSQL_DBS_TARGETS: list[MySQLTargetModel] = [
+    _to_target_model(compose_db, MySQLTargetModel)
+    for compose_db in db_compose_mysql_data()
+]
+ALL_MARIADB_DBS_TARGETS: list[MariaDBTargetModel] = [
+    _to_target_model(compose_db, MariaDBTargetModel)
+    for compose_db in db_compose_mariadb_data()
+]
 FILE_1 = SingleFileTargetModel(
     env_name="singlefile_1",
     cron_rule="* * * * *",
@@ -28,169 +72,6 @@ FOLDER_1 = DirectoryTargetModel(
     cron_rule="* * * * *",
     abs_path=Path(__file__).absolute().parent / "const/testfolder",
 )
-POSTGRES_16 = PostgreSQLTargetModel(
-    env_name="postgresql_db_16",
-    cron_rule="* * * * *",
-    host="postgres_16" if DOCKER_TESTS else "localhost",
-    port=5432 if DOCKER_TESTS else 10016,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-POSTGRES_15 = PostgreSQLTargetModel(
-    env_name="postgresql_db_15",
-    cron_rule="* * * * *",
-    host="postgres_15" if DOCKER_TESTS else "localhost",
-    port=5432 if DOCKER_TESTS else 10015,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-POSTGRES_14 = PostgreSQLTargetModel(
-    env_name="postgresql_db_14",
-    cron_rule="* * * * *",
-    host="postgres_14" if DOCKER_TESTS else "localhost",
-    port=5432 if DOCKER_TESTS else 10014,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-POSTGRES_13 = PostgreSQLTargetModel(
-    env_name="postgresql_db_13",
-    cron_rule="* * * * *",
-    host="postgres_13" if DOCKER_TESTS else "localhost",
-    port=5432 if DOCKER_TESTS else 10013,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-POSTGRES_12 = PostgreSQLTargetModel(
-    env_name="postgresql_db_12",
-    cron_rule="* * * * *",
-    host="postgres_12" if DOCKER_TESTS else "localhost",
-    port=5432 if DOCKER_TESTS else 10012,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-POSTGRES_11 = PostgreSQLTargetModel(
-    env_name="postgresql_db_11",
-    cron_rule="* * * * *",
-    host="postgres_11" if DOCKER_TESTS else "localhost",
-    port=5432 if DOCKER_TESTS else 10011,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-MYSQL_57 = MySQLTargetModel(
-    env_name="mysql_db_57",
-    cron_rule="* * * * *",
-    host="mysql_57" if DOCKER_TESTS else "localhost",
-    port=3306 if DOCKER_TESTS else 10057,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-MYSQL_80 = MySQLTargetModel(
-    env_name="mysql_db_80",
-    cron_rule="* * * * *",
-    host="mysql_80" if DOCKER_TESTS else "localhost",
-    port=3306 if DOCKER_TESTS else 10080,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-MYSQL_81 = MySQLTargetModel(
-    env_name="mysql_db_81",
-    cron_rule="* * * * *",
-    host="mysql_81" if DOCKER_TESTS else "localhost",
-    port=3306 if DOCKER_TESTS else 10081,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-MARIADB_1101 = MariaDBTargetModel(
-    env_name="mariadb_1101",
-    cron_rule="* * * * *",
-    host="mariadb_1101" if DOCKER_TESTS else "localhost",
-    port=3306 if DOCKER_TESTS else 11101,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-MARIADB_1011 = MariaDBTargetModel(
-    env_name="mariadb_1011",
-    cron_rule="* * * * *",
-    host="mariadb_1011" if DOCKER_TESTS else "localhost",
-    port=3306 if DOCKER_TESTS else 11011,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-MARIADB_1006 = MariaDBTargetModel(
-    env_name="mariadb_1006",
-    cron_rule="* * * * *",
-    host="mariadb_1006" if DOCKER_TESTS else "localhost",
-    port=3306 if DOCKER_TESTS else 11006,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-MARIADB_1005 = MariaDBTargetModel(
-    env_name="mariadb_1005",
-    cron_rule="* * * * *",
-    host="mariadb_1005" if DOCKER_TESTS else "localhost",
-    port=3306 if DOCKER_TESTS else 11005,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-MARIADB_1004 = MariaDBTargetModel(
-    env_name="mariadb_1004",
-    cron_rule="* * * * *",
-    host="mariadb_1004" if DOCKER_TESTS else "localhost",
-    port=3306 if DOCKER_TESTS else 11004,
-    password=SecretStr("password-_-12!@#%^&*()/;><.,]}{["),
-    db="database-_-12!@#%^&*()/;><.,]}{[",
-    user="user-_-12!@#%^&*()/;><.,]}{[",
-)
-
-DB_VERSION_BY_ENV_VAR: dict[str, str] = {
-    "postgresql_db_16": "16.0",
-    "postgresql_db_15": "15.4",
-    "postgresql_db_14": "14.9",
-    "postgresql_db_13": "13.12",
-    "postgresql_db_12": "12.16",
-    "postgresql_db_11": "11.21",
-    "mysql_db_81": "8.1.0",
-    "mysql_db_80": "8.0.34",
-    "mysql_db_57": "5.7.42",
-    "mariadb_1101": "11.1.2",
-    "mariadb_1011": "10.11.2",
-    "mariadb_1006": "10.6.12",
-    "mariadb_1005": "10.5.19",
-    "mariadb_1004": "10.4.28",
-}
-ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLTargetModel] = [
-    POSTGRES_11,
-    POSTGRES_12,
-    POSTGRES_13,
-    POSTGRES_14,
-    POSTGRES_15,
-    POSTGRES_16,
-]
-ALL_MYSQL_DBS_TARGETS: list[MySQLTargetModel] = [
-    MYSQL_57,
-    MYSQL_80,
-    MYSQL_81,
-]
-ALL_MARIADB_DBS_TARGETS: list[MariaDBTargetModel] = [
-    MARIADB_1101,
-    MARIADB_1011,
-    MARIADB_1006,
-    MARIADB_1005,
-    MARIADB_1004,
-]
 
 
 @pytest.fixture(autouse=True)

@@ -1,0 +1,24 @@
+services:
+  backuper_acceptance_test_amd64:
+    restart: "no"
+    network_mode: "host"
+    platform: linux/amd64
+    build: 
+      context: ./../
+      dockerfile: docker/Dockerfile
+      target: build
+    command: python -m backuper.main --single
+    env_file:
+      - .env
+
+  backuper_acceptance_test_arm64:
+    restart: "no"
+    network_mode: "host"
+    platform: linux/arm64
+    build: 
+      context: ./../
+      dockerfile: docker/Dockerfile
+      target: build
+    command: python -m backuper.main --single
+    env_file:
+      - .env
