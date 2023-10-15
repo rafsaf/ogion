@@ -85,13 +85,7 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
         main.main()
     assert system_exit.type == SystemExit
 
-    target_envs = [
-        "postgresql_db_15",
-        "mysql_db_80",
-        "mariadb_1011",
-        "singlefile_1",
-        "directory_1",
-    ]
+    target_envs = [model.env_name for model in models]
     count = 0
     for dir in config.CONST_BACKUP_FOLDER_PATH.iterdir():
         assert dir.is_dir()

@@ -87,7 +87,7 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
         try:
             db = shlex.quote(self.db)
             result = core.run_subprocess(
-                f"mysql --defaults-file={self.option_file} {db} "
+                f"mariadb --defaults-file={self.option_file} {db} "
                 "--execute='SELECT version();'",
             )
         except core.CoreSubprocessError as err:

@@ -49,13 +49,13 @@ msal-extensions = ">=0.3.0,<2.0.0"
 
 [[package]]
 name = "azure-storage-blob"
-version = "12.18.2"
+version = "12.18.3"
 description = "Microsoft Azure Blob Storage Client Library for Python"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "azure-storage-blob-12.18.2.tar.gz", hash = "sha256:e11935348981ffc005b848b55db25c04f2d1f90e1ee33000659906b763cf14c8"},
-    {file = "azure_storage_blob-12.18.2-py3-none-any.whl", hash = "sha256:ffd864bf9abf33dfc72c6ef37899a19bd9d585a946a2c61e288b4420c035df3a"},
+    {file = "azure-storage-blob-12.18.3.tar.gz", hash = "sha256:d8ced0deee3367fa3d4f3d1a03cd9edadf4440c0a371f503d623fa6c807554ee"},
+    {file = "azure_storage_blob-12.18.3-py3-none-any.whl", hash = "sha256:c278dde2ac41857a68d615c9f2b36d894ba877a7e84d62795603c7e79d0bb5e9"},
 ]
 
 [package.dependencies]
@@ -127,17 +127,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.62"
+version = "1.28.63"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.62-py3-none-any.whl", hash = "sha256:0dfa2fc96ccafce4feb23044d6cba8b25075ad428a0c450d369d099c6a1059d2"},
-    {file = "boto3-1.28.62.tar.gz", hash = "sha256:148eeba0f1867b3db5b3e5ae2997d75a94d03fad46171374a0819168c36f7ed0"},
+    {file = "boto3-1.28.63-py3-none-any.whl", hash = "sha256:65d052ec13197460586ee385aa2d6bba0e7378d2d2c7f3e93c044c43ae1ca782"},
+    {file = "boto3-1.28.63.tar.gz", hash = "sha256:94218aba2feb5b404b665b8d76c172dc654f79b4c5fa0e9e92459c098da87bf4"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.62,<1.32.0"
+botocore = ">=1.31.63,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.7.0,<0.8.0"
 
@@ -146,13 +146,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.62"
+version = "1.31.63"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.62-py3-none-any.whl", hash = "sha256:be792d806afc064694a2d0b9b25779f3ca0c1584b29a35ac32e67f0064ddb8b7"},
-    {file = "botocore-1.31.62.tar.gz", hash = "sha256:272b78ac65256b6294cb9cdb0ac484d447ad3a85642e33cb6a3b1b8afee15a4c"},
+    {file = "botocore-1.31.63-py3-none-any.whl", hash = "sha256:cb9db5db5af865b1fc2e1405b967db5d78dd0f4d84e5dc1974e082733c1034b7"},
+    {file = "botocore-1.31.63.tar.gz", hash = "sha256:6e582c811ea74f25bdb490ac372b2645de4a60286b42ddd8c69f3b6df82b6b12"},
 ]
 
 [package.dependencies]
@@ -450,13 +450,13 @@ toml = ["tomli"]
 
 [[package]]
 name = "croniter"
-version = "2.0.0"
+version = "2.0.1"
 description = "croniter provides iteration for datetime object with cron like format"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "croniter-2.0.0-py2.py3-none-any.whl", hash = "sha256:137ea3b0748f615eb3344462de3e185d3d7900a7388d07c2950110ec76bfe20b"},
-    {file = "croniter-2.0.0.tar.gz", hash = "sha256:92319e69477c467a9b3da615264c02fb183c1daf7ac8ea9790ca8f7a77ded69c"},
+    {file = "croniter-2.0.1-py2.py3-none-any.whl", hash = "sha256:4cb064ce2d8f695b3b078be36ff50115cf8ac306c10a7e8653ee2a5b534673d7"},
+    {file = "croniter-2.0.1.tar.gz", hash = "sha256:d199b2ec3ea5e82988d1f72022433c5f9302b3b3ea9e6bfd6a1518f6ea5e700a"},
 ]
 
 [package.dependencies]
@@ -645,19 +645,20 @@ grpc = ["grpcio (>=1.38.0,<2.0dev)"]
 
 [[package]]
 name = "google-cloud-storage"
-version = "2.11.0"
+version = "2.12.0"
 description = "Google Cloud Storage API client library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google-cloud-storage-2.11.0.tar.gz", hash = "sha256:6fbf62659b83c8f3a0a743af0d661d2046c97c3a5bfb587c4662c4bc68de3e31"},
-    {file = "google_cloud_storage-2.11.0-py2.py3-none-any.whl", hash = "sha256:88cbd7fb3d701c780c4272bc26952db99f25eb283fb4c2208423249f00b5fe53"},
+    {file = "google-cloud-storage-2.12.0.tar.gz", hash = "sha256:57c0bcda2f5e11f008a155d8636d8381d5abab46b58e0cae0e46dd5e595e6b46"},
+    {file = "google_cloud_storage-2.12.0-py2.py3-none-any.whl", hash = "sha256:bc52563439d42981b6e21b071a76da2791672776eda3ba99d13a8061ebbd6e5e"},
 ]
 
 [package.dependencies]
 google-api-core = ">=1.31.5,<2.0.dev0 || >2.3.0,<3.0.0dev"
-google-auth = ">=1.25.0,<3.0dev"
+google-auth = ">=2.23.3,<3.0dev"
 google-cloud-core = ">=2.3.0,<3.0dev"
+google-crc32c = ">=1.0,<2.0dev"
 google-resumable-media = ">=2.6.0"
 requests = ">=2.18.0,<3.0.0dev"
 
@@ -764,13 +765,13 @@ requests = ["requests (>=2.18.0,<3.0.0dev)"]
 
 [[package]]
 name = "googleapis-common-protos"
-version = "1.60.0"
+version = "1.61.0"
 description = "Common protobufs used in Google APIs"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "googleapis-common-protos-1.60.0.tar.gz", hash = "sha256:e73ebb404098db405ba95d1e1ae0aa91c3e15a71da031a2eeb6b2e23e7bc3708"},
-    {file = "googleapis_common_protos-1.60.0-py2.py3-none-any.whl", hash = "sha256:69f9bbcc6acde92cab2db95ce30a70bd2b81d20b12eff3f1aabaffcbe8a93918"},
+    {file = "googleapis-common-protos-1.61.0.tar.gz", hash = "sha256:8a64866a97f6304a7179873a465d6eee97b7a24ec6cfd78e0f575e96b821240b"},
+    {file = "googleapis_common_protos-1.61.0-py2.py3-none-any.whl", hash = "sha256:22f1915393bb3245343f6efe87f6fe868532efc12aa26b391b15132e1279f1c0"},
 ]
 
 [package.dependencies]
@@ -1051,13 +1052,13 @@ mkdocs = ">=1.1"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.4.5"
+version = "9.4.6"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.4.5-py3-none-any.whl", hash = "sha256:0922e3e34d95dbf3f0c84fc817a233e1cbd5874830c6fd821d525ba90e0ce077"},
-    {file = "mkdocs_material-9.4.5.tar.gz", hash = "sha256:efaa52843a8c64b99bcf5a97cf4ba57d410424828e3087b13c9b3954e8adb5ff"},
+    {file = "mkdocs_material-9.4.6-py3-none-any.whl", hash = "sha256:78802035d5768a78139c84ad7dce0c6493e8f7dc4861727d36ed91d1520a54da"},
+    {file = "mkdocs_material-9.4.6.tar.gz", hash = "sha256:09665e60df7ee9e5ff3a54af173f6d45be718b1ee7dd962bcff3102b81fb0c14"},
 ]
 
 [package.dependencies]
@@ -1319,13 +1320,13 @@ tests = ["pytest (>=5.4.1)", "pytest-cov (>=2.8.1)", "pytest-mypy (>=0.8.0)", "p
 
 [[package]]
 name = "pre-commit"
-version = "3.4.0"
+version = "3.5.0"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pre_commit-3.4.0-py2.py3-none-any.whl", hash = "sha256:96d529a951f8b677f730a7212442027e8ba53f9b04d217c4c67dc56c393ad945"},
-    {file = "pre_commit-3.4.0.tar.gz", hash = "sha256:6bbd5129a64cad4c0dfaeeb12cd8f7ea7e15b77028d985341478c8af3c759522"},
+    {file = "pre_commit-3.5.0-py2.py3-none-any.whl", hash = "sha256:841dc9aef25daba9a0238cd27984041fa0467b4199fc4852e27950664919f660"},
+    {file = "pre_commit-3.5.0.tar.gz", hash = "sha256:5804465c675b659b0862f07907f96295d490822a450c4c40e747d0b1c6ebcb32"},
 ]
 
 [package.dependencies]
@@ -2064,13 +2065,13 @@ files = [
 
 [[package]]
 name = "types-requests"
-version = "2.31.0.8"
+version = "2.31.0.9"
 description = "Typing stubs for requests"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "types-requests-2.31.0.8.tar.gz", hash = "sha256:e1b325c687b3494a2f528ab06e411d7092cc546cc9245c000bacc2fca5ae96d4"},
-    {file = "types_requests-2.31.0.8-py3-none-any.whl", hash = "sha256:39894cbca3fb3d032ed8bdd02275b4273471aa5668564617cc1734b0a65ffdf8"},
+    {file = "types-requests-2.31.0.9.tar.gz", hash = "sha256:3bb11188795cc3aa39f9635032044ee771009370fb31c3a06ae952b267b6fcd7"},
+    {file = "types_requests-2.31.0.9-py3-none-any.whl", hash = "sha256:140e323da742a0cd0ff0a5a83669da9ffcebfaeb855d367186b2ec3985ba2742"},
 ]
 
 [package.dependencies]

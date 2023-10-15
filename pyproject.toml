@@ -67,7 +67,7 @@ ignore = ["E501"]
 max-args = 12
 
 [tool.coverage.run]
-omit = []
+omit = ["backuper/tools/*"]
 source = ["backuper"]
 
 [tool.mypy]
