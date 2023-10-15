@@ -11,11 +11,11 @@ from backuper.notifications.notifications_context import NotificationsContext
 from backuper.upload_providers.debug import UploadProviderLocalDebug
 
 from .conftest import (
-    FILE_1,
-    FOLDER_1,
     ALL_MARIADB_DBS_TARGETS,
     ALL_MYSQL_DBS_TARGETS,
     ALL_POSTGRES_DBS_TARGETS,
+    FILE_1,
+    FOLDER_1,
 )
 
 

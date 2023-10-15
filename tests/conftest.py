@@ -2,29 +2,29 @@ import os
 import secrets
 from collections.abc import Generator
 from pathlib import Path
+from typing import Type, TypeVar
 
 import pytest
 import responses
 from pydantic import SecretStr
-from typing import TypeVar, Type
+
 from backuper import config
 from backuper.models.backup_target_models import (
     DirectoryTargetModel,
     MariaDBTargetModel,
     MySQLTargetModel,
     PostgreSQLTargetModel,
-    TargetModel,
     SingleFileTargetModel,
 )
+from backuper.tools.compose_db_models import ComposeDatabase
 from backuper.tools.compose_file_generator import (
-    db_compose_mysql_data,
-    db_compose_mariadb_data,
-    db_compose_postgresql_data,
     DB_NAME,
     DB_PWD,
     DB_USERNAME,
+    db_compose_mariadb_data,
+    db_compose_mysql_data,
+    db_compose_postgresql_data,
 )
-from backuper.tools.compose_db_models import ComposeDatabase
 
 TM = TypeVar("TM")
 
