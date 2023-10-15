@@ -3,7 +3,10 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 DB_COMPOSE_FILE="$SCRIPT_DIR/../docker/docker-compose.dbs.yml"
 
 cd $SCRIPT_DIR/../
-DIFF=$(git diff $DB_COMPOSE_FILE)
+git config user.name "GitHub Actions Bot"
+git config user.email "<>"
+git status
+DIFF=$(git diff origin/main $DB_COMPOSE_FILE)
 if [ "$DIFF" = "" ]
 then
     echo "no changes detected"
