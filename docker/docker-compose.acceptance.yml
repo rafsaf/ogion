@@ -9,7 +9,7 @@ services:
       target: build
     command: python -m backuper.main --single
     env_file:
-      - .env
+      - ./../.env
 
   backuper_acceptance_test_arm64:
     restart: "no"
@@ -21,4 +21,4 @@ services:
       target: build
     command: python -m backuper.main --single
     env_file:
-      - .env
+      - ./../.env
