@@ -30,6 +30,8 @@ types-requests = "^2.31.0.6"
 types-google-cloud-ndb = "^2.2.0.1"
 mike = "^1.1.2"
 ruff = "^0.0.291"
+pyyaml = "^6.0.1"
+requests = "^2.31.0"
 
 [tool.poetry.group.tests.dependencies]
 freezegun = "^1.2.2"
