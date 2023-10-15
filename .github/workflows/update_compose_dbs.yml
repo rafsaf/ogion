@@ -3,6 +3,8 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "12 6,18 * * *"
+permissions:
+  contents: write
 jobs:
   update_compose_dbs:
     runs-on: ubuntu-latest

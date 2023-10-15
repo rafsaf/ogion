@@ -119,6 +119,9 @@ services:
     networks:
     - backuper
     ports:
+
+
+
     - 9081:3306
     restart: 'no'
   backuper_postgres_11:
