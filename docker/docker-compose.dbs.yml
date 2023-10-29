@@ -91,7 +91,7 @@ services:
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:5.7.43
+    image: mysql:5.7.44
     networks:
     - backuper
     ports:
@@ -103,7 +103,7 @@ services:
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.0.34
+    image: mysql:8.0.35
     networks:
     - backuper
     ports:
