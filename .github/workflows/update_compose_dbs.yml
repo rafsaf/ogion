@@ -3,9 +3,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "12 11 */7 * *"
-permissions:
-  contents: write
-  pull-requests: write
 jobs:
   update_compose_dbs:
     runs-on: ubuntu-latest
@@ -41,4 +38,4 @@ jobs:
           make update_compose_db_file
           ./scripts/gh_update_dbs_with_pr.sh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RAFSAF_PERSONAL_ACCESS_TOKEN }}
