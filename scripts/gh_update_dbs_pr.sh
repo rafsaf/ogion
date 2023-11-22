@@ -17,5 +17,5 @@ else
     git commit -m 'GitHub Actions Bot: updated docker-compose.dbs.yml file'
     git push -u origin $branch
     gh pr create -B main -H $branch --title 'update docker-compose.dbs.yml file' --body 'Created by Github action'
-    gh pr merge $branch --merge
+    gh pr merge $branch --merge --admin
 fi
