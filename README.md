@@ -86,7 +86,7 @@ services:
       - BACKUP_PROVIDER=name=debug
 ```
 
-(NOTE this will use provider [debug](https://backuper.rafsaf.pl/providers/debug/) that store backups locally in the container).
+(NOTE this will use provider [debug](https://backuper.rafsaf.pl/latest/providers/debug/) that store backups locally in the container).
 
 ## Real world usage
 
