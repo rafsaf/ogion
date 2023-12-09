@@ -5,6 +5,8 @@ on:
       - "**"
     tags-ignore:
       - "*.*"
+  schedule:
+    - cron: "12 12 * * *"
 
 jobs:
   tests:
@@ -25,9 +27,6 @@ jobs:
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Touch .env
-        run: touch .env
 
       - name: Download and start db containers
         run: make docker_dbs_setup_up
