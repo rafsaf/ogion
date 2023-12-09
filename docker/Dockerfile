@@ -17,7 +17,7 @@ RUN addgroup --gid 1001 --system ${SERVICE_NAME} && \
     adduser --gid 1001 --shell /bin/false --disabled-password --uid 1001 ${SERVICE_NAME}
 
 FROM base as poetry
-RUN pip install poetry==1.6.1
+RUN pip install poetry==1.7.1
 COPY poetry.lock pyproject.toml ./
 RUN poetry export -o /requirements.txt --without-hashes
 RUN poetry export -o /requirements-tests.txt --without-hashes --with tests
