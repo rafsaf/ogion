@@ -5,6 +5,8 @@ on:
       - "**"
     tags-ignore:
       - "*.*"
+  schedule:
+    - cron: "12 12 * * *"
 
 jobs:
   tests:
