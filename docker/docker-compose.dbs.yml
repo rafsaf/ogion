@@ -91,7 +91,7 @@ services:
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.0.36
+    image: mysql:8.0.35
     networks:
     - backuper
     ports:
