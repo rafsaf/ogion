@@ -1,5 +1,15 @@
 [
     {
+        "cycle": "8.3",
+        "releaseDate": "2024-01-16",
+        "eol": false,
+        "latest": "8.3.0",
+        "link": null,
+        "support": true,
+        "discontinued": null,
+        "before_eol": true
+    },
+    {
         "cycle": "8.2",
         "releaseDate": "2023-10-12",
         "eol": false,
@@ -23,7 +33,7 @@
         "cycle": "8.0",
         "releaseDate": "2018-04-08",
         "eol": "2026-04-30",
-        "latest": "8.0.35",
+        "latest": "8.0.36",
         "link": null,
         "support": "2025-04-30",
         "discontinued": null,
