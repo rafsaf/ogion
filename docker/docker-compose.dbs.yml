@@ -91,7 +91,7 @@ services:
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.0.35
+    image: mysql:8.0.36
     networks:
     - backuper
     ports:
@@ -108,6 +108,18 @@ services:
     - backuper
     ports:
     - 9082:3306
+    restart: 'no'
+  backuper_mysql_8_3:
+    environment:
+    - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
+    - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
+    - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
+    image: mysql:8.3.0
+    networks:
+    - backuper
+    ports:
+    - 9083:3306
     restart: 'no'
   backuper_postgres_12:
     environment:
