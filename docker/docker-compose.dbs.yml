@@ -7,7 +7,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.11.6
+    image: mariadb:10.11.7
     networks:
     - backuper
     ports:
@@ -19,7 +19,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.4.32
+    image: mariadb:10.4.33
     networks:
     - backuper
     ports:
@@ -31,7 +31,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.5.23
+    image: mariadb:10.5.24
     networks:
     - backuper
     ports:
@@ -43,7 +43,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.6.16
+    image: mariadb:10.6.17
     networks:
     - backuper
     ports:
@@ -55,7 +55,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.0.4
+    image: mariadb:11.0.5
     networks:
     - backuper
     ports:
@@ -67,7 +67,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.1.3
+    image: mariadb:11.1.4
     networks:
     - backuper
     ports:
@@ -126,7 +126,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:12.17-bookworm
+    image: postgres:12.18-bookworm
     networks:
     - backuper
     ports:
@@ -137,7 +137,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:13.13-bookworm
+    image: postgres:13.14-bookworm
     networks:
     - backuper
     ports:
@@ -148,7 +148,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:14.10-bookworm
+    image: postgres:14.11-bookworm
     networks:
     - backuper
     ports:
@@ -159,7 +159,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:15.5-bookworm
+    image: postgres:15.6-bookworm
     networks:
     - backuper
     ports:
@@ -170,7 +170,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:16.1-bookworm
+    image: postgres:16.2-bookworm
     networks:
     - backuper
     ports:
