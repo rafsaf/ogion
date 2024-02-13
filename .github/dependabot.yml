@@ -19,6 +19,15 @@ updates:
           - "pydantic-settings"
           - "azure-storage-blob"
           - "azure-identity"
+      main-dependencies:
+        patterns:
+          - "croniter"
+          - "google-cloud-storage"
+          - "pydantic"
+          - "boto3"
+          - "pydantic-settings"
+          - "azure-storage-blob"
+          - "azure-identity"
 
   - package-ecosystem: github-actions
     directory: /
