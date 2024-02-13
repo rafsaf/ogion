@@ -38,9 +38,11 @@ def _to_target_model(
         env_name=compose_db.name,
         cron_rule="* * * * *",
         host=compose_db.name if DOCKER_TESTS else "localhost",
-        port=int(compose_db.ports[0].split(":")[1])
-        if DOCKER_TESTS
-        else int(compose_db.ports[0].split(":")[0]),
+        port=(
+            int(compose_db.ports[0].split(":")[1])
+            if DOCKER_TESTS
+            else int(compose_db.ports[0].split(":")[0])
+        ),
         password=SecretStr(DB_PWD),
         db=DB_NAME,
         user=DB_USERNAME,

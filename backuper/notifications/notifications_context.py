@@ -1,6 +1,7 @@
 """
 https://discord.com/developers/docs/resources/webhook#execute-webhook
 """
+
 import logging
 import traceback
 from concurrent.futures import ThreadPoolExecutor
