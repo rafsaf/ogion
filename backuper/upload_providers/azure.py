@@ -35,9 +35,8 @@ class UploadProviderAzure(
     def _post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
-        backup_dest_in_azure_container = "{}/{}".format(
-            zip_backup_file.parent.name,
-            zip_backup_file.name,
+        backup_dest_in_azure_container = (
+            f"{zip_backup_file.parent.name}/{zip_backup_file.name}"
         )
         blob_client = self.container_client.get_blob_client(
             blob=backup_dest_in_azure_container

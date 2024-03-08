@@ -1,27 +1,11 @@
-<a href="https://github.com/rafsaf/backuper/blob/main/LICENSE" target="_blank">
-    <img src="https://img.shields.io/github/license/rafsaf/backuper" alt="License">
-</a>
-<a href="https://docs.python.org/3/whatsnew/3.12.html" target="_blank">
-    <img src="https://img.shields.io/badge/python-3.12-blue" alt="Python">
-</a>
-<a href="https://github.com/psf/black" target="_blank">
-    <img src="https://img.shields.io/badge/code%20style-black-lightgrey" alt="Black">
-</a>
-<a href="https://github.com/rafsaf/backuper/actions/workflows/tests.yml" target="_blank">
-    <img src="https://github.com/rafsaf/backuper/actions/workflows/tests.yml/badge.svg" alt="Tests">
-</a>
-<a href="https://github.com/rafsaf/backuper/actions/workflows/type_check.yml" target="_blank">
-    <img src="https://github.com/rafsaf/backuper/actions/workflows/type_check.yml/badge.svg" alt="Type check">
-</a>
-<a href="https://github.com/rafsaf/backuper/actions/workflows/dev_build.yml" target="_blank">
-    <img src="https://github.com/rafsaf/backuper/actions/workflows/dev_build.yml/badge.svg" alt="Dev build">
-</a>
-<a href="https://github.com/rafsaf/backuper/actions/workflows/release_build.yml" target="_blank">
-    <img src="https://github.com/rafsaf/backuper/actions/workflows/release_build.yml/badge.svg" alt="Release build">
-</a>
-<a href="https://github.com/rafsaf/backuper/actions/workflows/update_compose_dbs.yml" target="_blank">
-    <img src="https://github.com/rafsaf/backuper/actions/workflows/update_compose_dbs.yml/badge.svg" alt="Update of db versions">
-</a>
+[![License](https://img.shields.io/github/license/rafsaf/backuper)](https://github.com/rafsaf/backuper/blob/main/LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://docs.python.org/3/whatsnew/3.12.html)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Tests](https://github.com/rafsaf/backuper/actions/workflows/tests.yml/badge.svg)](https://github.com/rafsaf/backuper/actions/workflows/tests.yml)
+[![Type check](https://github.com/rafsaf/backuper/actions/workflows/type_check.yml/badge.svg)](https://github.com/rafsaf/backuper/actions/workflows/type_check.yml)
+[![Dev build](https://github.com/rafsaf/backuper/actions/workflows/dev_build.yml/badge.svg)](https://github.com/rafsaf/backuper/actions/workflows/dev_build.yml)
+[![Release build](https://github.com/rafsaf/backuper/actions/workflows/release_build.yml/badge.svg)](https://github.com/rafsaf/backuper/actions/workflows/release_build.yml)
+[![Update of db versions](https://github.com/rafsaf/backuper/actions/workflows/update_compose_dbs.yml/badge.svg)](https://github.com/rafsaf/backuper/actions/workflows/update_compose_dbs.yml)
 
 # Backuper
 

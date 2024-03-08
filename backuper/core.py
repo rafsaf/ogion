@@ -6,7 +6,7 @@ import secrets
 import shlex
 import shutil
 import subprocess
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -64,7 +64,7 @@ def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
     base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
     new_file = (
         f"{env_name}_"
-        f"{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M')}_"
+        f"{datetime.now(UTC).strftime('%Y%m%d_%H%M')}_"
         f"{name}_"
         f"{secrets.token_urlsafe(3)}"
     )

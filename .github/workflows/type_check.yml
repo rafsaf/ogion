@@ -10,7 +10,7 @@ jobs:
   type_check:
     strategy:
       matrix:
-        check: ["ruff check", "mypy --check", "black --check"]
+        check: ["ruff check", "mypy --check", "ruff format --check"]
 
     runs-on: ubuntu-latest
     steps:
