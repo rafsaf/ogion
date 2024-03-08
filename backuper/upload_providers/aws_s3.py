@@ -48,10 +48,10 @@ class UploadProviderAWS(
     def _post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
-        backup_dest_in_bucket = "{}/{}/{}".format(
-            self.bucket_upload_path,
-            zip_backup_file.parent.name,
-            zip_backup_file.name,
+        backup_dest_in_bucket = (
+            f"{self.bucket_upload_path}/"
+            f"{zip_backup_file.parent.name}/"
+            f"{zip_backup_file.name}"
         )
 
         log.info("start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)

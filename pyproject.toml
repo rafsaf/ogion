@@ -6,65 +6,67 @@ name = "backuper"
 version = "5.2"
 
 [tool.poetry.dependencies]
+python = "^3.12"
+
+azure-identity = "^1.14.0"
+azure-storage-blob = "^12.18.2"
+boto3 = "^1.34.49"
 croniter = "^2.0.0"
 google-cloud-storage = "^2.14.0"
 pydantic = "^2.6.2"
-python = "^3.12"
-boto3 = "^1.34.49"
 pydantic-settings = "^2.2.1"
-azure-storage-blob = "^12.18.2"
-azure-identity = "^1.14.0"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.2.0"
 coverage = "^7.4.3"
 markdown-include = "^0.8.1"
+mike = "^2.0.0"
 mkdocs = "^1.5.3"
 mkdocs-material = "^9.5.12"
-mkdocstrings = {extras = ["python"], version = "^0.24.1"}
+mkdocstrings = { extras = ["python"], version = "^0.24.1" }
+mypy = "^1.8.0"
 pre-commit = "^3.6.2"
 pymdown-extensions = "^10.7"
-mypy = "^1.8.0"
-types-croniter = "^2.0.0.20240106"
-types-requests = "^2.31.0.20240218"
-types-google-cloud-ndb = "^2.2.0.20240205"
-mike = "^2.0.0"
-ruff = "^0.3.0"
 pyyaml = "^6.0.1"
 requests = "^2.31.0"
+ruff = "^0.3.0"
+types-croniter = "^2.0.0.20240106"
+types-google-cloud-ndb = "^2.2.0.20240205"
 types-pyyaml = "^6.0.12.12"
+types-requests = "^2.31.0.20240218"
 
 [tool.poetry.group.tests.dependencies]
 freezegun = "^1.4.0"
 pytest = "^8.0.2"
 pytest-cov = "^4.1.0"
-python-dotenv = "^1.0.1"
-pytest-xdist = "^3.3.1"
 pytest-env = "^1.0.1"
+pytest-xdist = "^3.3.1"
+python-dotenv = "^1.0.1"
 responses = "^0.25.0"
-
 
 [tool.pytest.ini_options]
 addopts = "-v --cov --cov-report term-missing --cov-fail-under 100 -n auto"
+env = [
+  "BACKUP_MAX_NUMBER=1",
+  "BACKUP_PROVIDER=",
+  "LOG_FOLDER_PATH=/tmp/pytest_backuper_env_vars_hook_logs_folder",
+  "LOG_LEVEL=DEBUG",
+  "SUBPROCESS_TIMEOUT_SECS=5",
+  "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#%^&*()/;><.,][`~'",
+]
 filterwarnings = [
   "ignore:Deprecated call to `pkg_resources.declare_namespace\\('google:DeprecationWarning",
   "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
 ]
-env = [
-  "SUBPROCESS_TIMEOUT_SECS=5",
-  "LOG_LEVEL=DEBUG",
-  "BACKUP_MAX_NUMBER=1",
-  "BACKUP_PROVIDER=",
-  "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#%^&*()/;><.,][`~'",
-  "LOG_FOLDER_PATH=/tmp/pytest_backuper_env_vars_hook_logs_folder",
-]
-minversion = "6.0"
 
 [tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
 # pycodestyle, pyflakes, isort, pylint, pyupgrade
-select = ["E", "W", "F", "I", "PL", "UP"]
 ignore = ["E501"]
-[tool.ruff.pylint]
+select = ["E", "F", "I", "PL", "UP", "W"]
+
+[tool.ruff.lint.pylint]
 max-args = 12
 
 [tool.coverage.run]
@@ -72,11 +74,11 @@ omit = ["backuper/tools/*"]
 source = ["backuper"]
 
 [tool.mypy]
+ignore_missing_imports = true
 python_version = "3.12"
+strict = true
 warn_return_any = true
 warn_unused_configs = true
-ignore_missing_imports = true
-strict = true
 
 [tool.poetry.scripts]
 backuper = "backuper.main:main"

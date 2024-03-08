@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from freezegun import freeze_time
@@ -18,16 +18,12 @@ def test_base_backup_target_next_backup() -> None:
     )
     assert target.cron_rule == "* * * * *"
     assert target.env_name == "env"
-    assert target.last_backup_time == datetime(2023, 5, 3, 17, 58, tzinfo=timezone.utc)
-    assert target.next_backup_time == datetime(2023, 5, 3, 17, 59, tzinfo=timezone.utc)
+    assert target.last_backup_time == datetime(2023, 5, 3, 17, 58, tzinfo=UTC)
+    assert target.next_backup_time == datetime(2023, 5, 3, 17, 59, tzinfo=UTC)
     assert not target.next_backup()
-    assert target.last_backup_time == datetime(2023, 5, 3, 17, 58, tzinfo=timezone.utc)
-    assert target.next_backup_time == datetime(2023, 5, 3, 17, 59, tzinfo=timezone.utc)
+    assert target.last_backup_time == datetime(2023, 5, 3, 17, 58, tzinfo=UTC)
+    assert target.next_backup_time == datetime(2023, 5, 3, 17, 59, tzinfo=UTC)
     with freeze_time("2023-05-03 17:59:02"):
         assert target.next_backup()
-        assert target.last_backup_time == datetime(
-            2023, 5, 3, 17, 59, tzinfo=timezone.utc
-        )
-        assert target.next_backup_time == datetime(
-            2023, 5, 3, 18, 0, tzinfo=timezone.utc
-        )
+        assert target.last_backup_time == datetime(2023, 5, 3, 17, 59, tzinfo=UTC)
+        assert target.next_backup_time == datetime(2023, 5, 3, 18, 0, tzinfo=UTC)

@@ -2,7 +2,7 @@ import os
 import secrets
 from collections.abc import Generator
 from pathlib import Path
-from typing import Type, TypeVar
+from typing import TypeVar
 
 import pytest
 import responses
@@ -31,7 +31,7 @@ TM = TypeVar("TM")
 
 def _to_target_model(
     compose_db: ComposeDatabase,
-    model: Type[TM],
+    model: type[TM],
 ) -> TM:
     DB_VERSION_BY_ENV_VAR[compose_db.name] = compose_db.version
     return model(  # type: ignore[call-arg]

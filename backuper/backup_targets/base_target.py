@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import final
 
@@ -21,7 +21,7 @@ class BaseBackupTarget(ABC):
         self.env_name: str = env_name
         self.max_backups: int = max_backups
         self.min_retention_days: int = min_retention_days
-        self.last_backup_time: datetime = datetime.now(timezone.utc)
+        self.last_backup_time: datetime = datetime.now(UTC)
         self.next_backup_time: datetime = self._get_next_backup_time()
         log.info(
             "first calculated backup of target `%s` will be: %s",
@@ -43,7 +43,7 @@ class BaseBackupTarget(ABC):
 
     @final
     def _get_next_backup_time(self) -> datetime:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         cron = croniter(
             self.cron_rule,
             start_time=now,

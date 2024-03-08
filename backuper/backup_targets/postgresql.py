@@ -57,13 +57,14 @@ class PostgreSQL(
             return s.replace("\\", "\\\\").replace(":", "\\:")
 
         password = self.password.get_secret_value()
-        text = "{}:{}:{}:{}:{}\n".format(
-            self.host,
-            self.port,
-            escape(self.db),
-            escape(self.user),
-            escape(password),
+        text = (
+            f"{self.host}:"
+            f"{self.port}:"
+            f"{escape(self.db)}:"
+            f"{escape(self.user)}:"
+            f"{escape(password)}\n"
         )
+
         md5_hash = hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()
         name = f"{self.env_name}.{md5_hash}.pgpass"
 

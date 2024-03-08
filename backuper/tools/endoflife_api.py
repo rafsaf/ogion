@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import requests
@@ -23,17 +23,17 @@ class EOLApiProductCycle(BaseModel):
     @computed_field  # type: ignore[misc]
     @property
     def before_eol(self) -> bool:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if isinstance(self.eol, str):
             eol_date = datetime.strptime(self.eol, "%Y-%m-%d").replace(
-                tzinfo=timezone.utc, hour=23, minute=59, second=59
+                tzinfo=UTC, hour=23, minute=59, second=59
             )
             return now < eol_date
         if self.eol:
             return True
         if isinstance(self.support, str):
             support_end = datetime.strptime(self.support, "%Y-%m-%d").replace(
-                tzinfo=timezone.utc
+                tzinfo=UTC
             )
             return now < support_end
         if self.support:

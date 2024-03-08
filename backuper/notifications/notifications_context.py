@@ -6,7 +6,7 @@ import logging
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import ContextDecorator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from types import TracebackType
 
@@ -42,7 +42,7 @@ class NotificationsContext(ContextDecorator):
         exc_val: BaseException,
         exc_traceback: TracebackType,
     ) -> str:
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S,%f %Z")
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S,%f %Z")
         msg = f"[FAIL] {now}\nStep: {self.step_name}\n"
         msg += f"Backuper Host: {config.options.INSTANCE_NAME}\n"
         if self.env_name:
