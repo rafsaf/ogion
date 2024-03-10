@@ -8,6 +8,7 @@ from pydantic import SecretStr
 
 from backuper import config, core
 from backuper.backup_targets.base_target import BaseBackupTarget
+from backuper.models.backup_target_models import MySQLTargetModel
 
 log = logging.getLogger(__name__)
 
@@ -19,31 +20,9 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
     # https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html
     # https://dev.mysql.com/doc/refman/8.0/en/connecting.html
 
-    def __init__(
-        self,
-        user: str,
-        password: SecretStr,
-        port: int,
-        host: str,
-        db: str,
-        cron_rule: str,
-        env_name: str,
-        max_backups: int,
-        min_retention_days: int,
-        **kwargs: str | int,
-    ) -> None:
-        super().__init__(
-            cron_rule=cron_rule,
-            env_name=env_name,
-            max_backups=max_backups,
-            min_retention_days=min_retention_days,
-        )
-        self.cron_rule: str = cron_rule
-        self.user: str = user
-        self.db: str = db
-        self.host: str = host
-        self.port: int = port
-        self.password: SecretStr = password
+    def __init__(self, target_model: MySQLTargetModel) -> None:
+        self.target_model = target_model
+        super().__init__(target_model)
         self.option_file: Path = self._init_option_file()
         self.db_version: str = self._mysql_connection()
 
@@ -51,13 +30,13 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
         def escape(s: str) -> str:
             return s.replace("\\", "\\\\")
 
-        password = self.password.get_secret_value()
+        password = self.target_model.password.get_secret_value()
         text = "{}\n{}\n{}\n{}\n{}\n{}".format(
             "[client]",
-            f'user="{escape(self.user)}"',
+            f'user="{escape(self.target_model.user)}"',
             f'password="{escape(password)}"',
-            f"host={self.host}",
-            f"port={self.port}",
+            f"host={self.target_model.host}",
+            f"port={self.target_model.port}",
             "protocol=TCP",
         )
         md5_hash = hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()
@@ -85,7 +64,7 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
             raise
         log.debug("start mysql connection")
         try:
-            db = shlex.quote(self.db)
+            db = shlex.quote(self.target_model.db)
             result = core.run_subprocess(
                 f"mariadb --defaults-file={self.option_file} {db} "
                 "--execute='SELECT version();'",
@@ -109,11 +88,11 @@ class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
         return version
 
     def _backup(self) -> Path:
-        escaped_dbname = core.safe_text_version(self.db)
+        escaped_dbname = core.safe_text_version(self.target_model.db)
         name = f"{escaped_dbname}_{self.db_version}"
         out_file = core.get_new_backup_path(self.env_name, name, sql=True)
 
-        db = shlex.quote(self.db)
+        db = shlex.quote(self.target_model.db)
         shell_mysqldump_db = (
             f"mariadb-dump --defaults-file={self.option_file} "
             f"--result-file={out_file} --verbose {db}"

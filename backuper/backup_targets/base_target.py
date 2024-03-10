@@ -2,36 +2,50 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import final
+from typing import TypeVar, final, Generic
 
 from croniter import croniter
 
 from backuper import config
+from backuper.models.backup_target_models import TargetModel
 
 log = logging.getLogger(__name__)
 
+TM = TypeVar("TM", bound=TargetModel)
+
 
 class BaseBackupTarget(ABC):
-    NAME: config.BackupTargetEnum
 
-    def __init__(
-        self, cron_rule: str, env_name: str, max_backups: int, min_retention_days: int
-    ) -> None:
-        self.cron_rule: str = cron_rule
-        self.env_name: str = env_name
-        self.max_backups: int = max_backups
-        self.min_retention_days: int = min_retention_days
+    @abstractmethod
+    def __init__(self, target_model: TargetModel) -> None:
+        self.target_model = target_model
         self.last_backup_time: datetime = datetime.now(UTC)
         self.next_backup_time: datetime = self._get_next_backup_time()
         log.info(
             "first calculated backup of target `%s` will be: %s",
-            env_name,
+            self.target_model.env_name,
             self.next_backup_time,
         )
 
-    def __init_subclass__(cls, target_model_name: config.BackupTargetEnum) -> None:
-        cls.NAME = target_model_name
-        super().__init_subclass__()
+    @property
+    def cron_rule(self) -> str:
+        return self.target_model.cron_rule
+
+    @property
+    def env_name(self) -> str:
+        return self.target_model.env_name
+
+    @property
+    def max_backups(self) -> int:
+        return self.target_model.max_backups
+
+    @property
+    def min_retention_days(self) -> int:
+        return self.target_model.min_retention_days
+
+    @property
+    def target_name(self) -> config.BackupTargetEnum:
+        return self.target_model._name
 
     @final
     def make_backup(self) -> Path:

@@ -30,7 +30,7 @@ def quit(sig: int, frame: FrameType | None) -> None:
 def backup_provider() -> BaseUploadProvider:
     backup_provider_map: dict[config.UploadProviderEnum, type[BaseUploadProvider]] = {}
     for backup_provider in BaseUploadProvider.__subclasses__():
-        backup_provider_map[backup_provider.NAME] = backup_provider  # type: ignore
+        backup_provider_map[backup_provider.target_name] = backup_provider  # type: ignore
 
     provider_model = core.create_provider_model()
     log.info(
@@ -51,7 +51,7 @@ def backup_provider() -> BaseUploadProvider:
 def backup_targets() -> list[BaseBackupTarget]:
     backup_targets_map: dict[config.BackupTargetEnum, type[BaseBackupTarget]] = {}
     for backup_target in BaseBackupTarget.__subclasses__():
-        backup_targets_map[backup_target.NAME] = backup_target  # type: ignore
+        backup_targets_map[backup_target.target_name] = backup_target  # type: ignore
 
     backup_targets: list[BaseBackupTarget] = []
     target_models = core.create_target_models()
@@ -128,7 +128,7 @@ def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
     log.info(
         "backup file created: %s, starting post save upload to provider %s",
         backup_file,
-        provider.NAME,
+        provider.target_name,
     )
     with NotificationsContext(
         step_name=PROGRAM_STEP.UPLOAD,

@@ -9,10 +9,10 @@ log = logging.getLogger(__name__)
 
 
 class BaseUploadProvider(ABC):
-    NAME: config.UploadProviderEnum
+    target_name: config.UploadProviderEnum
 
     def __init_subclass__(cls, name: config.UploadProviderEnum) -> None:
-        cls.NAME = name
+        cls.target_name = name
         super().__init_subclass__()
 
     @final

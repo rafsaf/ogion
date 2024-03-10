@@ -1,6 +1,6 @@
 from functools import cached_property
 from pathlib import Path
-from typing import Self
+from typing import Self, TypeVar
 
 from croniter import croniter
 from pydantic import (
@@ -16,6 +16,7 @@ from backuper import config
 
 
 class TargetModel(BaseModel):
+    _name: config.BackupTargetEnum
     env_name: str = Field(pattern=r"^[A-Za-z_0-9]{1,}$")
     cron_rule: str
     max_backups: int = Field(ge=1, le=998, default=config.options.BACKUP_MAX_NUMBER)
@@ -40,6 +41,7 @@ class TargetModel(BaseModel):
 
 
 class PostgreSQLTargetModel(TargetModel):
+    _name: str = config.BackupTargetEnum.POSTGRESQL
     user: str = "postgres"
     host: str = "localhost"
     port: int = 5432
@@ -48,6 +50,7 @@ class PostgreSQLTargetModel(TargetModel):
 
 
 class MySQLTargetModel(TargetModel):
+    _name: str = config.BackupTargetEnum.MYSQL
     user: str = "root"
     host: str = "localhost"
     port: int = 3306
@@ -56,6 +59,7 @@ class MySQLTargetModel(TargetModel):
 
 
 class MariaDBTargetModel(TargetModel):
+    _name: str = config.BackupTargetEnum.MARIADB
     user: str = "root"
     host: str = "localhost"
     port: int = 3306
@@ -64,6 +68,7 @@ class MariaDBTargetModel(TargetModel):
 
 
 class SingleFileTargetModel(TargetModel):
+    _name: str = config.BackupTargetEnum.FILE
     abs_path: Path
 
     @model_validator(mode="after")
@@ -77,6 +82,7 @@ class SingleFileTargetModel(TargetModel):
 
 
 class DirectoryTargetModel(TargetModel):
+    _name: str = config.BackupTargetEnum.FOLDER
     abs_path: Path
 
     @model_validator(mode="after")
