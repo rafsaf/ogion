@@ -13,7 +13,14 @@ from typing import Any, TypeVar
 from pydantic import BaseModel
 
 from backuper import config
-from backuper.models.backup_target_models import TargetModel
+from backuper.models.backup_target_models import (
+    DirectoryTargetModel,
+    MariaDBTargetModel,
+    MySQLTargetModel,
+    PostgreSQLTargetModel,
+    SingleFileTargetModel,
+    TargetModel,
+)
 from backuper.models.upload_provider_models import ProviderModel
 
 log = logging.getLogger(__name__)
@@ -146,12 +153,15 @@ def _validate_model(
 
 
 def create_target_models() -> list[TargetModel]:
-    target_map: dict[config.BackupTargetEnum, type[TargetModel]] = {}
-    for target_model in TargetModel.__subclasses__():
-        name = config.BackupTargetEnum(
-            target_model.__name__.lower().removesuffix("targetmodel")
-        )
-        target_map[name] = target_model
+    target_map: dict[str, type[TargetModel]] = {
+        config.BackupTargetEnum.FILE: SingleFileTargetModel,
+        config.BackupTargetEnum.FOLDER: DirectoryTargetModel,
+        config.BackupTargetEnum.MARIADB: MariaDBTargetModel,
+        config.BackupTargetEnum.MYSQL: MySQLTargetModel,
+        config.BackupTargetEnum.POSTGRESQL: PostgreSQLTargetModel,
+    }
+
+    log.critical(target_map)
 
     targets: list[TargetModel] = []
     for env_name, env_value in os.environ.items():

@@ -1,13 +1,11 @@
-from functools import cached_property
 from pathlib import Path
-from typing import Self, TypeVar
+from typing import Self
 
 from croniter import croniter
 from pydantic import (
     BaseModel,
     Field,
     SecretStr,
-    computed_field,
     field_validator,
     model_validator,
 )
@@ -16,7 +14,7 @@ from backuper import config
 
 
 class TargetModel(BaseModel):
-    _name: config.BackupTargetEnum
+    name: config.BackupTargetEnum = config.BackupTargetEnum.TEST
     env_name: str = Field(pattern=r"^[A-Za-z_0-9]{1,}$")
     cron_rule: str
     max_backups: int = Field(ge=1, le=998, default=config.options.BACKUP_MAX_NUMBER)
@@ -32,16 +30,9 @@ class TargetModel(BaseModel):
             )
         return cron_rule
 
-    @computed_field()  # type: ignore
-    @cached_property
-    def target_type(self) -> config.BackupTargetEnum:
-        cls_name = self.__class__.__name__.lower()
-        target_name = cls_name.removesuffix("targetmodel")
-        return config.BackupTargetEnum(target_name)
-
 
 class PostgreSQLTargetModel(TargetModel):
-    _name: str = config.BackupTargetEnum.POSTGRESQL
+    name: config.BackupTargetEnum = config.BackupTargetEnum.POSTGRESQL
     user: str = "postgres"
     host: str = "localhost"
     port: int = 5432
@@ -50,7 +41,7 @@ class PostgreSQLTargetModel(TargetModel):
 
 
 class MySQLTargetModel(TargetModel):
-    _name: str = config.BackupTargetEnum.MYSQL
+    name: config.BackupTargetEnum = config.BackupTargetEnum.MYSQL
     user: str = "root"
     host: str = "localhost"
     port: int = 3306
@@ -59,7 +50,7 @@ class MySQLTargetModel(TargetModel):
 
 
 class MariaDBTargetModel(TargetModel):
-    _name: str = config.BackupTargetEnum.MARIADB
+    name: config.BackupTargetEnum = config.BackupTargetEnum.MARIADB
     user: str = "root"
     host: str = "localhost"
     port: int = 3306
@@ -68,7 +59,7 @@ class MariaDBTargetModel(TargetModel):
 
 
 class SingleFileTargetModel(TargetModel):
-    _name: str = config.BackupTargetEnum.FILE
+    name: config.BackupTargetEnum = config.BackupTargetEnum.FILE
     abs_path: Path
 
     @model_validator(mode="after")
@@ -82,7 +73,7 @@ class SingleFileTargetModel(TargetModel):
 
 
 class DirectoryTargetModel(TargetModel):
-    _name: str = config.BackupTargetEnum.FOLDER
+    name: config.BackupTargetEnum = config.BackupTargetEnum.FOLDER
     abs_path: Path
 
     @model_validator(mode="after")

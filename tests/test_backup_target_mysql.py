@@ -4,7 +4,7 @@ import pytest
 from freezegun import freeze_time
 
 from backuper import config, core
-from backuper.backup_targets import MySQL
+from backuper.backup_targets.mysql import MySQL
 from backuper.models.backup_target_models import MySQLTargetModel
 
 from .conftest import ALL_MYSQL_DBS_TARGETS, CONST_TOKEN_URLSAFE, DB_VERSION_BY_ENV_VAR
@@ -12,7 +12,7 @@ from .conftest import ALL_MYSQL_DBS_TARGETS, CONST_TOKEN_URLSAFE, DB_VERSION_BY_
 
 @pytest.mark.parametrize("mysql_target", ALL_MYSQL_DBS_TARGETS)
 def test_mysql_connection_success(mysql_target: MySQLTargetModel) -> None:
-    db = MySQL(**mysql_target.model_dump())
+    db = MySQL(target_model=mysql_target)
     assert db.db_version == DB_VERSION_BY_ENV_VAR[mysql_target.env_name]
 
 
@@ -24,7 +24,7 @@ def test_mysql_connection_fail(
     with pytest.raises(core.CoreSubprocessError):
         # simulate not existing db port 9999 and connection err
         monkeypatch.setattr(mysql_target, "port", 9999)
-        MySQL(**mysql_target.model_dump())
+        MySQL(target_model=mysql_target)
 
 
 @freeze_time("2022-12-11")
@@ -36,7 +36,7 @@ def test_run_mysqldump(
     mock = Mock(return_value="fixed_dbname")
     monkeypatch.setattr(core, "safe_text_version", mock)
 
-    db = MySQL(**mysql_target.model_dump())
+    db = MySQL(target_model=mysql_target)
     out_backup = db._backup()
 
     out_file = f"{db.env_name}/{db.env_name}_20221211_0000_fixed_dbname_{db.db_version}_{CONST_TOKEN_URLSAFE}.sql"

@@ -2,11 +2,10 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TypeVar, final, Generic
+from typing import TypeVar, final
 
 from croniter import croniter
 
-from backuper import config
 from backuper.models.backup_target_models import TargetModel
 
 log = logging.getLogger(__name__)
@@ -15,8 +14,6 @@ TM = TypeVar("TM", bound=TargetModel)
 
 
 class BaseBackupTarget(ABC):
-
-    @abstractmethod
     def __init__(self, target_model: TargetModel) -> None:
         self.target_model = target_model
         self.last_backup_time: datetime = datetime.now(UTC)
@@ -42,10 +39,6 @@ class BaseBackupTarget(ABC):
     @property
     def min_retention_days(self) -> int:
         return self.target_model.min_retention_days
-
-    @property
-    def target_name(self) -> config.BackupTargetEnum:
-        return self.target_model._name
 
     @final
     def make_backup(self) -> Path:

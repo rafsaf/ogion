@@ -4,8 +4,6 @@ import re
 import shlex
 from pathlib import Path
 
-from pydantic import SecretStr
-
 from backuper import config, core
 from backuper.backup_targets.base_target import BaseBackupTarget
 from backuper.models.backup_target_models import MariaDBTargetModel
@@ -15,7 +13,7 @@ log = logging.getLogger(__name__)
 VERSION_REGEX = re.compile(r"\d*\.\d*\.\d*")
 
 
-class MariaDB(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MARIADB):
+class MariaDB(BaseBackupTarget):
     # https://mariadb.com/kb/en/configuring-mariadb-with-option-files/
     # https://mariadb.com/kb/en/mariadb-dump/
     # https://mariadb.com/kb/en/connecting-to-mariadb/

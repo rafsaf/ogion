@@ -5,8 +5,6 @@ import shlex
 import urllib.parse
 from pathlib import Path
 
-from pydantic import SecretStr
-
 from backuper import config, core
 from backuper.backup_targets.base_target import BaseBackupTarget
 from backuper.models.backup_target_models import PostgreSQLTargetModel
@@ -16,9 +14,7 @@ log = logging.getLogger(__name__)
 VERSION_REGEX = re.compile(r"PostgreSQL \d*\.\d* ")
 
 
-class PostgreSQL(
-    BaseBackupTarget, target_model_name=config.BackupTargetEnum.POSTGRESQL
-):
+class PostgreSQL(BaseBackupTarget):
     # https://www.postgresql.org/docs/current/app-pgdump.html
     # https://www.postgresql.org/docs/current/app-psql.html
 

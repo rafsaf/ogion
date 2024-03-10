@@ -1,10 +1,9 @@
 import logging
 from pathlib import Path
-from typing import Generic
 
 from backuper import core
-from backuper.models.backup_target_models import SingleFileTargetModel
 from backuper.backup_targets.base_target import BaseBackupTarget
+from backuper.models.backup_target_models import SingleFileTargetModel
 
 log = logging.getLogger(__name__)
 

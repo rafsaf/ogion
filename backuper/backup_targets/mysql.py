@@ -4,8 +4,6 @@ import re
 import shlex
 from pathlib import Path
 
-from pydantic import SecretStr
-
 from backuper import config, core
 from backuper.backup_targets.base_target import BaseBackupTarget
 from backuper.models.backup_target_models import MySQLTargetModel
@@ -15,7 +13,7 @@ log = logging.getLogger(__name__)
 VERSION_REGEX = re.compile(r"\d*\.\d*\.\d*")
 
 
-class MySQL(BaseBackupTarget, target_model_name=config.BackupTargetEnum.MYSQL):
+class MySQL(BaseBackupTarget):
     # https://dev.mysql.com/doc/refman/8.0/en/option-files.html
     # https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html
     # https://dev.mysql.com/doc/refman/8.0/en/connecting.html
