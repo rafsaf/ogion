@@ -10,8 +10,8 @@ log = logging.getLogger(__name__)
 
 class File(BaseBackupTarget):
     def __init__(self, target_model: SingleFileTargetModel) -> None:
-        self.target_model = target_model
         super().__init__(target_model)
+        self.target_model: SingleFileTargetModel = target_model
 
     def _backup(self) -> Path:
         out_file = core.get_new_backup_path(

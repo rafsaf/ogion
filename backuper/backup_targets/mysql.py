@@ -19,8 +19,8 @@ class MySQL(BaseBackupTarget):
     # https://dev.mysql.com/doc/refman/8.0/en/connecting.html
 
     def __init__(self, target_model: MySQLTargetModel) -> None:
-        self.target_model = target_model
         super().__init__(target_model)
+        self.target_model: MySQLTargetModel = target_model
         self.option_file: Path = self._init_option_file()
         self.db_version: str = self._mysql_connection()
 

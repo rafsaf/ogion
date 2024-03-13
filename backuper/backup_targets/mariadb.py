@@ -19,8 +19,8 @@ class MariaDB(BaseBackupTarget):
     # https://mariadb.com/kb/en/connecting-to-mariadb/
 
     def __init__(self, target_model: MariaDBTargetModel) -> None:
-        self.target_model = target_model
         super().__init__(target_model)
+        self.target_model: MariaDBTargetModel = target_model
         self.option_file: Path = self._init_option_file()
         self.db_version: str = self._mariadb_connection()
 

@@ -19,8 +19,8 @@ class PostgreSQL(BaseBackupTarget):
     # https://www.postgresql.org/docs/current/app-psql.html
 
     def __init__(self, target_model: PostgreSQLTargetModel) -> None:
-        self.target_model = target_model
         super().__init__(target_model)
+        self.target_model: PostgreSQLTargetModel = target_model
         self.escaped_conn_uri: str = self._get_escaped_conn_uri()
         self.db_version: str = self._postgres_connection()
 
