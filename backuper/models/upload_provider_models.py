@@ -6,14 +6,15 @@ from backuper import config
 
 
 class ProviderModel(BaseModel):
-    name: config.UploadProviderEnum
+    name: str
 
 
 class DebugProviderModel(ProviderModel):
-    pass
+    name: str = config.UploadProviderEnum.LOCAL_FILES_DEBUG
 
 
 class GCSProviderModel(ProviderModel):
+    name: str = config.UploadProviderEnum.GOOGLE_CLOUD_STORAGE
     bucket_name: str
     bucket_upload_path: str
     service_account_base64: SecretStr
@@ -29,6 +30,7 @@ class GCSProviderModel(ProviderModel):
 
 
 class AWSProviderModel(ProviderModel):
+    name: str = config.UploadProviderEnum.AWS_S3
     bucket_name: str
     bucket_upload_path: str
     key_id: str
@@ -38,5 +40,6 @@ class AWSProviderModel(ProviderModel):
 
 
 class AzureProviderModel(ProviderModel):
+    name: str = config.UploadProviderEnum.AZURE
     container_name: str
     connect_string: SecretStr

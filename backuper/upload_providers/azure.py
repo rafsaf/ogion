@@ -5,28 +5,20 @@ from azure.storage.blob import BlobServiceClient
 from pydantic import SecretStr
 
 from backuper import config, core
+from backuper.models.upload_provider_models import AzureProviderModel
 from backuper.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
 
-class UploadProviderAzure(
-    BaseUploadProvider,
-    name=config.UploadProviderEnum.AZURE,
-):
+class UploadProviderAzure(BaseUploadProvider):
     """Azure blob storage for storing backups"""
 
-    def __init__(
-        self,
-        container_name: str,
-        connect_string: SecretStr,
-        **kwargs: str,
-    ) -> None:
-        self.container_name = container_name
-        self.connect_str = connect_string
+    def __init__(self, target_provider: AzureProviderModel) -> None:
+        self.container_name = target_provider.container_name
 
         blob_service_client = BlobServiceClient.from_connection_string(
-            connect_string.get_secret_value()
+            target_provider.connect_string.get_secret_value()
         )
         self.container_client = blob_service_client.get_container_client(
             container=self.container_name

@@ -7,28 +7,18 @@ import google.cloud.storage as cloud_storage
 from pydantic import SecretStr
 
 from backuper import config, core
+from backuper.models.upload_provider_models import GCSProviderModel
 from backuper.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
 
-class UploadProviderGCS(
-    BaseUploadProvider,
-    name=config.UploadProviderEnum.GOOGLE_CLOUD_STORAGE,
-):
+class UploadProviderGCS(BaseUploadProvider):
     """GCS bucket for storing backups"""
 
-    def __init__(
-        self,
-        bucket_name: str,
-        bucket_upload_path: str,
-        service_account_base64: SecretStr,
-        chunk_size_mb: int,
-        chunk_timeout_secs: int,
-        **kwargs: str,
-    ) -> None:
+    def __init__(self, target_provider: GCSProviderModel) -> None:
         service_account_bytes = base64.b64decode(
-            service_account_base64.get_secret_value()
+            target_provider.service_account_base64.get_secret_value()
         )
         sa_path = config.CONST_CONFIG_FOLDER_PATH / "google_auth.json"
         with open(sa_path, "wb") as f:
@@ -36,10 +26,10 @@ class UploadProviderGCS(
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(sa_path)
 
         self.storage_client = cloud_storage.Client()
-        self.bucket = self.storage_client.bucket(bucket_name)
-        self.bucket_upload_path = bucket_upload_path
-        self.chunk_size_bytes = chunk_size_mb * 1024 * 1024
-        self.chunk_timeout_secs = chunk_timeout_secs
+        self.bucket = self.storage_client.bucket(target_provider.bucket_name)
+        self.bucket_upload_path = target_provider.bucket_upload_path
+        self.chunk_size_bytes = target_provider.chunk_size_mb * 1024 * 1024
+        self.chunk_timeout_secs = target_provider.chunk_timeout_secs
 
     def _post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)

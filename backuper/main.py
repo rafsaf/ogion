@@ -10,17 +10,26 @@ from types import FrameType
 from typing import NoReturn
 
 from backuper import config, core
-from backuper.backup_targets.base_target import BaseBackupTarget
-from backuper.backup_targets.file import File
-from backuper.backup_targets.folder import Folder
-from backuper.backup_targets.mariadb import MariaDB
-from backuper.backup_targets.mysql import MySQL
-from backuper.backup_targets.postgresql import PostgreSQL
+from backuper.backup_targets import (
+    base_target,
+    file,
+    folder,
+    mariadb,
+    mysql,
+    postgresql,
+)
+from backuper.upload_providers import (
+    base_provider,
+    debug,
+    google_cloud_storage,
+    aws_s3,
+    azure,
+)
 from backuper.notifications.notifications_context import (
     PROGRAM_STEP,
     NotificationsContext,
 )
-from backuper.upload_providers import BaseUploadProvider
+
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)
@@ -31,18 +40,36 @@ def quit(sig: int, frame: FrameType | None) -> None:
     exit_event.set()
 
 
+def _get_provider_cls_map() -> dict[str, type[base_provider.BaseUploadProvider]]:
+    return {
+        config.UploadProviderEnum.AWS_S3: aws_s3.UploadProviderAWS,
+        config.UploadProviderEnum.AZURE: azure.UploadProviderAzure,
+        config.UploadProviderEnum.GOOGLE_CLOUD_STORAGE: google_cloud_storage.UploadProviderGCS,
+        config.UploadProviderEnum.LOCAL_FILES_DEBUG: debug.UploadProviderLocalDebug,
+    }
+
+
+def _get_target_cls_map() -> dict[str, type[base_target.BaseBackupTarget]]:
+    return {
+        config.BackupTargetEnum.FILE: file.File,
+        config.BackupTargetEnum.FOLDER: folder.Folder,
+        config.BackupTargetEnum.MARIADB: mariadb.MariaDB,
+        config.BackupTargetEnum.POSTGRESQL: postgresql.PostgreSQL,
+        config.BackupTargetEnum.MYSQL: mysql.MySQL,
+    }
+
+
 @NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
-def backup_provider() -> BaseUploadProvider:
-    backup_provider_map: dict[config.UploadProviderEnum, type[BaseUploadProvider]] = {}
-    for backup_provider in BaseUploadProvider.__subclasses__():
-        backup_provider_map[backup_provider.target_name] = backup_provider  # type: ignore
+def backup_provider() -> base_provider.BaseUploadProvider:
+    provider_cls_map = _get_provider_cls_map()
 
     provider_model = core.create_provider_model()
     log.info(
         "initializing provider: `%s`",
         provider_model.name,
     )
-    provider_target_cls = backup_provider_map[provider_model.name]
+
+    provider_target_cls = provider_cls_map[provider_model.name]
     log.debug("initializing %s with %s", provider_target_cls, provider_model)
     res_backup_provider = provider_target_cls(**provider_model.model_dump())
     log.info(
@@ -53,16 +80,10 @@ def backup_provider() -> BaseUploadProvider:
 
 
 @NotificationsContext(step_name=PROGRAM_STEP.SETUP_TARGETS)
-def backup_targets() -> list[BaseBackupTarget]:
-    backup_targets_map: dict[str, type[BaseBackupTarget]] = {
-        config.BackupTargetEnum.FILE: File,
-        config.BackupTargetEnum.FOLDER: Folder,
-        config.BackupTargetEnum.MARIADB: MariaDB,
-        config.BackupTargetEnum.POSTGRESQL: PostgreSQL,
-        config.BackupTargetEnum.MYSQL: MySQL,
-    }
+def backup_targets() -> list[base_target.BaseBackupTarget]:
+    backup_target_cls_map = _get_target_cls_map()
 
-    backup_targets: list[BaseBackupTarget] = []
+    backup_targets: list[base_target.BaseBackupTarget] = []
     target_models = core.create_target_models()
     if not target_models:
         raise RuntimeError("Found 0 backup targets, at least 1 is required.")
@@ -74,7 +95,7 @@ def backup_targets() -> list[BaseBackupTarget]:
             "initializing target: `%s`",
             target_model.env_name,
         )
-        backup_target_cls = backup_targets_map[target_model.name]
+        backup_target_cls = backup_target_cls_map[target_model.name]
         log.debug("initializing %s with %s", backup_target_cls, target_model)
         backup_targets.append(backup_target_cls(target_model=target_model))
         log.info(
@@ -128,7 +149,9 @@ def shutdown() -> NoReturn:  # pragma: no cover
         sys.exit(1)
 
 
-def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
+def run_backup(
+    target: base_target.BaseBackupTarget, provider: base_provider.BaseUploadProvider
+) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
     with NotificationsContext(
         step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name
@@ -137,7 +160,7 @@ def run_backup(target: BaseBackupTarget, provider: BaseUploadProvider) -> None:
     log.info(
         "backup file created: %s, starting post save upload to provider %s",
         backup_file,
-        provider.target_name,
+        provider.__class__.__name__,
     )
     with NotificationsContext(
         step_name=PROGRAM_STEP.UPLOAD,

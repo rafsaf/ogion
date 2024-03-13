@@ -7,6 +7,7 @@ from boto3.s3.transfer import TransferConfig
 from pydantic import SecretStr
 
 from backuper import config, core
+from backuper.models.upload_provider_models import AWSProviderModel
 from backuper.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
@@ -16,33 +17,21 @@ class DeleteItemDict(TypedDict):
     Key: str
 
 
-class UploadProviderAWS(
-    BaseUploadProvider,
-    name=config.UploadProviderEnum.AWS_S3,
-):
+class UploadProviderAWS(BaseUploadProvider):
     """AWS S3 bucket for storing backups"""
 
-    def __init__(
-        self,
-        bucket_name: str,
-        bucket_upload_path: str,
-        key_id: str,
-        key_secret: SecretStr,
-        region: str,
-        max_bandwidth: int | None,
-        **kwargs: str,
-    ) -> None:
-        self.bucket_upload_path = bucket_upload_path
-        self.max_bandwidth = max_bandwidth
+    def __init__(self, target_provider: AWSProviderModel) -> None:
+        self.bucket_upload_path = target_provider.bucket_upload_path
+        self.max_bandwidth = target_provider.max_bandwidth
 
         s3: Any = boto3.resource(
             "s3",
-            region_name=region,
-            aws_access_key_id=key_id,
-            aws_secret_access_key=key_secret.get_secret_value(),
+            region_name=target_provider.region,
+            aws_access_key_id=target_provider.key_id,
+            aws_secret_access_key=target_provider.key_secret.get_secret_value(),
         )
 
-        self.bucket = s3.Bucket(bucket_name)
+        self.bucket = s3.Bucket(target_provider.bucket_name)
         self.transfer_config = TransferConfig(max_bandwidth=self.max_bandwidth)
 
     def _post_save(self, backup_file: Path) -> str:
