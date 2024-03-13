@@ -6,7 +6,8 @@ import pytest
 from freezegun import freeze_time
 from pydantic import SecretStr
 
-from backuper.upload_providers import UploadProviderGCS
+from backuper.models.upload_provider_models import GCSProviderModel
+from backuper.upload_providers.google_cloud_storage import UploadProviderGCS
 
 
 @pytest.fixture(autouse=True)
@@ -16,11 +17,13 @@ def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def get_test_gcs() -> UploadProviderGCS:
     return UploadProviderGCS(
-        bucket_name="name",
-        bucket_upload_path="test",
-        service_account_base64=SecretStr("Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="),
-        chunk_size_mb=100,
-        chunk_timeout_secs=100,
+        GCSProviderModel(
+            bucket_name="name",
+            bucket_upload_path="test",
+            service_account_base64=SecretStr("Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="),
+            chunk_size_mb=100,
+            chunk_timeout_secs=100,
+        )
     )
 
 

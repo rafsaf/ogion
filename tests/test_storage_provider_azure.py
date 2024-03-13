@@ -6,7 +6,8 @@ from azure.storage.blob import BlobServiceClient
 from freezegun import freeze_time
 from pydantic import SecretStr
 
-from backuper.upload_providers import UploadProviderAzure
+from backuper.models.upload_provider_models import AzureProviderModel
+from backuper.upload_providers.azure import UploadProviderAzure
 
 
 @pytest.fixture(autouse=True)
@@ -15,7 +16,9 @@ def mock_azure_service_client(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def get_test_azure() -> UploadProviderAzure:
-    return UploadProviderAzure(container_name="test", connect_string=SecretStr("any"))
+    return UploadProviderAzure(
+        AzureProviderModel(container_name="test", connect_string=SecretStr("any"))
+    )
 
 
 def test_azure_post_save_fails_on_fail_upload(

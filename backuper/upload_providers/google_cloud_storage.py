@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 
 import google.cloud.storage as cloud_storage
-from pydantic import SecretStr
 
 from backuper import config, core
 from backuper.models.upload_provider_models import GCSProviderModel

@@ -2,9 +2,8 @@ import logging
 from pathlib import Path
 
 from azure.storage.blob import BlobServiceClient
-from pydantic import SecretStr
 
-from backuper import config, core
+from backuper import core
 from backuper.models.upload_provider_models import AzureProviderModel
 from backuper.upload_providers.base_provider import BaseUploadProvider
 

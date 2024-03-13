@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from backuper import config, core
+from backuper import core
 from backuper.models.upload_provider_models import DebugProviderModel
 from backuper.upload_providers.base_provider import BaseUploadProvider
 

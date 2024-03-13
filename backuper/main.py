@@ -18,18 +18,17 @@ from backuper.backup_targets import (
     mysql,
     postgresql,
 )
-from backuper.upload_providers import (
-    base_provider,
-    debug,
-    google_cloud_storage,
-    aws_s3,
-    azure,
-)
 from backuper.notifications.notifications_context import (
     PROGRAM_STEP,
     NotificationsContext,
 )
-
+from backuper.upload_providers import (
+    aws_s3,
+    azure,
+    base_provider,
+    debug,
+    google_cloud_storage,
+)
 
 exit_event = threading.Event()
 log = logging.getLogger(__name__)

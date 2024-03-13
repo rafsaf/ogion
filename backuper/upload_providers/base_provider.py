@@ -2,14 +2,13 @@ import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import final
+
 from backuper.models.upload_provider_models import ProviderModel
-from backuper import config
 
 log = logging.getLogger(__name__)
 
 
 class BaseUploadProvider(ABC):
-
     def __init__(self, target_provider: ProviderModel) -> None:
         self.target_provider = target_provider
 

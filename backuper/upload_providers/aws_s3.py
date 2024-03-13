@@ -4,9 +4,8 @@ from typing import Any, TypedDict
 
 import boto3
 from boto3.s3.transfer import TransferConfig
-from pydantic import SecretStr
 
-from backuper import config, core
+from backuper import core
 from backuper.models.upload_provider_models import AWSProviderModel
 from backuper.upload_providers.base_provider import BaseUploadProvider
 
