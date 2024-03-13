@@ -70,7 +70,7 @@ def backup_provider() -> base_provider.BaseUploadProvider:
 
     provider_target_cls = provider_cls_map[provider_model.name]
     log.debug("initializing %s with %s", provider_target_cls, provider_model)
-    res_backup_provider = provider_target_cls(**provider_model.model_dump())
+    res_backup_provider = provider_target_cls(target_provider=provider_model)
     log.info(
         "success initializing provider: `%s`",
         provider_model.name,

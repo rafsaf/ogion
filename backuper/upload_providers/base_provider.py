@@ -9,8 +9,8 @@ log = logging.getLogger(__name__)
 
 
 class BaseUploadProvider(ABC):
-    def __init__(self, target_provider: ProviderModel) -> None:
-        self.target_provider = target_provider
+    def __init__(self, target_provider: ProviderModel) -> None:  # pragma: no cover
+        pass
 
     @final
     def post_save(self, backup_file: Path) -> str:

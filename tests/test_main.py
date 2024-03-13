@@ -61,7 +61,7 @@ def test_backup_provider(monkeypatch: pytest.MonkeyPatch) -> None:
         "name=gcs bucket_name=name bucket_upload_path=test service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
     )
     provider = main.backup_provider()
-    assert provider.__class__.__name__ == UploadProviderGCS.__class__.__name__
+    assert provider.__class__.__name__ == UploadProviderGCS.__name__
 
 
 def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
