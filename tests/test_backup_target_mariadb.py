@@ -4,7 +4,7 @@ import pytest
 from freezegun import freeze_time
 
 from backuper import config, core
-from backuper.backup_targets import MariaDB
+from backuper.backup_targets.mariadb import MariaDB
 from backuper.models.backup_target_models import MariaDBTargetModel
 
 from .conftest import (
@@ -16,7 +16,7 @@ from .conftest import (
 
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
 def test_mariadb_connection_success(mariadb_target: MariaDBTargetModel) -> None:
-    db = MariaDB(**mariadb_target.model_dump())
+    db = MariaDB(target_model=mariadb_target)
     assert db.db_version == DB_VERSION_BY_ENV_VAR[mariadb_target.env_name]
 
 
@@ -28,7 +28,7 @@ def test_mariadb_connection_fail(
     with pytest.raises(core.CoreSubprocessError):
         # simulate not existing db port 9999 and connection err
         monkeypatch.setattr(mariadb_target, "port", 9999)
-        MariaDB(**mariadb_target.model_dump())
+        MariaDB(target_model=mariadb_target)
 
 
 @freeze_time("2022-12-11")
@@ -40,7 +40,7 @@ def test_run_mariadb_dump(
     mock = Mock(return_value="fixed_dbname")
     monkeypatch.setattr(core, "safe_text_version", mock)
 
-    db = MariaDB(**mariadb_target.model_dump())
+    db = MariaDB(target_model=mariadb_target)
     out_backup = db._backup()
 
     out_file = f"{db.env_name}/{db.env_name}_20221211_0000_fixed_dbname_{db.db_version}_{CONST_TOKEN_URLSAFE}.sql"

@@ -5,47 +5,22 @@ import shlex
 import urllib.parse
 from pathlib import Path
 
-from pydantic import SecretStr
-
 from backuper import config, core
 from backuper.backup_targets.base_target import BaseBackupTarget
+from backuper.models.backup_target_models import PostgreSQLTargetModel
 
 log = logging.getLogger(__name__)
 
 VERSION_REGEX = re.compile(r"PostgreSQL \d*\.\d* ")
 
 
-class PostgreSQL(
-    BaseBackupTarget, target_model_name=config.BackupTargetEnum.POSTGRESQL
-):
+class PostgreSQL(BaseBackupTarget):
     # https://www.postgresql.org/docs/current/app-pgdump.html
     # https://www.postgresql.org/docs/current/app-psql.html
 
-    def __init__(
-        self,
-        user: str,
-        password: SecretStr,
-        port: int,
-        host: str,
-        db: str,
-        cron_rule: str,
-        env_name: str,
-        max_backups: int,
-        min_retention_days: int,
-        **kwargs: str | int,
-    ) -> None:
-        super().__init__(
-            cron_rule=cron_rule,
-            env_name=env_name,
-            max_backups=max_backups,
-            min_retention_days=min_retention_days,
-        )
-        self.cron_rule: str = cron_rule
-        self.user: str = user
-        self.db: str = db
-        self.host: str = host
-        self.port: int = port
-        self.password: SecretStr = password
+    def __init__(self, target_model: PostgreSQLTargetModel) -> None:
+        super().__init__(target_model)
+        self.target_model: PostgreSQLTargetModel = target_model
         self.escaped_conn_uri: str = self._get_escaped_conn_uri()
         self.db_version: str = self._postgres_connection()
 
@@ -56,12 +31,12 @@ class PostgreSQL(
         def escape(s: str) -> str:
             return s.replace("\\", "\\\\").replace(":", "\\:")
 
-        password = self.password.get_secret_value()
+        password = self.target_model.password.get_secret_value()
         text = (
-            f"{self.host}:"
-            f"{self.port}:"
-            f"{escape(self.db)}:"
-            f"{escape(self.user)}:"
+            f"{self.target_model.host}:"
+            f"{self.target_model.port}:"
+            f"{escape(self.target_model.db)}:"
+            f"{escape(self.target_model.user)}:"
             f"{escape(password)}\n"
         )
 
@@ -81,10 +56,10 @@ class PostgreSQL(
         # it includes symbols with special meaning in any of its parts.
 
         pgpass_file = self._init_pgpass_file()
-        encoded_user = urllib.parse.quote_plus(self.user)
-        encoded_db = urllib.parse.quote_plus(self.db)
+        encoded_user = urllib.parse.quote_plus(self.target_model.user)
+        encoded_db = urllib.parse.quote_plus(self.target_model.db)
         uri = (
-            f"postgresql://{encoded_user}@{self.host}:{self.port}/{encoded_db}?"
+            f"postgresql://{encoded_user}@{self.target_model.host}:{self.target_model.port}/{encoded_db}?"
             f"passfile={pgpass_file}"
         )
         escaped_uri = shlex.quote(uri)
@@ -127,7 +102,7 @@ class PostgreSQL(
         return version
 
     def _backup(self) -> Path:
-        escaped_dbname = core.safe_text_version(self.db)
+        escaped_dbname = core.safe_text_version(self.target_model.db)
         name = f"{escaped_dbname}_{self.db_version}"
         out_file = core.get_new_backup_path(self.env_name, name, sql=True)
         shell_pg_dump_db = f"pg_dump --clean --if-exists -v -O -d {self.escaped_conn_uri} -f {out_file}"
