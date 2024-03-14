@@ -13,15 +13,7 @@ from typing import Any, TypeVar
 from pydantic import BaseModel
 
 from backuper import config
-from backuper.models.backup_target_models import (
-    DirectoryTargetModel,
-    MariaDBTargetModel,
-    MySQLTargetModel,
-    PostgreSQLTargetModel,
-    SingleFileTargetModel,
-    TargetModel,
-)
-from backuper.models.upload_provider_models import ProviderModel
+from backuper.models import backup_target_models, models_mapping, upload_provider_models
 
 log = logging.getLogger(__name__)
 
@@ -152,18 +144,10 @@ def _validate_model(
     return validated_target
 
 
-def create_target_models() -> list[TargetModel]:
-    target_map: dict[str, type[TargetModel]] = {
-        config.BackupTargetEnum.FILE: SingleFileTargetModel,
-        config.BackupTargetEnum.FOLDER: DirectoryTargetModel,
-        config.BackupTargetEnum.MARIADB: MariaDBTargetModel,
-        config.BackupTargetEnum.MYSQL: MySQLTargetModel,
-        config.BackupTargetEnum.POSTGRESQL: PostgreSQLTargetModel,
-    }
+def create_target_models() -> list[backup_target_models.TargetModel]:
+    target_map = models_mapping.get_target_map()
 
-    log.critical(target_map)
-
-    targets: list[TargetModel] = []
+    targets: list[backup_target_models.TargetModel] = []
     for env_name, env_value in os.environ.items():
         env_name_lowercase = env_name.lower()
         log.debug("processing env variable %s", env_name_lowercase)
@@ -178,22 +162,18 @@ def create_target_models() -> list[TargetModel]:
     return targets
 
 
-def create_provider_model() -> ProviderModel:
-    target_map: dict[config.UploadProviderEnum, type[ProviderModel]] = {}
-    for target_model in ProviderModel.__subclasses__():
-        name = config.UploadProviderEnum(
-            target_model.__name__.lower().removesuffix("providermodel")
-        )
-        target_map[name] = target_model
+def create_provider_model() -> upload_provider_models.ProviderModel:
+    provider_map = models_mapping.get_provider_map()
+
     log.info("start validating BACKUP_PROVIDER environment variable")
 
     base_provider = _validate_model(
         "backup_provider",
         config.options.BACKUP_PROVIDER,
-        ProviderModel,
+        upload_provider_models.ProviderModel,
         value_whitespace_split=True,
     )
-    target_model_cls = target_map[base_provider.name]
+    target_model_cls = provider_map[base_provider.name]
     return _validate_model(
         "backup_provider", config.options.BACKUP_PROVIDER, target_model_cls
     )

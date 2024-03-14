@@ -3,14 +3,17 @@ from pathlib import Path
 import pytest
 from freezegun import freeze_time
 
-from backuper.upload_providers import UploadProviderLocalDebug
+from backuper.models.upload_provider_models import DebugProviderModel
+from backuper.upload_providers.debug import UploadProviderLocalDebug
+
+
+def get_test_debug() -> UploadProviderLocalDebug:
+    return UploadProviderLocalDebug(DebugProviderModel())
 
 
 @pytest.mark.parametrize("method_name", ["_clean", "clean"])
-def test_local_debug_clean_file(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
-) -> None:
-    local = UploadProviderLocalDebug()
+def test_local_debug_clean_file(tmp_path: Path, method_name: str) -> None:
+    local = get_test_debug()
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
@@ -38,10 +41,8 @@ def test_local_debug_clean_file(
 
 
 @pytest.mark.parametrize("method_name", ["_clean", "clean"])
-def test_local_debug_clean_folder(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
-) -> None:
-    local = UploadProviderLocalDebug()
+def test_local_debug_clean_folder(tmp_path: Path, method_name: str) -> None:
+    local = get_test_debug()
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
@@ -71,9 +72,9 @@ def test_local_debug_clean_folder(
 @freeze_time("2023-08-27")
 @pytest.mark.parametrize("method_name", ["_clean", "clean"])
 def test_local_debug_respects_min_retention_days_param_and_not_delete_any_file(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
+    tmp_path: Path, method_name: str
 ) -> None:
-    local = UploadProviderLocalDebug()
+    local = get_test_debug()
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()

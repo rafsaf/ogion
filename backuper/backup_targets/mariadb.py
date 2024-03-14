@@ -79,7 +79,10 @@ class MariaDB(BaseBackupTarget):
             version = match.group(0)
             break
         if version is None:  # pragma: no cover
-            msg = f"mariadb_connection error processing sql result, version unknown: {result}"
+            msg = (
+                f"mariadb_connection error processing sql result, "
+                f"version unknown: {result}"
+            )
             log.error(msg)
             raise ValueError(msg)
         log.info("mariadb_connection calculated version: %s", version)

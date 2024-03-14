@@ -1,22 +1,20 @@
 import logging
 from pathlib import Path
 
-from backuper import config, core
+from backuper import core
+from backuper.models.upload_provider_models import DebugProviderModel
 from backuper.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
 
-class UploadProviderLocalDebug(
-    BaseUploadProvider,
-    name=config.UploadProviderEnum.LOCAL_FILES_DEBUG,
-):
+class UploadProviderLocalDebug(BaseUploadProvider):
     """Represent local folder `data` for storing backups.
 
     If docker volume/persistant volume is lost, so are backups.
     """
 
-    def __init__(self, **kwargs: str) -> None:
+    def __init__(self, target_provider: DebugProviderModel) -> None:
         pass
 
     def _post_save(self, backup_file: Path) -> str:

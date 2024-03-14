@@ -7,8 +7,10 @@ import google.cloud.storage as cloud_storage
 import pytest
 
 from backuper import config, core, main
+from backuper.models import upload_provider_models
 from backuper.notifications.notifications_context import NotificationsContext
 from backuper.upload_providers.debug import UploadProviderLocalDebug
+from backuper.upload_providers.google_cloud_storage import UploadProviderGCS
 
 from .conftest import (
     ALL_MARIADB_DBS_TARGETS,
@@ -56,10 +58,11 @@ def test_backup_provider(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         config.options,
         "BACKUP_PROVIDER",
-        "name=gcs bucket_name=name bucket_upload_path=test service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
+        "name=gcs bucket_name=name bucket_upload_path=test "
+        "service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=",
     )
     provider = main.backup_provider()
-    assert provider.target_name == "gcs"
+    assert provider.__class__.__name__ == UploadProviderGCS.__name__
 
 
 def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -127,7 +130,7 @@ def test_run_backup_notifications_fail_message_is_fired_when_it_fails(
     backup_file = Path("/tmp/fake")
     backup_mock = Mock(return_value=backup_file, side_effect=make_backup_side_effect)
     monkeypatch.setattr(target, "_backup", backup_mock)
-    provider = UploadProviderLocalDebug()
+    provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
     monkeypatch.setattr(provider, "_post_save", Mock(side_effect=post_save_side_effect))
     monkeypatch.setattr(provider, "_clean", Mock(side_effect=clean_side_effect))
 

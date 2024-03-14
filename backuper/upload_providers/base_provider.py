@@ -3,17 +3,14 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import final
 
-from backuper import config
+from backuper.models.upload_provider_models import ProviderModel
 
 log = logging.getLogger(__name__)
 
 
 class BaseUploadProvider(ABC):
-    target_name: config.UploadProviderEnum
-
-    def __init_subclass__(cls, name: config.UploadProviderEnum) -> None:
-        cls.target_name = name
-        super().__init_subclass__()
+    def __init__(self, target_provider: ProviderModel) -> None:  # pragma: no cover
+        pass
 
     @final
     def post_save(self, backup_file: Path) -> str:

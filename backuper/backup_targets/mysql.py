@@ -79,7 +79,10 @@ class MySQL(BaseBackupTarget):
             version = match.group(0)
             break
         if version is None:  # pragma: no cover
-            msg = f"mysql_connection error processing sql result, version unknown: {result}"
+            msg = (
+                f"mysql_connection error processing sql result, "
+                f"version unknown: {result}"
+            )
             log.error(msg)
             raise ValueError(msg)
         log.info("mysql_connection calculated version: %s", version)

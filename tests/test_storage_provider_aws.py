@@ -6,7 +6,8 @@ import pytest
 from freezegun import freeze_time
 from pydantic import SecretStr
 
-from backuper.upload_providers import UploadProviderAWS
+from backuper.models.upload_provider_models import AWSProviderModel
+from backuper.upload_providers.aws_s3 import UploadProviderAWS
 
 
 @pytest.fixture(autouse=True)
@@ -16,12 +17,14 @@ def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def get_test_aws() -> UploadProviderAWS:
     return UploadProviderAWS(
-        bucket_name="name",
-        bucket_upload_path="test123",
-        key_id="id",
-        key_secret=SecretStr("secret"),
-        region="fake region",
-        max_bandwidth=None,
+        AWSProviderModel(
+            bucket_name="name",
+            bucket_upload_path="test123",
+            key_id="id",
+            key_secret=SecretStr("secret"),
+            region="fake region",
+            max_bandwidth=None,
+        )
     )
 
 
