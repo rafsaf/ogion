@@ -3,13 +3,15 @@
 
 import base64
 
-from pydantic import BaseModel, SecretStr, field_validator
+from pydantic import BaseModel, ConfigDict, SecretStr, field_validator
 
 from backuper import config
 
 
 class ProviderModel(BaseModel):
     name: str
+
+    model_config = ConfigDict(frozen=True)
 
 
 class DebugProviderModel(ProviderModel):

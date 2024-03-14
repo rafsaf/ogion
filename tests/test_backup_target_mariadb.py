@@ -23,14 +23,11 @@ def test_mariadb_connection_success(mariadb_target: MariaDBTargetModel) -> None:
 
 
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
-def test_mariadb_connection_fail(
-    mariadb_target: MariaDBTargetModel,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_mariadb_connection_fail(mariadb_target: MariaDBTargetModel) -> None:
     with pytest.raises(core.CoreSubprocessError):
         # simulate not existing db port 9999 and connection err
-        monkeypatch.setattr(mariadb_target, "port", 9999)
-        MariaDB(target_model=mariadb_target)
+        target_model = mariadb_target.model_copy(update={"port": 9999})
+        MariaDB(target_model=target_model)
 
 
 @freeze_time("2022-12-11")

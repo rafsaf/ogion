@@ -19,14 +19,11 @@ def test_mysql_connection_success(mysql_target: MySQLTargetModel) -> None:
 
 
 @pytest.mark.parametrize("mysql_target", ALL_MYSQL_DBS_TARGETS)
-def test_mysql_connection_fail(
-    mysql_target: MySQLTargetModel,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_mysql_connection_fail(mysql_target: MySQLTargetModel) -> None:
     with pytest.raises(core.CoreSubprocessError):
         # simulate not existing db port 9999 and connection err
-        monkeypatch.setattr(mysql_target, "port", 9999)
-        MySQL(target_model=mysql_target)
+        target_model = mysql_target.model_copy(update={"port": 9999})
+        MySQL(target_model=target_model)
 
 
 @freeze_time("2022-12-11")

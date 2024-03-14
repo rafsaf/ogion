@@ -25,14 +25,11 @@ def test_postgres_connection_success(
 
 
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
-def test_postgres_connection_fail(
-    postgres_target: PostgreSQLTargetModel,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_postgres_connection_fail(postgres_target: PostgreSQLTargetModel) -> None:
     with pytest.raises(core.CoreSubprocessError):
         # simulate not existing db port 9999 and connection err
-        monkeypatch.setattr(postgres_target, "port", 9999)
-        PostgreSQL(target_model=postgres_target)
+        target_model = postgres_target.model_copy(update={"port": 9999})
+        PostgreSQL(target_model=target_model)
 
 
 @freeze_time("2022-12-11")
