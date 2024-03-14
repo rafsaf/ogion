@@ -100,7 +100,8 @@ def test_end_to_end_successful_restore_after_backup(
     )
 
     result = core.run_subprocess(
-        f"psql -d {test_db.escaped_conn_uri} -w --command 'select * from my_table;'",
+        f"psql -d {test_db.escaped_conn_uri} -w --command "
+        "'select * from my_table order by id asc;'",
     )
 
     assert result == (

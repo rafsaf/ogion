@@ -112,7 +112,7 @@ def test_end_to_end_successful_restore_after_backup(
 
     result = core.run_subprocess(
         f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"
-        " --execute='select * from my_table;'",
+        " --execute='select * from my_table order by id asc;'",
     )
 
     assert result == ("id\tname\tage\n" "1\tGeralt z Rivii\t60\n" "2\trafsaf\t24\n")
