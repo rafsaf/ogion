@@ -41,7 +41,6 @@ class BackupTargetEnum(StrEnum):
     MARIADB = "mariadb"
     FILE = "singlefile"
     FOLDER = "directory"
-    TEST = "test"
 
 
 class Settings(BaseSettings):
