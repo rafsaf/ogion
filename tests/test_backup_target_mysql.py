@@ -39,6 +39,9 @@ def test_run_mysqldump(
     db = MySQL(target_model=mysql_target)
     out_backup = db._backup()
 
-    out_file = f"{db.env_name}/{db.env_name}_20221211_0000_fixed_dbname_{db.db_version}_{CONST_TOKEN_URLSAFE}.sql"
+    out_file = (
+        f"{db.env_name}/"
+        f"{db.env_name}_20221211_0000_fixed_dbname_{db.db_version}_{CONST_TOKEN_URLSAFE}.sql"
+    )
     out_path = config.CONST_BACKUP_FOLDER_PATH / out_file
     assert out_backup == out_path

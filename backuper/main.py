@@ -115,8 +115,9 @@ def shutdown() -> NoReturn:  # pragma: no cover
         sys.exit(0)
     else:
         log.warning(
-            "noooo, exiting! i am now killing myself with %d daemon threads force killed. "
-            "you can extend this time using environment SIGTERM_TIMEOUT_SECS.",
+            "noooo, exiting! i am now killing myself with %d daemon threads "
+            "force killed. you can extend this time using environment "
+            "SIGTERM_TIMEOUT_SECS.",
             threading.active_count() - 1,
         )
         sys.exit(1)

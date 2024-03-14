@@ -27,7 +27,7 @@ except ImportError:  # pragma: no cover
 
 class UploadProviderEnum(StrEnum):
     LOCAL_FILES_DEBUG = "debug"
-    GOOGLE_CLOUD_STORAGE = "gcs"
+    GCS = "gcs"
     AWS_S3 = "aws"
     AZURE = "azure"
 
@@ -81,7 +81,8 @@ class Settings(BaseSettings):
         smtp_settings = [self.SMTP_HOST, self.SMTP_FROM_ADDR, self.SMTP_TO_ADDRS]
         if any(smtp_settings) != all(smtp_settings):  # pragma: no cover
             raise ValueError(
-                "parameters SMTP_HOST, SMTP_FROM_ADDR, SMTP_TO_ADDRS must be all either set or not."
+                "parameters SMTP_HOST, SMTP_FROM_ADDR, SMTP_TO_ADDRS "
+                "must be all either set or not."
             )
         return self
 

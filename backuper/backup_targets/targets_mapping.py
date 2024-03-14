@@ -6,7 +6,6 @@ from backuper.backup_targets import (
     mysql,
     postgresql,
 )
-
 from backuper.config import BackupTargetEnum
 
 

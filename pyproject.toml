@@ -54,8 +54,8 @@ env = [
   "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#%^&*()/;><.,][`~'",
 ]
 filterwarnings = [
-  "ignore:Deprecated call to `pkg_resources.declare_namespace\\('google:DeprecationWarning",
-  "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
+  "ignore:Type google._upb._message.ScalarMapContainer uses PyType_Spec",
+  "ignore:Type google._upb._message.MessageMapContainer uses PyType_Spec",
 ]
 
 [tool.ruff]
@@ -63,11 +63,7 @@ target-version = "py312"
 
 [tool.ruff.lint]
 # pycodestyle, pyflakes, isort, pylint, pyupgrade
-ignore = ["E501"]
 select = ["E", "F", "I", "PL", "UP", "W"]
-
-[tool.ruff.lint.pylint]
-max-args = 12
 
 [tool.coverage.run]
 omit = ["backuper/tools/*"]
@@ -77,8 +73,6 @@ source = ["backuper"]
 ignore_missing_imports = true
 python_version = "3.12"
 strict = true
-warn_return_any = true
-warn_unused_configs = true
 
 [tool.poetry.scripts]
 backuper = "backuper.main:main"

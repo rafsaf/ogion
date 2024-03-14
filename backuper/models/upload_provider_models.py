@@ -14,7 +14,7 @@ class DebugProviderModel(ProviderModel):
 
 
 class GCSProviderModel(ProviderModel):
-    name: str = config.UploadProviderEnum.GOOGLE_CLOUD_STORAGE
+    name: str = config.UploadProviderEnum.GCS
     bucket_name: str
     bucket_upload_path: str
     service_account_base64: SecretStr
