@@ -6,13 +6,12 @@ changelog:
       exclude:
         labels:
           - dependencies
-        authors:
-          - github-actions
+          - auto-update
 
     - title: Dependencies
       labels:
         - dependencies
 
-    - title: Misc
-      authors:
-        - github-actions
+    - title: Auto update
+      labels:
+        - auto-update
