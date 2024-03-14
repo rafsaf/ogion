@@ -95,7 +95,9 @@ class MariaDB(BaseBackupTarget):
         escaped_dbname = core.safe_text_version(self.target_model.db)
         escaped_version = core.safe_text_version(self.db_version)
         name = f"{escaped_dbname}_{escaped_version}"
+
         out_file = core.get_new_backup_path(self.env_name, name).with_suffix(".sql")
+
         db = shlex.quote(self.target_model.db)
         shell_mariadb_dump_db = (
             f"mariadb-dump --defaults-file={self.option_file} "

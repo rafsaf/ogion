@@ -113,6 +113,7 @@ class PostgreSQL(BaseBackupTarget):
         name = f"{escaped_dbname}_{escaped_version}"
 
         out_file = core.get_new_backup_path(self.env_name, name).with_suffix(".sql")
+
         shell_pg_dump_db = (
             f"pg_dump --clean --if-exists -v -O -d "
             f"{self.escaped_conn_uri} -f {out_file}"
