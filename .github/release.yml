@@ -1,11 +1,18 @@
 changelog:
   categories:
-    - title: Features
+    - title: Feat
       labels:
         - "*"
       exclude:
         labels:
           - dependencies
-    - title: Misc
+        authors:
+          - github-actions
+
+    - title: Dependencies
       labels:
         - dependencies
+
+    - title: Misc
+      authors:
+        - github-actions
