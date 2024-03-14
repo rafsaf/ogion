@@ -39,7 +39,7 @@ def test_postgres_connection_fail(
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
 def test_run_pg_dump(postgres_target: PostgreSQLTargetModel) -> None:
     db = PostgreSQL(target_model=postgres_target)
-    out_backup = db._backup()
+    out_backup = db.make_backup()
 
     escaped_name = "database_12"
     escaped_version = db.db_version.replace(".", "")

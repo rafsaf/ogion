@@ -33,7 +33,7 @@ def test_mysql_connection_fail(
 @pytest.mark.parametrize("mysql_target", ALL_MYSQL_DBS_TARGETS)
 def test_run_mysqldump(mysql_target: MySQLTargetModel) -> None:
     db = MySQL(target_model=mysql_target)
-    out_backup = db._backup()
+    out_backup = db.make_backup()
 
     escaped_name = "database_12"
     escaped_version = db.db_version.replace(".", "")

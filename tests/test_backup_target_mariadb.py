@@ -37,7 +37,7 @@ def test_mariadb_connection_fail(
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
 def test_run_mariadb_dump(mariadb_target: MariaDBTargetModel) -> None:
     db = MariaDB(target_model=mariadb_target)
-    out_backup = db._backup()
+    out_backup = db.make_backup()
 
     escaped_name = "database_12"
     escaped_version = db.db_version.replace(".", "")
