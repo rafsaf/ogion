@@ -17,6 +17,8 @@ def find_python_files(path: pathlib.Path) -> list[pathlib.Path]:
     python_file_lst: list[pathlib.Path] = []
     for path, dirs, files in path.walk():
         for file in files:
+            if file == "__init__.py":
+                continue
             if file.endswith(".py"):
                 python_file_lst.append(path / file)
         for dir in dirs:

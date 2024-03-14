@@ -73,11 +73,11 @@ Note, exactly above is being run inside runners in tests github action.
 
 ## Acceptance tests
 
-The tests folder includes tests for cloud providers integrations, but for obvious reasons this cannot replace end-to-end tests with **real** credentials to storage in cloud and eventually costs involved.
+The tests folder includes tests for cloud providers integrations, but for obvious reasons this cannot replace end-to-end tests with **real** credentials to storage in cloud and eventually costs involved, proceed with caution!
 
 For `Debug` provider acceptance tests, existing `.env.example` can be ok for `.env` file. To test other providers, you will need to change `BACKUP_PROVIDER` environment variable accordingly.
 
-Then `acceptance_tests_amd64` (or even for arm64 `acceptance_tests_arm64`) will use target `build` and your local `.env` file.
+Then `make acceptance_tests_amd64` (or even for arm64 `make acceptance_tests_arm64`) will build docker image target `build` and your local `.env` file, then fire single backup to upload provider and exit.
 
 ## Coding conventions
 
