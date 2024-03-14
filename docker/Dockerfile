@@ -17,7 +17,8 @@ RUN addgroup --gid 1001 --system ${SERVICE_NAME} && \
     adduser --gid 1001 --shell /bin/false --disabled-password --uid 1001 ${SERVICE_NAME}
 
 FROM base as poetry
-RUN pip install poetry==1.7.1
+RUN pip install poetry==1.8.2
+RUN poetry self add poetry-plugin-export
 COPY poetry.lock pyproject.toml ./
 RUN poetry export -o /requirements.txt --without-hashes
 RUN poetry export -o /requirements-tests.txt --without-hashes --with tests
@@ -43,6 +44,8 @@ RUN target_arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
     && rm -f backuper/bin/7zip/${target_arch}/7zz
 
 COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
+RUN rm -rf scripts
+COPY LICENSE LICENSE
 
 ENTRYPOINT ["/bin/sh", "/docker_entrypoint.sh"]
 
