@@ -54,14 +54,6 @@ def test_get_new_backup_path() -> None:
     assert str(new_path) == str(expected_path)
 
 
-@freeze_time("2022-12-11")
-def test_get_new_backup_path_sql() -> None:
-    new_path = core.get_new_backup_path("env_name", "db_string", sql=True)
-    expected_file = "env_name/env_name_20221211_0000_db_string_mock.sql"
-    expected_path = config.CONST_BACKUP_FOLDER_PATH / expected_file
-    assert str(new_path) == str(expected_path)
-
-
 @pytest.mark.parametrize("integrity", [True, False])
 def test_run_create_zip_archive(
     tmp_path: Path, integrity: str, monkeypatch: pytest.MonkeyPatch

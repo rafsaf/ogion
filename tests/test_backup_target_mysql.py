@@ -32,19 +32,16 @@ def test_mysql_connection_fail(
 
 @freeze_time("2022-12-11")
 @pytest.mark.parametrize("mysql_target", ALL_MYSQL_DBS_TARGETS)
-def test_run_mysqldump(
-    mysql_target: MySQLTargetModel,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    mock = Mock(return_value="fixed_dbname")
-    monkeypatch.setattr(core, "safe_text_version", mock)
-
+def test_run_mysqldump(mysql_target: MySQLTargetModel) -> None:
     db = MySQL(target_model=mysql_target)
     out_backup = db._backup()
 
+    escaped_name = "database_12"
+    escaped_version = db.db_version.replace(".", "")
+
     out_file = (
         f"{db.env_name}/"
-        f"{db.env_name}_20221211_0000_fixed_dbname_{db.db_version}_{CONST_TOKEN_URLSAFE}.sql"
+        f"{db.env_name}_20221211_0000_{escaped_name}_{escaped_version}_{CONST_TOKEN_URLSAFE}.sql"
     )
     out_path = config.CONST_BACKUP_FOLDER_PATH / out_file
     assert out_backup == out_path
