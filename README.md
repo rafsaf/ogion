@@ -59,13 +59,13 @@ Everyday 5am backup of PostgreSQL database defined in the same file and running 
 
 services:
   db:
-    image: postgres:15
+    image: postgres:16
     environment:
       - POSTGRES_PASSWORD=pwd
   backuper:
     image: rafsaf/backuper:latest
     environment:
-      - POSTGRESQL_PG15=host=db password=pwd cron_rule=0 0 5 * * port=5432
+      - POSTGRESQL_PG16=host=db password=pwd cron_rule=0 0 5 * * port=5432
       - ZIP_ARCHIVE_PASSWORD=change_me
       - BACKUP_PROVIDER=name=debug
 ```
