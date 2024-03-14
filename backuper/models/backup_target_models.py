@@ -17,7 +17,7 @@ from backuper import config
 
 
 class TargetModel(BaseModel):
-    name: config.BackupTargetEnum = config.BackupTargetEnum.TEST
+    name: str = "test"
     env_name: str = Field(pattern=r"^[A-Za-z_0-9]{1,}$")
     cron_rule: str
     max_backups: int = Field(ge=1, le=998, default=config.options.BACKUP_MAX_NUMBER)
