@@ -12,22 +12,15 @@ from typing import NoReturn
 from backuper import config, core
 from backuper.backup_targets import (
     base_target,
-    file,
-    folder,
-    mariadb,
-    mysql,
-    postgresql,
+    targets_mapping,
 )
 from backuper.notifications.notifications_context import (
     PROGRAM_STEP,
     NotificationsContext,
 )
 from backuper.upload_providers import (
-    aws_s3,
-    azure,
     base_provider,
-    debug,
-    google_cloud_storage,
+    providers_mapping,
 )
 
 exit_event = threading.Event()
@@ -39,28 +32,9 @@ def quit(sig: int, frame: FrameType | None) -> None:
     exit_event.set()
 
 
-def _get_provider_cls_map() -> dict[str, type[base_provider.BaseUploadProvider]]:
-    return {
-        config.UploadProviderEnum.AWS_S3: aws_s3.UploadProviderAWS,
-        config.UploadProviderEnum.AZURE: azure.UploadProviderAzure,
-        config.UploadProviderEnum.GOOGLE_CLOUD_STORAGE: google_cloud_storage.UploadProviderGCS,
-        config.UploadProviderEnum.LOCAL_FILES_DEBUG: debug.UploadProviderLocalDebug,
-    }
-
-
-def _get_target_cls_map() -> dict[str, type[base_target.BaseBackupTarget]]:
-    return {
-        config.BackupTargetEnum.FILE: file.File,
-        config.BackupTargetEnum.FOLDER: folder.Folder,
-        config.BackupTargetEnum.MARIADB: mariadb.MariaDB,
-        config.BackupTargetEnum.POSTGRESQL: postgresql.PostgreSQL,
-        config.BackupTargetEnum.MYSQL: mysql.MySQL,
-    }
-
-
 @NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
 def backup_provider() -> base_provider.BaseUploadProvider:
-    provider_cls_map = _get_provider_cls_map()
+    provider_cls_map = providers_mapping.get_provider_cls_map()
 
     provider_model = core.create_provider_model()
     log.info(
@@ -80,7 +54,7 @@ def backup_provider() -> base_provider.BaseUploadProvider:
 
 @NotificationsContext(step_name=PROGRAM_STEP.SETUP_TARGETS)
 def backup_targets() -> list[base_target.BaseBackupTarget]:
-    backup_target_cls_map = _get_target_cls_map()
+    backup_target_cls_map = targets_mapping.get_target_cls_map()
 
     backup_targets: list[base_target.BaseBackupTarget] = []
     target_models = core.create_target_models()
