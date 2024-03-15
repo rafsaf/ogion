@@ -11,16 +11,16 @@ import pytest
 import responses
 from pydantic import SecretStr
 
-from backuper import config
-from backuper.models.backup_target_models import (
+from ogion import config
+from ogion.models.backup_target_models import (
     DirectoryTargetModel,
     MariaDBTargetModel,
     MySQLTargetModel,
     PostgreSQLTargetModel,
     SingleFileTargetModel,
 )
-from backuper.tools.compose_db_models import ComposeDatabase
-from backuper.tools.compose_file_generator import (
+from ogion.tools.compose_db_models import ComposeDatabase
+from ogion.tools.compose_file_generator import (
     DB_NAME,
     DB_PWD,
     DB_USERNAME,

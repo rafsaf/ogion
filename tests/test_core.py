@@ -10,7 +10,7 @@ import pytest
 from freezegun import freeze_time
 from pytest import LogCaptureFixture
 
-from backuper import config, core
+from ogion import config, core
 
 
 @pytest.mark.parametrize(

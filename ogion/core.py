@@ -15,8 +15,8 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
-from backuper import config
-from backuper.models import backup_target_models, models_mapping, upload_provider_models
+from ogion import config
+from ogion.models import backup_target_models, models_mapping, upload_provider_models
 
 log = logging.getLogger(__name__)
 
@@ -167,6 +167,7 @@ def create_provider_model() -> upload_provider_models.ProviderModel:
     provider_map = models_mapping.get_provider_map()
 
     log.info("start validating BACKUP_PROVIDER environment variable")
+    log.debug("BACKUP_PROVIDER: %s", config.options.BACKUP_PROVIDER)
 
     base_provider = _validate_model(
         "backup_provider",

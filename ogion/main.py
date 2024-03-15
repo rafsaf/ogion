@@ -12,16 +12,16 @@ from threading import Thread
 from types import FrameType
 from typing import NoReturn
 
-from backuper import config, core
-from backuper.backup_targets import (
+from ogion import config, core
+from ogion.backup_targets import (
     base_target,
     targets_mapping,
 )
-from backuper.notifications.notifications_context import (
+from ogion.notifications.notifications_context import (
     PROGRAM_STEP,
     NotificationsContext,
 )
-from backuper.upload_providers import (
+from ogion.upload_providers import (
     base_provider,
     providers_mapping,
 )
@@ -87,8 +87,8 @@ def shutdown() -> NoReturn:  # pragma: no cover
     start = time.time()
     deadline = start + timeout_secs
     log.info(
-        "start backuper shutdown, force exit after SIGTERM_TIMEOUT_SECS=%ss, "
-        "use this environment to control it, see https://backuper.rafsaf.pl/latest/configuration/.",
+        "start ogion shutdown, force exit after SIGTERM_TIMEOUT_SECS=%ss, "
+        "use this environment to control it, see https://ogion.rafsaf.pl/latest/configuration/.",
         timeout_secs,
     )
     for thread in threading.enumerate():
@@ -114,7 +114,7 @@ def shutdown() -> NoReturn:  # pragma: no cover
                 thread.name,
             )
     if threading.active_count() == 1:
-        log.info("gracefully exiting backuper")
+        log.info("gracefully exiting ogion")
         sys.exit(0)
     else:
         log.warning(
@@ -169,7 +169,7 @@ class RuntimeArgs:
 
 
 def setup_runtime_arguments() -> RuntimeArgs:
-    parser = argparse.ArgumentParser(description="Backuper program")
+    parser = argparse.ArgumentParser(description="Ogion program")
     parser.add_argument(
         "-s", "--single", action="store_true", help="Only single backup then exit"
     )
@@ -183,7 +183,7 @@ def setup_runtime_arguments() -> RuntimeArgs:
 
 
 def main() -> NoReturn:
-    log.info("start backuper configuration...")
+    log.info("start ogion configuration...")
 
     runtime_args = setup_runtime_arguments()
 
@@ -197,7 +197,7 @@ def main() -> NoReturn:
     provider = backup_provider()
     targets = backup_targets()
 
-    log.info("backuper configuration finished")
+    log.info("ogion configuration finished")
 
     while not exit_event.is_set():
         for target in targets:

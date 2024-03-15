@@ -3,13 +3,13 @@ from typing import Any
 
 import pytest
 
-from backuper.backup_targets.base_target import BaseBackupTarget
-from backuper.backup_targets.targets_mapping import get_target_cls_map
-from backuper.config import BackupTargetEnum, UploadProviderEnum
-from backuper.models import backup_target_models, upload_provider_models
-from backuper.models.models_mapping import get_provider_map, get_target_map
-from backuper.upload_providers.base_provider import BaseUploadProvider
-from backuper.upload_providers.providers_mapping import get_provider_cls_map
+from ogion.backup_targets.base_target import BaseBackupTarget
+from ogion.backup_targets.targets_mapping import get_target_cls_map
+from ogion.config import BackupTargetEnum, UploadProviderEnum
+from ogion.models import backup_target_models, upload_provider_models
+from ogion.models.models_mapping import get_provider_map, get_target_map
+from ogion.upload_providers.base_provider import BaseUploadProvider
+from ogion.upload_providers.providers_mapping import get_provider_cls_map
 
 
 def test_get_target_map_contains_all_enums_and_has_valid_value_types() -> None:

@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from backuper.notifications.notifications_context import (
+from ogion.notifications.notifications_context import (
     PROGRAM_STEP,
     NotificationsContext,
 )

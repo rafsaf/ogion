@@ -4,8 +4,8 @@
 
 from freezegun import freeze_time
 
-from backuper import config
-from backuper.backup_targets.file import File
+from ogion import config
+from ogion.backup_targets.file import File
 
 from .conftest import CONST_TOKEN_URLSAFE, FILE_1
 

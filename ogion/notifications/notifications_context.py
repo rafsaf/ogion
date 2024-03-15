@@ -13,10 +13,10 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from types import TracebackType
 
-from backuper import config
-from backuper.notifications.discord import Discord
-from backuper.notifications.slack import Slack
-from backuper.notifications.smtp import SMTP
+from ogion import config
+from ogion.notifications.discord import Discord
+from ogion.notifications.slack import Slack
+from ogion.notifications.smtp import SMTP
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class NotificationsContext(ContextDecorator):
     ) -> str:
         now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S,%f %Z")
         msg = f"[FAIL] {now}\nStep: {self.step_name}\n"
-        msg += f"Backuper Host: {config.options.INSTANCE_NAME}\n"
+        msg += f"Ogion Host: {config.options.INSTANCE_NAME}\n"
         if self.env_name:
             msg += f"Target: {self.env_name}\n"
         msg += f"Exception Type: {exc_type}\n"

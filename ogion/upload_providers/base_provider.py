@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import final
 
-from backuper.models.upload_provider_models import ProviderModel
+from ogion.models.upload_provider_models import ProviderModel
 
 log = logging.getLogger(__name__)
 

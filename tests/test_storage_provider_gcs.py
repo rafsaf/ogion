@@ -9,8 +9,8 @@ import pytest
 from freezegun import freeze_time
 from pydantic import SecretStr
 
-from backuper.models.upload_provider_models import GCSProviderModel
-from backuper.upload_providers.google_cloud_storage import UploadProviderGCS
+from ogion.models.upload_provider_models import GCSProviderModel
+from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
 
 
 @pytest.fixture(autouse=True)

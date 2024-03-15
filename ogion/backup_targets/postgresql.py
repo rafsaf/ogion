@@ -8,9 +8,9 @@ import shlex
 import urllib.parse
 from pathlib import Path
 
-from backuper import config, core
-from backuper.backup_targets.base_target import BaseBackupTarget
-from backuper.models.backup_target_models import PostgreSQLTargetModel
+from ogion import config, core
+from ogion.backup_targets.base_target import BaseBackupTarget
+from ogion.models.backup_target_models import PostgreSQLTargetModel
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class PostgreSQL(BaseBackupTarget):
             log.critical(
                 "psql postgres client is not detected on your system (%s)\n"
                 "check out ready script: "
-                "https://github.com/rafsaf/backuper/blob/main/scripts/install_postgresql_client.sh",
+                "https://github.com/rafsaf/ogion/blob/main/scripts/install_postgresql_client.sh",
                 version_err,
             )
             raise

@@ -5,7 +5,7 @@ import base64
 
 from pydantic import BaseModel, ConfigDict, SecretStr, field_validator
 
-from backuper import config
+from ogion import config
 
 
 class ProviderModel(BaseModel):

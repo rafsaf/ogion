@@ -1,8 +1,8 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from backuper.config import BackupTargetEnum, UploadProviderEnum
-from backuper.models import backup_target_models, upload_provider_models
+from ogion.config import BackupTargetEnum, UploadProviderEnum
+from ogion.models import backup_target_models, upload_provider_models
 
 
 def get_target_map() -> dict[str, type[backup_target_models.TargetModel]]:

@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from freezegun import freeze_time
 
-from backuper.models.upload_provider_models import DebugProviderModel
-from backuper.upload_providers.debug import UploadProviderLocalDebug
+from ogion.models.upload_provider_models import DebugProviderModel
+from ogion.upload_providers.debug import UploadProviderLocalDebug
 
 
 def get_test_debug() -> UploadProviderLocalDebug:

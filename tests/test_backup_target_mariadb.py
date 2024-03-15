@@ -8,9 +8,9 @@ import pytest
 from freezegun import freeze_time
 from pydantic import SecretStr
 
-from backuper import config, core
-from backuper.backup_targets.mariadb import MariaDB
-from backuper.models.backup_target_models import MariaDBTargetModel
+from ogion import config, core
+from ogion.backup_targets.mariadb import MariaDB
+from ogion.models.backup_target_models import MariaDBTargetModel
 
 from .conftest import (
     ALL_MARIADB_DBS_TARGETS,

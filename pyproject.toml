@@ -2,7 +2,7 @@
 authors = ["Rafał Safin <rafal.safin@rafsaf.pl>"]
 description = "A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms."
 license = "GNU GPLv3"
-name = "backuper"
+name = "ogion"
 version = "5.2"
 
 [tool.poetry.dependencies]
@@ -48,7 +48,7 @@ addopts = "-v --cov --cov-report term-missing --cov-fail-under 100 -n auto"
 env = [
   "BACKUP_MAX_NUMBER=1",
   "BACKUP_PROVIDER=",
-  "LOG_FOLDER_PATH=/tmp/pytest_backuper_env_vars_hook_logs_folder",
+  "LOG_FOLDER_PATH=/tmp/pytest_ogion_env_vars_hook_logs_folder",
   "LOG_LEVEL=DEBUG",
   "SUBPROCESS_TIMEOUT_SECS=5",
   "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#%^&*()/;><.,][`~'",
@@ -66,8 +66,8 @@ target-version = "py312"
 select = ["E", "F", "I", "PL", "UP", "W"]
 
 [tool.coverage.run]
-omit = ["backuper/tools/*"]
-source = ["backuper"]
+omit = ["ogion/tools/*"]
+source = ["ogion"]
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -75,7 +75,7 @@ python_version = "3.12"
 strict = true
 
 [tool.poetry.scripts]
-backuper = "backuper.main:main"
+ogion = "ogion.main:main"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

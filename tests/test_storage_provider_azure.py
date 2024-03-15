@@ -9,8 +9,8 @@ from azure.storage.blob import BlobServiceClient
 from freezegun import freeze_time
 from pydantic import SecretStr
 
-from backuper.models.upload_provider_models import AzureProviderModel
-from backuper.upload_providers.azure import UploadProviderAzure
+from ogion.models.upload_provider_models import AzureProviderModel
+from ogion.upload_providers.azure import UploadProviderAzure
 
 
 @pytest.fixture(autouse=True)

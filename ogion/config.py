@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     INSTANCE_NAME: str = socket.gethostname()
     ZIP_SKIP_INTEGRITY_CHECK: bool = False
     CPU_ARCH: Literal["amd64", "arm64"] = Field(
-        default="amd64", alias_priority=2, alias="BACKUPER_CPU_ARCHITECTURE"
+        default="amd64", alias_priority=2, alias="OGION_CPU_ARCHITECTURE"
     )
     SUBPROCESS_TIMEOUT_SECS: float = Field(ge=5, le=3600 * 24, default=3600)
     SIGTERM_TIMEOUT_SECS: float = Field(ge=0, le=3600 * 24, default=30)
@@ -71,7 +71,7 @@ class Settings(BaseSettings):
     @computed_field  # type: ignore[misc]
     @cached_property
     def seven_zip_bin_path(self) -> Path:
-        return CONST_BASE_DIR / f"backuper/bin/7zip/{self.CPU_ARCH}/7zzs"
+        return CONST_BASE_DIR / f"ogion/bin/7zip/{self.CPU_ARCH}/7zzs"
 
     @computed_field  # type: ignore[misc]
     @cached_property
@@ -111,7 +111,7 @@ def logging_config(log_level: _log_levels) -> None:
             },
             "error": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": options.LOG_FOLDER_PATH / "backuper_error.log",
+                "filename": options.LOG_FOLDER_PATH / "ogion_error.log",
                 "formatter": "verbose",
                 "maxBytes": 5 * 10**6,
                 "backupCount": 1,
@@ -119,7 +119,7 @@ def logging_config(log_level: _log_levels) -> None:
             },
             "warning": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": options.LOG_FOLDER_PATH / "backuper_warning.log",
+                "filename": options.LOG_FOLDER_PATH / "ogion_warning.log",
                 "formatter": "verbose",
                 "maxBytes": 5 * 10**6,
                 "backupCount": 1,
@@ -127,7 +127,7 @@ def logging_config(log_level: _log_levels) -> None:
             },
             "info": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": options.LOG_FOLDER_PATH / "backuper_info.log",
+                "filename": options.LOG_FOLDER_PATH / "ogion_info.log",
                 "formatter": "verbose",
                 "maxBytes": 5 * 10**6,
                 "backupCount": 1,
@@ -135,7 +135,7 @@ def logging_config(log_level: _log_levels) -> None:
             },
             "debug": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": options.LOG_FOLDER_PATH / "backuper_debug.log",
+                "filename": options.LOG_FOLDER_PATH / "ogion_debug.log",
                 "formatter": "verbose",
                 "maxBytes": 5 * 10**7,
                 "backupCount": 1,

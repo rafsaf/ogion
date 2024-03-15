@@ -1,5 +1,5 @@
 services:
-  backuper_acceptance_test_amd64:
+  ogion_acceptance_test_amd64:
     restart: "no"
     network_mode: "host"
     platform: linux/amd64
@@ -7,11 +7,11 @@ services:
       context: ./../
       dockerfile: docker/Dockerfile
       target: build
-    command: python -m backuper.main --single
+    command: python -m ogion.main --single
     env_file:
       - ./../.env
 
-  backuper_acceptance_test_arm64:
+  ogion_acceptance_test_arm64:
     restart: "no"
     network_mode: "host"
     platform: linux/arm64
@@ -19,6 +19,6 @@ services:
       context: ./../
       dockerfile: docker/Dockerfile
       target: build
-    command: python -m backuper.main --single
+    command: python -m ogion.main --single
     env_file:
       - ./../.env

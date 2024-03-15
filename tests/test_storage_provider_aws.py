@@ -9,8 +9,8 @@ import pytest
 from freezegun import freeze_time
 from pydantic import SecretStr
 
-from backuper.models.upload_provider_models import AWSProviderModel
-from backuper.upload_providers.aws_s3 import UploadProviderAWS
+from ogion.models.upload_provider_models import AWSProviderModel
+from ogion.upload_providers.aws_s3 import UploadProviderAWS
 
 
 @pytest.fixture(autouse=True)
