@@ -28,12 +28,12 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-      - name: Build and push backuper image
+      - name: Build and push ogion image
         uses: docker/build-push-action@v5
         with:
           file: docker/Dockerfile
           context: .
           target: build
           push: true
-          tags: rafsaf/backuper:dev
+          tags: rafsaf/ogion:dev
           platforms: linux/amd64,linux/arm64

@@ -77,7 +77,7 @@ class PostgreSQL(BaseBackupTarget):
             log.critical(
                 "psql postgres client is not detected on your system (%s)\n"
                 "check out ready script: "
-                "https://github.com/rafsaf/backuper/blob/main/scripts/install_postgresql_client.sh",
+                "https://github.com/rafsaf/ogion/blob/main/scripts/install_postgresql_client.sh",
                 version_err,
             )
             raise

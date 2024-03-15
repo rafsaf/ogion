@@ -30,12 +30,12 @@ else:
 DB_PWD = "password-_-12!@#%^&*()/;><.,]}{["
 DB_NAME = "database-_-12!@#%^&*()/;><.,]}{["
 DB_USERNAME = "user-_-12!@#%^&*()/;><.,]}{["
-DEFAULT_NETWORK = "backuper"
+DEFAULT_NETWORK = "ogion"
 
 
 def mariadb_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
     host_port = 11000 + int(cycle.cycle.replace(".", ""))
-    name = f"backuper_mariadb_{cycle.cycle.replace('.','_')}"
+    name = f"ogion_mariadb_{cycle.cycle.replace('.','_')}"
     compose_db = ComposeDatabase(
         name=name,
         restart="no",
@@ -56,7 +56,7 @@ def mariadb_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
 
 def mysql_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
     host_port = 9000 + int(cycle.cycle.replace(".", ""))
-    name = f"backuper_mysql_{cycle.cycle.replace('.','_')}"
+    name = f"ogion_mysql_{cycle.cycle.replace('.','_')}"
     compose_db = ComposeDatabase(
         name=name,
         restart="no",
@@ -77,7 +77,7 @@ def mysql_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
 
 def postgres_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
     host_port = 10000 + int(cycle.cycle.replace(".", ""))
-    name = f"backuper_postgres_{cycle.cycle.replace('.','_')}"
+    name = f"ogion_postgres_{cycle.cycle.replace('.','_')}"
     compose_db = ComposeDatabase(
         name=name,
         restart="no",
@@ -121,7 +121,7 @@ def db_compose_mysql_data() -> list[ComposeDatabase]:
 
 if __name__ == "__main__":
     update_eol_files()
-    data: dict[str, Any] = {"services": {}, "networks": {"backuper": {}}}
+    data: dict[str, Any] = {"services": {}, "networks": {"ogion": {}}}
     compose_data: list[ComposeDatabase] = []
     compose_data += db_compose_mariadb_data()
     compose_data += db_compose_postgresql_data()

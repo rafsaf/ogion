@@ -13,5 +13,5 @@ Leave the [ ] open if they are not applicable, or if you have not completed the 
 
 <!---
 acceptance tests are defined in CONTRIBUTING.md file
-see https://github.com/rafsaf/backuper/blob/main/CONTRIBUTING.md#acceptance-tests
+see https://github.com/rafsaf/ogion/blob/main/CONTRIBUTING.md#acceptance-tests
 --->

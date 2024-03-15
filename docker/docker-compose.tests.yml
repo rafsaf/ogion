@@ -1,8 +1,8 @@
 services:
-  backuper_tests_amd64:
+  ogion_tests_amd64:
     restart: "no"
     networks:
-      - backuper
+      - ogion
     platform: linux/amd64
     build:
       context: ./../
@@ -12,10 +12,10 @@ services:
       - DOCKER_TESTS=true
       - ZIP_ARCHIVE_PASSWORD=password
 
-  backuper_tests_arm64:
+  ogion_tests_arm64:
     restart: "no"
     networks:
-      - backuper
+      - ogion
     platform: linux/arm64
     build:
       context: ./../
@@ -26,4 +26,4 @@ services:
       - ZIP_ARCHIVE_PASSWORD=password
 
 networks:
-  backuper:
+  ogion:

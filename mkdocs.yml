@@ -1,12 +1,12 @@
-site_name: backuper
+site_name: ogion
 theme:
   favicon: images/favicon.ico
   name: material
   palette:
     primary: purple
 
-repo_name: rafsaf/backuper
-repo_url: https://github.com/rafsaf/backuper
+repo_name: rafsaf/ogion
+repo_url: https://github.com/rafsaf/ogion
 
 markdown_extensions:
   - markdown_include.include:
@@ -20,7 +20,7 @@ markdown_extensions:
   - tables
 
 nav:
-  - Backuper: index.md
+  - Ogion: index.md
   - Upload providers:
       - providers/google_cloud_storage.md
       - providers/aws_s3.md

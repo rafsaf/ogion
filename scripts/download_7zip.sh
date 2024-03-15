@@ -6,10 +6,10 @@
 #!/bin/sh
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-AMD64_DIR="$SCRIPT_DIR/../backuper/bin/7zip/amd64"
+AMD64_DIR="$SCRIPT_DIR/../ogion/bin/7zip/amd64"
 AMD64_7ZZ="$AMD64_DIR/7zz"
 
-ARM64_DIR="$SCRIPT_DIR/../backuper/bin/7zip/arm64"
+ARM64_DIR="$SCRIPT_DIR/../ogion/bin/7zip/arm64"
 ARM64_7ZZ="$ARM64_DIR/7zz"
 
 if [ -f "$AMD64_7ZZ" ]

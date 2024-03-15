@@ -47,7 +47,7 @@ class NotificationsContext(ContextDecorator):
     ) -> str:
         now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S,%f %Z")
         msg = f"[FAIL] {now}\nStep: {self.step_name}\n"
-        msg += f"Backuper Host: {config.options.INSTANCE_NAME}\n"
+        msg += f"Ogion Host: {config.options.INSTANCE_NAME}\n"
         if self.env_name:
             msg += f"Target: {self.env_name}\n"
         msg += f"Exception Type: {exc_type}\n"
