@@ -15,8 +15,8 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
-from backuper import config
-from backuper.models import backup_target_models, models_mapping, upload_provider_models
+from ogion import config
+from ogion.models import backup_target_models, models_mapping, upload_provider_models
 
 log = logging.getLogger(__name__)
 

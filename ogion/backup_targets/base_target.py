@@ -9,7 +9,7 @@ from typing import TypeVar, final
 
 from croniter import croniter
 
-from backuper.models.backup_target_models import TargetModel
+from ogion.models.backup_target_models import TargetModel
 
 log = logging.getLogger(__name__)
 

@@ -4,9 +4,9 @@
 import logging
 from pathlib import Path
 
-from backuper import core
-from backuper.models.upload_provider_models import DebugProviderModel
-from backuper.upload_providers.base_provider import BaseUploadProvider
+from ogion import core
+from ogion.models.upload_provider_models import DebugProviderModel
+from ogion.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 

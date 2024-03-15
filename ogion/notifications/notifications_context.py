@@ -13,10 +13,10 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from types import TracebackType
 
-from backuper import config
-from backuper.notifications.discord import Discord
-from backuper.notifications.slack import Slack
-from backuper.notifications.smtp import SMTP
+from ogion import config
+from ogion.notifications.discord import Discord
+from ogion.notifications.slack import Slack
+from ogion.notifications.smtp import SMTP
 
 log = logging.getLogger(__name__)
 

@@ -12,16 +12,16 @@ from threading import Thread
 from types import FrameType
 from typing import NoReturn
 
-from backuper import config, core
-from backuper.backup_targets import (
+from ogion import config, core
+from ogion.backup_targets import (
     base_target,
     targets_mapping,
 )
-from backuper.notifications.notifications_context import (
+from ogion.notifications.notifications_context import (
     PROGRAM_STEP,
     NotificationsContext,
 )
-from backuper.upload_providers import (
+from ogion.upload_providers import (
     base_provider,
     providers_mapping,
 )

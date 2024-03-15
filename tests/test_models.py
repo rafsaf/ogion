@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from backuper.models.backup_target_models import (
+from ogion.models.backup_target_models import (
     DirectoryTargetModel,
     MariaDBTargetModel,
     MySQLTargetModel,

@@ -6,8 +6,8 @@ from typing import Any
 import pytest
 import responses
 
-from backuper import config
-from backuper.notifications import slack
+from ogion import config
+from ogion.notifications import slack
 
 slack_webhook_url = (
     "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"

@@ -8,9 +8,9 @@ import pytest
 from freezegun import freeze_time
 from pydantic import SecretStr
 
-from backuper import config, core
-from backuper.backup_targets.mysql import MySQL
-from backuper.models.backup_target_models import MySQLTargetModel
+from ogion import config, core
+from ogion.backup_targets.mysql import MySQL
+from ogion.models.backup_target_models import MySQLTargetModel
 
 from .conftest import ALL_MYSQL_DBS_TARGETS, CONST_TOKEN_URLSAFE, DB_VERSION_BY_ENV_VAR
 

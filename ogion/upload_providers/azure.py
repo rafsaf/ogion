@@ -6,9 +6,9 @@ from pathlib import Path
 
 from azure.storage.blob import BlobServiceClient
 
-from backuper import core
-from backuper.models.upload_provider_models import AzureProviderModel
-from backuper.upload_providers.base_provider import BaseUploadProvider
+from ogion import core
+from ogion.models.upload_provider_models import AzureProviderModel
+from ogion.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 

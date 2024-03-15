@@ -6,8 +6,8 @@ from pathlib import Path
 
 from freezegun import freeze_time
 
-from backuper.backup_targets.base_target import BaseBackupTarget
-from backuper.models.backup_target_models import TargetModel
+from ogion.backup_targets.base_target import BaseBackupTarget
+from ogion.models.backup_target_models import TargetModel
 
 
 @freeze_time("2023-05-03 17:58")

@@ -7,9 +7,9 @@ import re
 import shlex
 from pathlib import Path
 
-from backuper import config, core
-from backuper.backup_targets.base_target import BaseBackupTarget
-from backuper.models.backup_target_models import MariaDBTargetModel
+from ogion import config, core
+from ogion.backup_targets.base_target import BaseBackupTarget
+from ogion.models.backup_target_models import MariaDBTargetModel
 
 log = logging.getLogger(__name__)
 

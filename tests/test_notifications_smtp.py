@@ -7,8 +7,8 @@ from unittest.mock import Mock
 import pytest
 from pydantic import SecretStr
 
-from backuper import config
-from backuper.notifications import smtp
+from ogion import config
+from ogion.notifications import smtp
 
 
 def test_smtp_skip_when_no_webhook_url() -> None:

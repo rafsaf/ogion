@@ -1,8 +1,8 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from backuper.config import UploadProviderEnum
-from backuper.upload_providers import (
+from ogion.config import UploadProviderEnum
+from ogion.upload_providers import (
     aws_s3,
     azure,
     base_provider,

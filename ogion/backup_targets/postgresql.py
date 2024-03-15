@@ -8,9 +8,9 @@ import shlex
 import urllib.parse
 from pathlib import Path
 
-from backuper import config, core
-from backuper.backup_targets.base_target import BaseBackupTarget
-from backuper.models.backup_target_models import PostgreSQLTargetModel
+from ogion import config, core
+from ogion.backup_targets.base_target import BaseBackupTarget
+from ogion.models.backup_target_models import PostgreSQLTargetModel
 
 log = logging.getLogger(__name__)
 

@@ -9,11 +9,11 @@ from unittest.mock import Mock
 import google.cloud.storage as cloud_storage
 import pytest
 
-from backuper import config, core, main
-from backuper.models import upload_provider_models
-from backuper.notifications.notifications_context import NotificationsContext
-from backuper.upload_providers.debug import UploadProviderLocalDebug
-from backuper.upload_providers.google_cloud_storage import UploadProviderGCS
+from ogion import config, core, main
+from ogion.models import upload_provider_models
+from ogion.notifications.notifications_context import NotificationsContext
+from ogion.upload_providers.debug import UploadProviderLocalDebug
+from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
 
 from .conftest import (
     ALL_MARIADB_DBS_TARGETS,

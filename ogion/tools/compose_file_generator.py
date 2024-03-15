@@ -9,7 +9,7 @@ from typing import Any
 import yaml
 
 try:
-    import backuper  # noqa
+    import ogion  # noqa
 except ImportError:
     from compose_db_models import ComposeDatabase
     from endoflife_api import (
@@ -19,8 +19,8 @@ except ImportError:
         update_eol_files,
     )
 else:
-    from backuper.tools.compose_db_models import ComposeDatabase
-    from backuper.tools.endoflife_api import (
+    from ogion.tools.compose_db_models import ComposeDatabase
+    from ogion.tools.endoflife_api import (
         EOL_DATA_DIR,
         EOLApiProduct,
         EOLApiProductCycle,

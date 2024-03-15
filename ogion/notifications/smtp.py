@@ -5,8 +5,8 @@ import logging
 import smtplib
 import ssl
 
-from backuper import config
-from backuper.notifications.base_notification_system import NotificationSystem
+from ogion import config
+from ogion.notifications.base_notification_system import NotificationSystem
 
 log = logging.getLogger(__name__)
 

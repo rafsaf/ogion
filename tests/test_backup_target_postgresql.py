@@ -7,9 +7,9 @@ import shlex
 import pytest
 from freezegun import freeze_time
 
-from backuper import config, core
-from backuper.backup_targets.postgresql import PostgreSQL
-from backuper.models.backup_target_models import PostgreSQLTargetModel
+from ogion import config, core
+from ogion.backup_targets.postgresql import PostgreSQL
+from ogion.models.backup_target_models import PostgreSQLTargetModel
 
 from .conftest import (
     ALL_POSTGRES_DBS_TARGETS,

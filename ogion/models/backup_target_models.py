@@ -14,7 +14,7 @@ from pydantic import (
     model_validator,
 )
 
-from backuper import config
+from ogion import config
 
 
 class TargetModel(BaseModel):

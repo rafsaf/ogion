@@ -6,8 +6,8 @@ from typing import Any
 import pytest
 import responses
 
-from backuper import config
-from backuper.notifications import discord
+from ogion import config
+from ogion.notifications import discord
 
 discord_webhook_url = "https://discord.com/api/webhooks/12345/token"
 

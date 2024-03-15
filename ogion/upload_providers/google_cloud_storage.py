@@ -8,9 +8,9 @@ from pathlib import Path
 
 import google.cloud.storage as cloud_storage
 
-from backuper import config, core
-from backuper.models.upload_provider_models import GCSProviderModel
-from backuper.upload_providers.base_provider import BaseUploadProvider
+from ogion import config, core
+from ogion.models.upload_provider_models import GCSProviderModel
+from ogion.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 

@@ -6,25 +6,25 @@ import logging
 import requests
 from requests.adapters import HTTPAdapter, Retry
 
-from backuper import config
-from backuper.notifications.base_notification_system import NotificationSystem
+from ogion import config
+from ogion.notifications.base_notification_system import NotificationSystem
 
 log = logging.getLogger(__name__)
 
 
-STATUS_CODE_204 = 204
+STATUS_CODE_200 = 200
 
 
-class Discord(NotificationSystem):
+class Slack(NotificationSystem):
     def _send(self, message: str) -> bool:
-        if not config.options.DISCORD_WEBHOOK_URL:
-            log.info("skip sending discord notification, no setup")
+        if not config.options.SLACK_WEBHOOK_URL:
+            log.info("skip sending slack notification, no setup")
             return False
 
-        log.info("sending discord notification")
+        log.info("sending slack notification")
 
         content = self.limit_message(
-            message=message, limit=config.options.DISCORD_MAX_MSG_LEN
+            message=message, limit=config.options.SLACK_MAX_MSG_LEN
         )
 
         with requests.session() as session:
@@ -36,20 +36,20 @@ class Discord(NotificationSystem):
             adapter = HTTPAdapter(max_retries=retry)
             session.mount("", adapter=adapter)
 
-            discord_resp = session.post(
-                str(config.options.DISCORD_WEBHOOK_URL),
-                json={"content": content},
+            slack_resp = session.post(
+                str(config.options.SLACK_WEBHOOK_URL),
+                json={"text": content},
                 headers={"Content-Type": "application/json"},
                 timeout=3,
             )
 
-            if discord_resp.status_code != STATUS_CODE_204:
+            if slack_resp.status_code != STATUS_CODE_200:
                 log.error(
-                    "failed send discord `%s` to %s with status code %s and resp: %s",
+                    "failed send slack `%s` to %s with status code %s and resp: %s",
                     message,
-                    config.options.DISCORD_WEBHOOK_URL,
-                    discord_resp.status_code,
-                    discord_resp.content,
+                    config.options.SLACK_WEBHOOK_URL,
+                    slack_resp.status_code,
+                    slack_resp.content,
                 )
                 return False
             return True

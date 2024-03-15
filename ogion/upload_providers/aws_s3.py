@@ -8,9 +8,9 @@ from typing import Any, TypedDict
 import boto3
 from boto3.s3.transfer import TransferConfig
 
-from backuper import core
-from backuper.models.upload_provider_models import AWSProviderModel
-from backuper.upload_providers.base_provider import BaseUploadProvider
+from ogion import core
+from ogion.models.upload_provider_models import AWSProviderModel
+from ogion.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
