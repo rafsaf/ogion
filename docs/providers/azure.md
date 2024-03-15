@@ -14,7 +14,7 @@ BACKUP_PROVIDER="name=azure container_name=my-ogion-instance connect_string=Defa
 Uses Azure Blob Storage for storing backups.
 
 !!! note
-_There can be only one upload provider defined per app, using **BACKUP_PROVIDER** environemnt variable_. It's type is guessed by using `name`, in this case `name=azure`. Params must be included in value, splited by single space for example "value1=1 value2=foo".
+    _There can be only one upload provider defined per app, using **BACKUP_PROVIDER** environemnt variable_. It's type is guessed by using `name`, in this case `name=azure`. Params must be included in value, splited by single space for example "value1=1 value2=foo".
 
 ## Params
 

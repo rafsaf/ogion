@@ -12,7 +12,7 @@ DIRECTORY_SOME_STRING="abs_path=... cron_rule=..."
 ```
 
 !!! note
-_Any environment variable that starts with "\*\*DIRECTORY_\*\*" will be handled as Directory.\_ There can be multiple files paths definition for one ogion instance, for example `DIRECTORY_FOO` and `DIRECTORY_BAR`. Params must be included in value, splited by single space for example `"value1=1 value2=foo"`.
+    _Any environment variable that starts with "\*\*DIRECTORY_\*\*" will be handled as Directory.\_ There can be multiple files paths definition for one ogion instance, for example `DIRECTORY_FOO` and `DIRECTORY_BAR`. Params must be included in value, splited by single space for example `"value1=1 value2=foo"`.
 
 ## Params
 

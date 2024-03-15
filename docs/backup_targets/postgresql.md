@@ -12,7 +12,7 @@ POSTGRESQL_SOME_STRING="host=... password=... cron_rule=..."
 ```
 
 !!! note
-_Any environment variable that starts with **"POSTGRESQL\_"** will be handled as PostgreSQL._ There can be multiple files paths definition for one ogion instance, for example `POSTGRESQL_FOO_MY_DB1` and `POSTGRESQL_BAR_MY_DB2`. [All currently supported versions are also supported by ogion](https://endoflife.date/postgresql). Changes in versions are automatically tracke . Params must be included in value, splited by single space for example `"value1=1 value2=foo"`.
+    _Any environment variable that starts with **"POSTGRESQL\_"** will be handled as PostgreSQL._ There can be multiple files paths definition for one ogion instance, for example `POSTGRESQL_FOO_MY_DB1` and `POSTGRESQL_BAR_MY_DB2`. [All currently supported versions are also supported by ogion](https://endoflife.date/postgresql). Changes in versions are automatically tracke . Params must be included in value, splited by single space for example `"value1=1 value2=foo"`.
 
 ## Params
 

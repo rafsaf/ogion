@@ -14,7 +14,7 @@ BACKUP_PROVIDER="name=gcs bucket_name=my_bucket_name bucket_upload_path=my_ogion
 Uses Google Cloud Storage bucket for storing backups.
 
 !!! note
-_There can be only one upload provider defined per app, using **BACKUP_PROVIDER** environemnt variable_. It's type is guessed by using `name`, in this case `name=gcs`. Params must be included in value, splited by single space for example "value1=1 value2=foo".
+    _There can be only one upload provider defined per app, using **BACKUP_PROVIDER** environemnt variable_. It's type is guessed by using `name`, in this case `name=gcs`. Params must be included in value, splited by single space for example "value1=1 value2=foo".
 
 ## Params
 
