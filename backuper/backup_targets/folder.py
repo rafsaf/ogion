@@ -17,9 +17,9 @@ class Folder(BaseBackupTarget):
         self.target_model: DirectoryTargetModel = target_model
 
     def _backup(self) -> Path:
-        out_file = core.get_new_backup_path(
-            self.env_name, self.target_model.abs_path.name
-        )
+        escaped_foldername = core.safe_text_version(self.target_model.abs_path.name)
+
+        out_file = core.get_new_backup_path(self.env_name, escaped_foldername)
 
         shell_create_dir_symlink = f"ln -s {self.target_model.abs_path} {out_file}"
         log.debug("start ln in subprocess: %s", shell_create_dir_symlink)

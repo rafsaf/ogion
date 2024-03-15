@@ -24,6 +24,7 @@ class MySQL(BaseBackupTarget):
     def __init__(self, target_model: MySQLTargetModel) -> None:
         super().__init__(target_model)
         self.target_model: MySQLTargetModel = target_model
+        self.db_name = shlex.quote(self.target_model.db)
         self.option_file: Path = self._init_option_file()
         self.db_version: str = self._mysql_connection()
 
@@ -65,9 +66,8 @@ class MySQL(BaseBackupTarget):
             raise
         log.debug("start mysql connection")
         try:
-            db = shlex.quote(self.target_model.db)
             result = core.run_subprocess(
-                f"mariadb --defaults-file={self.option_file} {db} "
+                f"mariadb --defaults-file={self.option_file} {self.db_name} "
                 "--execute='SELECT version();'",
             )
         except core.CoreSubprocessError as err:
@@ -93,13 +93,14 @@ class MySQL(BaseBackupTarget):
 
     def _backup(self) -> Path:
         escaped_dbname = core.safe_text_version(self.target_model.db)
-        name = f"{escaped_dbname}_{self.db_version}"
-        out_file = core.get_new_backup_path(self.env_name, name, sql=True)
+        escaped_version = core.safe_text_version(self.db_version)
+        name = f"{escaped_dbname}_{escaped_version}"
 
-        db = shlex.quote(self.target_model.db)
+        out_file = core.get_new_backup_path(self.env_name, name).with_suffix(".sql")
+
         shell_mysqldump_db = (
             f"mariadb-dump --defaults-file={self.option_file} "
-            f"--result-file={out_file} --verbose {db}"
+            f"--result-file={out_file} --verbose {self.db_name}"
         )
         log.debug("start mysqldump in subprocess: %s", shell_mysqldump_db)
         core.run_subprocess(shell_mysqldump_db)

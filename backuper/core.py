@@ -61,17 +61,15 @@ def remove_path(path: Path) -> None:
             shutil.rmtree(path=path)
 
 
-def get_new_backup_path(env_name: str, name: str, sql: bool = False) -> Path:
+def get_new_backup_path(env_name: str, name: str) -> Path:
     base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
     base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
     new_file = (
         f"{env_name}_"
         f"{datetime.now(UTC).strftime('%Y%m%d_%H%M')}_"
         f"{name}_"
-        f"{secrets.token_urlsafe(3)}"
+        f"{secrets.token_urlsafe(6)}"
     )
-    if sql:
-        new_file += ".sql"
     return base_dir_path / new_file
 
 

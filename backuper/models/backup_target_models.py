@@ -7,6 +7,7 @@ from typing import Self
 from croniter import croniter
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     SecretStr,
     field_validator,
@@ -24,6 +25,8 @@ class TargetModel(BaseModel):
     min_retention_days: int = Field(
         ge=0, le=36600, default=config.options.BACKUP_MIN_RETENTION_DAYS
     )
+
+    model_config = ConfigDict(frozen=True)
 
     @field_validator("cron_rule")
     def cron_rule_is_valid(cls, cron_rule: str) -> str:
