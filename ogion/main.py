@@ -245,7 +245,7 @@ def main() -> NoReturn:
         run_debug_notifications_and_exit()
     elif runtime_args.single:
         run_single_all_backups()
-    else:
+    else:  # pragma: no cover
         run_main_loop()
 
 
