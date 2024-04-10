@@ -1,20 +1,17 @@
 services:
-  ogion_acceptance_test_amd64:
+  ogion_unit_tests:
     restart: "no"
     network_mode: "host"
-    platform: linux/amd64
-    build: 
+    platform: linux/${OGION_ARCH}
+    build:
       context: ./../
       dockerfile: docker/Dockerfile
-      target: build
-    command: python -m ogion.main --single
-    env_file:
-      - ./../.env
+      target: tests
 
-  ogion_acceptance_test_arm64:
+  ogion_acceptance_tests:
     restart: "no"
     network_mode: "host"
-    platform: linux/arm64
+    platform: linux/${OGION_ARCH:-amd64}
     build: 
       context: ./../
       dockerfile: docker/Dockerfile
