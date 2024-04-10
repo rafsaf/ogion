@@ -3,6 +3,7 @@ authors = ["Rafał Safin <rafal.safin@rafsaf.pl>"]
 description = "A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms."
 license = "GNU GPLv3"
 name = "ogion"
+package-mode = false
 version = "6.1"
 
 [tool.poetry.dependencies]

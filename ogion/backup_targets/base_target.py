@@ -70,6 +70,12 @@ class BaseBackupTarget(ABC):
             return True
         return False
 
+    @final
+    @property
+    def pretty_thread_name(self) -> str:
+        pretty_env_name = self.env_name.replace("_", "-")
+        return f"Thread-{pretty_env_name}"
+
     @abstractmethod
     def _backup(self) -> Path:  # pragma: no cover
         pass
