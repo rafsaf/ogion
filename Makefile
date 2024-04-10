@@ -21,16 +21,16 @@ ogion/bin/7zip/arm64/7zzs:
 
 .PHONY: docker_dbs_setup_up
 docker_dbs_setup_up:
-	docker compose -f docker/docker-compose.dbs.yml up -d 
+	docker compose -f docker/docker-compose.dbs.yml up -d --remove-orphans
 
 .PHONY: docker_dbs_setup_down
 docker_dbs_setup_down:
-	docker compose -f docker/docker-compose.dbs.yml down
+	docker compose -f docker/docker-compose.dbs.yml down --remove-orphans
 
 .PHONY: unit_tests
 unit_tests:
 	$(MAKE) docker_dbs_setup_up
-	docker compose -f docker/docker-compose.yml run --rm --build ogion_unit_tests
+	docker compose -f docker/docker-compose.yml run --rm --build ogion_unit_tests 
 
 .PHONY: acceptance_tests
 acceptance_tests:

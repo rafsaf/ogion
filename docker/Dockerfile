@@ -42,6 +42,22 @@ RUN remove_arch=$(arch | sed s/aarch64/amd64/ | sed s/x86_64/arm64/) \
 # rm 7zip 7zz dynamic linked version binary
 RUN target_arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
     && rm -f ogion/bin/7zip/${target_arch}/7zz
+# rm to save ~65M
+RUN rm -f \
+    /usr/bin/mariadb-binlog \
+    /usr/bin/mariadb-slap \
+    /usr/bin/mariadb-admin \
+    /usr/bin/mariadb-check \
+    /usr/bin/mariadb-show \
+    /usr/bin/mariadb-import \
+    /usr/bin/perror \
+    /usr/bin/mariadb-conv \
+    /usr/bin/mariadb-plugin \
+    /usr/bin/mariadb-tzinfo-to-sql \
+    /usr/bin/resolve_stack_dump \
+    /usr/bin/my_print_defaults \
+    /usr/bin/mariadb-waitpid \
+    /usr/bin/replace
 
 COPY scripts/docker_entrypoint.sh /docker_entrypoint.sh
 RUN rm -rf scripts
