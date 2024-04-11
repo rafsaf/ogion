@@ -27,7 +27,7 @@ class UploadProviderAzure(BaseUploadProvider):
             container=self.container_name
         )
 
-    def _post_save(self, backup_file: Path) -> str:
+    def post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
         backup_dest_in_azure_container = (
@@ -71,7 +71,7 @@ class UploadProviderAzure(BaseUploadProvider):
 
         return Path(backup_file.name)
 
-    def _clean(
+    def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
         for backup_path in backup_file.parent.iterdir():

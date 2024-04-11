@@ -20,7 +20,7 @@ class UploadProviderLocalDebug(BaseUploadProvider):
     def __init__(self, target_provider: DebugProviderModel) -> None:
         pass
 
-    def _post_save(self, backup_file: Path) -> str:
+    def post_save(self, backup_file: Path) -> str:
         zip_file = core.run_create_zip_archive(backup_file=backup_file)
         return str(zip_file)
 
@@ -34,7 +34,7 @@ class UploadProviderLocalDebug(BaseUploadProvider):
     def get_or_download_backup(self, path: str) -> Path:
         return Path(path)
 
-    def _clean(
+    def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
         core.remove_path(backup_file)

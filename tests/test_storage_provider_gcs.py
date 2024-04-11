@@ -44,9 +44,8 @@ def test_gcs_post_save_fails_on_fail_upload(tmp_path: Path) -> None:
         assert gcs.post_save(fake_backup_file_path)
 
 
-@pytest.mark.parametrize("gcs_method_name", ["_post_save", "post_save"])
 def test_gcs_post_save_with_google_bucket_upload_path(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     gcs = get_test_gcs()
     bucket_mock = Mock()
@@ -64,8 +63,7 @@ def test_gcs_post_save_with_google_bucket_upload_path(
 
     monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
     assert (
-        getattr(gcs, gcs_method_name)(fake_backup_file_path)
-        == "test123/fake_env_name/fake_backup.zip"
+        gcs.post_save(fake_backup_file_path) == "test123/fake_env_name/fake_backup.zip"
     )
     assert fake_backup_file_zip_path.exists()
     bucket_mock.blob.assert_called_once_with(
@@ -100,9 +98,9 @@ list_blobs_long_no_upload_path: list[BlobInCloudStorage] = [
 ]
 
 
-@pytest.mark.parametrize("gcs_method_name", ["_clean", "clean"])
 def test_gcs_clean_file_and_short_blob_list(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     gcs = get_test_gcs()
 
@@ -125,7 +123,7 @@ def test_gcs_clean_file_and_short_blob_list(
 
     monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
 
-    getattr(gcs, gcs_method_name)(fake_backup_file_zip_path, 2, 1)
+    gcs.clean(fake_backup_file_zip_path, 2, 1)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_zip_path.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -136,9 +134,9 @@ def test_gcs_clean_file_and_short_blob_list(
     single_blob_mock.delete.assert_called_once_with()
 
 
-@pytest.mark.parametrize("gcs_method_name", ["_clean", "clean"])
 def test_gcs_clean_directory_and_long_blob_list(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     gcs = get_test_gcs()
 
@@ -167,7 +165,7 @@ def test_gcs_clean_directory_and_long_blob_list(
 
     monkeypatch.setattr(gcs, "bucket_upload_path", None)
 
-    getattr(gcs, gcs_method_name)(fake_backup_dir_path, 2, 1)
+    gcs.clean(fake_backup_dir_path, 2, 1)
     assert not fake_backup_dir_path.exists()
     assert not fake_backup_file_zip_path.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -191,9 +189,9 @@ def test_gcs_clean_directory_and_long_blob_list(
 
 
 @freeze_time("2023-08-27")
-@pytest.mark.parametrize("gcs_method_name", ["_clean", "clean"])
 def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_file(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gcs_method_name: str
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     gcs = get_test_gcs()
 
@@ -214,7 +212,7 @@ def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_file(
 
     monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
 
-    getattr(gcs, gcs_method_name)(fake_backup_file_zip_path, 2, 30 * 365)
+    gcs.clean(fake_backup_file_zip_path, 2, 30 * 365)
 
     bucket_mock.blob.assert_not_called()
     single_blob_mock.delete.assert_not_called()

@@ -14,8 +14,7 @@ def get_test_debug() -> UploadProviderLocalDebug:
     return UploadProviderLocalDebug(DebugProviderModel())
 
 
-@pytest.mark.parametrize("method_name", ["_clean", "clean"])
-def test_local_debug_clean_file(tmp_path: Path, method_name: str) -> None:
+def test_local_debug_clean_file(tmp_path: Path) -> None:
     local = get_test_debug()
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
@@ -35,7 +34,7 @@ def test_local_debug_clean_file(tmp_path: Path, method_name: str) -> None:
     )
     fake_backup_file_zip_path3.touch()
 
-    getattr(local, method_name)(fake_backup_file_path4, 2, 1)
+    local.clean(fake_backup_file_path4, 2, 1)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_path4.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -43,8 +42,7 @@ def test_local_debug_clean_file(tmp_path: Path, method_name: str) -> None:
     assert fake_backup_file_zip_path4.exists()
 
 
-@pytest.mark.parametrize("method_name", ["_clean", "clean"])
-def test_local_debug_clean_folder(tmp_path: Path, method_name: str) -> None:
+def test_local_debug_clean_folder(tmp_path: Path) -> None:
     local = get_test_debug()
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
@@ -64,7 +62,7 @@ def test_local_debug_clean_folder(tmp_path: Path, method_name: str) -> None:
     )
     fake_backup_file_zip_path3.mkdir()
 
-    getattr(local, method_name)(fake_backup_file_path4, 2, 1)
+    local.clean(fake_backup_file_path4, 2, 1)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_path4.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -73,9 +71,8 @@ def test_local_debug_clean_folder(tmp_path: Path, method_name: str) -> None:
 
 
 @freeze_time("2023-08-27")
-@pytest.mark.parametrize("method_name", ["_clean", "clean"])
 def test_local_debug_respects_min_retention_days_param_and_not_delete_any_file(
-    tmp_path: Path, method_name: str
+    tmp_path: Path,
 ) -> None:
     local = get_test_debug()
 
@@ -96,7 +93,7 @@ def test_local_debug_respects_min_retention_days_param_and_not_delete_any_file(
         fake_backup_dir_path / "fake_backup_20000801_0000_file.zip"
     )
     fake_backup_file_zip3_path.touch()
-    getattr(local, method_name)(fake_backup_file_path, 1, 365 * 30)
+    local.clean(fake_backup_file_path, 1, 365 * 30)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_path.exists()
     assert fake_backup_file_zip_path.exists()

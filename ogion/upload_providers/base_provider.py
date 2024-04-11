@@ -16,28 +16,6 @@ class BaseUploadProvider(ABC):
     def __init__(self, target_provider: ProviderModel) -> None:  # pragma: no cover
         pass
 
-    @final
-    def post_save(self, backup_file: Path) -> str:
-        try:
-            return self._post_save(backup_file=backup_file)
-        except Exception as err:
-            log.error(err, exc_info=True)
-            raise
-
-    @final
-    def clean(
-        self, backup_file: Path, max_backups: int, min_retention_days: int
-    ) -> None:
-        try:
-            return self._clean(
-                backup_file=backup_file,
-                max_backups=max_backups,
-                min_retention_days=min_retention_days,
-            )
-        except Exception as err:
-            log.error(err, exc_info=True)
-            raise
-
     @abstractmethod
     def all_target_backups(self, backup_file: Path) -> list[str]:  # pragma: no cover
         pass
@@ -47,11 +25,11 @@ class BaseUploadProvider(ABC):
         pass
 
     @abstractmethod
-    def _post_save(self, backup_file: Path) -> str:  # pragma: no cover
+    def post_save(self, backup_file: Path) -> str:  # pragma: no cover
         pass
 
     @abstractmethod
-    def _clean(
+    def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:  # pragma: no cover
         pass

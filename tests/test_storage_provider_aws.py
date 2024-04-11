@@ -43,10 +43,7 @@ def test_aws_post_save_fails_on_fail_upload(tmp_path: Path) -> None:
         assert aws.post_save(fake_backup_file_path)
 
 
-@pytest.mark.parametrize("aws_method_name", ["_post_save", "post_save"])
-def test_aws_post_save_with_bucket_upload_path(
-    tmp_path: Path, aws_method_name: str
-) -> None:
+def test_aws_post_save_with_bucket_upload_path(tmp_path: Path) -> None:
     aws = get_test_aws()
     bucket_mock = Mock()
     aws.bucket = bucket_mock
@@ -59,8 +56,7 @@ def test_aws_post_save_with_bucket_upload_path(
         f.write("abcdefghijk\n12345")
 
     assert (
-        getattr(aws, aws_method_name)(fake_backup_file_path)
-        == "test123/fake_env_name/fake_backup.zip"
+        aws.post_save(fake_backup_file_path) == "test123/fake_env_name/fake_backup.zip"
     )
     assert fake_backup_file_zip_path.exists()
 
@@ -86,8 +82,7 @@ items_lst: list[ItemInS3] = [
 ]
 
 
-@pytest.mark.parametrize("aws_method_name", ["_clean", "clean"])
-def test_aws_clean_method_with_file_list(tmp_path: Path, aws_method_name: str) -> None:
+def test_aws_clean_method_with_file_list(tmp_path: Path) -> None:
     aws = get_test_aws()
 
     bucket_mock = Mock()
@@ -112,7 +107,7 @@ def test_aws_clean_method_with_file_list(tmp_path: Path, aws_method_name: str) -
     fake_backup_file_zip_path2 = fake_backup_dir_path / "fake_backup2.zip"
     fake_backup_file_zip_path2.touch()
 
-    getattr(aws, aws_method_name)(fake_backup_file_zip_path, 2, 1)
+    aws.clean(fake_backup_file_zip_path, 2, 1)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_zip_path.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -131,9 +126,8 @@ def test_aws_clean_method_with_file_list(tmp_path: Path, aws_method_name: str) -
 
 
 @freeze_time("2023-08-27")
-@pytest.mark.parametrize("aws_method_name", ["_clean", "clean"])
 def test_aws_clean_respects_min_retention_days_param_and_not_delete_any_file(
-    tmp_path: Path, aws_method_name: str
+    tmp_path: Path,
 ) -> None:
     aws = get_test_aws()
 
@@ -147,6 +141,6 @@ def test_aws_clean_respects_min_retention_days_param_and_not_delete_any_file(
     fake_backup_file_path = fake_backup_dir_path / "fake_backup"
     fake_backup_file_path.touch()
 
-    getattr(aws, aws_method_name)(fake_backup_file_path, 2, 3650)
+    aws.clean(fake_backup_file_path, 2, 3650)
 
     aws.bucket.delete_objects.assert_not_called()

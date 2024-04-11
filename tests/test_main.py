@@ -3,6 +3,8 @@
 
 import sys
 from pathlib import Path
+import threading
+import time
 from typing import Any, NoReturn
 from unittest.mock import Mock
 
@@ -93,6 +95,12 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
 
     target_envs = [model.env_name for model in models]
     count = 0
+
+    timeout = 0
+    while threading.active_count() > 1 and timeout < 5:
+        timeout += 0.05
+        time.sleep(0.05)
+
     for dir in config.CONST_BACKUP_FOLDER_PATH.iterdir():
         assert dir.is_dir()
         assert dir.name in target_envs
@@ -134,11 +142,12 @@ def test_run_backup_notifications_fail_message_is_fired_when_it_fails(
     backup_mock = Mock(return_value=backup_file, side_effect=make_backup_side_effect)
     monkeypatch.setattr(target, "_backup", backup_mock)
     provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
-    monkeypatch.setattr(provider, "_post_save", Mock(side_effect=post_save_side_effect))
-    monkeypatch.setattr(provider, "_clean", Mock(side_effect=clean_side_effect))
+    monkeypatch.setattr(provider, "post_save", Mock(side_effect=post_save_side_effect))
+    monkeypatch.setattr(provider, "clean", Mock(side_effect=clean_side_effect))
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider))
 
     with pytest.raises(ValueError):
-        main.run_backup(target=target, provider=provider)
+        main.run_backup(target=target)
     fail_message_mock.assert_called_once()
 
 

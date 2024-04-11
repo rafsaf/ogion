@@ -125,10 +125,14 @@ def shutdown() -> NoReturn:  # pragma: no cover
         sys.exit(1)
 
 
-def run_backup(
-    target: base_target.BaseBackupTarget, provider: base_provider.BaseUploadProvider
-) -> None:
+def run_backup(target: base_target.BaseBackupTarget) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
+
+    # init provider every time in each new thread
+    # eg. s3 session are not thread safe
+    # this should add only minimal overhead
+    provider = backup_provider()
+
     with NotificationsContext(
         step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name
     ):
@@ -193,17 +197,16 @@ def run_debug_notifications_and_exit() -> NoReturn:
 def run_single_all_backups() -> NoReturn:
     log.info("start run_single_all_backups")
 
-    provider = backup_provider()
+    backup_provider()
     targets = backup_targets()
 
     for target in targets:
         threading.Thread(
             target=run_backup,
-            args=(target, provider),
+            args=(target,),
             daemon=True,
             name=target.pretty_thread_name,
         ).start()
-        exit_event.wait(0.5)
 
     shutdown()
 
@@ -211,7 +214,7 @@ def run_single_all_backups() -> NoReturn:
 def run_main_loop() -> NoReturn:  # pragma: no cover
     log.info("start run_main_loop")
 
-    provider = backup_provider()
+    backup_provider()
     targets = backup_targets()
 
     while not exit_event.is_set():
@@ -221,7 +224,7 @@ def run_main_loop() -> NoReturn:  # pragma: no cover
 
             threading.Thread(
                 target=run_backup,
-                args=(target, provider),
+                args=(target,),
                 daemon=True,
                 name=target.pretty_thread_name,
             ).start()

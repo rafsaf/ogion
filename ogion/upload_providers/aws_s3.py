@@ -36,7 +36,7 @@ class UploadProviderAWS(BaseUploadProvider):
         self.bucket = s3.Bucket(target_provider.bucket_name)
         self.transfer_config = TransferConfig(max_bandwidth=self.max_bandwidth)
 
-    def _post_save(self, backup_file: Path) -> str:
+    def post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
         backup_dest_in_bucket = (
@@ -74,7 +74,7 @@ class UploadProviderAWS(BaseUploadProvider):
         )
         return Path(backup_file.name)
 
-    def _clean(
+    def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
         for backup_path in backup_file.parent.iterdir():
