@@ -3,6 +3,7 @@
 
 import logging
 from pathlib import Path
+import tempfile
 
 from azure.storage.blob import BlobServiceClient
 
@@ -51,6 +52,25 @@ class UploadProviderAzure(BaseUploadProvider):
         )
         return backup_dest_in_azure_container
 
+    def all_target_backups(self, backup_file: Path) -> list[str]:
+        backups: list[str] = []
+        for blob in self.container_client.list_blobs(
+            name_starts_with=backup_file.parent.name
+        ):
+            backups.append(blob.name)
+
+        backups.sort(reverse=True)
+        return backups
+
+    def get_or_download_backup(self, path: str) -> Path:
+        backup_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{path}")
+
+        with open(file=backup_file.name, mode="wb") as file:
+            stream = self.container_client.download_blob(path)
+            file.write(stream.readall())
+
+        return Path(backup_file.name)
+
     def _clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
@@ -58,17 +78,10 @@ class UploadProviderAzure(BaseUploadProvider):
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
 
-        backup_list_cloud: list[str] = []
-        for blob in self.container_client.list_blobs(
-            name_starts_with=backup_file.parent.name
-        ):
-            backup_list_cloud.append(blob.name)
+        backups = self.all_target_backups(backup_file=backup_file)
 
-        # remove oldest
-        backup_list_cloud.sort(reverse=True)
-
-        while len(backup_list_cloud) > max_backups:
-            backup_to_remove = backup_list_cloud.pop()
+        while len(backups) > max_backups:
+            backup_to_remove = backups.pop()
             file_name = backup_to_remove.split("/")[-1]
             if core.file_before_retention_period_ends(
                 backup_name=file_name, min_retention_days=min_retention_days
@@ -76,7 +89,7 @@ class UploadProviderAzure(BaseUploadProvider):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "
                     "but oldest cannot be removed due to min retention days",
-                    len(backup_list_cloud),
+                    len(backups),
                     max_backups,
                 )
                 break

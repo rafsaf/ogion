@@ -5,6 +5,7 @@ import base64
 import logging
 import os
 from pathlib import Path
+import tempfile
 
 import google.cloud.storage as cloud_storage
 
@@ -55,6 +56,27 @@ class UploadProviderGCS(BaseUploadProvider):
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
+    def all_target_backups(self, backup_file: Path) -> list[str]:
+        backups: list[str] = []
+        prefix = f"{self.bucket_upload_path}/{backup_file.parent.name}"
+        for blob in self.storage_client.list_blobs(self.bucket, prefix=prefix):
+            backups.append(blob.name)
+
+        backups.sort(reverse=True)
+        return backups
+
+    def get_or_download_backup(self, path: str) -> Path:
+        backup_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{path}")
+
+        blob = self.bucket.blob(path, chunk_size=self.chunk_size_bytes)
+        blob.download_to_filename(
+            backup_file.name,
+            timeout=self.chunk_timeout_secs,
+            checksum="crc32c",
+        )
+
+        return Path(backup_file.name)
+
     def _clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
@@ -62,15 +84,10 @@ class UploadProviderGCS(BaseUploadProvider):
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
 
-        backup_list_cloud: list[str] = []
-        prefix = f"{self.bucket_upload_path}/{backup_file.parent.name}"
-        for blob in self.storage_client.list_blobs(self.bucket, prefix=prefix):
-            backup_list_cloud.append(blob.name)
+        backups = self.all_target_backups(backup_file=backup_file)
 
-        # remove oldest
-        backup_list_cloud.sort(reverse=True)
-        while len(backup_list_cloud) > max_backups:
-            backup_to_remove = backup_list_cloud.pop()
+        while len(backups) > max_backups:
+            backup_to_remove = backups.pop()
             file_name = backup_to_remove.split("/")[-1]
             if core.file_before_retention_period_ends(
                 backup_name=file_name, min_retention_days=min_retention_days
@@ -78,7 +95,7 @@ class UploadProviderGCS(BaseUploadProvider):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "
                     "but oldest cannot be removed due to min retention days",
-                    len(backup_list_cloud),
+                    len(backups),
                     max_backups,
                 )
                 break

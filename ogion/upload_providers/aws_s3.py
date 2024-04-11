@@ -4,7 +4,7 @@
 import logging
 from pathlib import Path
 from typing import Any, TypedDict
-
+import tempfile
 import boto3
 from boto3.s3.transfer import TransferConfig
 
@@ -56,6 +56,24 @@ class UploadProviderAWS(BaseUploadProvider):
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
+    def all_target_backups(self, backup_file: Path) -> list[str]:
+        backups: list[str] = []
+        prefix = f"{self.bucket_upload_path}/{backup_file.parent.name}/"
+        for bucket_obj in self.bucket.objects.filter(Delimiter="/", Prefix=prefix):
+            backups.append(bucket_obj.key)
+
+        backups.sort(reverse=True)
+        return backups
+
+    def get_or_download_backup(self, path: str) -> Path:
+        backup_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{path}")
+        self.bucket.upload_file(
+            Filename=backup_file,
+            Key=path,
+            Config=self.transfer_config,
+        )
+        return Path(backup_file.name)
+
     def _clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
@@ -63,17 +81,11 @@ class UploadProviderAWS(BaseUploadProvider):
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
 
-        backup_list_cloud: list[str] = []
-        prefix = f"{self.bucket_upload_path}/{backup_file.parent.name}/"
-        for bucket_obj in self.bucket.objects.filter(Delimiter="/", Prefix=prefix):
-            backup_list_cloud.append(bucket_obj.key)
-
-        # remove oldest
-        backup_list_cloud.sort(reverse=True)
         items_to_delete: list[DeleteItemDict] = []
+        backups = self.all_target_backups(backup_file=backup_file)
 
-        while len(backup_list_cloud) > max_backups:
-            backup_to_remove = backup_list_cloud.pop()
+        while len(backups) > max_backups:
+            backup_to_remove = backups.pop()
             file_name = backup_to_remove.split("/")[-1]
             if core.file_before_retention_period_ends(
                 backup_name=file_name, min_retention_days=min_retention_days
@@ -81,7 +93,7 @@ class UploadProviderAWS(BaseUploadProvider):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "
                     "but oldest cannot be removed due to min retention days",
-                    len(backup_list_cloud),
+                    len(backups),
                     max_backups,
                 )
                 break

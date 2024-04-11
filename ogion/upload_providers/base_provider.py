@@ -4,6 +4,7 @@
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
+import pathlib
 from typing import final
 
 from ogion.models.upload_provider_models import ProviderModel
@@ -36,6 +37,14 @@ class BaseUploadProvider(ABC):
         except Exception as err:
             log.error(err, exc_info=True)
             raise
+
+    @abstractmethod
+    def all_target_backups(self, backup_file: Path) -> list[str]:  # pragma: no cover
+        pass
+
+    @abstractmethod
+    def get_or_download_backup(self, path: str) -> pathlib.Path:  # pragma: no cover
+        pass
 
     @abstractmethod
     def _post_save(self, backup_file: Path) -> str:  # pragma: no cover

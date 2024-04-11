@@ -24,23 +24,32 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         zip_file = core.run_create_zip_archive(backup_file=backup_file)
         return str(zip_file)
 
+    def all_target_backups(self, backup_file: Path) -> list[str]:
+        backups: list[str] = []
+        for backup_path in backup_file.parent.iterdir():
+            backups.append(str(backup_path.absolute()))
+        backups.sort(reverse=True)
+        return backups
+
+    def get_or_download_backup(self, path: str) -> Path:
+        return Path(path)
+
     def _clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
         core.remove_path(backup_file)
-        files: list[str] = []
-        for backup_path in backup_file.parent.iterdir():
-            files.append(str(backup_path.absolute()))
-        files.sort(reverse=True)
-        while len(files) > max_backups:
-            backup_to_remove = Path(files.pop())
+
+        backups = self.all_target_backups(backup_file=backup_file)
+
+        while len(backups) > max_backups:
+            backup_to_remove = Path(backups.pop())
             if core.file_before_retention_period_ends(
                 backup_name=backup_to_remove.name, min_retention_days=min_retention_days
             ):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "
                     "but oldest cannot be removed due to min retention days",
-                    len(files),
+                    len(backups),
                     max_backups,
                 )
                 break
