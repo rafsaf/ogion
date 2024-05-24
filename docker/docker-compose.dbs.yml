@@ -7,7 +7,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.11.7
+    image: mariadb:10.11.8
     networks:
     - ogion
     ports:
@@ -19,7 +19,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.4.33
+    image: mariadb:10.4.34
     networks:
     - ogion
     ports:
@@ -31,7 +31,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.5.24
+    image: mariadb:10.5.25
     networks:
     - ogion
     ports:
@@ -43,7 +43,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.6.17
+    image: mariadb:10.6.18
     networks:
     - ogion
     ports:
@@ -55,7 +55,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.0.5
+    image: mariadb:11.0.6
     networks:
     - ogion
     ports:
@@ -67,7 +67,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.1.4
+    image: mariadb:11.1.5
     networks:
     - ogion
     ports:
@@ -79,23 +79,11 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.2.3
+    image: mariadb:11.2.4
     networks:
     - ogion
     ports:
     - 11112:3306
-    restart: 'no'
-  ogion_mariadb_11_3:
-    environment:
-    - MARIADB_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
-    - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
-    - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
-    - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.3.2
-    networks:
-    - ogion
-    ports:
-    - 11113:3306
     restart: 'no'
   ogion_mysql_8_0:
     environment:
