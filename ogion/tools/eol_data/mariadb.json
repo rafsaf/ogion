@@ -2,7 +2,7 @@
     {
         "cycle": "11.3",
         "releaseDate": "2024-02-16",
-        "eol": "2024-05-16",
+        "eol": false,
         "latest": "11.3.2",
         "link": null,
         "support": null,
