@@ -3,7 +3,7 @@ authors = ["Rafał Safin <rafal.safin@rafsaf.pl>"]
 description = "A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms."
 license = "GNU GPLv3"
 name = "ogion"
-version = "5.2"
+version = "6.1"
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -54,8 +54,8 @@ env = [
   "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#%^&*()/;><.,][`~'",
 ]
 filterwarnings = [
-  "ignore:Type google._upb._message.ScalarMapContainer uses PyType_Spec",
   "ignore:Type google._upb._message.MessageMapContainer uses PyType_Spec",
+  "ignore:Type google._upb._message.ScalarMapContainer uses PyType_Spec",
 ]
 
 [tool.ruff]
