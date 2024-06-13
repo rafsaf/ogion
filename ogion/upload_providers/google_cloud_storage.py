@@ -4,8 +4,8 @@
 import base64
 import logging
 import os
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 import google.cloud.storage as cloud_storage
 

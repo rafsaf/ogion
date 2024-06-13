@@ -2,10 +2,9 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
+import pathlib
 from abc import ABC, abstractmethod
 from pathlib import Path
-import pathlib
-from typing import final
 
 from ogion.models.upload_provider_models import ProviderModel
 

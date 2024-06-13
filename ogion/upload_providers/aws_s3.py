@@ -2,9 +2,10 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
+import tempfile
 from pathlib import Path
 from typing import Any, TypedDict
-import tempfile
+
 import boto3
 from boto3.s3.transfer import TransferConfig
 

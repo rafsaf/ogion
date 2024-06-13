@@ -2,8 +2,8 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 from azure.storage.blob import BlobServiceClient
 

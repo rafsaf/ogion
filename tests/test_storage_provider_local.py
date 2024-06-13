@@ -3,7 +3,6 @@
 
 from pathlib import Path
 
-import pytest
 from freezegun import freeze_time
 
 from ogion.models.upload_provider_models import DebugProviderModel

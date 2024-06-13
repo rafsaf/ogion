@@ -2,9 +2,9 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import sys
-from pathlib import Path
 import threading
 import time
+from pathlib import Path
 from typing import Any, NoReturn
 from unittest.mock import Mock
 
@@ -24,6 +24,8 @@ from .conftest import (
     FILE_1,
     FOLDER_1,
 )
+
+SECONDS_TIMEOUT = 5
 
 
 @pytest.fixture(autouse=True)
@@ -97,7 +99,7 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
     count = 0
 
     timeout = 0
-    while threading.active_count() > 1 and timeout < 5:
+    while threading.active_count() > 1 and timeout < SECONDS_TIMEOUT:
         timeout += 0.05
         time.sleep(0.05)
 
