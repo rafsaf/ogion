@@ -52,11 +52,9 @@ class UploadProviderAzure(BaseUploadProvider):
         )
         return backup_dest_in_azure_container
 
-    def all_target_backups(self, backup_file: Path) -> list[str]:
+    def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
-        for blob in self.container_client.list_blobs(
-            name_starts_with=backup_file.parent.name
-        ):
+        for blob in self.container_client.list_blobs(name_starts_with=env_name):
             backups.append(blob.name)
 
         backups.sort(reverse=True)
@@ -78,7 +76,7 @@ class UploadProviderAzure(BaseUploadProvider):
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
 
-        backups = self.all_target_backups(backup_file=backup_file)
+        backups = self.all_target_backups(env_name=backup_file.parent.name)
 
         while len(backups) > max_backups:
             backup_to_remove = backups.pop()

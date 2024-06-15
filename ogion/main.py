@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 from dataclasses import dataclass
+from pprint import pprint
 from types import FrameType
 from typing import NoReturn
 
@@ -169,6 +170,8 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
 class RuntimeArgs:
     single: bool
     debug_notifications: bool
+    download: str | None
+    list: str | None
 
 
 def setup_runtime_arguments() -> RuntimeArgs:
@@ -181,6 +184,20 @@ def setup_runtime_arguments() -> RuntimeArgs:
         "--debug-notifications",
         action="store_true",
         help="Check if notifications setup is working",
+    )
+    parser.add_argument(
+        "--download",
+        type=str,
+        default=None,
+        required=False,
+        help="Download given backup file locally and print path",
+    )
+    parser.add_argument(
+        "--list",
+        type=str,
+        default=None,
+        required=False,
+        help="For given prefix - env name, list all backups",
     )
     return RuntimeArgs(**vars(parser.parse_args()))
 
@@ -209,6 +226,22 @@ def run_single_all_backups() -> NoReturn:
         ).start()
 
     shutdown()
+
+
+def run_download_backup_file(path: str) -> NoReturn:
+    provider = backup_provider()
+
+    out = provider.get_or_download_backup(path)
+    print(out)
+    sys.exit(0)
+
+
+def run_list_backup_files(env_name: str) -> NoReturn:
+    provider = backup_provider()
+
+    out = provider.all_target_backups(env_name.lower())
+    pprint(out)
+    sys.exit(0)
 
 
 def run_main_loop() -> NoReturn:  # pragma: no cover
@@ -248,6 +281,10 @@ def main() -> NoReturn:
         run_debug_notifications_and_exit()
     elif runtime_args.single:
         run_single_all_backups()
+    elif runtime_args.download is not None:
+        run_download_backup_file(runtime_args.download)
+    elif runtime_args.list is not None:
+        run_list_backup_files(runtime_args.list)
     else:  # pragma: no cover
         run_main_loop()
 

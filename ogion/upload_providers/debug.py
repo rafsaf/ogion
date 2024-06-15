@@ -4,7 +4,7 @@
 import logging
 from pathlib import Path
 
-from ogion import core
+from ogion import config, core
 from ogion.models.upload_provider_models import DebugProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
 
@@ -24,9 +24,10 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         zip_file = core.run_create_zip_archive(backup_file=backup_file)
         return str(zip_file)
 
-    def all_target_backups(self, backup_file: Path) -> list[str]:
+    def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
-        for backup_path in backup_file.parent.iterdir():
+        path = config.CONST_BACKUP_FOLDER_PATH / env_name
+        for backup_path in path.iterdir():
             backups.append(str(backup_path.absolute()))
         backups.sort(reverse=True)
         return backups
@@ -39,7 +40,7 @@ class UploadProviderLocalDebug(BaseUploadProvider):
     ) -> None:
         core.remove_path(backup_file)
 
-        backups = self.all_target_backups(backup_file=backup_file)
+        backups = self.all_target_backups(env_name=backup_file.parent.name)
 
         while len(backups) > max_backups:
             backup_to_remove = Path(backups.pop())

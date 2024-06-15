@@ -57,9 +57,9 @@ class UploadProviderAWS(BaseUploadProvider):
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
-    def all_target_backups(self, backup_file: Path) -> list[str]:
+    def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
-        prefix = f"{self.bucket_upload_path}/{backup_file.parent.name}/"
+        prefix = f"{self.bucket_upload_path}/{env_name}/"
         for bucket_obj in self.bucket.objects.filter(Delimiter="/", Prefix=prefix):
             backups.append(bucket_obj.key)
 
@@ -83,7 +83,7 @@ class UploadProviderAWS(BaseUploadProvider):
             log.info("removed %s from local disk", backup_path)
 
         items_to_delete: list[DeleteItemDict] = []
-        backups = self.all_target_backups(backup_file=backup_file)
+        backups = self.all_target_backups(env_name=backup_file.parent.name)
 
         while len(backups) > max_backups:
             backup_to_remove = backups.pop()

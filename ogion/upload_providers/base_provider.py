@@ -16,7 +16,7 @@ class BaseUploadProvider(ABC):
         pass
 
     @abstractmethod
-    def all_target_backups(self, backup_file: Path) -> list[str]:  # pragma: no cover
+    def all_target_backups(self, env_name: str) -> list[str]:  # pragma: no cover
         pass
 
     @abstractmethod
