@@ -171,7 +171,7 @@ class RuntimeArgs:
     single: bool
     debug_notifications: bool
     download: str | None
-    list: str | None
+    list: bool
 
 
 def setup_runtime_arguments() -> RuntimeArgs:
@@ -193,11 +193,10 @@ def setup_runtime_arguments() -> RuntimeArgs:
         help="Download given backup file locally and print path",
     )
     parser.add_argument(
+        "-l",
         "--list",
-        type=str,
-        default=None,
-        required=False,
-        help="For given prefix - env name, list all backups",
+        action="store_true",
+        help="list all backups for all targets",
     )
     return RuntimeArgs(**vars(parser.parse_args()))
 
@@ -236,11 +235,14 @@ def run_download_backup_file(path: str) -> NoReturn:
     sys.exit(0)
 
 
-def run_list_backup_files(env_name: str) -> NoReturn:
+def run_list_backup_files() -> NoReturn:
     provider = backup_provider()
+    targets = backup_targets()
 
-    out = provider.all_target_backups(env_name.lower())
-    pprint(out)
+    for target in targets:
+        print(target.env_name)
+        out = provider.all_target_backups(target.env_name.lower())
+        pprint(out)
     sys.exit(0)
 
 
@@ -283,8 +285,8 @@ def main() -> NoReturn:
         run_single_all_backups()
     elif runtime_args.download is not None:
         run_download_backup_file(runtime_args.download)
-    elif runtime_args.list is not None:
-        run_list_backup_files(runtime_args.list)
+    elif runtime_args.list:
+        run_list_backup_files()
     else:  # pragma: no cover
         run_main_loop()
 
