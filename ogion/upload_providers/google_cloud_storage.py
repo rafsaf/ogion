@@ -4,7 +4,6 @@
 import base64
 import logging
 import os
-import tempfile
 from pathlib import Path
 
 import google.cloud.storage as cloud_storage
@@ -65,17 +64,18 @@ class UploadProviderGCS(BaseUploadProvider):
         backups.sort(reverse=True)
         return backups
 
-    def get_or_download_backup(self, path: str) -> Path:
-        backup_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{path}")
+    def download_backup(self, path: str) -> Path:
+        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        backup_file.parent.mkdir(parents=True)
 
         blob = self.bucket.blob(path, chunk_size=self.chunk_size_bytes)
         blob.download_to_filename(
-            backup_file.name,
+            backup_file,
             timeout=self.chunk_timeout_secs,
             checksum="crc32c",
         )
 
-        return Path(backup_file.name)
+        return backup_file
 
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int

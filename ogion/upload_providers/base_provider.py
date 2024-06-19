@@ -20,7 +20,7 @@ class BaseUploadProvider(ABC):
         pass
 
     @abstractmethod
-    def get_or_download_backup(self, path: str) -> pathlib.Path:  # pragma: no cover
+    def download_backup(self, path: str) -> pathlib.Path:  # pragma: no cover
         pass
 
     @abstractmethod

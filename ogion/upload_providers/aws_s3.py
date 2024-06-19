@@ -2,14 +2,13 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
-import tempfile
 from pathlib import Path
 from typing import Any, TypedDict
 
 import boto3
 from boto3.s3.transfer import TransferConfig
 
-from ogion import core
+from ogion import config, core
 from ogion.models.upload_provider_models import AWSProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
 
@@ -66,14 +65,17 @@ class UploadProviderAWS(BaseUploadProvider):
         backups.sort(reverse=True)
         return backups
 
-    def get_or_download_backup(self, path: str) -> Path:
-        backup_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{path}")
+    def download_backup(self, path: str) -> Path:
+        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        backup_file.parent.mkdir(parents=True)
+
         self.bucket.upload_file(
             Filename=backup_file,
             Key=path,
             Config=self.transfer_config,
         )
-        return Path(backup_file.name)
+
+        return backup_file
 
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int

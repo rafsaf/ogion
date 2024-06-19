@@ -230,7 +230,7 @@ def run_single_all_backups() -> NoReturn:
 def run_download_backup_file(path: str) -> NoReturn:
     provider = backup_provider()
 
-    out = provider.get_or_download_backup(path)
+    out = provider.download_backup(path)
     print(out)
     sys.exit(0)
 

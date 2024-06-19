@@ -2,12 +2,11 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
-import tempfile
 from pathlib import Path
 
 from azure.storage.blob import BlobServiceClient
 
-from ogion import core
+from ogion import config, core
 from ogion.models.upload_provider_models import AzureProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
 
@@ -60,14 +59,15 @@ class UploadProviderAzure(BaseUploadProvider):
         backups.sort(reverse=True)
         return backups
 
-    def get_or_download_backup(self, path: str) -> Path:
-        backup_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{path}")
+    def download_backup(self, path: str) -> Path:
+        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        backup_file.parent.mkdir(parents=True)
 
-        with open(file=backup_file.name, mode="wb") as file:
+        with open(backup_file, mode="wb") as file:
             stream = self.container_client.download_blob(path)
             file.write(stream.readall())
 
-        return Path(backup_file.name)
+        return backup_file
 
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int

@@ -32,7 +32,7 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         backups.sort(reverse=True)
         return backups
 
-    def get_or_download_backup(self, path: str) -> Path:
+    def download_backup(self, path: str) -> Path:
         return Path(path)
 
     def clean(
