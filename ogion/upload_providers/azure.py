@@ -65,7 +65,7 @@ class UploadProviderAzure(BaseUploadProvider):
 
         with open(backup_file, mode="wb") as file:
             stream = self.container_client.download_blob(path)
-            file.write(stream.readall())
+            stream.readinto(file)
 
         return backup_file
 
