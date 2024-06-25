@@ -5,15 +5,13 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TypeVar, final
+from typing import final
 
 from croniter import croniter
 
 from ogion.models.backup_target_models import TargetModel
 
 log = logging.getLogger(__name__)
-
-TM = TypeVar("TM", bound=TargetModel)
 
 
 class BaseBackupTarget(ABC):
