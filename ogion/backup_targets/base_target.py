@@ -44,14 +44,6 @@ class BaseBackupTarget(ABC):
         return self.target_model.min_retention_days
 
     @final
-    def make_backup(self) -> Path:
-        try:
-            return self._backup()
-        except Exception as err:
-            log.error(err, exc_info=True)
-            raise
-
-    @final
     def _get_next_backup_time(self) -> datetime:
         now = datetime.now(UTC)
         cron = croniter(
@@ -77,7 +69,7 @@ class BaseBackupTarget(ABC):
         return f"Thread-{pretty_env_name}"
 
     @abstractmethod
-    def _backup(self) -> Path:  # pragma: no cover
+    def backup(self) -> Path:  # pragma: no cover
         pass
 
     @abstractmethod

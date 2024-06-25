@@ -137,7 +137,7 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
     with NotificationsContext(
         step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name
     ):
-        backup_file = target.make_backup()
+        backup_file = target.backup()
     log.info(
         "backup file created: %s, starting post save upload to provider %s",
         backup_file,

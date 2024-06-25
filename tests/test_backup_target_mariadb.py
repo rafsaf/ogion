@@ -37,7 +37,7 @@ def test_mariadb_connection_fail(mariadb_target: MariaDBTargetModel) -> None:
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
 def test_run_mariadb_dump(mariadb_target: MariaDBTargetModel) -> None:
     db = MariaDB(target_model=mariadb_target)
-    out_backup = db.make_backup()
+    out_backup = db.backup()
 
     escaped_name = "database_12"
     escaped_version = db.db_version.replace(".", "")
@@ -94,7 +94,7 @@ def test_end_to_end_successful_restore_after_backup(
         f"--execute={insert_query}",
     )
 
-    test_db_backup = test_db.make_backup()
+    test_db_backup = test_db.backup()
 
     core.run_subprocess(
         f"mariadb --defaults-file={db.option_file} {db.db_name} --execute="

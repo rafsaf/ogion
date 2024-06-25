@@ -18,7 +18,7 @@ class Folder(BaseBackupTarget):
         self.target_model: DirectoryTargetModel = target_model
 
     @override
-    def _backup(self) -> Path:
+    def backup(self) -> Path:
         escaped_foldername = core.safe_text_version(self.target_model.abs_path.name)
 
         out_file = core.get_new_backup_path(self.env_name, escaped_foldername)

@@ -15,7 +15,7 @@ from ogion.models.backup_target_models import TargetModel
 def test_base_backup_target_next_backup() -> None:
     class MyTargetModel(BaseBackupTarget):
         @override
-        def _backup(self) -> Path:
+        def backup(self) -> Path:
             return Path(__file__)
 
         @override

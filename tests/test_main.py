@@ -142,7 +142,7 @@ def test_run_backup_notifications_fail_message_is_fired_when_it_fails(
     target = main.backup_targets()[0]
     backup_file = Path("/tmp/fake")
     backup_mock = Mock(return_value=backup_file, side_effect=make_backup_side_effect)
-    monkeypatch.setattr(target, "_backup", backup_mock)
+    monkeypatch.setattr(target, "backup", backup_mock)
     provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
     monkeypatch.setattr(provider, "post_save", Mock(side_effect=post_save_side_effect))
     monkeypatch.setattr(provider, "clean", Mock(side_effect=clean_side_effect))

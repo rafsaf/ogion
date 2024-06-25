@@ -109,7 +109,7 @@ class PostgreSQL(BaseBackupTarget):
         return version
 
     @override
-    def _backup(self) -> Path:
+    def backup(self) -> Path:
         escaped_dbname = core.safe_text_version(self.target_model.db)
         escaped_version = core.safe_text_version(self.db_version)
         name = f"{escaped_dbname}_{escaped_version}"
