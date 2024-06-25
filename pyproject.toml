@@ -58,6 +58,9 @@ filterwarnings = [
   "ignore:Type google._upb._message.ScalarMapContainer uses PyType_Spec",
 ]
 
+[tool.pyright]
+reportImplicitOverride = true
+
 [tool.ruff]
 target-version = "py312"
 
@@ -73,6 +76,7 @@ source = ["ogion"]
 ignore_missing_imports = true
 python_version = "3.12"
 strict = true
+enable_error_code = "explicit-override"
 
 [tool.poetry.scripts]
 ogion = "ogion.main:main"

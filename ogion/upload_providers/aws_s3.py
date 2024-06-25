@@ -3,7 +3,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any, TypedDict, override
 
 import boto3
 from boto3.s3.transfer import TransferConfig
@@ -36,6 +36,7 @@ class UploadProviderAWS(BaseUploadProvider):
         self.bucket = s3.Bucket(target_provider.bucket_name)
         self.transfer_config = TransferConfig(max_bandwidth=self.max_bandwidth)
 
+    @override
     def post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
@@ -56,6 +57,7 @@ class UploadProviderAWS(BaseUploadProvider):
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
+    @override
     def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
         prefix = f"{self.bucket_upload_path}/{env_name}/"
@@ -65,6 +67,7 @@ class UploadProviderAWS(BaseUploadProvider):
         backups.sort(reverse=True)
         return backups
 
+    @override
     def download_backup(self, path: str) -> Path:
         backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
         backup_file.parent.mkdir(parents=True)
@@ -77,6 +80,7 @@ class UploadProviderAWS(BaseUploadProvider):
 
         return backup_file
 
+    @override
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:

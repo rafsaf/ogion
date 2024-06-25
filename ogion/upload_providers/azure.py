@@ -3,6 +3,7 @@
 
 import logging
 from pathlib import Path
+from typing import override
 
 from azure.storage.blob import BlobServiceClient
 
@@ -26,6 +27,7 @@ class UploadProviderAzure(BaseUploadProvider):
             container=self.container_name
         )
 
+    @override
     def post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
@@ -51,6 +53,7 @@ class UploadProviderAzure(BaseUploadProvider):
         )
         return backup_dest_in_azure_container
 
+    @override
     def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
         for blob in self.container_client.list_blobs(name_starts_with=env_name):
@@ -59,6 +62,7 @@ class UploadProviderAzure(BaseUploadProvider):
         backups.sort(reverse=True)
         return backups
 
+    @override
     def download_backup(self, path: str) -> Path:
         backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
         backup_file.parent.mkdir(parents=True)
@@ -69,6 +73,7 @@ class UploadProviderAzure(BaseUploadProvider):
 
         return backup_file
 
+    @override
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:

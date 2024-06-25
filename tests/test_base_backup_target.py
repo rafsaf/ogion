@@ -3,6 +3,7 @@
 
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import override
 
 from freezegun import freeze_time
 
@@ -13,8 +14,13 @@ from ogion.models.backup_target_models import TargetModel
 @freeze_time("2023-05-03 17:58")
 def test_base_backup_target_next_backup() -> None:
     class MyTargetModel(BaseBackupTarget):
+        @override
         def _backup(self) -> Path:
             return Path(__file__)
+
+        @override
+        def restore(self, path: Path) -> None:
+            return None
 
     target = MyTargetModel(
         target_model=TargetModel(

@@ -3,6 +3,7 @@
 
 import logging
 from pathlib import Path
+from typing import override
 
 from ogion import config, core
 from ogion.models.upload_provider_models import DebugProviderModel
@@ -20,10 +21,12 @@ class UploadProviderLocalDebug(BaseUploadProvider):
     def __init__(self, target_provider: DebugProviderModel) -> None:
         pass
 
+    @override
     def post_save(self, backup_file: Path) -> str:
         zip_file = core.run_create_zip_archive(backup_file=backup_file)
         return str(zip_file)
 
+    @override
     def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
         path = config.CONST_BACKUP_FOLDER_PATH / env_name
@@ -32,9 +35,11 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         backups.sort(reverse=True)
         return backups
 
+    @override
     def download_backup(self, path: str) -> Path:
         return Path(path)
 
+    @override
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:

@@ -98,7 +98,7 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
     target_envs = [model.env_name for model in models]
     count = 0
 
-    timeout = 0
+    timeout: float = 0
     while threading.active_count() > 1 and timeout < SECONDS_TIMEOUT:
         timeout += 0.05
         time.sleep(0.05)

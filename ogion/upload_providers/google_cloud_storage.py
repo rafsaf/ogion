@@ -5,6 +5,7 @@ import base64
 import logging
 import os
 from pathlib import Path
+from typing import override
 
 import google.cloud.storage as cloud_storage
 
@@ -33,6 +34,7 @@ class UploadProviderGCS(BaseUploadProvider):
         self.chunk_size_bytes = target_provider.chunk_size_mb * 1024 * 1024
         self.chunk_timeout_secs = target_provider.chunk_timeout_secs
 
+    @override
     def post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
@@ -55,6 +57,7 @@ class UploadProviderGCS(BaseUploadProvider):
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
+    @override
     def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
         prefix = f"{self.bucket_upload_path}/{env_name}"
@@ -64,6 +67,7 @@ class UploadProviderGCS(BaseUploadProvider):
         backups.sort(reverse=True)
         return backups
 
+    @override
     def download_backup(self, path: str) -> Path:
         backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
         backup_file.parent.mkdir(parents=True)
@@ -77,6 +81,7 @@ class UploadProviderGCS(BaseUploadProvider):
 
         return backup_file
 
+    @override
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:

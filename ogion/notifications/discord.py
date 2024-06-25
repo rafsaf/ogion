@@ -2,6 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
+from typing import override
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -16,6 +17,7 @@ STATUS_CODE_204 = 204
 
 
 class Discord(NotificationSystem):
+    @override
     def _send(self, message: str) -> bool:
         if not config.options.DISCORD_WEBHOOK_URL:
             log.info("skip sending discord notification, no setup")

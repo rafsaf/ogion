@@ -3,6 +3,7 @@
 
 import logging
 from pathlib import Path
+from typing import override
 
 from ogion import core
 from ogion.backup_targets.base_target import BaseBackupTarget
@@ -16,6 +17,7 @@ class File(BaseBackupTarget):
         super().__init__(target_model)
         self.target_model: SingleFileTargetModel = target_model
 
+    @override
     def _backup(self) -> Path:
         escaped_filename = core.safe_text_version(self.target_model.abs_path.name)
 
@@ -26,3 +28,10 @@ class File(BaseBackupTarget):
         core.run_subprocess(shell_create_file_symlink)
         log.debug("finished ln, output: %s", out_file)
         return out_file
+
+    @override
+    def restore(self, path: Path) -> None:
+        shell_cp_file = f"cp {path} {self.target_model.abs_path}"
+        log.debug("start cp in subprocess: %s", shell_cp_file)
+        core.run_subprocess(shell_cp_file)
+        log.debug("finished cp to %s", self.target_model.abs_path)
