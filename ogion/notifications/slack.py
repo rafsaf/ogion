@@ -2,6 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
+from typing import override
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -16,6 +17,7 @@ STATUS_CODE_200 = 200
 
 
 class Slack(NotificationSystem):
+    @override
     def _send(self, message: str) -> bool:
         if not config.options.SLACK_WEBHOOK_URL:
             log.info("skip sending slack notification, no setup")

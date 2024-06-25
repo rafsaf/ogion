@@ -40,9 +40,8 @@ def test_azure_post_save_fails_on_fail_upload(
         assert azure.post_save(fake_backup_file_path)
 
 
-@pytest.mark.parametrize("azure_method_name", ["_post_save", "post_save"])
 def test_azure_post_save_with_bucket_upload_path(
-    tmp_path: Path, azure_method_name: str, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     azure = get_test_azure()
     blob_client_mock = Mock()
@@ -57,10 +56,7 @@ def test_azure_post_save_with_bucket_upload_path(
     with open(fake_backup_file_path, "w") as f:
         f.write("abcdefghijk\n12345")
 
-    assert (
-        getattr(azure, azure_method_name)(fake_backup_file_path)
-        == "fake_env_name/fake_backup.zip"
-    )
+    assert azure.post_save(fake_backup_file_path) == "fake_env_name/fake_backup.zip"
     assert fake_backup_file_zip_path.exists()
 
     blob_client_mock.upload_blob.assert_called_once()
@@ -86,9 +82,8 @@ list_blobs_long: list[AzureBlob] = [
 ]
 
 
-@pytest.mark.parametrize("azure_method_name", ["_clean", "clean"])
 def test_azure_clean_file_and_short_blob_list(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, azure_method_name: str
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     azure = get_test_azure()
     container_client_mock = Mock()
@@ -102,7 +97,7 @@ def test_azure_clean_file_and_short_blob_list(
     fake_backup_file_zip_path2 = fake_backup_dir_path / "fake_backup2.zip"
     fake_backup_file_zip_path2.touch()
 
-    getattr(azure, azure_method_name)(fake_backup_file_zip_path, 2, 1)
+    azure.clean(fake_backup_file_zip_path, 2, 1)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_zip_path.exists()
     assert not fake_backup_file_zip_path2.exists()
@@ -112,9 +107,8 @@ def test_azure_clean_file_and_short_blob_list(
     )
 
 
-@pytest.mark.parametrize("azure_method_name", ["_clean", "clean"])
 def test_azure_clean_directory_and_long_blob_list(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, azure_method_name: str
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     azure = get_test_azure()
     container_client_mock = Mock()
@@ -126,7 +120,7 @@ def test_azure_clean_directory_and_long_blob_list(
     fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
     fake_backup_file_zip_path.touch()
 
-    getattr(azure, azure_method_name)(fake_backup_dir_path, 2, 1)
+    azure.clean(fake_backup_dir_path, 2, 1)
 
     assert not fake_backup_dir_path.exists()
     assert not fake_backup_file_zip_path.exists()
@@ -146,9 +140,8 @@ def test_azure_clean_directory_and_long_blob_list(
 
 
 @freeze_time("2023-08-27")
-@pytest.mark.parametrize("azure_method_name", ["_clean", "clean"])
 def test_azure_clean_respects_min_retention_days_param_and_not_delete_any_file(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, azure_method_name: str
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     azure = get_test_azure()
     container_client_mock = Mock()
@@ -160,6 +153,6 @@ def test_azure_clean_respects_min_retention_days_param_and_not_delete_any_file(
     fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
     fake_backup_file_zip_path.touch()
 
-    getattr(azure, azure_method_name)(fake_backup_dir_path, 2, 30 * 365)
+    azure.clean(fake_backup_dir_path, 2, 30 * 365)
 
     container_client_mock.delete_blob.assert_not_called()

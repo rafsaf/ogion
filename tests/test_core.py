@@ -1,6 +1,7 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import logging
 import os
 import shlex
 from pathlib import Path
@@ -27,24 +28,26 @@ def test_safe_text_version(text: str, result: str) -> None:
 
 
 def test_run_subprocess_fail(caplog: LogCaptureFixture) -> None:
-    with pytest.raises(core.CoreSubprocessError):
-        core.run_subprocess("exit 1")
-    assert caplog.messages == [
-        "run_subprocess running: 'exit 1'",
-        "run_subprocess failed with status 1",
-        "run_subprocess stdout: ",
-        "run_subprocess stderr: ",
-    ]
+    with caplog.at_level(logging.DEBUG):
+        with pytest.raises(core.CoreSubprocessError):
+            core.run_subprocess("exit 1")
+        assert caplog.messages == [
+            "run_subprocess running: 'exit 1'",
+            "run_subprocess failed with status 1",
+            "run_subprocess stdout: ",
+            "run_subprocess stderr: ",
+        ]
 
 
 def test_run_subprocess_success(caplog: LogCaptureFixture) -> None:
-    core.run_subprocess("echo 'welcome'")
-    assert caplog.messages == [
-        "run_subprocess running: 'echo 'welcome''",
-        "run_subprocess finished with status 0",
-        "run_subprocess stdout: welcome\n",
-        "run_subprocess stderr: ",
-    ]
+    with caplog.at_level(logging.DEBUG):
+        core.run_subprocess("echo 'welcome'")
+        assert caplog.messages == [
+            "run_subprocess running: 'echo 'welcome''",
+            "run_subprocess finished with status 0",
+            "run_subprocess stdout: welcome\n",
+            "run_subprocess stderr: ",
+        ]
 
 
 @freeze_time("2022-12-11")

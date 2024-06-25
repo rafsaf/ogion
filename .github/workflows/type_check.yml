@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies and actiavte virtualenv
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: |
-          poetry install --no-interaction --no-root
+          poetry install --no-interaction
 
       - name: Run ${{ matrix.check }}
         run: |

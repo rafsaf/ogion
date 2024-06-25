@@ -4,6 +4,7 @@
 import logging
 import smtplib
 import ssl
+from typing import override
 
 from ogion import config
 from ogion.notifications.base_notification_system import NotificationSystem
@@ -14,6 +15,7 @@ context = ssl.create_default_context()
 
 
 class SMTP(NotificationSystem):
+    @override
     def _send(self, message: str) -> bool:
         if not config.options.SMTP_HOST:
             log.info("skip sending smtp notification, no setup")

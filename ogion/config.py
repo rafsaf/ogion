@@ -17,8 +17,10 @@ _log_levels = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 CONST_BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 CONST_BACKUP_FOLDER_PATH: Path = CONST_BASE_DIR / "data"
 CONST_CONFIG_FOLDER_PATH: Path = CONST_BASE_DIR / "conf"
+CONST_DOWNLOADS_FOLDER_PATH: Path = CONST_BACKUP_FOLDER_PATH / "downloads"
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_CONFIG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
+CONST_DOWNLOADS_FOLDER_PATH.mkdir(mode=0o700, exist_ok=True)
 
 try:
     from dotenv import load_dotenv

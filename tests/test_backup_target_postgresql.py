@@ -38,7 +38,7 @@ def test_postgres_connection_fail(postgres_target: PostgreSQLTargetModel) -> Non
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
 def test_run_pg_dump(postgres_target: PostgreSQLTargetModel) -> None:
     db = PostgreSQL(target_model=postgres_target)
-    out_backup = db.make_backup()
+    out_backup = db.backup()
 
     escaped_name = "database_12"
     escaped_version = db.db_version.replace(".", "")
@@ -86,7 +86,7 @@ def test_end_to_end_successful_restore_after_backup(
         f"psql -d {test_db.escaped_conn_uri} -w --command {insert_query}",
     )
 
-    test_db_backup = test_db.make_backup()
+    test_db_backup = test_db.backup()
 
     core.run_subprocess(
         f"psql -d {db.escaped_conn_uri} -w --command 'DROP DATABASE test_db;'",

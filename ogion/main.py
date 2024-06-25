@@ -8,7 +8,7 @@ import sys
 import threading
 import time
 from dataclasses import dataclass
-from threading import Thread
+from pprint import pprint
 from types import FrameType
 from typing import NoReturn
 
@@ -126,14 +126,18 @@ def shutdown() -> NoReturn:  # pragma: no cover
         sys.exit(1)
 
 
-def run_backup(
-    target: base_target.BaseBackupTarget, provider: base_provider.BaseUploadProvider
-) -> None:
+def run_backup(target: base_target.BaseBackupTarget) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
+
+    # init provider every time in each new thread
+    # eg. s3 session are not thread safe
+    # this should add only minimal overhead
+    provider = backup_provider()
+
     with NotificationsContext(
         step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name
     ):
-        backup_file = target.make_backup()
+        backup_file = target.backup()
     log.info(
         "backup file created: %s, starting post save upload to provider %s",
         backup_file,
@@ -166,6 +170,8 @@ def run_backup(
 class RuntimeArgs:
     single: bool
     debug_notifications: bool
+    download: str | None
+    list: bool
 
 
 def setup_runtime_arguments() -> RuntimeArgs:
@@ -179,43 +185,110 @@ def setup_runtime_arguments() -> RuntimeArgs:
         action="store_true",
         help="Check if notifications setup is working",
     )
+    parser.add_argument(
+        "--download",
+        type=str,
+        default=None,
+        required=False,
+        help="Download given backup file locally and print path",
+    )
+    parser.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        help="list all backups for all targets",
+    )
     return RuntimeArgs(**vars(parser.parse_args()))
 
 
-def main() -> NoReturn:
-    log.info("start ogion configuration...")
+def run_debug_notifications_and_exit() -> NoReturn:
+    log.info("start run_debug_notifications_and_exit")
+    try:
+        with NotificationsContext(step_name=PROGRAM_STEP.DEBUG_NOTIFICATIONS):
+            raise ValueError("hi! this is notifications debug exception")
+    finally:
+        sys.exit(0)
 
-    runtime_args = setup_runtime_arguments()
 
-    if runtime_args.debug_notifications:
-        try:
-            with NotificationsContext(step_name=PROGRAM_STEP.DEBUG_NOTIFICATIONS):
-                raise ValueError("hi! this is notifications debug exception")
-        except Exception:
-            sys.exit(0)
+def run_single_all_backups() -> NoReturn:
+    log.info("start run_single_all_backups")
 
+    backup_provider()
+    targets = backup_targets()
+
+    for target in targets:
+        threading.Thread(
+            target=run_backup,
+            args=(target,),
+            daemon=True,
+            name=target.pretty_thread_name,
+        ).start()
+
+    shutdown()
+
+
+def run_download_backup_file(path: str) -> NoReturn:
+    provider = backup_provider()
+
+    out = provider.download_backup(path)
+    print(out)
+    sys.exit(0)
+
+
+def run_list_backup_files() -> NoReturn:
     provider = backup_provider()
     targets = backup_targets()
 
-    log.info("ogion configuration finished")
+    for target in targets:
+        print(target.env_name)
+        out = provider.all_target_backups(target.env_name.lower())
+        pprint(out)
+    sys.exit(0)
+
+
+def run_main_loop() -> NoReturn:  # pragma: no cover
+    log.info("start run_main_loop")
+
+    backup_provider()
+    targets = backup_targets()
 
     while not exit_event.is_set():
         for target in targets:
-            if target.next_backup() or runtime_args.single:
-                pretty_env_name = target.env_name.replace("_", "-")
-                backup_thread = Thread(
-                    target=run_backup,
-                    args=(target, provider),
-                    daemon=True,
-                    name=f"Thread-{pretty_env_name}",
-                )
-                backup_thread.start()
-                exit_event.wait(0.5)
-        if runtime_args.single:
-            exit_event.set()
+            if not target.next_backup():
+                continue
+
+            threading.Thread(
+                target=run_backup,
+                args=(target,),
+                daemon=True,
+                name=target.pretty_thread_name,
+            ).start()
+            exit_event.wait(0.5)
+
         exit_event.wait(5)
 
     shutdown()
+
+
+def main() -> NoReturn:
+    log.info("parsing runtime arguments...")
+
+    runtime_args = setup_runtime_arguments()
+
+    log.debug("runtime args: %s", runtime_args)
+
+    log.info("starting ogion...")
+
+    if runtime_args.debug_notifications:
+        run_debug_notifications_and_exit()
+    elif runtime_args.single:
+        run_single_all_backups()
+    elif runtime_args.download is not None:
+        run_download_backup_file(runtime_args.download)
+    elif runtime_args.list:
+        run_list_backup_files()
+    else:  # pragma: no cover
+        run_main_loop()
 
 
 if __name__ == "__main__":  # pragma: no cover

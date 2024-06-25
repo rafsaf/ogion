@@ -13,7 +13,7 @@ from .conftest import CONST_TOKEN_URLSAFE, FILE_1
 @freeze_time("2024-03-14")
 def test_run_file_backup_output_file_has_proper_name() -> None:
     file = File(target_model=FILE_1)
-    out_backup = file.make_backup()
+    out_backup = file.backup()
 
     escaped_file_name = FILE_1.abs_path.name.replace(".", "")
     out_file = (
@@ -26,6 +26,6 @@ def test_run_file_backup_output_file_has_proper_name() -> None:
 
 def test_run_file_backup_output_file_has_exact_same_content() -> None:
     file = File(target_model=FILE_1)
-    out_backup = file.make_backup()
+    out_backup = file.backup()
 
     assert out_backup.read_text() == FILE_1.abs_path.read_text()
