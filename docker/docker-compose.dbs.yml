@@ -79,7 +79,7 @@ services:
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.0.37
+    image: mysql:8.0.38
     networks:
     - ogion
     ports:
@@ -115,7 +115,7 @@ services:
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.4.0
+    image: mysql:8.4.1
     networks:
     - ogion
     ports:
