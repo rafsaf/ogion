@@ -32,4 +32,6 @@ jobs:
         run: make docker_dbs_setup_up
 
       - name: Build image and run tests in container
-        run: make tests_${{ matrix.arch }}
+        env:
+          OGION_ARCH: ${{ matrix.arch }}
+        run: make unit_tests

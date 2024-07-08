@@ -19,7 +19,7 @@ def test_base_backup_target_next_backup() -> None:
             return Path(__file__)
 
         @override
-        def restore(self, path: Path) -> None:
+        def restore(self, path: str) -> None:
             return None
 
     target = MyTargetModel(
