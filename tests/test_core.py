@@ -90,6 +90,23 @@ def test_run_create_zip_archive_can_be_unzipped_using_unzip(tmp_path: Path) -> N
     assert fake_backup_file.read_text() == "xxxąć”©#$%"
 
 
+def test_run_create_zip_archive_can_be_unzipped_using_core_unzip(
+    tmp_path: Path,
+) -> None:
+    fake_backup_file = tmp_path / "test_archive"
+
+    with open(fake_backup_file, "w") as f:
+        f.write("xxxąć”©#$%")
+
+    archive_file = core.run_create_zip_archive(fake_backup_file)
+    fake_backup_file.unlink()
+
+    fake_backup_file = core.run_unzip_zip_archive(archive_file)
+
+    assert fake_backup_file.exists()
+    assert fake_backup_file.read_text() == "xxxąć”©#$%"
+
+
 test_data = [
     (
         [

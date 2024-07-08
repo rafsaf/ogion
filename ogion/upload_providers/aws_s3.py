@@ -70,7 +70,8 @@ class UploadProviderAWS(BaseUploadProvider):
     @override
     def download_backup(self, path: str) -> Path:
         backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
-        backup_file.parent.mkdir(parents=True)
+        backup_file.parent.mkdir(parents=True, exist_ok=True)
+        backup_file.touch(exist_ok=True)
 
         self.bucket.upload_file(
             Filename=backup_file,

@@ -73,6 +73,21 @@ def get_new_backup_path(env_name: str, name: str) -> Path:
     return base_dir_path / new_file
 
 
+def run_unzip_zip_archive(backup_file: Path) -> Path:
+    log.info("start unzip zip archive in subprocess: %s", backup_file)
+    zip_escaped_password = shlex.quote(
+        config.options.ZIP_ARCHIVE_PASSWORD.get_secret_value()
+    )
+
+    # TODO :9
+    shell_unzip_7zip_archive = (
+        f"unzip -o -P {zip_escaped_password} -d {backup_file.parent} {backup_file}"
+    )
+    run_subprocess(shell_unzip_7zip_archive)
+    log.info("finished zip archive unzip")
+    return Path(str(backup_file).removesuffix(".zip"))
+
+
 def run_create_zip_archive(backup_file: Path) -> Path:
     out_file = Path(f"{backup_file}.zip")
     log.info("start creating zip archive in subprocess: %s", backup_file)

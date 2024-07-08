@@ -172,6 +172,8 @@ class RuntimeArgs:
     debug_notifications: bool
     download: str | None
     list: bool
+    restore_latest: str | None
+    restore: str
 
 
 def setup_runtime_arguments() -> RuntimeArgs:
@@ -191,6 +193,21 @@ def setup_runtime_arguments() -> RuntimeArgs:
         default=None,
         required=False,
         help="Download given backup file locally and print path",
+    )
+    parser.add_argument(
+        "--restore-latest",
+        type=str,
+        default=None,
+        required=False,
+        help="restore given target to latest database",
+    )
+    parser.add_argument(
+        "-r",
+        "--restore",
+        type=str,
+        default=None,
+        required=False,
+        help="list all backups for all targets",
     )
     parser.add_argument(
         "-l",
@@ -246,6 +263,25 @@ def run_list_backup_files() -> NoReturn:
     sys.exit(0)
 
 
+def run_restore_latest(target_name: str) -> NoReturn:
+    provider = backup_provider()
+    targets = backup_targets()
+
+    for target in targets:
+        if target.env_name != target_name:
+            continue
+        backups = provider.all_target_backups(target.env_name.lower())
+        if not backups:
+            log.warning("no backups at all for '%s'", target_name)
+        latest_backup = backups[0]
+        path_zip = provider.download_backup(latest_backup)
+        path = core.run_unzip_zip_archive(path_zip)
+        target.restore(str(path))
+        sys.exit(0)
+    log.warning("target '%s' does not exist")
+    sys.exit(1)
+
+
 def run_main_loop() -> NoReturn:  # pragma: no cover
     log.info("start run_main_loop")
 
@@ -287,6 +323,8 @@ def main() -> NoReturn:
         run_download_backup_file(runtime_args.download)
     elif runtime_args.list:
         run_list_backup_files()
+    elif runtime_args.restore_latest is not None:
+        run_restore_latest(runtime_args.restore_latest)
     else:  # pragma: no cover
         run_main_loop()
 

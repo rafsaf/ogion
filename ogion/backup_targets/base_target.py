@@ -71,5 +71,5 @@ class BaseBackupTarget(ABC):
         pass
 
     @abstractmethod
-    def restore(self, path: Path) -> None:  # pragma: no cover
+    def restore(self, path: str) -> None:  # pragma: no cover
         pass

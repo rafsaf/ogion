@@ -87,6 +87,9 @@ def test_end_to_end_successful_restore_after_backup(
     )
 
     test_db_backup = test_db.backup()
+    backup_zip = core.run_create_zip_archive(test_db_backup)
+    test_db_backup.unlink()
+    test_db_backup = core.run_unzip_zip_archive(backup_zip)
 
     core.run_subprocess(
         f"psql -d {db.escaped_conn_uri} -w --command 'DROP DATABASE test_db;'",
@@ -95,9 +98,27 @@ def test_end_to_end_successful_restore_after_backup(
         f"psql -d {db.escaped_conn_uri} -w --command 'CREATE DATABASE test_db;'",
     )
 
-    core.run_subprocess(
-        f"psql -d {test_db.escaped_conn_uri} -w < {test_db_backup}",
+    test_db.restore(str(test_db_backup))
+
+    result = core.run_subprocess(
+        f"psql -d {test_db.escaped_conn_uri} -w --command "
+        "'select * from my_table order by id asc;'",
     )
+
+    assert result == (
+        " id |      name      | age \n"
+        "----+----------------+-----\n"
+        "  1 | Geralt z Rivii |  60\n"
+        "  2 | rafsaf         |  24\n"
+        "(2 rows)\n\n"
+    )
+
+    core.run_subprocess(
+        f"psql -d {test_db.escaped_conn_uri} -w --command "
+        "'delete from my_table where id = '2';'",
+    )
+
+    test_db.restore(str(test_db_backup))
 
     result = core.run_subprocess(
         f"psql -d {test_db.escaped_conn_uri} -w --command "

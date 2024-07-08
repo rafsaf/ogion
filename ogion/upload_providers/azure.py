@@ -65,7 +65,7 @@ class UploadProviderAzure(BaseUploadProvider):
     @override
     def download_backup(self, path: str) -> Path:
         backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
-        backup_file.parent.mkdir(parents=True)
+        backup_file.parent.mkdir(parents=True, exist_ok=True)
 
         with open(backup_file, mode="wb") as file:
             stream = self.container_client.download_blob(path)

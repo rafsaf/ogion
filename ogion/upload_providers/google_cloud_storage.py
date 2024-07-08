@@ -70,13 +70,12 @@ class UploadProviderGCS(BaseUploadProvider):
     @override
     def download_backup(self, path: str) -> Path:
         backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
-        backup_file.parent.mkdir(parents=True)
+        backup_file.parent.mkdir(parents=True, exist_ok=True)
 
         blob = self.bucket.blob(path, chunk_size=self.chunk_size_bytes)
         blob.download_to_filename(
             backup_file,
             timeout=self.chunk_timeout_secs,
-            checksum="crc32c",
         )
 
         return backup_file

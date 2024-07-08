@@ -126,5 +126,8 @@ class PostgreSQL(BaseBackupTarget):
         return out_file
 
     @override
-    def restore(self, path: Path) -> None:
-        return None
+    def restore(self, path: str) -> None:
+        shell_psql_restore = f"psql {self.escaped_conn_uri} < {path}"
+        log.debug("start restore in subprocess: %s", shell_psql_restore)
+        core.run_subprocess(shell_psql_restore)
+        log.debug("finished restore")

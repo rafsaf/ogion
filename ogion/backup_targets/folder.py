@@ -30,7 +30,7 @@ class Folder(BaseBackupTarget):
         return out_file
 
     @override
-    def restore(self, path: Path) -> None:
+    def restore(self, path: str) -> None:
         shell_cp_file = f"cp -r {path} {self.target_model.abs_path.parent}"
         log.debug("start cp in subprocess: %s", shell_cp_file)
         core.run_subprocess(shell_cp_file)
