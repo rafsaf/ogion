@@ -93,7 +93,7 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     with pytest.raises(SystemExit) as system_exit:
         main.main()
-    assert system_exit.type == SystemExit
+    assert system_exit.type is SystemExit
 
     target_envs = [model.env_name for model in models]
     count = 0
@@ -115,7 +115,7 @@ def test_main_debug_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(SystemExit) as system_exit:
         main.main()
-    assert system_exit.type == SystemExit
+    assert system_exit.type is SystemExit
 
 
 @pytest.mark.parametrize(

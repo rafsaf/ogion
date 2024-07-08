@@ -34,4 +34,6 @@ jobs:
       - name: Build image and run tests in container
         env:
           OGION_ARCH: ${{ matrix.arch }}
-        run: make unit_tests
+        run: |
+          touch .env
+          make unit_tests
