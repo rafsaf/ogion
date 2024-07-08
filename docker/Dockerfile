@@ -8,7 +8,7 @@ ENV FOLDER_PATH="/var/lib/ogion"
 ENV LOG_FOLDER_PATH="/var/log/ogion"
 WORKDIR ${FOLDER_PATH}
 
-RUN apt-get -y update && apt-get -y install wget unzip gpg
+RUN apt-get -y update && apt-get -y install wget unzip gpg rsync
 COPY scripts scripts
 RUN ./scripts/install_mariadb_client.sh
 RUN ./scripts/install_postgresql_client.sh

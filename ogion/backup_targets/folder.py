@@ -31,7 +31,7 @@ class Folder(BaseBackupTarget):
 
     @override
     def restore(self, path: str) -> None:
-        shell_cp_file = f"cp -r {path} {self.target_model.abs_path.parent}"
+        shell_cp_file = f"rsync -avh {path}/ {self.target_model.abs_path}"
         log.debug("start cp in subprocess: %s", shell_cp_file)
         core.run_subprocess(shell_cp_file)
         log.debug("finished cp to %s", self.target_model.abs_path)
