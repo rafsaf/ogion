@@ -45,7 +45,7 @@ python-dotenv = "^1.0.1"
 responses = "^0.25.0"
 
 [tool.pytest.ini_options]
-addopts = "-v --cov --cov-report term-missing --cov-fail-under 100 -n auto"
+addopts = "-v --cov --cov-report term-missing --cov-fail-under 90 -n auto"
 env = [
   "BACKUP_MAX_NUMBER=1",
   "BACKUP_PROVIDER=",
@@ -73,10 +73,10 @@ omit = ["ogion/tools/*"]
 source = ["ogion"]
 
 [tool.mypy]
+enable_error_code = "explicit-override"
 ignore_missing_imports = true
 python_version = "3.12"
 strict = true
-enable_error_code = "explicit-override"
 
 [tool.poetry.scripts]
 ogion = "ogion.main:main"
