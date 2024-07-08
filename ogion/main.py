@@ -170,9 +170,10 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
 class RuntimeArgs:
     single: bool
     debug_notifications: bool
-    download: str | None
+    debug_download: str | None
     list: bool
-    restore_latest: str | None
+    restore_latest: bool
+    target: str | None
     restore: str
 
 
@@ -188,18 +189,23 @@ def setup_runtime_arguments() -> RuntimeArgs:
         help="Check if notifications setup is working",
     )
     parser.add_argument(
-        "--download",
+        "--debug-download",
         type=str,
         default=None,
         required=False,
         help="Download given backup file locally and print path",
     )
     parser.add_argument(
-        "--restore-latest",
+        "--target",
         type=str,
         default=None,
         required=False,
-        help="restore given target to latest database",
+        help="Backup target",
+    )
+    parser.add_argument(
+        "--restore-latest",
+        action="store_true",
+        help="Restore given target to latest database",
     )
     parser.add_argument(
         "-r",
@@ -207,13 +213,13 @@ def setup_runtime_arguments() -> RuntimeArgs:
         type=str,
         default=None,
         required=False,
-        help="list all backups for all targets",
+        help="Restore given target to backup file",
     )
     parser.add_argument(
         "-l",
         "--list",
         action="store_true",
-        help="list all backups for all targets",
+        help="List all backups for given target",
     )
     return RuntimeArgs(**vars(parser.parse_args()))
 
@@ -252,15 +258,19 @@ def run_download_backup_file(path: str) -> NoReturn:
     sys.exit(0)
 
 
-def run_list_backup_files() -> NoReturn:
+def run_list_backup_files(target_name: str) -> NoReturn:
     provider = backup_provider()
     targets = backup_targets()
 
     for target in targets:
-        print(target.env_name)
-        out = provider.all_target_backups(target.env_name.lower())
-        pprint(out)
-    sys.exit(0)
+        if target.env_name.lower() != target_name.lower():
+            continue
+        backups = provider.all_target_backups(target.env_name.lower())
+        for i in backups:
+            print(i)
+        sys.exit(0)
+    log.warning("target '%s' does not exist")
+    sys.exit(1)
 
 
 def run_restore_latest(target_name: str) -> NoReturn:
@@ -268,13 +278,38 @@ def run_restore_latest(target_name: str) -> NoReturn:
     targets = backup_targets()
 
     for target in targets:
-        if target.env_name != target_name:
+        if target.env_name.lower() != target_name.lower():
             continue
         backups = provider.all_target_backups(target.env_name.lower())
         if not backups:
             log.warning("no backups at all for '%s'", target_name)
+            sys.exit(2)
         latest_backup = backups[0]
         path_zip = provider.download_backup(latest_backup)
+        path = core.run_unzip_zip_archive(path_zip)
+        target.restore(str(path))
+        sys.exit(0)
+    log.warning("target '%s' does not exist")
+    sys.exit(1)
+
+
+def run_restore(backup_name: str, target_name: str) -> NoReturn:
+    provider = backup_provider()
+    targets = backup_targets()
+
+    for target in targets:
+        if target.env_name.lower() != target_name.lower():
+            continue
+        backups = provider.all_target_backups(target.env_name.lower())
+        if not backups:
+            log.warning("no backups at all for '%s'", target_name)
+            sys.exit(2)
+        if backup_name not in backups:
+            log.warning(
+                "backup '%s' not exist at all for '%s'", backup_name, target_name
+            )
+            sys.exit(2)
+        path_zip = provider.download_backup(backup_name)
         path = core.run_unzip_zip_archive(path_zip)
         target.restore(str(path))
         sys.exit(0)
@@ -319,12 +354,23 @@ def main() -> NoReturn:
         run_debug_notifications_and_exit()
     elif runtime_args.single:
         run_single_all_backups()
-    elif runtime_args.download is not None:
-        run_download_backup_file(runtime_args.download)
+    elif runtime_args.debug_download is not None:
+        run_download_backup_file(runtime_args.debug_download)
     elif runtime_args.list:
-        run_list_backup_files()
-    elif runtime_args.restore_latest is not None:
-        run_restore_latest(runtime_args.restore_latest)
+        if runtime_args.target is None:
+            log.warning("--target must be defined to use --list")
+            sys.exit(3)
+        run_list_backup_files(runtime_args.target)
+    elif runtime_args.restore_latest:
+        if runtime_args.target is None:
+            log.warning("--target must be defined to use --restore-latest")
+            sys.exit(3)
+        run_restore_latest(runtime_args.target)
+    elif runtime_args.restore is not None:
+        if runtime_args.target is None:
+            log.warning("--target must be defined to use --restore-latest")
+            sys.exit(3)
+        run_restore(runtime_args.restore, runtime_args.target)
     else:  # pragma: no cover
         run_main_loop()
 
