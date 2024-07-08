@@ -8,7 +8,6 @@ import sys
 import threading
 import time
 from dataclasses import dataclass
-from pprint import pprint
 from types import FrameType
 from typing import NoReturn
 
