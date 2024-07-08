@@ -5,15 +5,13 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TypeVar, final
+from typing import final
 
 from croniter import croniter
 
 from ogion.models.backup_target_models import TargetModel
 
 log = logging.getLogger(__name__)
-
-TM = TypeVar("TM", bound=TargetModel)
 
 
 class BaseBackupTarget(ABC):
@@ -44,14 +42,6 @@ class BaseBackupTarget(ABC):
         return self.target_model.min_retention_days
 
     @final
-    def make_backup(self) -> Path:
-        try:
-            return self._backup()
-        except Exception as err:
-            log.error(err, exc_info=True)
-            raise
-
-    @final
     def _get_next_backup_time(self) -> datetime:
         now = datetime.now(UTC)
         cron = croniter(
@@ -70,6 +60,16 @@ class BaseBackupTarget(ABC):
             return True
         return False
 
+    @final
+    @property
+    def pretty_thread_name(self) -> str:
+        pretty_env_name = self.env_name.replace("_", "-")
+        return f"Thread-{pretty_env_name}"
+
     @abstractmethod
-    def _backup(self) -> Path:  # pragma: no cover
+    def backup(self) -> Path:  # pragma: no cover
+        pass
+
+    @abstractmethod
+    def restore(self, path: str) -> None:  # pragma: no cover
         pass

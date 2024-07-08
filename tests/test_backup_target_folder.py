@@ -13,7 +13,7 @@ from .conftest import CONST_TOKEN_URLSAFE, FOLDER_1
 @freeze_time("2024-03-14")
 def test_run_folder_backup_output_folder_has_proper_name() -> None:
     folder = Folder(target_model=FOLDER_1)
-    out_backup = folder.make_backup()
+    out_backup = folder.backup()
 
     folder_name = FOLDER_1.abs_path.name
     out_file = (
@@ -26,7 +26,7 @@ def test_run_folder_backup_output_folder_has_proper_name() -> None:
 
 def test_run_folder_backup_output_file_in_folder_has_exact_same_content() -> None:
     folder = Folder(target_model=FOLDER_1)
-    out_backup = folder.make_backup()
+    out_backup = folder.backup()
 
     file_in_folder = FOLDER_1.abs_path / "file.txt"
     file_in_out_folder = out_backup / "file.txt"

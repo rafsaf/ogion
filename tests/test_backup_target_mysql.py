@@ -33,7 +33,7 @@ def test_mysql_connection_fail(mysql_target: MySQLTargetModel) -> None:
 @pytest.mark.parametrize("mysql_target", ALL_MYSQL_DBS_TARGETS)
 def test_run_mysqldump(mysql_target: MySQLTargetModel) -> None:
     db = MySQL(target_model=mysql_target)
-    out_backup = db.make_backup()
+    out_backup = db.backup()
 
     escaped_name = "database_12"
     escaped_version = db.db_version.replace(".", "")
@@ -91,7 +91,10 @@ def test_end_to_end_successful_restore_after_backup(
         f"--execute={insert_query}",
     )
 
-    test_db_backup = test_db.make_backup()
+    test_db_backup = test_db.backup()
+    backup_zip = core.run_create_zip_archive(test_db_backup)
+    test_db_backup.unlink()
+    test_db_backup = core.run_unzip_zip_archive(backup_zip)
 
     core.run_subprocess(
         f"mariadb --defaults-file={db.option_file} {db.db_name} --execute="
@@ -102,10 +105,27 @@ def test_end_to_end_successful_restore_after_backup(
         "'CREATE DATABASE test_db;'",
     )
 
-    core.run_subprocess(
+    test_db.restore(str(test_db_backup))
+
+    result = core.run_subprocess(
         f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"
-        f" < {test_db_backup}",
+        " --execute='select * from my_table order by id asc;'",
     )
+
+    assert result == ("id\tname\tage\n" "1\tGeralt z Rivii\t60\n" "2\trafsaf\t24\n")
+
+    result = core.run_subprocess(
+        f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"
+        " --execute='delete from my_table where id = '2';'",
+    )
+    result = core.run_subprocess(
+        f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"
+        " --execute='select * from my_table order by id asc;'",
+    )
+
+    assert result == ("id\tname\tage\n" "1\tGeralt z Rivii\t60\n")
+
+    test_db.restore(str(test_db_backup))
 
     result = core.run_subprocess(
         f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"

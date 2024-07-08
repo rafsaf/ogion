@@ -3,8 +3,9 @@
 
 import logging
 from pathlib import Path
+from typing import override
 
-from ogion import core
+from ogion import config, core
 from ogion.models.upload_provider_models import DebugProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
 
@@ -20,27 +21,41 @@ class UploadProviderLocalDebug(BaseUploadProvider):
     def __init__(self, target_provider: DebugProviderModel) -> None:
         pass
 
-    def _post_save(self, backup_file: Path) -> str:
+    @override
+    def post_save(self, backup_file: Path) -> str:
         zip_file = core.run_create_zip_archive(backup_file=backup_file)
         return str(zip_file)
 
-    def _clean(
+    @override
+    def all_target_backups(self, env_name: str) -> list[str]:
+        backups: list[str] = []
+        path = config.CONST_BACKUP_FOLDER_PATH / env_name
+        for backup_path in path.iterdir():
+            backups.append(str(backup_path.absolute()))
+        backups.sort(reverse=True)
+        return backups
+
+    @override
+    def download_backup(self, path: str) -> Path:
+        return Path(path)
+
+    @override
+    def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
         core.remove_path(backup_file)
-        files: list[str] = []
-        for backup_path in backup_file.parent.iterdir():
-            files.append(str(backup_path.absolute()))
-        files.sort(reverse=True)
-        while len(files) > max_backups:
-            backup_to_remove = Path(files.pop())
+
+        backups = self.all_target_backups(env_name=backup_file.parent.name)
+
+        while len(backups) > max_backups:
+            backup_to_remove = Path(backups.pop())
             if core.file_before_retention_period_ends(
                 backup_name=backup_to_remove.name, min_retention_days=min_retention_days
             ):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "
                     "but oldest cannot be removed due to min retention days",
-                    len(files),
+                    len(backups),
                     max_backups,
                 )
                 break

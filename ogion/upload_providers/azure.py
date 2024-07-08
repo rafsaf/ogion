@@ -3,10 +3,11 @@
 
 import logging
 from pathlib import Path
+from typing import override
 
 from azure.storage.blob import BlobServiceClient
 
-from ogion import core
+from ogion import config, core
 from ogion.models.upload_provider_models import AzureProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
 
@@ -26,7 +27,8 @@ class UploadProviderAzure(BaseUploadProvider):
             container=self.container_name
         )
 
-    def _post_save(self, backup_file: Path) -> str:
+    @override
+    def post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
         backup_dest_in_azure_container = (
@@ -51,24 +53,38 @@ class UploadProviderAzure(BaseUploadProvider):
         )
         return backup_dest_in_azure_container
 
-    def _clean(
+    @override
+    def all_target_backups(self, env_name: str) -> list[str]:
+        backups: list[str] = []
+        for blob in self.container_client.list_blobs(name_starts_with=env_name):
+            backups.append(blob.name)
+
+        backups.sort(reverse=True)
+        return backups
+
+    @override
+    def download_backup(self, path: str) -> Path:
+        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        backup_file.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(backup_file, mode="wb") as file:
+            stream = self.container_client.download_blob(path)
+            stream.readinto(file)
+
+        return backup_file
+
+    @override
+    def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
         for backup_path in backup_file.parent.iterdir():
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
 
-        backup_list_cloud: list[str] = []
-        for blob in self.container_client.list_blobs(
-            name_starts_with=backup_file.parent.name
-        ):
-            backup_list_cloud.append(blob.name)
+        backups = self.all_target_backups(env_name=backup_file.parent.name)
 
-        # remove oldest
-        backup_list_cloud.sort(reverse=True)
-
-        while len(backup_list_cloud) > max_backups:
-            backup_to_remove = backup_list_cloud.pop()
+        while len(backups) > max_backups:
+            backup_to_remove = backups.pop()
             file_name = backup_to_remove.split("/")[-1]
             if core.file_before_retention_period_ends(
                 backup_name=file_name, min_retention_days=min_retention_days
@@ -76,7 +92,7 @@ class UploadProviderAzure(BaseUploadProvider):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "
                     "but oldest cannot be removed due to min retention days",
-                    len(backup_list_cloud),
+                    len(backups),
                     max_backups,
                 )
                 break

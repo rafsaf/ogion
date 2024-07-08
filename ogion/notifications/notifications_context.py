@@ -73,6 +73,7 @@ class NotificationsContext(ContextDecorator):
         exc_traceback: TracebackType | None,
     ) -> None:
         if exc_type and exc_val and exc_traceback:
+            log.error("%s: %s", exc_val, exc_traceback)
             log.error("step %s failed, sending notifications", self.step_name)
 
             fail_message = self.create_fail_message(

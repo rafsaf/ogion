@@ -3,12 +3,12 @@
 
 import logging
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any, TypedDict, override
 
 import boto3
 from boto3.s3.transfer import TransferConfig
 
-from ogion import core
+from ogion import config, core
 from ogion.models.upload_provider_models import AWSProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
 
@@ -36,7 +36,8 @@ class UploadProviderAWS(BaseUploadProvider):
         self.bucket = s3.Bucket(target_provider.bucket_name)
         self.transfer_config = TransferConfig(max_bandwidth=self.max_bandwidth)
 
-    def _post_save(self, backup_file: Path) -> str:
+    @override
+    def post_save(self, backup_file: Path) -> str:
         zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
 
         backup_dest_in_bucket = (
@@ -56,24 +57,43 @@ class UploadProviderAWS(BaseUploadProvider):
         log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
-    def _clean(
+    @override
+    def all_target_backups(self, env_name: str) -> list[str]:
+        backups: list[str] = []
+        prefix = f"{self.bucket_upload_path}/{env_name}/"
+        for bucket_obj in self.bucket.objects.filter(Delimiter="/", Prefix=prefix):
+            backups.append(bucket_obj.key)
+
+        backups.sort(reverse=True)
+        return backups
+
+    @override
+    def download_backup(self, path: str) -> Path:
+        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        backup_file.parent.mkdir(parents=True, exist_ok=True)
+        backup_file.touch(exist_ok=True)
+
+        self.bucket.upload_file(
+            Filename=backup_file,
+            Key=path,
+            Config=self.transfer_config,
+        )
+
+        return backup_file
+
+    @override
+    def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
         for backup_path in backup_file.parent.iterdir():
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
 
-        backup_list_cloud: list[str] = []
-        prefix = f"{self.bucket_upload_path}/{backup_file.parent.name}/"
-        for bucket_obj in self.bucket.objects.filter(Delimiter="/", Prefix=prefix):
-            backup_list_cloud.append(bucket_obj.key)
-
-        # remove oldest
-        backup_list_cloud.sort(reverse=True)
         items_to_delete: list[DeleteItemDict] = []
+        backups = self.all_target_backups(env_name=backup_file.parent.name)
 
-        while len(backup_list_cloud) > max_backups:
-            backup_to_remove = backup_list_cloud.pop()
+        while len(backups) > max_backups:
+            backup_to_remove = backups.pop()
             file_name = backup_to_remove.split("/")[-1]
             if core.file_before_retention_period_ends(
                 backup_name=file_name, min_retention_days=min_retention_days
@@ -81,7 +101,7 @@ class UploadProviderAWS(BaseUploadProvider):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "
                     "but oldest cannot be removed due to min retention days",
-                    len(backup_list_cloud),
+                    len(backups),
                     max_backups,
                 )
                 break

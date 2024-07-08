@@ -1,6 +1,7 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import logging
 import os
 import shlex
 from pathlib import Path
@@ -27,24 +28,26 @@ def test_safe_text_version(text: str, result: str) -> None:
 
 
 def test_run_subprocess_fail(caplog: LogCaptureFixture) -> None:
-    with pytest.raises(core.CoreSubprocessError):
-        core.run_subprocess("exit 1")
-    assert caplog.messages == [
-        "run_subprocess running: 'exit 1'",
-        "run_subprocess failed with status 1",
-        "run_subprocess stdout: ",
-        "run_subprocess stderr: ",
-    ]
+    with caplog.at_level(logging.DEBUG):
+        with pytest.raises(core.CoreSubprocessError):
+            core.run_subprocess("exit 1")
+        assert caplog.messages == [
+            "run_subprocess running: 'exit 1'",
+            "run_subprocess failed with status 1",
+            "run_subprocess stdout: ",
+            "run_subprocess stderr: ",
+        ]
 
 
 def test_run_subprocess_success(caplog: LogCaptureFixture) -> None:
-    core.run_subprocess("echo 'welcome'")
-    assert caplog.messages == [
-        "run_subprocess running: 'echo 'welcome''",
-        "run_subprocess finished with status 0",
-        "run_subprocess stdout: welcome\n",
-        "run_subprocess stderr: ",
-    ]
+    with caplog.at_level(logging.DEBUG):
+        core.run_subprocess("echo 'welcome'")
+        assert caplog.messages == [
+            "run_subprocess running: 'echo 'welcome''",
+            "run_subprocess finished with status 0",
+            "run_subprocess stdout: welcome\n",
+            "run_subprocess stderr: ",
+        ]
 
 
 @freeze_time("2022-12-11")
@@ -82,6 +85,23 @@ def test_run_create_zip_archive_can_be_unzipped_using_unzip(tmp_path: Path) -> N
     shell_unzip = f"unzip -P {passwd} -d {tmp_path} {archive_file}"
 
     core.run_subprocess(shell_unzip)
+
+    assert fake_backup_file.exists()
+    assert fake_backup_file.read_text() == "xxxąć”©#$%"
+
+
+def test_run_create_zip_archive_can_be_unzipped_using_core_unzip(
+    tmp_path: Path,
+) -> None:
+    fake_backup_file = tmp_path / "test_archive"
+
+    with open(fake_backup_file, "w") as f:
+        f.write("xxxąć”©#$%")
+
+    archive_file = core.run_create_zip_archive(fake_backup_file)
+    fake_backup_file.unlink()
+
+    fake_backup_file = core.run_unzip_zip_archive(archive_file)
 
     assert fake_backup_file.exists()
     assert fake_backup_file.read_text() == "xxxąć”©#$%"

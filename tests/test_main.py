@@ -2,6 +2,8 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import sys
+import threading
+import time
 from pathlib import Path
 from typing import Any, NoReturn
 from unittest.mock import Mock
@@ -22,6 +24,8 @@ from .conftest import (
     FILE_1,
     FOLDER_1,
 )
+
+SECONDS_TIMEOUT = 5
 
 
 @pytest.fixture(autouse=True)
@@ -89,10 +93,16 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     with pytest.raises(SystemExit) as system_exit:
         main.main()
-    assert system_exit.type == SystemExit
+    assert system_exit.type is SystemExit
 
     target_envs = [model.env_name for model in models]
     count = 0
+
+    timeout: float = 0
+    while threading.active_count() > 1 and timeout < SECONDS_TIMEOUT:
+        timeout += 0.05
+        time.sleep(0.05)
+
     for dir in config.CONST_BACKUP_FOLDER_PATH.iterdir():
         assert dir.is_dir()
         assert dir.name in target_envs
@@ -105,7 +115,7 @@ def test_main_debug_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(SystemExit) as system_exit:
         main.main()
-    assert system_exit.type == SystemExit
+    assert system_exit.type is SystemExit
 
 
 @pytest.mark.parametrize(
@@ -132,13 +142,14 @@ def test_run_backup_notifications_fail_message_is_fired_when_it_fails(
     target = main.backup_targets()[0]
     backup_file = Path("/tmp/fake")
     backup_mock = Mock(return_value=backup_file, side_effect=make_backup_side_effect)
-    monkeypatch.setattr(target, "_backup", backup_mock)
+    monkeypatch.setattr(target, "backup", backup_mock)
     provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
-    monkeypatch.setattr(provider, "_post_save", Mock(side_effect=post_save_side_effect))
-    monkeypatch.setattr(provider, "_clean", Mock(side_effect=clean_side_effect))
+    monkeypatch.setattr(provider, "post_save", Mock(side_effect=post_save_side_effect))
+    monkeypatch.setattr(provider, "clean", Mock(side_effect=clean_side_effect))
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider))
 
     with pytest.raises(ValueError):
-        main.run_backup(target=target, provider=provider)
+        main.run_backup(target=target)
     fail_message_mock.assert_called_once()
 
 

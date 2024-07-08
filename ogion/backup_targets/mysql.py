@@ -6,6 +6,7 @@ import logging
 import re
 import shlex
 from pathlib import Path
+from typing import override
 
 from ogion import config, core
 from ogion.backup_targets.base_target import BaseBackupTarget
@@ -91,7 +92,8 @@ class MySQL(BaseBackupTarget):
         log.info("mysql_connection calculated version: %s", version)
         return version
 
-    def _backup(self) -> Path:
+    @override
+    def backup(self) -> Path:
         escaped_dbname = core.safe_text_version(self.target_model.db)
         escaped_version = core.safe_text_version(self.db_version)
         name = f"{escaped_dbname}_{escaped_version}"
@@ -106,3 +108,12 @@ class MySQL(BaseBackupTarget):
         core.run_subprocess(shell_mysqldump_db)
         log.debug("finished mysqldump, output: %s", out_file)
         return out_file
+
+    @override
+    def restore(self, path: str) -> None:
+        shell_mysql_restore = (
+            f"mariadb --defaults-file={self.option_file} {self.db_name} < {path}"
+        )
+        log.debug("start restore in subprocess: %s", shell_mysql_restore)
+        core.run_subprocess(shell_mysql_restore)
+        log.debug("finished restore")

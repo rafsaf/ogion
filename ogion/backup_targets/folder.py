@@ -3,6 +3,7 @@
 
 import logging
 from pathlib import Path
+from typing import override
 
 from ogion import core
 from ogion.backup_targets.base_target import BaseBackupTarget
@@ -16,7 +17,8 @@ class Folder(BaseBackupTarget):
         super().__init__(target_model)
         self.target_model: DirectoryTargetModel = target_model
 
-    def _backup(self) -> Path:
+    @override
+    def backup(self) -> Path:
         escaped_foldername = core.safe_text_version(self.target_model.abs_path.name)
 
         out_file = core.get_new_backup_path(self.env_name, escaped_foldername)
@@ -26,3 +28,10 @@ class Folder(BaseBackupTarget):
         core.run_subprocess(shell_create_dir_symlink)
         log.debug("finished ln, output: %s", out_file)
         return out_file
+
+    @override
+    def restore(self, path: str) -> None:
+        shell_cp_file = f"rsync -avh {path}/ {self.target_model.abs_path}"
+        log.debug("start cp in subprocess: %s", shell_cp_file)
+        core.run_subprocess(shell_cp_file)
+        log.debug("finished cp to %s", self.target_model.abs_path)

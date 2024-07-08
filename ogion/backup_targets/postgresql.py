@@ -7,6 +7,7 @@ import re
 import shlex
 import urllib.parse
 from pathlib import Path
+from typing import override
 
 from ogion import config, core
 from ogion.backup_targets.base_target import BaseBackupTarget
@@ -107,7 +108,8 @@ class PostgreSQL(BaseBackupTarget):
         log.info("postgres_connection calculated version: %s", version)
         return version
 
-    def _backup(self) -> Path:
+    @override
+    def backup(self) -> Path:
         escaped_dbname = core.safe_text_version(self.target_model.db)
         escaped_version = core.safe_text_version(self.db_version)
         name = f"{escaped_dbname}_{escaped_version}"
@@ -122,3 +124,10 @@ class PostgreSQL(BaseBackupTarget):
         core.run_subprocess(shell_pg_dump_db)
         log.debug("finished pg_dump, output: %s", out_file)
         return out_file
+
+    @override
+    def restore(self, path: str) -> None:
+        shell_psql_restore = f"psql {self.escaped_conn_uri} < {path}"
+        log.debug("start restore in subprocess: %s", shell_psql_restore)
+        core.run_subprocess(shell_psql_restore)
+        log.debug("finished restore")

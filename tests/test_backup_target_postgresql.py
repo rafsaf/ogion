@@ -38,7 +38,7 @@ def test_postgres_connection_fail(postgres_target: PostgreSQLTargetModel) -> Non
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
 def test_run_pg_dump(postgres_target: PostgreSQLTargetModel) -> None:
     db = PostgreSQL(target_model=postgres_target)
-    out_backup = db.make_backup()
+    out_backup = db.backup()
 
     escaped_name = "database_12"
     escaped_version = db.db_version.replace(".", "")
@@ -86,7 +86,10 @@ def test_end_to_end_successful_restore_after_backup(
         f"psql -d {test_db.escaped_conn_uri} -w --command {insert_query}",
     )
 
-    test_db_backup = test_db.make_backup()
+    test_db_backup = test_db.backup()
+    backup_zip = core.run_create_zip_archive(test_db_backup)
+    test_db_backup.unlink()
+    test_db_backup = core.run_unzip_zip_archive(backup_zip)
 
     core.run_subprocess(
         f"psql -d {db.escaped_conn_uri} -w --command 'DROP DATABASE test_db;'",
@@ -95,9 +98,27 @@ def test_end_to_end_successful_restore_after_backup(
         f"psql -d {db.escaped_conn_uri} -w --command 'CREATE DATABASE test_db;'",
     )
 
-    core.run_subprocess(
-        f"psql -d {test_db.escaped_conn_uri} -w < {test_db_backup}",
+    test_db.restore(str(test_db_backup))
+
+    result = core.run_subprocess(
+        f"psql -d {test_db.escaped_conn_uri} -w --command "
+        "'select * from my_table order by id asc;'",
     )
+
+    assert result == (
+        " id |      name      | age \n"
+        "----+----------------+-----\n"
+        "  1 | Geralt z Rivii |  60\n"
+        "  2 | rafsaf         |  24\n"
+        "(2 rows)\n\n"
+    )
+
+    core.run_subprocess(
+        f"psql -d {test_db.escaped_conn_uri} -w --command "
+        "'delete from my_table where id = '2';'",
+    )
+
+    test_db.restore(str(test_db_backup))
 
     result = core.run_subprocess(
         f"psql -d {test_db.escaped_conn_uri} -w --command "
