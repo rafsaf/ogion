@@ -158,3 +158,36 @@ def test_quit(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(main, "exit_event", exit_mock)
     main.quit(1, None)
     exit_mock.set.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "cli_args,expected_attributes",
+    [
+        (["main.py", "--single"], {"single": True}),
+        (["main.py", "--debug-notifications"], {"debug_notifications": True}),
+        (
+            ["main.py", "--debug-download", "example.log"],
+            {"debug_download": "example.log"},
+        ),
+        (["main.py", "--list"], {"list": True}),
+        (["main.py", "--restore-latest"], {"restore_latest": True}),
+        (["main.py", "--target", "example_target"], {"target": "example_target"}),
+        (
+            ["main.py", "--restore", "example_restore"],
+            {"restore": "example_restore"},
+        ),
+    ],
+)
+def test_setup_runtime_arguments_parametrized(
+    monkeypatch: pytest.MonkeyPatch,
+    cli_args: list[str],
+    expected_attributes: dict[str, bool | str],
+) -> None:
+    monkeypatch.setattr("sys.argv", cli_args)
+
+    args: main.RuntimeArgs = main.setup_runtime_arguments()
+
+    assert isinstance(args, main.RuntimeArgs)
+
+    for attribute, expected_value in expected_attributes.items():
+        assert getattr(args, attribute) == expected_value
