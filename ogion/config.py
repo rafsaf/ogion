@@ -56,7 +56,7 @@ class Settings(BaseSettings):
         default="amd64", alias_priority=2, alias="OGION_CPU_ARCHITECTURE"
     )
     SUBPROCESS_TIMEOUT_SECS: float = Field(ge=5, le=3600 * 24, default=3600)
-    SIGTERM_TIMEOUT_SECS: float = Field(ge=0, le=3600 * 24, default=30)
+    SIGTERM_TIMEOUT_SECS: float = Field(ge=0, le=3600 * 24, default=3600)
     ZIP_ARCHIVE_LEVEL: int = Field(ge=1, le=9, default=3)
     BACKUP_MAX_NUMBER: int = Field(ge=1, le=998, default=7)
     BACKUP_MIN_RETENTION_DAYS: int = Field(ge=0, le=36600, default=3)
