@@ -29,7 +29,7 @@ from ogion.tools.compose_file_generator import (
     db_compose_postgresql_data,
 )
 
-TM = TypeVar("TM")
+TM = TypeVar("TM", MariaDBTargetModel, PostgreSQLTargetModel, MySQLTargetModel)
 
 
 def _to_target_model(
@@ -37,7 +37,7 @@ def _to_target_model(
     model: type[TM],
 ) -> TM:
     DB_VERSION_BY_ENV_VAR[compose_db.name] = compose_db.version
-    return model(  # type: ignore[call-arg]
+    return model(
         env_name=compose_db.name,
         cron_rule="* * * * *",
         host=compose_db.name if DOCKER_TESTS else "localhost",
