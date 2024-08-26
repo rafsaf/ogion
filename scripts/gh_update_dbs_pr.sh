@@ -11,7 +11,7 @@ then
     echo "no changes detected"
 else
     echo "file changed"
-    make tests_amd64
+    make unit_tests
     echo "merge changes"
     timestamp=$(date +%s)
     branch="update-docker-compose-dbs-$timestamp"

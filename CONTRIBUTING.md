@@ -64,8 +64,8 @@ You can run all the test cases locally by invoking `pytest`.
 Since the code is closely related to docker container environment, setup to run pytest
 directly in the container exists:
 
-- amd64: `make tests_amd64`
-- arm64 (slow, qemu) `make tests_arm64`
+- amd64: `make unit_tests`
+- arm64 (slow, qemu) `OGION_ARCH=arm64 make unit_tests`
 
 To run tests vs `arm64` you will need to follow steps in https://docs.docker.com/build/building/multi-platform/.
 
