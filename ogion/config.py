@@ -70,12 +70,12 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: SecretStr = SecretStr("")
     SMTP_TO_ADDRS: str = ""
 
-    @computed_field  # type: ignore[misc]
+    @computed_field  # type: ignore[prop-decorator]
     @cached_property
     def seven_zip_bin_path(self) -> Path:
         return CONST_BASE_DIR / f"ogion/bin/7zip/{self.CPU_ARCH}/7zzs"
 
-    @computed_field  # type: ignore[misc]
+    @computed_field  # type: ignore[prop-decorator]
     @cached_property
     def smtp_addresses(self) -> list[str]:
         return self.SMTP_TO_ADDRS.split(",")

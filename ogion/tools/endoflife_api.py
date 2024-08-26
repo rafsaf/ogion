@@ -23,7 +23,7 @@ class EOLApiProductCycle(BaseModel):
     support: str | bool | None = None
     discontinued: str | bool | None = None
 
-    @computed_field  # type: ignore[misc]
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def before_eol(self) -> bool:
         now = datetime.now(UTC)
