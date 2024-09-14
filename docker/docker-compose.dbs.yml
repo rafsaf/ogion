@@ -7,7 +7,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.11.8
+    image: mariadb:10.11.9
     networks:
     - ogion
     ports:
@@ -19,7 +19,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.5.25
+    image: mariadb:10.5.26
     networks:
     - ogion
     ports:
@@ -31,23 +31,11 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.6.18
+    image: mariadb:10.6.19
     networks:
     - ogion
     ports:
     - 11106:3306
-    restart: 'no'
-  ogion_mariadb_11_1:
-    environment:
-    - MARIADB_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
-    - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
-    - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
-    - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.1.5
-    networks:
-    - ogion
-    ports:
-    - 11111:3306
     restart: 'no'
   ogion_mariadb_11_2:
     environment:
@@ -55,7 +43,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.2.4
+    image: mariadb:11.2.5
     networks:
     - ogion
     ports:
@@ -67,7 +55,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.4.2
+    image: mariadb:11.4.3
     networks:
     - ogion
     ports:
@@ -79,35 +67,11 @@ services:
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.0.38
+    image: mysql:8.0.39
     networks:
     - ogion
     ports:
     - 9080:3306
-    restart: 'no'
-  ogion_mysql_8_2:
-    environment:
-    - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
-    - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
-    - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
-    - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.2.0
-    networks:
-    - ogion
-    ports:
-    - 9082:3306
-    restart: 'no'
-  ogion_mysql_8_3:
-    environment:
-    - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
-    - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
-    - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
-    - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.3.0
-    networks:
-    - ogion
-    ports:
-    - 9083:3306
     restart: 'no'
   ogion_mysql_8_4:
     environment:
@@ -115,18 +79,30 @@ services:
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.4.1
+    image: mysql:8.4.2
     networks:
     - ogion
     ports:
     - 9084:3306
+    restart: 'no'
+  ogion_mysql_9_0:
+    environment:
+    - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
+    - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
+    - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
+    image: mysql:9.0.1
+    networks:
+    - ogion
+    ports:
+    - 9090:3306
     restart: 'no'
   ogion_postgres_12:
     environment:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:12.19-bookworm
+    image: postgres:12.20-bookworm
     networks:
     - ogion
     ports:
@@ -137,7 +113,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:13.15-bookworm
+    image: postgres:13.16-bookworm
     networks:
     - ogion
     ports:
@@ -148,7 +124,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:14.12-bookworm
+    image: postgres:14.13-bookworm
     networks:
     - ogion
     ports:
@@ -159,7 +135,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:15.7-bookworm
+    image: postgres:15.8-bookworm
     networks:
     - ogion
     ports:
@@ -170,7 +146,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:16.3-bookworm
+    image: postgres:16.4-bookworm
     networks:
     - ogion
     ports:
