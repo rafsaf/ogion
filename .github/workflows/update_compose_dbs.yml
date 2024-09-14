@@ -38,6 +38,7 @@ jobs:
 
       - name: Check update
         run: |
+          cp .env.example .env
           make update_compose_db_file
           ./scripts/gh_update_dbs_pr.sh
         env:
