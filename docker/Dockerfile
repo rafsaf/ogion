@@ -1,4 +1,4 @@
-FROM python:3.12.5-slim-bookworm AS base
+FROM python:3.12.6-slim-bookworm AS base
 ARG TARGETARCH
 ARG PYTHONUNBUFFERED=1
 ARG PIP_DISABLE_PIP_VERSION_CHECK=1
