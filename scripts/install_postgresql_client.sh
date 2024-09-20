@@ -1,10 +1,10 @@
+#!/bin/sh
 #########################################################################
 # POSTGRES CLIENT INSTALLATION
 #
 # https://www.postgresql.org/download/linux/debian/
 # Note apt-key is considered unsecure and signed-by used as a replacement
 #########################################################################
-#!/bin/sh
 CPU="$(dpkg --print-architecture)"
 DISTR="$(awk -F= '/^ID=/{print $2}' /etc/os-release)"
 DISTR_VERSION="$(awk -F= '/^VERSION_CODENAME=/{print $2}' /etc/os-release)"
