@@ -9,22 +9,29 @@ ENV LOG_FOLDER_PATH="/var/log/ogion"
 ENV OGION_CPU_ARCHITECTURE=${TARGETARCH}
 WORKDIR ${FOLDER_PATH}
 
-RUN apt-get -y update && apt-get -y install age wget tar gpg
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get -y update && apt-get -y install age wget tar gpg
+
 COPY scripts scripts
-RUN ./scripts/install_mariadb_client.sh
-RUN ./scripts/install_postgresql_client.sh
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    ./scripts/install_mariadb_client.sh
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    ./scripts/install_postgresql_client.sh
 RUN apt-get -y remove gpg
 
 FROM base AS poetry
-RUN pip install poetry==1.8.2
-RUN poetry self add poetry-plugin-export
+RUN --mount=type=cache,target=/root/.cache/pip pip install poetry==1.8.2
+RUN --mount=type=cache,target=/root/.cache/pip poetry self add poetry-plugin-export
 COPY poetry.lock pyproject.toml ./
 RUN poetry export -o /requirements.txt --without-hashes
 RUN poetry export -o /requirements-tests.txt --without-hashes --with tests
 
 FROM base AS common
 COPY --from=poetry /requirements.txt .
-RUN pip install -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 RUN rm -f requirements.txt
 # reduce size of botocore lib, see https://github.com/boto/botocore/issues/1543
 RUN mkdir /tmp/data \
@@ -57,7 +64,7 @@ COPY LICENSE LICENSE
 
 FROM common AS tests
 COPY --from=poetry /requirements-tests.txt .
-RUN pip install -r requirements-tests.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-tests.txt
 COPY pyproject.toml .
 COPY tests tests
 CMD ["pytest"]
