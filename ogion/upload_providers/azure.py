@@ -29,7 +29,7 @@ class UploadProviderAzure(BaseUploadProvider):
 
     @override
     def post_save(self, backup_file: Path) -> str:
-        zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
+        zip_backup_file = core.run_create_age_archive(backup_file=backup_file)
 
         backup_dest_in_azure_container = (
             f"{zip_backup_file.parent.name}/{zip_backup_file.name}"

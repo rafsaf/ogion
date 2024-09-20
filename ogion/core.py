@@ -6,9 +6,9 @@ import logging.config
 import os
 import re
 import secrets
-import shlex
 import shutil
 import subprocess
+import tempfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, TypeVar
@@ -73,53 +73,39 @@ def get_new_backup_path(env_name: str, name: str) -> Path:
     return base_dir_path / new_file
 
 
-def run_unzip_zip_archive(backup_file: Path) -> Path:
-    log.info("start unzip zip archive in subprocess: %s", backup_file)
-    zip_escaped_password = shlex.quote(
-        config.options.ZIP_ARCHIVE_PASSWORD.get_secret_value()
-    )
+def run_decrypt_age_archive(backup_file: Path, debug_secret: str | None = None) -> Path:
+    log.info("start age decrypt archive in subprocess: %s", backup_file)
 
-    # TODO :9
-    shell_unzip_7zip_archive = (
-        f"unzip -o -P {zip_escaped_password} -d {backup_file.parent} {backup_file}"
-    )
-    run_subprocess(shell_unzip_7zip_archive)
-    log.info("finished zip archive unzip")
-    return Path(str(backup_file).removesuffix(".zip"))
+    out = Path(str(backup_file).removesuffix(".age"))
 
+    if debug_secret:
+        secret = debug_secret
+    else:
+        secret = input("please input age private key to decrypt\n")
 
-def run_create_zip_archive(backup_file: Path) -> Path:
-    out_file = Path(f"{backup_file}.zip")
-    log.info("start creating zip archive in subprocess: %s", backup_file)
-    zip_escaped_password = shlex.quote(
-        config.options.ZIP_ARCHIVE_PASSWORD.get_secret_value()
-    )
-    shell_create_7zip_archive = (
-        f"{config.options.seven_zip_bin_path} a -p{zip_escaped_password} "
-        f"-mx={config.options.ZIP_ARCHIVE_LEVEL} {out_file} {backup_file}"
-    )
-    run_subprocess(shell_create_7zip_archive)
-    log.info("finished zip archive creating")
+    with tempfile.NamedTemporaryFile("w") as identity_file:
+        identity_file.write(secret)
+        identity_file.flush()
 
-    if config.options.ZIP_SKIP_INTEGRITY_CHECK:
-        return out_file
-
-    log.info(
-        (
-            "start zip archive integriy test on %s in subprocess, "
-            "you can control it using ZIP_SKIP_INTEGRITY_CHECK"
-        ),
-        out_file,
-    )
-    shell_7zip_archive_integriy_check = (
-        f"{config.options.seven_zip_bin_path} t -p{zip_escaped_password} {out_file}"
-    )
-    integrity_check_result = run_subprocess(shell_7zip_archive_integriy_check)
-    if "Everything is Ok" not in integrity_check_result:  # pragma: no cover
-        raise AssertionError(
-            "zip arichive integrity test on %s: %s", out_file, integrity_check_result
+        shell_age_decrypt_archive = (
+            f"age -d -o {out} -i {identity_file.name} {backup_file}"
         )
-    log.info("finished zip archive integriy test")
+        run_subprocess(shell_age_decrypt_archive)
+        log.info("finished age archive decrypt")
+
+    return out
+
+
+def run_create_age_archive(backup_file: Path) -> Path:
+    out_file = Path(f"{backup_file}.age")
+    log.info("start creating age archive in subprocess: %s", backup_file)
+
+    recipients = config.options.age_recipients_file
+
+    shell_create_age_archive = f"age -R {recipients} " f"-o {out_file} {backup_file}"
+    run_subprocess(shell_create_age_archive)
+    log.info("finished age archive creating")
+
     return out_file
 
 

@@ -21,15 +21,15 @@ def test_local_debug_clean_file() -> None:
     fake_backup_file_path4 = fake_backup_dir_path / "fake_backup4_20230801_0000_file"
     fake_backup_file_path4.touch()
     fake_backup_file_zip_path4 = (
-        fake_backup_dir_path / "fake_backup4_20230801_0000_file.zip"
+        fake_backup_dir_path / "fake_backup4_20230801_0000_file.age"
     )
     fake_backup_file_zip_path4.touch()
     fake_backup_file_zip_path2 = (
-        fake_backup_dir_path / "fake_backup2_20230801_0000_file.zip"
+        fake_backup_dir_path / "fake_backup2_20230801_0000_file.age"
     )
     fake_backup_file_zip_path2.touch()
     fake_backup_file_zip_path3 = (
-        fake_backup_dir_path / "fake_backup3_20230801_0000_file.zip"
+        fake_backup_dir_path / "fake_backup3_20230801_0000_file.age"
     )
     fake_backup_file_zip_path3.touch()
 
@@ -49,15 +49,15 @@ def test_local_debug_clean_folder() -> None:
     fake_backup_file_path4 = fake_backup_dir_path / "fake_backup4_20230801_0000_file"
     fake_backup_file_path4.mkdir()
     fake_backup_file_zip_path4 = (
-        fake_backup_dir_path / "fake_backup4_20230801_0000_file.zip"
+        fake_backup_dir_path / "fake_backup4_20230801_0000_file.age"
     )
     fake_backup_file_zip_path4.mkdir()
     fake_backup_file_zip_path2 = (
-        fake_backup_dir_path / "fake_backup2_20230801_0000_file.zip"
+        fake_backup_dir_path / "fake_backup2_20230801_0000_file.age"
     )
     fake_backup_file_zip_path2.mkdir()
     fake_backup_file_zip_path3 = (
-        fake_backup_dir_path / "fake_backup3_20230801_0000_file.zip"
+        fake_backup_dir_path / "fake_backup3_20230801_0000_file.age"
     )
     fake_backup_file_zip_path3.mkdir()
     print("xxx")
@@ -81,16 +81,16 @@ def test_local_debug_respects_min_retention_days_param_and_not_delete_any_file()
     fake_backup_file_path = fake_backup_dir_path / "fake_backup_20230827_0001_file"
     fake_backup_file_path.touch()
     fake_backup_file_zip_path = (
-        fake_backup_dir_path / "fake_backup_20230827_0001_file.zip"
+        fake_backup_dir_path / "fake_backup_20230827_0001_file.age"
     )
     fake_backup_file_zip_path.touch()
 
     fake_backup_file_zip2_path = (
-        fake_backup_dir_path / "fake_backup2_20000501_0000_file.zip"
+        fake_backup_dir_path / "fake_backup2_20000501_0000_file.age"
     )
     fake_backup_file_zip2_path.touch()
     fake_backup_file_zip3_path = (
-        fake_backup_dir_path / "fake_backup_20000801_0000_file.zip"
+        fake_backup_dir_path / "fake_backup_20000801_0000_file.age"
     )
     fake_backup_file_zip3_path.touch()
     local.clean(fake_backup_file_path, 1, 365 * 30)

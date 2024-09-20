@@ -23,7 +23,7 @@ class UploadProviderLocalDebug(BaseUploadProvider):
 
     @override
     def post_save(self, backup_file: Path) -> str:
-        zip_file = core.run_create_zip_archive(backup_file=backup_file)
+        zip_file = core.run_create_age_archive(backup_file=backup_file)
         return str(zip_file)
 
     @override
