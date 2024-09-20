@@ -52,12 +52,12 @@ def test_azure_post_save_with_bucket_upload_path(
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_path = fake_backup_dir_path / "fake_backup"
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
     with open(fake_backup_file_path, "w") as f:
         f.write("abcdefghijk\n12345")
 
-    assert azure.post_save(fake_backup_file_path) == "fake_env_name/fake_backup.zip"
-    assert fake_backup_file_zip_path.exists()
+    assert azure.post_save(fake_backup_file_path) == "fake_env_name/fake_backup.age"
+    assert fake_backup_file_age_path.exists()
 
     blob_client_mock.upload_blob.assert_called_once()
 
@@ -68,17 +68,17 @@ class AzureBlob:
 
 
 list_blobs_short: list[AzureBlob] = [
-    AzureBlob("fake_env_name/file_20230427_0105_dummy_xfcs.zip"),
-    AzureBlob("fake_env_name/file_20230427_0108_dummy_xfcs.zip"),
-    AzureBlob("fake_env_name/file_19990427_0108_dummy_xfcs.zip"),
+    AzureBlob("fake_env_name/file_20230427_0105_dummy_xfcs.age"),
+    AzureBlob("fake_env_name/file_20230427_0108_dummy_xfcs.age"),
+    AzureBlob("fake_env_name/file_19990427_0108_dummy_xfcs.age"),
 ]
 list_blobs_long: list[AzureBlob] = [
-    AzureBlob("fake_env_name/file_20230427_0105_dummy_xfcs.zip"),
-    AzureBlob("fake_env_name/file_20230127_0105_dummy_xfcs.zip"),
-    AzureBlob("fake_env_name/file_20230426_0105_dummy_xfcs.zip"),
-    AzureBlob("fake_env_name/file_20230227_0105_dummy_xfcs.zip.zip"),
-    AzureBlob("fake_env_name/file_20230425_0105_dummy_xfcs.zip.zip"),
-    AzureBlob("fake_env_name/file_20230327_0105_dummy_xfcs.zip.zip"),
+    AzureBlob("fake_env_name/file_20230427_0105_dummy_xfcs.age"),
+    AzureBlob("fake_env_name/file_20230127_0105_dummy_xfcs.age"),
+    AzureBlob("fake_env_name/file_20230426_0105_dummy_xfcs.age"),
+    AzureBlob("fake_env_name/file_20230227_0105_dummy_xfcs.age.age"),
+    AzureBlob("fake_env_name/file_20230425_0105_dummy_xfcs.age.age"),
+    AzureBlob("fake_env_name/file_20230327_0105_dummy_xfcs.age.age"),
 ]
 
 
@@ -92,18 +92,18 @@ def test_azure_clean_file_and_short_blob_list(
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
-    fake_backup_file_zip_path.touch()
-    fake_backup_file_zip_path2 = fake_backup_dir_path / "fake_backup2.zip"
-    fake_backup_file_zip_path2.touch()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+    fake_backup_file_age_path.touch()
+    fake_backup_file_age_path2 = fake_backup_dir_path / "fake_backup2.age"
+    fake_backup_file_age_path2.touch()
 
-    azure.clean(fake_backup_file_zip_path, 2, 1)
+    azure.clean(fake_backup_file_age_path, 2, 1)
     assert fake_backup_dir_path.exists()
-    assert not fake_backup_file_zip_path.exists()
-    assert not fake_backup_file_zip_path2.exists()
+    assert not fake_backup_file_age_path.exists()
+    assert not fake_backup_file_age_path2.exists()
 
     container_client_mock.delete_blob.assert_called_once_with(
-        blob="fake_env_name/file_19990427_0108_dummy_xfcs.zip"
+        blob="fake_env_name/file_19990427_0108_dummy_xfcs.age"
     )
 
 
@@ -117,25 +117,25 @@ def test_azure_clean_directory_and_long_blob_list(
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
-    fake_backup_file_zip_path.touch()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+    fake_backup_file_age_path.touch()
 
     azure.clean(fake_backup_dir_path, 2, 1)
 
     assert not fake_backup_dir_path.exists()
-    assert not fake_backup_file_zip_path.exists()
+    assert not fake_backup_file_age_path.exists()
 
     container_client_mock.delete_blob.assert_any_call(
-        blob="fake_env_name/file_20230127_0105_dummy_xfcs.zip"
+        blob="fake_env_name/file_20230127_0105_dummy_xfcs.age"
     )
     container_client_mock.delete_blob.assert_any_call(
-        blob="fake_env_name/file_20230227_0105_dummy_xfcs.zip.zip"
+        blob="fake_env_name/file_20230227_0105_dummy_xfcs.age.age"
     )
     container_client_mock.delete_blob.assert_any_call(
-        blob="fake_env_name/file_20230425_0105_dummy_xfcs.zip.zip"
+        blob="fake_env_name/file_20230425_0105_dummy_xfcs.age.age"
     )
     container_client_mock.delete_blob.assert_any_call(
-        blob="fake_env_name/file_20230327_0105_dummy_xfcs.zip.zip"
+        blob="fake_env_name/file_20230327_0105_dummy_xfcs.age.age"
     )
 
 
@@ -150,8 +150,8 @@ def test_azure_clean_respects_min_retention_days_param_and_not_delete_any_file(
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
-    fake_backup_file_zip_path.touch()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+    fake_backup_file_age_path.touch()
 
     azure.clean(fake_backup_dir_path, 2, 30 * 365)
 

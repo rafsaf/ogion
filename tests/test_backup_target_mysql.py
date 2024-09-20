@@ -12,7 +12,12 @@ from ogion import config, core
 from ogion.backup_targets.mysql import MySQL
 from ogion.models.backup_target_models import MySQLTargetModel
 
-from .conftest import ALL_MYSQL_DBS_TARGETS, CONST_TOKEN_URLSAFE, DB_VERSION_BY_ENV_VAR
+from .conftest import (
+    ALL_MYSQL_DBS_TARGETS,
+    CONST_TOKEN_URLSAFE,
+    CONST_UNSAFE_AGE_KEY,
+    DB_VERSION_BY_ENV_VAR,
+)
 
 
 @pytest.mark.parametrize("mysql_target", ALL_MYSQL_DBS_TARGETS)
@@ -92,9 +97,11 @@ def test_end_to_end_successful_restore_after_backup(
     )
 
     test_db_backup = test_db.backup()
-    backup_zip = core.run_create_zip_archive(test_db_backup)
+    backup_age = core.run_create_age_archive(test_db_backup)
     test_db_backup.unlink()
-    test_db_backup = core.run_unzip_zip_archive(backup_zip)
+    test_db_backup = core.run_decrypt_age_archive(
+        backup_age, debug_secret=CONST_UNSAFE_AGE_KEY
+    )
 
     core.run_subprocess(
         f"mariadb --defaults-file={db.option_file} {db.db_name} --execute="

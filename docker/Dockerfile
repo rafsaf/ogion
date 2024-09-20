@@ -9,20 +9,20 @@ ENV LOG_FOLDER_PATH="/var/log/ogion"
 ENV OGION_CPU_ARCHITECTURE=${TARGETARCH}
 WORKDIR ${FOLDER_PATH}
 
-RUN apt-get -y update && apt-get -y install wget unzip gpg rsync
+RUN apt-get -y update && apt-get -y install age wget tar gpg
 COPY scripts scripts
 RUN ./scripts/install_mariadb_client.sh
 RUN ./scripts/install_postgresql_client.sh
 RUN apt-get -y remove gpg
 
-FROM base as poetry
+FROM base AS poetry
 RUN pip install poetry==1.8.2
 RUN poetry self add poetry-plugin-export
 COPY poetry.lock pyproject.toml ./
 RUN poetry export -o /requirements.txt --without-hashes
 RUN poetry export -o /requirements-tests.txt --without-hashes --with tests
 
-FROM base as common
+FROM base AS common
 COPY --from=poetry /requirements.txt .
 RUN pip install -r requirements.txt
 RUN rm -f requirements.txt
@@ -35,10 +35,7 @@ RUN mkdir /tmp/data \
     && rm -rf /tmp/data
 
 COPY ogion ogion
-# rm 7zip to save ~5M for aarch64 when on amd64 and reverse
-RUN find ./ogion/bin/7zip/* ! -name "${OGION_CPU_ARCHITECTURE}" -type d -exec rm -r {} +
-# rm 7zip 7zz dynamic linked version binary
-RUN rm -f ogion/bin/7zip/${OGION_CPU_ARCHITECTURE}/7zz
+
 # rm to save ~65M
 RUN rm -f \
     /usr/bin/mariadb-binlog \

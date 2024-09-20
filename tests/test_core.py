@@ -3,7 +3,6 @@
 
 import logging
 import os
-import shlex
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -12,6 +11,7 @@ from freezegun import freeze_time
 from pytest import LogCaptureFixture
 
 from ogion import config, core
+from tests.conftest import CONST_UNSAFE_AGE_KEY
 
 
 @pytest.mark.parametrize(
@@ -58,39 +58,22 @@ def test_get_new_backup_path() -> None:
     assert str(new_path) == str(expected_path)
 
 
-@pytest.mark.parametrize("integrity", [True, False])
-def test_run_create_zip_archive_out_path_exists(
-    tmp_path: Path, integrity: str, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(config.options, "ZIP_SKIP_INTEGRITY_CHECK", integrity)
+def test_run_create_age_archive_out_path_exists(tmp_path: Path) -> None:
     fake_backup_file = tmp_path / "fake_backup"
     with open(fake_backup_file, "w") as f:
         f.write("abcdefghijk\n12345")
 
-    fake_backup_file_out = core.run_create_zip_archive(fake_backup_file)
-    assert fake_backup_file_out == tmp_path / "fake_backup.zip"
+    fake_backup_file_out = core.run_create_age_archive(fake_backup_file)
+    assert fake_backup_file_out == tmp_path / "fake_backup.age"
     assert fake_backup_file_out.exists()
 
 
-def test_run_create_zip_archive_can_be_unzipped_using_unzip(tmp_path: Path) -> None:
-    fake_backup_file = tmp_path / "test_archive"
-
-    with open(fake_backup_file, "w") as f:
-        f.write("xxxąć”©#$%")
-
-    archive_file = core.run_create_zip_archive(fake_backup_file)
-    fake_backup_file.unlink()
-
-    passwd = shlex.quote(config.options.ZIP_ARCHIVE_PASSWORD.get_secret_value())
-    shell_unzip = f"unzip -P {passwd} -d {tmp_path} {archive_file}"
-
-    core.run_subprocess(shell_unzip)
-
-    assert fake_backup_file.exists()
-    assert fake_backup_file.read_text() == "xxxąć”©#$%"
+def test_run_create_age_archive_dir_raise_error(tmp_path: Path) -> None:
+    with pytest.raises(ValueError):
+        core.run_create_age_archive(tmp_path)
 
 
-def test_run_create_zip_archive_can_be_unzipped_using_core_unzip(
+def test_run_create_age_archive_can_be_decrypted(
     tmp_path: Path,
 ) -> None:
     fake_backup_file = tmp_path / "test_archive"
@@ -98,10 +81,12 @@ def test_run_create_zip_archive_can_be_unzipped_using_core_unzip(
     with open(fake_backup_file, "w") as f:
         f.write("xxxąć”©#$%")
 
-    archive_file = core.run_create_zip_archive(fake_backup_file)
+    archive_file = core.run_create_age_archive(fake_backup_file)
     fake_backup_file.unlink()
 
-    fake_backup_file = core.run_unzip_zip_archive(archive_file)
+    fake_backup_file = core.run_decrypt_age_archive(
+        archive_file, debug_secret=CONST_UNSAFE_AGE_KEY
+    )
 
     assert fake_backup_file.exists()
     assert fake_backup_file.read_text() == "xxxąć”©#$%"

@@ -57,21 +57,21 @@ def test_gcs_post_save_with_google_bucket_upload_path(
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_path = fake_backup_dir_path / "fake_backup"
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
     with open(fake_backup_file_path, "w") as f:
         f.write("abcdefghijk\n12345")
 
     monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
     assert (
-        gcs.post_save(fake_backup_file_path) == "test123/fake_env_name/fake_backup.zip"
+        gcs.post_save(fake_backup_file_path) == "test123/fake_env_name/fake_backup.age"
     )
-    assert fake_backup_file_zip_path.exists()
+    assert fake_backup_file_age_path.exists()
     bucket_mock.blob.assert_called_once_with(
-        "test123/fake_env_name/fake_backup.zip",
+        "test123/fake_env_name/fake_backup.age",
         chunk_size=gcs.chunk_size_bytes,
     )
     single_blob_mock.upload_from_filename.assert_called_once_with(
-        fake_backup_file_zip_path,
+        fake_backup_file_age_path,
         timeout=gcs.chunk_timeout_secs,
         if_generation_match=0,
         checksum="crc32c",
@@ -84,17 +84,17 @@ class BlobInCloudStorage:
 
 
 list_blobs_short_with_upload_path: list[BlobInCloudStorage] = [
-    BlobInCloudStorage("test123/fake_env_name/file_20230427_0105_dummy_xfcs.zip"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230427_0108_dummy_xfcs.zip"),
-    BlobInCloudStorage("test123/fake_env_name/file_19990427_0108_dummy_xfcs.zip"),
+    BlobInCloudStorage("test123/fake_env_name/file_20230427_0105_dummy_xfcs.age"),
+    BlobInCloudStorage("test123/fake_env_name/file_20230427_0108_dummy_xfcs.age"),
+    BlobInCloudStorage("test123/fake_env_name/file_19990427_0108_dummy_xfcs.age"),
 ]
 list_blobs_long_no_upload_path: list[BlobInCloudStorage] = [
-    BlobInCloudStorage("test123/fake_env_name/file_20230427_0105_dummy_xfcs.zip"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230127_0105_dummy_xfcs.zip"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230426_0105_dummy_xfcs.zip"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230227_0105_dummy_xfcs.zip.zip"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230425_0105_dummy_xfcs.zip.zip"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230327_0105_dummy_xfcs.zip.zip"),
+    BlobInCloudStorage("test123/fake_env_name/file_20230427_0105_dummy_xfcs.age"),
+    BlobInCloudStorage("test123/fake_env_name/file_20230127_0105_dummy_xfcs.age"),
+    BlobInCloudStorage("test123/fake_env_name/file_20230426_0105_dummy_xfcs.age"),
+    BlobInCloudStorage("test123/fake_env_name/file_20230227_0105_dummy_xfcs.age.age"),
+    BlobInCloudStorage("test123/fake_env_name/file_20230425_0105_dummy_xfcs.age.age"),
+    BlobInCloudStorage("test123/fake_env_name/file_20230327_0105_dummy_xfcs.age.age"),
 ]
 
 
@@ -116,20 +116,20 @@ def test_gcs_clean_file_and_short_blob_list(
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
-    fake_backup_file_zip_path.touch()
-    fake_backup_file_zip_path2 = fake_backup_dir_path / "fake_backup2.zip"
-    fake_backup_file_zip_path2.touch()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+    fake_backup_file_age_path.touch()
+    fake_backup_file_age_path2 = fake_backup_dir_path / "fake_backup2.age"
+    fake_backup_file_age_path2.touch()
 
     monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
 
-    gcs.clean(fake_backup_file_zip_path, 2, 1)
+    gcs.clean(fake_backup_file_age_path, 2, 1)
     assert fake_backup_dir_path.exists()
-    assert not fake_backup_file_zip_path.exists()
-    assert not fake_backup_file_zip_path2.exists()
+    assert not fake_backup_file_age_path.exists()
+    assert not fake_backup_file_age_path2.exists()
 
     bucket_mock.blob.assert_called_once_with(
-        "test123/fake_env_name/file_19990427_0108_dummy_xfcs.zip"
+        "test123/fake_env_name/file_19990427_0108_dummy_xfcs.age"
     )
     single_blob_mock.delete.assert_called_once_with()
 
@@ -152,38 +152,38 @@ def test_gcs_clean_directory_and_long_blob_list(
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
-    fake_backup_file_zip_path.touch()
-    fake_backup_file_zip_path2 = fake_backup_dir_path / "fake_backup2.zip"
-    fake_backup_file_zip_path2.touch()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+    fake_backup_file_age_path.touch()
+    fake_backup_file_age_path2 = fake_backup_dir_path / "fake_backup2.age"
+    fake_backup_file_age_path2.touch()
     fake_backup_dir_path2 = tmp_path / "fake_env_name2"
     fake_backup_dir_path2.mkdir()
-    fake_backup_file_zip_path3 = fake_backup_dir_path2 / "fake_backup.zip"
-    fake_backup_file_zip_path3.touch()
-    fake_backup_file_zip_path4 = fake_backup_dir_path2 / "fake_backup2.zip"
-    fake_backup_file_zip_path4.touch()
+    fake_backup_file_age_path3 = fake_backup_dir_path2 / "fake_backup.age"
+    fake_backup_file_age_path3.touch()
+    fake_backup_file_age_path4 = fake_backup_dir_path2 / "fake_backup2.age"
+    fake_backup_file_age_path4.touch()
 
     monkeypatch.setattr(gcs, "bucket_upload_path", None)
 
     gcs.clean(fake_backup_dir_path, 2, 1)
     assert not fake_backup_dir_path.exists()
-    assert not fake_backup_file_zip_path.exists()
-    assert not fake_backup_file_zip_path2.exists()
+    assert not fake_backup_file_age_path.exists()
+    assert not fake_backup_file_age_path2.exists()
     assert not fake_backup_dir_path2.exists()
-    assert not fake_backup_file_zip_path3.exists()
-    assert not fake_backup_file_zip_path4.exists()
+    assert not fake_backup_file_age_path3.exists()
+    assert not fake_backup_file_age_path4.exists()
 
     bucket_mock.blob.assert_any_call(
-        "test123/fake_env_name/file_20230127_0105_dummy_xfcs.zip"
+        "test123/fake_env_name/file_20230127_0105_dummy_xfcs.age"
     )
     bucket_mock.blob.assert_any_call(
-        "test123/fake_env_name/file_20230227_0105_dummy_xfcs.zip.zip"
+        "test123/fake_env_name/file_20230227_0105_dummy_xfcs.age.age"
     )
     bucket_mock.blob.assert_any_call(
-        "test123/fake_env_name/file_20230425_0105_dummy_xfcs.zip.zip"
+        "test123/fake_env_name/file_20230425_0105_dummy_xfcs.age.age"
     )
     bucket_mock.blob.assert_any_call(
-        "test123/fake_env_name/file_20230327_0105_dummy_xfcs.zip.zip"
+        "test123/fake_env_name/file_20230327_0105_dummy_xfcs.age.age"
     )
     single_blob_mock.delete.assert_called()
 
@@ -207,12 +207,12 @@ def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_file(
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup"
-    fake_backup_file_zip_path.touch()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup"
+    fake_backup_file_age_path.touch()
 
     monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
 
-    gcs.clean(fake_backup_file_zip_path, 2, 30 * 365)
+    gcs.clean(fake_backup_file_age_path, 2, 30 * 365)
 
     bucket_mock.blob.assert_not_called()
     single_blob_mock.delete.assert_not_called()

@@ -18,7 +18,7 @@ services:
       - MYSQL_DB2=...
       - MARIADB_DB3=...
 
-      - ZIP_ARCHIVE_PASSWORD=change_me
+      - AGE_RECIPIENTS=age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
       - BACKUP_PROVIDER=name=gcs bucket_name=my_bucket_name bucket_upload_path=my_ogion_instance_1 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=
 ```
 
@@ -58,7 +58,7 @@ stringData:
   POSTGRESQL_DB1: ...
   MYSQL_DB2: ...
   MARIADB_DB3: ...
-  ZIP_ARCHIVE_PASSWORD: change_me
+  AGE_RECIPIENTS: age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
   BACKUP_PROVIDER: "name=gcs bucket_name=my_bucket_name bucket_upload_path=my_ogion_instance_1 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="
 ---
 apiVersion: apps/v1

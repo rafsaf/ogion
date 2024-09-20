@@ -54,6 +54,9 @@ def _to_target_model(
 
 DOCKER_TESTS: bool = os.environ.get("DOCKER_TESTS", None) is not None
 CONST_TOKEN_URLSAFE = "mock"
+CONST_UNSAFE_AGE_KEY = (
+    "AGE-SECRET-KEY-12L9ETSAZJXK2XLGQRU503VMJ59NGXASGXKAUH05KJ4TDC6UKTAJQGMSN3L"
+)
 DB_VERSION_BY_ENV_VAR: dict[str, str] = {}
 ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLTargetModel] = [
     _to_target_model(compose_db, PostgreSQLTargetModel)
@@ -90,12 +93,9 @@ def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     options = config.Settings(
         LOG_LEVEL="DEBUG",
         BACKUP_PROVIDER="name=debug",
-        ZIP_ARCHIVE_PASSWORD=SecretStr("pass"),
         INSTANCE_NAME="tests",
-        ZIP_SKIP_INTEGRITY_CHECK=False,
         SUBPROCESS_TIMEOUT_SECS=5,
         SIGTERM_TIMEOUT_SECS=1,
-        ZIP_ARCHIVE_LEVEL=1,
         BACKUP_MAX_NUMBER=2,
         BACKUP_MIN_RETENTION_DAYS=0,
         DISCORD_WEBHOOK_URL=None,
@@ -107,6 +107,7 @@ def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
         SMTP_FROM_ADDR="",
         SMTP_PASSWORD=SecretStr(""),
         SMTP_TO_ADDRS="",
+        AGE_RECIPIENTS="age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2",
     )
     monkeypatch.setattr(config, "options", options)
 

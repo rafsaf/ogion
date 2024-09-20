@@ -21,17 +21,26 @@ class Folder(BaseBackupTarget):
     def backup(self) -> Path:
         escaped_foldername = core.safe_text_version(self.target_model.abs_path.name)
 
-        out_file = core.get_new_backup_path(self.env_name, escaped_foldername)
+        out_file = core.get_new_backup_path(
+            self.env_name, escaped_foldername
+        ).with_suffix(".tar")
 
-        shell_create_dir_symlink = f"ln -s {self.target_model.abs_path} {out_file}"
-        log.debug("start ln in subprocess: %s", shell_create_dir_symlink)
-        core.run_subprocess(shell_create_dir_symlink)
-        log.debug("finished ln, output: %s", out_file)
+        shell_create_dir_tar = (
+            f"tar -C {self.target_model.abs_path.parent} "
+            f"-cvf {out_file} {self.target_model.abs_path.name}"
+        )
+        log.debug("start tar in subprocess: %s", shell_create_dir_tar)
+        core.run_subprocess(shell_create_dir_tar)
+        log.debug("finished tar, output: %s", out_file)
         return out_file
 
     @override
     def restore(self, path: str) -> None:
-        shell_cp_file = f"rsync -avh {path}/ {self.target_model.abs_path}"
-        log.debug("start cp in subprocess: %s", shell_cp_file)
-        core.run_subprocess(shell_cp_file)
-        log.debug("finished cp to %s", self.target_model.abs_path)
+        self.target_model.abs_path.mkdir(parents=True, exist_ok=True)
+
+        shell_untar_file = (
+            f"tar xf {path} -C {self.target_model.abs_path} --strip-components=1"
+        )
+        log.debug("start tar extract in subprocess: %s", shell_untar_file)
+        core.run_subprocess(shell_untar_file)
+        log.debug("finished tar extract to %s", self.target_model.abs_path)
