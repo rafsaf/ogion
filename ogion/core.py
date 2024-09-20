@@ -80,7 +80,7 @@ def run_decrypt_age_archive(backup_file: Path, debug_secret: str | None = None) 
 
     if debug_secret:
         secret = debug_secret
-    else:
+    else:  # pragma: no cover
         secret = input("please input age private key to decrypt\n")
 
     with tempfile.NamedTemporaryFile("w") as identity_file:
@@ -97,8 +97,11 @@ def run_decrypt_age_archive(backup_file: Path, debug_secret: str | None = None) 
 
 
 def run_create_age_archive(backup_file: Path) -> Path:
-    out_file = Path(f"{backup_file}.age")
+    if not backup_file.is_file():
+        raise ValueError(f"backup_file must be file, not dir: {backup_file}")
+
     log.info("start creating age archive in subprocess: %s", backup_file)
+    out_file = Path(f"{backup_file}.age")
 
     recipients = config.options.age_recipients_file
 

@@ -68,6 +68,11 @@ def test_run_create_age_archive_out_path_exists(tmp_path: Path) -> None:
     assert fake_backup_file_out.exists()
 
 
+def test_run_create_age_archive_dir_raise_error(tmp_path: Path) -> None:
+    with pytest.raises(ValueError):
+        core.run_create_age_archive(tmp_path)
+
+
 def test_run_create_age_archive_can_be_decrypted(
     tmp_path: Path,
 ) -> None:
