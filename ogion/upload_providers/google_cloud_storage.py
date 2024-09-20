@@ -36,25 +36,25 @@ class UploadProviderGCS(BaseUploadProvider):
 
     @override
     def post_save(self, backup_file: Path) -> str:
-        zip_backup_file = core.run_create_age_archive(backup_file=backup_file)
+        age_backup_file = core.run_create_age_archive(backup_file=backup_file)
 
         backup_dest_in_bucket = (
             f"{self.bucket_upload_path}/"
-            f"{zip_backup_file.parent.name}/"
-            f"{zip_backup_file.name}"
+            f"{age_backup_file.parent.name}/"
+            f"{age_backup_file.name}"
         )
 
-        log.info("start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("start uploading %s to %s", age_backup_file, backup_dest_in_bucket)
 
         blob = self.bucket.blob(backup_dest_in_bucket, chunk_size=self.chunk_size_bytes)
         blob.upload_from_filename(
-            zip_backup_file,
+            age_backup_file,
             timeout=self.chunk_timeout_secs,
             if_generation_match=0,
             checksum="crc32c",
         )
 
-        log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("uploaded %s to %s", age_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
     @override

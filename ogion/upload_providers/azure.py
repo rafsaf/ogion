@@ -29,25 +29,25 @@ class UploadProviderAzure(BaseUploadProvider):
 
     @override
     def post_save(self, backup_file: Path) -> str:
-        zip_backup_file = core.run_create_age_archive(backup_file=backup_file)
+        age_backup_file = core.run_create_age_archive(backup_file=backup_file)
 
         backup_dest_in_azure_container = (
-            f"{zip_backup_file.parent.name}/{zip_backup_file.name}"
+            f"{age_backup_file.parent.name}/{age_backup_file.name}"
         )
         blob_client = self.container_client.get_blob_client(
             blob=backup_dest_in_azure_container
         )
 
         log.info(
-            "start uploading %s to %s", zip_backup_file, backup_dest_in_azure_container
+            "start uploading %s to %s", age_backup_file, backup_dest_in_azure_container
         )
 
-        with open(file=zip_backup_file, mode="rb") as data:
+        with open(file=age_backup_file, mode="rb") as data:
             blob_client.upload_blob(data=data)
 
         log.info(
             "uploaded %s to %s in %s",
-            zip_backup_file,
+            age_backup_file,
             backup_dest_in_azure_container,
             self.container_name,
         )

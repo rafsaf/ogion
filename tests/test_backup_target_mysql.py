@@ -97,10 +97,10 @@ def test_end_to_end_successful_restore_after_backup(
     )
 
     test_db_backup = test_db.backup()
-    backup_zip = core.run_create_age_archive(test_db_backup)
+    backup_age = core.run_create_age_archive(test_db_backup)
     test_db_backup.unlink()
     test_db_backup = core.run_decrypt_age_archive(
-        backup_zip, debug_secret=CONST_UNSAFE_AGE_KEY
+        backup_age, debug_secret=CONST_UNSAFE_AGE_KEY
     )
 
     core.run_subprocess(

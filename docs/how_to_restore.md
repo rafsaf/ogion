@@ -1,8 +1,8 @@
 # How to restore
 
-To restore backups you already have in cloud, for sure you will need `7-zip`, `unzip` or equivalent software to unzip the archive (and of course password `ZIP_ARCHIVE_PASSWORD` used for creating it in a first place). That step is ommited below.
+To restore backups you already have in cloud, for sure you will need `age` to extract the archive (and of course you age private key matching one of those in `AGE_RECIPIENTS` used for creating it in a first place). That step is ommited below.
 
-For below databases restore, you can for sure use `ogion` image itself (as it already has required software installed, for restore also, and must have network access to database). Tricky part can be "how to deliver zipped backup file to ogion container". This is also true for transporting it anywhere. Usual way is to use `scp` and for containers for docker compose and kubernetes respectively `docker compose cp` and `kubectl cp`.
+For below databases restore, you can for sure use `ogion` image itself (as it already has required software installed, for restore also, and must have network access to database). Tricky part can be "how to deliver age backup file to ogion container". This is also true for transporting it anywhere. Usual way is to use `scp` and for containers for docker compose and kubernetes respectively `docker compose cp` and `kubectl cp`.
 
 Other idea if you feel unhappy with passing your database backups around (even if password protected) would be to make the backup file public for a moment and available to download and use tools like `curl` to download it on destination place. If leaked, there is yet very strong cryptography to protect you. This should be sufficient for bunch of projects.
 

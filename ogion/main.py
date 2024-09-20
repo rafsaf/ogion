@@ -284,8 +284,8 @@ def run_restore_latest(target_name: str) -> NoReturn:
             log.warning("no backups at all for '%s'", target_name)
             sys.exit(2)
         latest_backup = backups[0]
-        path_zip = provider.download_backup(latest_backup)
-        path = core.run_decrypt_age_archive(path_zip)
+        path_age = provider.download_backup(latest_backup)
+        path = core.run_decrypt_age_archive(path_age)
         target.restore(str(path))
         sys.exit(0)
     log.warning("target '%s' does not exist")
@@ -308,8 +308,8 @@ def run_restore(backup_name: str, target_name: str) -> NoReturn:
                 "backup '%s' not exist at all for '%s'", backup_name, target_name
             )
             sys.exit(2)
-        path_zip = provider.download_backup(backup_name)
-        path = core.run_decrypt_age_archive(path_zip)
+        path_age = provider.download_backup(backup_name)
+        path = core.run_decrypt_age_archive(path_age)
         target.restore(str(path))
         sys.exit(0)
     log.warning("target '%s' does not exist")

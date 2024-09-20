@@ -11,7 +11,7 @@
 
 A tool for performing scheduled database backups and transferring encrypted data to secure public clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms.
 
-Backups are in `zip` format using [7-zip](https://www.7-zip.org/), with strong AES-256 encryption under the hood.
+Backups are in `age` format using [age](https://github.com/FiloSottile/age), with strong encryption under the hood. Why age? it's modern replacement for GnuPG, available for most architectures and systems.
 
 ## Documentation
 
@@ -66,7 +66,7 @@ services:
     image: rafsaf/ogion:latest
     environment:
       - POSTGRESQL_PG16=host=db password=pwd cron_rule=0 0 5 * * port=5432
-      - ZIP_ARCHIVE_PASSWORD=change_me
+      - AGE_RECIPIENTS=age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
       - BACKUP_PROVIDER=name=debug
 ```
 
