@@ -34,8 +34,9 @@ class MySQL(BaseBackupTarget):
             return s.replace("\\", "\\\\")
 
         password = self.target_model.password.get_secret_value()
-        text = "{}\n{}\n{}\n{}\n{}\n{}".format(
+        text = "{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
             "[client]",
+            "skip-ssl=true",
             f'user="{escape(self.target_model.user)}"',
             f'password="{escape(password)}"',
             f"host={self.target_model.host}",
