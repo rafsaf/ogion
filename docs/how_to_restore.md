@@ -20,19 +20,9 @@ Follow docs (ogion creates typical SQL file backups, nothing special about them)
 psql -h localhost -p 5432 -U postgres database_name -W < backup_file.sql
 ```
 
-## MySQL
-
-Backup is made using `mysqldump` ([see def \_backup() params](https://github.com/rafsaf/ogion/blob/main/ogion/backup_targets/mysql.py)). To restore database, you will need `mysql` [https://dev.mysql.com/doc/refman/8.0/en/mysql.html](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) and network access to database. If on debian/ubuntu, this is provided by apt package `mysql-client`.
-
-Follow docs (ogion creates typical SQL file backups, nothing special about them), but command will look something like that:
-
-```bash
-mysql -h localhost -P 3306 -u root -p database_name < backup_file.sql
-```
-
 ## MariaDB
 
-Backup is made using `mariadb-dump` ([see def \_backup() params](https://github.com/rafsaf/ogion/blob/main/ogion/backup_targets/mariadb.py)). To restore database, you will need `mysql` or `mariadb` [https://dev.mysql.com/doc/refman/8.0/en/mysql.html](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) or [https://mariadb.com/kb/en/mariadb-command-line-client/](https://mariadb.com/kb/en/mariadb-command-line-client/) and network access to database. If on debian/ubuntu, this is provided by apt package `mysql-client` or see [https://mariadb.com/kb/en/mariadb-package-repository-setup-and-usage/](https://mariadb.com/kb/en/mariadb-package-repository-setup-and-usage/).
+Backup is made using `mariadb-dump` ([see def \_backup() params](https://github.com/rafsaf/ogion/blob/main/ogion/backup_targets/mariadb.py)). To restore database, you will need `mariadb` [https://mariadb.com/kb/en/mariadb-command-line-client/](https://mariadb.com/kb/en/mariadb-command-line-client/) and network access to database. If on debian/ubuntu, this is provided by apt package [https://mariadb.com/kb/en/mariadb-package-repository-setup-and-usage/](https://mariadb.com/kb/en/mariadb-package-repository-setup-and-usage/).
 
 Follow docs (ogion creates typical SQL file backups, nothing special about them), but command will look something like that:
 

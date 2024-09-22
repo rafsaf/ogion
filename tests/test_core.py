@@ -118,16 +118,6 @@ test_data = [
     (
         [
             (
-                "MYSQL_SECOND_DB",
-                "host=10.0.0.1 port=3306 user=foo password=change_me!"
-                " db=bar cron_rule=0 5 * * *",
-            )
-        ],
-        True,
-    ),
-    (
-        [
-            (
                 "MARIADB_THIRD_DB",
                 "host=192.168.1.5 port=3306 user=root password=change_me_please! "
                 "db=project cron_rule=15 */3 * * * max_backups=20",

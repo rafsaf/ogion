@@ -46,15 +46,6 @@ class PostgreSQLTargetModel(TargetModel):
     password: SecretStr
 
 
-class MySQLTargetModel(TargetModel):
-    name: config.BackupTargetEnum = config.BackupTargetEnum.MYSQL
-    user: str = "root"
-    host: str = "localhost"
-    port: int = 3306
-    db: str = "mysql"
-    password: SecretStr
-
-
 class MariaDBTargetModel(TargetModel):
     name: config.BackupTargetEnum = config.BackupTargetEnum.MARIADB
     user: str = "root"

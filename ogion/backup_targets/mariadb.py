@@ -60,9 +60,7 @@ class MariaDB(BaseBackupTarget):
             log.debug("output: %s", mariadb_version)
         except core.CoreSubprocessError as version_err:  # pragma: no cover
             log.critical(
-                "mariadb client is not detected on your system (%s)\n"
-                "check out ready script: "
-                "https://github.com/rafsaf/ogion/blob/main/scripts/install_mariadb_mysql_client.sh",
+                "mariadb client is not detected on your system: %s",
                 version_err,
             )
             raise
