@@ -14,12 +14,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get -y update && apt-get -y install age curl wget tar gpg
 
 COPY scripts scripts
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    ./scripts/install_mariadb_client.sh
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    ./scripts/install_postgresql_client.sh
+RUN ./scripts/install_mariadb_client.sh
+RUN ./scripts/install_postgresql_client.sh
 RUN apt-get -y remove gpg
 
 FROM base AS poetry
