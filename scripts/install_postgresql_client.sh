@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #########################################################################
 # POSTGRES CLIENT INSTALLATION
 #
@@ -6,7 +6,6 @@
 # Note apt-key is considered unsecure and signed-by used as a replacement
 #########################################################################
 CPU="$(dpkg --print-architecture)"
-DISTR="$(awk -F= '/^ID=/{print $2}' /etc/os-release)"
 DISTR_VERSION="$(awk -F= '/^VERSION_CODENAME=/{print $2}' /etc/os-release)"
 
 echo "Installing postgresql-client-16"
