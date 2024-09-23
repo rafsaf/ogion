@@ -39,7 +39,6 @@ class UploadProviderEnum(StrEnum):
 
 class BackupTargetEnum(StrEnum):
     POSTGRESQL = "postgresql"
-    MYSQL = "mysql"
     MARIADB = "mariadb"
     FILE = "singlefile"
     FOLDER = "directory"

@@ -15,7 +15,6 @@ from ogion import config
 from ogion.models.backup_target_models import (
     DirectoryTargetModel,
     MariaDBTargetModel,
-    MySQLTargetModel,
     PostgreSQLTargetModel,
     SingleFileTargetModel,
 )
@@ -29,7 +28,7 @@ from ogion.tools.compose_file_generator import (
     db_compose_postgresql_data,
 )
 
-TM = TypeVar("TM", MariaDBTargetModel, PostgreSQLTargetModel, MySQLTargetModel)
+TM = TypeVar("TM", MariaDBTargetModel, PostgreSQLTargetModel)
 
 
 def _to_target_model(
@@ -62,8 +61,8 @@ ALL_POSTGRES_DBS_TARGETS: list[PostgreSQLTargetModel] = [
     _to_target_model(compose_db, PostgreSQLTargetModel)
     for compose_db in db_compose_postgresql_data()
 ]
-ALL_MYSQL_DBS_TARGETS: list[MySQLTargetModel] = [
-    _to_target_model(compose_db, MySQLTargetModel)
+ALL_MYSQL_DBS_TARGETS: list[MariaDBTargetModel] = [
+    _to_target_model(compose_db, MariaDBTargetModel)
     for compose_db in db_compose_mysql_data()
 ]
 ALL_MARIADB_DBS_TARGETS: list[MariaDBTargetModel] = [

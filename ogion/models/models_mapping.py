@@ -10,7 +10,6 @@ def get_target_map() -> dict[str, type[backup_target_models.TargetModel]]:
         BackupTargetEnum.FILE: backup_target_models.SingleFileTargetModel,
         BackupTargetEnum.FOLDER: backup_target_models.DirectoryTargetModel,
         BackupTargetEnum.MARIADB: backup_target_models.MariaDBTargetModel,
-        BackupTargetEnum.MYSQL: backup_target_models.MySQLTargetModel,
         BackupTargetEnum.POSTGRESQL: backup_target_models.PostgreSQLTargetModel,
     }
 

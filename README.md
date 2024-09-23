@@ -20,8 +20,8 @@ Backups are in `age` format using [age](https://github.com/FiloSottile/age), wit
 ## Supported backup targets
 
 - PostgreSQL ([all currently supported versions](https://endoflife.date/postgresql))
-- MySQL ([all currently supported versions](https://endoflife.date/mysql))
 - MariaDB ([all currently supported versions](https://endoflife.date/mariadb))
+- MySQL ([currently supported versions after 8.0](https://endoflife.date/mysql), version 8.0 does not work with current mariadb-client)
 - Single file
 - Directory
 

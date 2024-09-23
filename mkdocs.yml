@@ -28,7 +28,6 @@ nav:
       - providers/debug.md
   - Backup targets:
       - backup_targets/postgresql.md
-      - backup_targets/mysql.md
       - backup_targets/mariadb.md
       - backup_targets/file.md
       - backup_targets/directory.md
