@@ -98,11 +98,16 @@ def postgres_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
 def handle_file(
     filename: Path,
     cycle_func: Callable[[EOLApiProductCycle], ComposeDatabase],
+    omit_cycles: list[str] | None = None,
 ) -> list[ComposeDatabase]:
     with open(filename) as f:
         product = EOLApiProduct(cycles=json.load(f))
 
     before_eol_cycles = [cycle for cycle in product.cycles if cycle.before_eol]
+    if omit_cycles is not None:
+        before_eol_cycles = [
+            cycle for cycle in before_eol_cycles if cycle.cycle not in omit_cycles
+        ]
 
     return [cycle_func(cycle) for cycle in before_eol_cycles]
 
@@ -116,7 +121,9 @@ def db_compose_postgresql_data() -> list[ComposeDatabase]:
 
 
 def db_compose_mysql_data() -> list[ComposeDatabase]:
-    return handle_file(EOL_DATA_DIR / "mysql.json", mysql_db_generator)
+    return handle_file(
+        EOL_DATA_DIR / "mysql.json", mysql_db_generator, omit_cycles=["8.0"]
+    )
 
 
 if __name__ == "__main__":

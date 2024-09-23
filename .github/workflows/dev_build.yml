@@ -28,12 +28,35 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
+      - name: Cache
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            var-cache-pip
+            var-cache-apt
+            var-lib-apt
+          key: ${{ runner.os }}-cache-${{ hashFiles('docker/Dockerfile') }}
+
+      - name: Inject cache into docker
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.2
+        with:
+          cache-map: |
+            {
+              "var-cache-pip": "/var/cache/pip",
+              "var-cache-apt": "/var/cache/apt",
+              "var-lib-apt": "/var/lib/apt"
+            }
+          skip-extraction: ${{ steps.cache.outputs.cache-hit }}
+
       - name: Build and push ogion image
         uses: docker/build-push-action@v6
         with:
           file: docker/Dockerfile
           context: .
           target: build
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           push: true
           tags: rafsaf/ogion:dev
           platforms: linux/amd64,linux/arm64

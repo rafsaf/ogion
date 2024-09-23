@@ -47,11 +47,11 @@ responses = "^0.25.0"
 [tool.pytest.ini_options]
 addopts = "-v --cov --cov-report term-missing --cov-fail-under 90 -n auto"
 env = [
+  "AGE_RECIPIENTS=",
   "BACKUP_MAX_NUMBER=1",
   "BACKUP_PROVIDER=",
   "LOG_FOLDER_PATH=/tmp/pytest_ogion_env_vars_hook_logs_folder",
   "SUBPROCESS_TIMEOUT_SECS=5",
-  "ZIP_ARCHIVE_PASSWORD=very_unpleasant:password-_-12!@#%^&*()/;><.,][`~'",
 ]
 filterwarnings = [
   "ignore:Type google._upb._message.MessageMapContainer uses PyType_Spec",

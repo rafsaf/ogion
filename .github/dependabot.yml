@@ -3,38 +3,20 @@ updates:
   - package-ecosystem: pip
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
+      interval: monthly
     allow:
       - dependency-type: "all"
     groups:
-      dev-dependencies:
+      all-dependencies:
         patterns:
           - "*"
-        exclude-patterns:
-          - "croniter"
-          - "google-cloud-storage"
-          - "pydantic"
-          - "boto3"
-          - "pydantic-settings"
-          - "azure-storage-blob"
-          - "azure-identity"
-      main-dependencies:
-        patterns:
-          - "croniter"
-          - "google-cloud-storage"
-          - "pydantic"
-          - "boto3"
-          - "pydantic-settings"
-          - "azure-storage-blob"
-          - "azure-identity"
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
 
   - package-ecosystem: docker
     directory: docker/
     schedule:
-      interval: weekly
+      interval: monthly

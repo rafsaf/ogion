@@ -51,18 +51,18 @@ def test_aws_post_save_with_bucket_upload_path(tmp_path: Path) -> None:
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_path = fake_backup_dir_path / "fake_backup"
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
     with open(fake_backup_file_path, "w") as f:
         f.write("abcdefghijk\n12345")
 
     assert (
-        aws.post_save(fake_backup_file_path) == "test123/fake_env_name/fake_backup.zip"
+        aws.post_save(fake_backup_file_path) == "test123/fake_env_name/fake_backup.age"
     )
-    assert fake_backup_file_zip_path.exists()
+    assert fake_backup_file_age_path.exists()
 
     bucket_mock.upload_file.assert_called_once_with(
-        Filename=fake_backup_file_zip_path,
-        Key="test123/fake_env_name/fake_backup.zip",
+        Filename=fake_backup_file_age_path,
+        Key="test123/fake_env_name/fake_backup.age",
         Config=aws.transfer_config,
     )
 
@@ -73,12 +73,12 @@ class ItemInS3:
 
 
 items_lst: list[ItemInS3] = [
-    ItemInS3("test123/fake_env_name/file_20230427_0105_dummy_xfcs.zip"),
-    ItemInS3("test123/fake_env_name/file_20230127_0105_dummy_xfcs.zip"),
-    ItemInS3("test123/fake_env_name/file_20230426_0105_dummy_xfcs.zip"),
-    ItemInS3("test123/fake_env_name/file_20230227_0105_dummy_xfcs.zip.zip"),
-    ItemInS3("test123/fake_env_name/file_20230425_0105_dummy_xfcs.zip.zip"),
-    ItemInS3("test123/fake_env_name/file_20230327_0105_dummy_xfcs.zip.zip"),
+    ItemInS3("test123/fake_env_name/file_20230427_0105_dummy_xfcs.age"),
+    ItemInS3("test123/fake_env_name/file_20230127_0105_dummy_xfcs.age"),
+    ItemInS3("test123/fake_env_name/file_20230426_0105_dummy_xfcs.age"),
+    ItemInS3("test123/fake_env_name/file_20230227_0105_dummy_xfcs.age.age"),
+    ItemInS3("test123/fake_env_name/file_20230425_0105_dummy_xfcs.age.age"),
+    ItemInS3("test123/fake_env_name/file_20230327_0105_dummy_xfcs.age.age"),
 ]
 
 
@@ -102,23 +102,23 @@ def test_aws_clean_method_with_file_list(tmp_path: Path) -> None:
 
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
-    fake_backup_file_zip_path = fake_backup_dir_path / "fake_backup.zip"
-    fake_backup_file_zip_path.touch()
-    fake_backup_file_zip_path2 = fake_backup_dir_path / "fake_backup2.zip"
-    fake_backup_file_zip_path2.touch()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+    fake_backup_file_age_path.touch()
+    fake_backup_file_age_path2 = fake_backup_dir_path / "fake_backup2.age"
+    fake_backup_file_age_path2.touch()
 
-    aws.clean(fake_backup_file_zip_path, 2, 1)
+    aws.clean(fake_backup_file_age_path, 2, 1)
     assert fake_backup_dir_path.exists()
-    assert not fake_backup_file_zip_path.exists()
-    assert not fake_backup_file_zip_path2.exists()
+    assert not fake_backup_file_age_path.exists()
+    assert not fake_backup_file_age_path2.exists()
 
     aws.bucket.delete_objects.assert_called_once_with(
         Delete={
             "Objects": [
-                {"Key": "test123/fake_env_name/file_20230127_0105_dummy_xfcs.zip"},
-                {"Key": "test123/fake_env_name/file_20230227_0105_dummy_xfcs.zip.zip"},
-                {"Key": "test123/fake_env_name/file_20230327_0105_dummy_xfcs.zip.zip"},
-                {"Key": "test123/fake_env_name/file_20230425_0105_dummy_xfcs.zip.zip"},
+                {"Key": "test123/fake_env_name/file_20230127_0105_dummy_xfcs.age"},
+                {"Key": "test123/fake_env_name/file_20230227_0105_dummy_xfcs.age.age"},
+                {"Key": "test123/fake_env_name/file_20230327_0105_dummy_xfcs.age.age"},
+                {"Key": "test123/fake_env_name/file_20230425_0105_dummy_xfcs.age.age"},
             ],
             "Quiet": False,
         }
