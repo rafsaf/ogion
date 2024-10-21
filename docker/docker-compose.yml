@@ -26,6 +26,4 @@ services:
     image: "fsouza/fake-gcs-server:1.50.2"
     command: "-scheme http"
     ports:
-      - ${FAKE_GCS_PORT:-4443}:4443
-    env_file:
-      - ./../.env
+      - 4443:4443

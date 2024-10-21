@@ -29,7 +29,9 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Download and start db containers
-        run: make docker_setup_up
+        run: |
+          touch .env
+          make docker_setup_up
 
       - name: Cache
         uses: actions/cache@v4
