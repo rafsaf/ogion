@@ -31,10 +31,10 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 RUN rm -f requirements.txt
 # reduce size of botocore lib, see https://github.com/boto/botocore/issues/1543
 RUN mkdir /tmp/data \
-    && cp -r /usr/local/lib/python3.12/site-packages/botocore/data/s3 /tmp/data/ \ 
-    && cp -f /usr/local/lib/python3.12/site-packages/botocore/data/*.json /tmp/data \
-    && rm -rf /usr/local/lib/python3.12/site-packages/botocore/data \
-    && cp -r /tmp/data /usr/local/lib/python3.12/site-packages/botocore/ \
+    && cp -r /usr/local/lib/python3.13/site-packages/botocore/data/s3 /tmp/data/ \ 
+    && cp -f /usr/local/lib/python3.13/site-packages/botocore/data/*.json /tmp/data \
+    && rm -rf /usr/local/lib/python3.13/site-packages/botocore/data \
+    && cp -r /tmp/data /usr/local/lib/python3.13/site-packages/botocore/ \
     && rm -rf /tmp/data
 
 COPY ogion ogion

@@ -15,7 +15,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 ## Project requirements
 
-- Python 3.12.
+- Python 3.13.
 - Poetry [https://python-poetry.org/](https://python-poetry.org/).
 - Docker and docker compose plugin [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/).
 - Debian/Ubuntu are known to work.
