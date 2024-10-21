@@ -1,3 +1,4 @@
+name: ogion_dbs
 networks:
   ogion: {}
 services:
@@ -67,23 +68,23 @@ services:
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:8.4.2
+    image: mysql:8.4.3
     networks:
     - ogion
     ports:
     - 9084:3306
     restart: 'no'
-  ogion_mysql_9_0:
+  ogion_mysql_9_1:
     environment:
     - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:9.0.1
+    image: mysql:9.1.0
     networks:
     - ogion
     ports:
-    - 9090:3306
+    - 9091:3306
     restart: 'no'
   ogion_postgres_12:
     environment:
@@ -139,5 +140,16 @@ services:
     - ogion
     ports:
     - 10016:5432
+    restart: 'no'
+  ogion_postgres_17:
+    environment:
+    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
+    image: postgres:17.0-bookworm
+    networks:
+    - ogion
+    ports:
+    - 10017:5432
     restart: 'no'
 
