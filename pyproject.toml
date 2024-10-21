@@ -7,7 +7,7 @@ package-mode = false
 version = "6.1"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.13"
 
 azure-identity = "^1.17.1"
 azure-storage-blob = "^12.20.0"
@@ -75,7 +75,7 @@ source = ["ogion"]
 [tool.mypy]
 enable_error_code = "explicit-override"
 ignore_missing_imports = true
-python_version = "3.12"
+python_version = "3.13"
 strict = true
 
 [tool.poetry.scripts]
