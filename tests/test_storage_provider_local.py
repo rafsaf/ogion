@@ -60,8 +60,6 @@ def test_local_debug_clean_folder() -> None:
         fake_backup_dir_path / "fake_backup3_20230801_0000_file.age"
     )
     fake_backup_file_age_path3.mkdir()
-    print("xxx")
-    print(fake_backup_file_path4)
     local.clean(fake_backup_file_path4, 2, 1)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_path4.exists()

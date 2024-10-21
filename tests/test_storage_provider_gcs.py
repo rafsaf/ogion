@@ -1,27 +1,31 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import time
 from pathlib import Path
-from unittest.mock import Mock
 
-import google.cloud.storage as cloud_storage
+import google.cloud.storage as storage_client
 import pytest
 from freezegun import freeze_time
+from google.auth.credentials import AnonymousCredentials
 from pydantic import SecretStr
 
 from ogion.models.upload_provider_models import GCSProviderModel
 from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
 
 
-@pytest.fixture(autouse=True)
-def mock_google_storage_client(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(cloud_storage, "Client", Mock())
+@pytest.fixture
+def bucket() -> storage_client.Bucket:
+    return storage_client.Client(credentials=AnonymousCredentials()).create_bucket(  # type: ignore[no-untyped-call]
+        str(time.time_ns())
+    )
 
 
-def get_test_gcs() -> UploadProviderGCS:
+@pytest.fixture
+def gcs_provider(bucket: storage_client.Bucket) -> UploadProviderGCS:
     return UploadProviderGCS(
         GCSProviderModel(
-            bucket_name="name",
+            bucket_name=bucket.name or "",
             bucket_upload_path="test",
             service_account_base64=SecretStr("Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="),
             chunk_size_mb=100,
@@ -30,90 +34,33 @@ def get_test_gcs() -> UploadProviderGCS:
     )
 
 
-def test_gcs_post_save_fails_on_fail_upload(tmp_path: Path) -> None:
-    gcs = get_test_gcs()
-    bucket_mock = Mock()
-    single_blob_mock = Mock()
-    single_blob_mock.upload_from_filename.side_effect = ValueError()
-    bucket_mock.blob.return_value = single_blob_mock
-    gcs.bucket = bucket_mock
-
-    fake_backup_file_path = tmp_path / "fake_backup"
-    fake_backup_file_path.touch()
-    with pytest.raises(ValueError):
-        assert gcs.post_save(fake_backup_file_path)
-
-
-def test_gcs_post_save_with_google_bucket_upload_path(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+@pytest.mark.parametrize("upload_path", [("test",), ("",), ("12345_xxx")])
+def test_gcs_post_save(
+    tmp_path: Path, gcs_provider: UploadProviderGCS, upload_path: str
 ) -> None:
-    gcs = get_test_gcs()
-    bucket_mock = Mock()
-
-    single_blob_mock = Mock()
-    bucket_mock.blob.return_value = single_blob_mock
-    gcs.bucket = bucket_mock
-
+    gcs_provider.bucket_upload_path = upload_path
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_path = fake_backup_dir_path / "fake_backup"
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+
     with open(fake_backup_file_path, "w") as f:
         f.write("abcdefghijk\n12345")
 
-    monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
-    assert (
-        gcs.post_save(fake_backup_file_path) == "test123/fake_env_name/fake_backup.age"
-    )
+    if gcs_provider.bucket_upload_path:
+        assert (
+            gcs_provider.post_save(fake_backup_file_path)
+            == f"{gcs_provider.bucket_upload_path}/fake_env_name/fake_backup.age"
+        )
+    else:
+        assert (
+            gcs_provider.post_save(fake_backup_file_path)
+            == "fake_env_name/fake_backup.age"
+        )
     assert fake_backup_file_age_path.exists()
-    bucket_mock.blob.assert_called_once_with(
-        "test123/fake_env_name/fake_backup.age",
-        chunk_size=gcs.chunk_size_bytes,
-    )
-    single_blob_mock.upload_from_filename.assert_called_once_with(
-        fake_backup_file_age_path,
-        timeout=gcs.chunk_timeout_secs,
-        if_generation_match=0,
-        checksum="crc32c",
-    )
 
 
-class BlobInCloudStorage:
-    def __init__(self, blob_name: str) -> None:
-        self.name = blob_name
-
-
-list_blobs_short_with_upload_path: list[BlobInCloudStorage] = [
-    BlobInCloudStorage("test123/fake_env_name/file_20230427_0105_dummy_xfcs.age"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230427_0108_dummy_xfcs.age"),
-    BlobInCloudStorage("test123/fake_env_name/file_19990427_0108_dummy_xfcs.age"),
-]
-list_blobs_long_no_upload_path: list[BlobInCloudStorage] = [
-    BlobInCloudStorage("test123/fake_env_name/file_20230427_0105_dummy_xfcs.age"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230127_0105_dummy_xfcs.age"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230426_0105_dummy_xfcs.age"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230227_0105_dummy_xfcs.age.age"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230425_0105_dummy_xfcs.age.age"),
-    BlobInCloudStorage("test123/fake_env_name/file_20230327_0105_dummy_xfcs.age.age"),
-]
-
-
-def test_gcs_clean_file_and_short_blob_list(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    gcs = get_test_gcs()
-
-    bucket_mock = Mock()
-    storage_client_mock = Mock()
-    single_blob_mock = Mock()
-
-    storage_client_mock.list_blobs.return_value = list_blobs_short_with_upload_path
-    bucket_mock.blob.return_value = single_blob_mock
-
-    gcs.storage_client = storage_client_mock
-    gcs.bucket = bucket_mock
-
+def test_gcs_clean_local_files(tmp_path: Path, gcs_provider: UploadProviderGCS) -> None:
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
@@ -121,98 +68,148 @@ def test_gcs_clean_file_and_short_blob_list(
     fake_backup_file_age_path2 = fake_backup_dir_path / "fake_backup2.age"
     fake_backup_file_age_path2.touch()
 
-    monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
+    gcs_provider.clean(fake_backup_file_age_path, 2, 1)
 
-    gcs.clean(fake_backup_file_age_path, 2, 1)
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_age_path.exists()
     assert not fake_backup_file_age_path2.exists()
 
-    bucket_mock.blob.assert_called_once_with(
-        "test123/fake_env_name/file_19990427_0108_dummy_xfcs.age"
-    )
-    single_blob_mock.delete.assert_called_once_with()
 
-
-def test_gcs_clean_directory_and_long_blob_list(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
+def test_gcs_clean_gcs_files_short(
+    tmp_path: Path, gcs_provider: UploadProviderGCS, bucket: storage_client.Bucket
 ) -> None:
-    gcs = get_test_gcs()
-
-    bucket_mock = Mock()
-    storage_client_mock = Mock()
-    single_blob_mock = Mock()
-
-    storage_client_mock.list_blobs.return_value = list_blobs_long_no_upload_path
-    bucket_mock.blob.return_value = single_blob_mock
-
-    gcs.storage_client = storage_client_mock
-    gcs.bucket = bucket_mock
-
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
-    fake_backup_file_age_path.touch()
-    fake_backup_file_age_path2 = fake_backup_dir_path / "fake_backup2.age"
-    fake_backup_file_age_path2.touch()
-    fake_backup_dir_path2 = tmp_path / "fake_env_name2"
-    fake_backup_dir_path2.mkdir()
-    fake_backup_file_age_path3 = fake_backup_dir_path2 / "fake_backup.age"
-    fake_backup_file_age_path3.touch()
-    fake_backup_file_age_path4 = fake_backup_dir_path2 / "fake_backup2.age"
-    fake_backup_file_age_path4.touch()
 
-    monkeypatch.setattr(gcs, "bucket_upload_path", None)
+    bucket.blob(
+        "test/fake_env_name/file_19990427_0108_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230427_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230427_0108_dummy_xfcs.age"
+    ).upload_from_string("")
 
-    gcs.clean(fake_backup_dir_path, 2, 1)
-    assert not fake_backup_dir_path.exists()
-    assert not fake_backup_file_age_path.exists()
-    assert not fake_backup_file_age_path2.exists()
-    assert not fake_backup_dir_path2.exists()
-    assert not fake_backup_file_age_path3.exists()
-    assert not fake_backup_file_age_path4.exists()
+    gcs_provider.clean(fake_backup_file_age_path, 2, 1)
 
-    bucket_mock.blob.assert_any_call(
-        "test123/fake_env_name/file_20230127_0105_dummy_xfcs.age"
-    )
-    bucket_mock.blob.assert_any_call(
-        "test123/fake_env_name/file_20230227_0105_dummy_xfcs.age.age"
-    )
-    bucket_mock.blob.assert_any_call(
-        "test123/fake_env_name/file_20230425_0105_dummy_xfcs.age.age"
-    )
-    bucket_mock.blob.assert_any_call(
-        "test123/fake_env_name/file_20230327_0105_dummy_xfcs.age.age"
-    )
-    single_blob_mock.delete.assert_called()
+    assert sorted(
+        blob.name for blob in gcs_provider.storage_client.list_blobs(bucket)
+    ) == [
+        "test/fake_env_name/file_20230427_0105_dummy_xfcs.age",
+        "test/fake_env_name/file_20230427_0108_dummy_xfcs.age",
+    ]
+
+
+def test_gcs_clean_gcs_files_long(
+    tmp_path: Path, gcs_provider: UploadProviderGCS, bucket: storage_client.Bucket
+) -> None:
+    fake_backup_dir_path = tmp_path / "fake_env_name"
+    fake_backup_dir_path.mkdir()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+
+    bucket.blob(
+        "test/fake_env_name/file_20230127_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230227_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230327_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230425_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230426_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230427_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+
+    gcs_provider.clean(fake_backup_file_age_path, 2, 1)
+
+    assert sorted(
+        blob.name for blob in gcs_provider.storage_client.list_blobs(bucket)
+    ) == [
+        "test/fake_env_name/file_20230426_0105_dummy_xfcs.age",
+        "test/fake_env_name/file_20230427_0105_dummy_xfcs.age",
+    ]
 
 
 @freeze_time("2023-08-27")
-def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_file(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
+def test_gcs_clean_respects_max_backups_param_and_not_delete_old_files(
+    tmp_path: Path, gcs_provider: UploadProviderGCS, bucket: storage_client.Bucket
 ) -> None:
-    gcs = get_test_gcs()
-
-    bucket_mock = Mock()
-    storage_client_mock = Mock()
-    single_blob_mock = Mock()
-
-    storage_client_mock.list_blobs.return_value = list_blobs_short_with_upload_path
-    bucket_mock.blob.return_value = single_blob_mock
-
-    gcs.storage_client = storage_client_mock
-    gcs.bucket = bucket_mock
-
     fake_backup_dir_path = tmp_path / "fake_env_name"
     fake_backup_dir_path.mkdir()
-    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup"
-    fake_backup_file_age_path.touch()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
 
-    monkeypatch.setattr(gcs, "bucket_upload_path", "test123")
+    bucket.blob(
+        "test/fake_env_name/file_20230426_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230427_0105_dummy_xfcs.age"
+    ).upload_from_string("")
 
-    gcs.clean(fake_backup_file_age_path, 2, 30 * 365)
+    gcs_provider.clean(fake_backup_file_age_path, 2, 1)
 
-    bucket_mock.blob.assert_not_called()
-    single_blob_mock.delete.assert_not_called()
+    assert sorted(
+        blob.name for blob in gcs_provider.storage_client.list_blobs(bucket)
+    ) == [
+        "test/fake_env_name/file_20230426_0105_dummy_xfcs.age",
+        "test/fake_env_name/file_20230427_0105_dummy_xfcs.age",
+    ]
+
+
+@freeze_time("2023-08-27")
+def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_backup(
+    tmp_path: Path, gcs_provider: UploadProviderGCS, bucket: storage_client.Bucket
+) -> None:
+    fake_backup_dir_path = tmp_path / "fake_env_name"
+    fake_backup_dir_path.mkdir()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+
+    bucket.blob(
+        "test/fake_env_name/file_20230826_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230825_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230824_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230823_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+    bucket.blob(
+        "test/fake_env_name/file_20230729_0105_dummy_xfcs.age"
+    ).upload_from_string("")
+
+    gcs_provider.clean(fake_backup_file_age_path, 2, 30)
+
+    assert sorted(
+        blob.name for blob in gcs_provider.storage_client.list_blobs(bucket)
+    ) == [
+        "test/fake_env_name/file_20230729_0105_dummy_xfcs.age",
+        "test/fake_env_name/file_20230823_0105_dummy_xfcs.age",
+        "test/fake_env_name/file_20230824_0105_dummy_xfcs.age",
+        "test/fake_env_name/file_20230825_0105_dummy_xfcs.age",
+        "test/fake_env_name/file_20230826_0105_dummy_xfcs.age",
+    ]
+
+
+def test_gcs_download_backup(
+    gcs_provider: UploadProviderGCS, bucket: storage_client.Bucket
+) -> None:
+    bucket.blob(
+        "test/fake_env_name/file_20230426_0105_dummy_xfcs.age"
+    ).upload_from_string("abcdef")
+
+    out = gcs_provider.download_backup(
+        "test/fake_env_name/file_20230426_0105_dummy_xfcs.age"
+    )
+
+    assert out.is_file()
+    assert out.read_text() == "abcdef"
