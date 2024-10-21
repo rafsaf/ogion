@@ -13,7 +13,7 @@ azure-identity = "^1.17.1"
 azure-storage-blob = "^12.20.0"
 boto3 = "^1.34.140"
 croniter = "^3.0.3"
-google-cloud-storage = "^2.17.0"
+google-cloud-storage = "^2.18.2"
 pydantic = "^2.8.2"
 pydantic-settings = "^2.3.4"
 
@@ -50,7 +50,9 @@ env = [
   "AGE_RECIPIENTS=",
   "BACKUP_MAX_NUMBER=1",
   "BACKUP_PROVIDER=",
+  "FAKE_GCS_PORT=4443",
   "LOG_FOLDER_PATH=/tmp/pytest_ogion_env_vars_hook_logs_folder",
+  "STORAGE_EMULATOR_HOST=http://localhost:4443",
   "SUBPROCESS_TIMEOUT_SECS=5",
 ]
 filterwarnings = [

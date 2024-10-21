@@ -128,7 +128,11 @@ def db_compose_mysql_data() -> list[ComposeDatabase]:
 
 if __name__ == "__main__":
     update_eol_files()
-    data: dict[str, Any] = {"services": {}, "networks": {"ogion": {}}}
+    data: dict[str, Any] = {
+        "name": "ogion_dbs",
+        "services": {},
+        "networks": {"ogion": {}},
+    }
     compose_data: list[ComposeDatabase] = []
     compose_data += db_compose_mariadb_data()
     compose_data += db_compose_postgresql_data()

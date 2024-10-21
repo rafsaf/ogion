@@ -1,3 +1,4 @@
+name: ogion_services
 services:
   ogion_unit_tests:
     restart: "no"
@@ -12,10 +13,17 @@ services:
     restart: "no"
     network_mode: "host"
     platform: linux/${OGION_ARCH:-amd64}
-    build: 
+    build:
       context: ./../
       dockerfile: docker/Dockerfile
       target: build
     command: python -m ogion.main --single
     env_file:
       - ./../.env
+
+  gcs:
+    restart: "no"
+    image: "fsouza/fake-gcs-server:1.50.2"
+    command: "-scheme http"
+    ports:
+      - 4443:4443

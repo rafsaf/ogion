@@ -3,12 +3,10 @@
 
 import os
 import secrets
-from collections.abc import Generator
 from pathlib import Path
 from typing import TypeVar
 
 import pytest
-import responses
 from pydantic import SecretStr
 
 from ogion import config
@@ -89,6 +87,9 @@ def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     config_folder_path = tmp_path / "pytest_config"
     monkeypatch.setattr(config, "CONST_CONFIG_FOLDER_PATH", config_folder_path)
     config_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    download_folder_path = tmp_path / "pytest_download"
+    monkeypatch.setattr(config, "CONST_DOWNLOADS_FOLDER_PATH", download_folder_path)
+    download_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
     options = config.Settings(
         LOG_LEVEL="DEBUG",
         BACKUP_PROVIDER="name=debug",
@@ -117,13 +118,3 @@ def fixed_secrets_token_urlsafe(monkeypatch: pytest.MonkeyPatch) -> None:
         return CONST_TOKEN_URLSAFE
 
     monkeypatch.setattr(secrets, "token_urlsafe", mock_token_urlsafe)
-
-
-@pytest.fixture(autouse=True)
-def responses_activate_mock_to_prevent_accidential_requests() -> (
-    Generator[None, None, None]
-):
-    r_mock = responses.RequestsMock()
-    r_mock.start()
-    yield None
-    r_mock.stop()

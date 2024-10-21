@@ -39,7 +39,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 5. Setup databases
 
-   `make docker_dbs_setup_up`
+   `make docker_setup_up`
 
    Note, file `docker/docker-compose.dbs.yml` is automatically updated weekly keeping always latest tag per release cycle and adding new releases and removing those after EOL.
 
