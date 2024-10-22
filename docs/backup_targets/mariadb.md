@@ -12,7 +12,7 @@ MARIADB_SOME_STRING="host=... password=... cron_rule=..."
 ```
 
 !!! note
-    _Any environment variable that starts with "\*\*MARIADB_\*\*" will be handled as MariaDB.\_ There can be multiple files paths definition for one ogion instance, for example `MARIADB_FOO_MY_DB1` and `MARIADB_BAR_MY_DB2`. [All currently supported versions are also supported by ogion](https://endoflife.date/mariadb). Params must be included in value, splited by single space for example `"value1=1 value2=foo"`.
+    _Any environment variable that starts with **"MARIADB\_"** will be handled as MariaDB._ There can be multiple files paths definition for one ogion instance, for example `MARIADB_FOO_MY_DB1` and `MARIADB_BAR_MY_DB2`. [All currently supported versions are also supported by ogion](https://endoflife.date/mariadb). Params must be included in value, splited by single space for example `"value1=1 value2=foo"`.
 
 ## Params
 
