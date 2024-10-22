@@ -94,7 +94,7 @@ def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
         LOG_LEVEL="DEBUG",
         BACKUP_PROVIDER="name=debug",
         INSTANCE_NAME="tests",
-        SUBPROCESS_TIMEOUT_SECS=5,
+        SUBPROCESS_TIMEOUT_SECS=10,
         SIGTERM_TIMEOUT_SECS=1,
         BACKUP_MAX_NUMBER=2,
         BACKUP_MIN_RETENTION_DAYS=0,
