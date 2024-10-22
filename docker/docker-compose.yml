@@ -34,3 +34,9 @@ services:
     command: "server /opt"
     ports:
       - 9000:9000
+
+  azurite:
+    restart: "no"
+    image: "mcr.microsoft.com/azure-storage/azurite:latest"
+    ports:
+      - 10000:10000

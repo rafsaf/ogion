@@ -3,7 +3,7 @@ export OGION_ARCH ?= amd64
 
 .PHONY: docker_setup_up
 docker_setup_up:
-	docker compose -f docker/docker-compose.yml up -d gcs minio
+	docker compose -f docker/docker-compose.yml up -d gcs minio azurite
 	docker compose -f docker/docker-compose.dbs.yml up -d
 
 .PHONY: docker_setup_down
