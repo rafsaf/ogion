@@ -16,14 +16,13 @@ markdown_extensions:
   - pymdownx.superfences
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
   - tables
 
 nav:
   - Ogion: index.md
   - Upload providers:
       - providers/google_cloud_storage.md
-      - providers/aws_s3.md
+      - providers/s3.md
       - providers/azure.md
       - providers/debug.md
   - Backup targets:

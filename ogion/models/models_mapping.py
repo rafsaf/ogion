@@ -19,5 +19,5 @@ def get_provider_map() -> dict[str, type[upload_provider_models.ProviderModel]]:
         UploadProviderEnum.AZURE: upload_provider_models.AzureProviderModel,
         UploadProviderEnum.LOCAL_FILES_DEBUG: upload_provider_models.DebugProviderModel,
         UploadProviderEnum.GCS: upload_provider_models.GCSProviderModel,
-        UploadProviderEnum.AWS_S3: upload_provider_models.AWSProviderModel,
+        UploadProviderEnum.S3: upload_provider_models.S3ProviderModel,
     }

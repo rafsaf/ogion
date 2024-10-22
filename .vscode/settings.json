@@ -1,6 +1,5 @@
 {
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff"
-  },
-  "python.analysis.extraPaths": ["./ogion/tools"]
+  }
 }

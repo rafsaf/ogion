@@ -23,7 +23,14 @@ services:
 
   gcs:
     restart: "no"
-    image: "fsouza/fake-gcs-server:1.50.2"
+    image: "fsouza/fake-gcs-server:latest"
     command: "-scheme http"
     ports:
       - 4443:4443
+
+  minio:
+    restart: "no"
+    image: "quay.io/minio/minio:latest"
+    command: "server /opt"
+    ports:
+      - 9000:9000

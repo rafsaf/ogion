@@ -33,7 +33,7 @@ except ImportError:  # pragma: no cover
 class UploadProviderEnum(StrEnum):
     LOCAL_FILES_DEBUG = "debug"
     GCS = "gcs"
-    AWS_S3 = "aws"
+    S3 = "s3"
     AZURE = "azure"
 
 
