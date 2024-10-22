@@ -4,7 +4,7 @@ description = "A tool for performing scheduled database backups and transferring
 license = "GNU GPLv3"
 name = "ogion"
 package-mode = false
-version = "6.1"
+version = "7.0"
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -13,9 +13,9 @@ azure-identity = "^1.17.1"
 azure-storage-blob = "^12.20.0"
 croniter = "^3.0.3"
 google-cloud-storage = "^2.18.2"
+minio = "^7.2.9"
 pydantic = "^2.8.2"
 pydantic-settings = "^2.3.4"
-minio = "^7.2.9"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.6.1"
