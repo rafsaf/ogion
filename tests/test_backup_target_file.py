@@ -2,10 +2,13 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 
+from pathlib import Path
+
 from freezegun import freeze_time
 
 from ogion import config
 from ogion.backup_targets.file import File
+from ogion.models.backup_target_models import SingleFileTargetModel
 
 from .conftest import CONST_TOKEN_URLSAFE, FILE_1
 
@@ -31,3 +34,27 @@ def test_run_file_backup_output_file_has_exact_same_content() -> None:
     out_backup = file.backup()
 
     assert out_backup.read_text() == FILE_1.abs_path.read_text()
+
+
+def test_run_file_backup_output_file_has_same_content_after_restore(
+    tmp_path: Path,
+) -> None:
+    test_file = tmp_path / "test_file.txt"
+    test_file.write_text("abcdef")
+
+    file = File(
+        target_model=SingleFileTargetModel(
+            env_name="singlefile",
+            cron_rule="* * * * *",
+            abs_path=test_file,
+        )
+    )
+
+    out_backup = file.backup()
+
+    test_file.unlink()
+
+    file.restore(str(out_backup))
+
+    assert test_file.exists()
+    assert test_file.read_text() == "abcdef"
