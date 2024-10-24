@@ -24,7 +24,6 @@ class UploadProviderLocalDebug(BaseUploadProvider):
     @override
     def post_save(self, backup_file: Path) -> str:
         age_file = core.run_create_age_archive(backup_file=backup_file)
-        log.critical(age_file)
 
         out_path = config.CONST_DEBUG_FOLDER_PATH / age_file.parent.name / age_file.name
         out_path.parent.mkdir(mode=0o700, exist_ok=True)

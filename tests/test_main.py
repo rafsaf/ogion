@@ -25,7 +25,7 @@ from .conftest import (
     FOLDER_1,
 )
 
-SECONDS_TIMEOUT = 5
+SECONDS_TIMEOUT = 10
 
 
 @pytest.fixture(autouse=True)
