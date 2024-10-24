@@ -110,7 +110,7 @@ class UploadProviderS3(BaseUploadProvider):
             delete_response = self.client.remove_objects(
                 self.bucket, delete_object_list=items_to_delete
             )
-            if len([error for error in delete_response]):
+            if len([error for error in delete_response]):  # pragma: no cover
                 raise RuntimeError(
                     "Fail to delete backups from s3: %s", delete_response
                 )

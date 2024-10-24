@@ -103,7 +103,7 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
         timeout += 0.05
         time.sleep(0.05)
 
-    for dir in config.CONST_BACKUP_FOLDER_PATH.iterdir():
+    for dir in config.CONST_DEBUG_FOLDER_PATH.iterdir():
         assert dir.is_dir(), dir
         assert dir.name in target_envs, dir
         assert sum(1 for _ in dir.glob("*.age")) == 1, dir

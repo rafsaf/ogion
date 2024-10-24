@@ -2,26 +2,28 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import time
-from pathlib import Path
 
 import google.cloud.storage as storage_client
 import pytest
 from google.auth.credentials import AnonymousCredentials
 from pydantic import SecretStr
 
+from ogion import config
 from ogion.models.upload_provider_models import (
     AzureProviderModel,
+    DebugProviderModel,
     GCSProviderModel,
     S3ProviderModel,
 )
 from ogion.upload_providers.azure import UploadProviderAzure
 from ogion.upload_providers.base_provider import BaseUploadProvider
+from ogion.upload_providers.debug import UploadProviderLocalDebug
 from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
 from ogion.upload_providers.s3 import UploadProviderS3
 
 
-@pytest.fixture(params=["gcs", "s3", "azure"])
-def provider(request: pytest.FixtureRequest) -> BaseUploadProvider:  # type: ignore
+@pytest.fixture(params=["gcs", "s3", "azure", "debug"])
+def provider(request: pytest.FixtureRequest) -> BaseUploadProvider:
     if request.param == "gcs":
         bucket = storage_client.Client(
             credentials=AnonymousCredentials()  # type: ignore[no-untyped-call]
@@ -68,12 +70,23 @@ def provider(request: pytest.FixtureRequest) -> BaseUploadProvider:  # type: ign
         )
         provider_azure.container_client.create_container()
         return provider_azure
+    elif request.param == "debug":
+        return UploadProviderLocalDebug(DebugProviderModel())
+    else:
+        raise ValueError("unknown")
 
 
-def test_gcs_post_save(tmp_path: Path, provider: BaseUploadProvider) -> None:
-    prefix = "test/" if provider.__class__ != UploadProviderAzure else ""
+@pytest.fixture
+def provider_prefix(provider: BaseUploadProvider) -> str:
+    if provider.__class__ == UploadProviderAzure:
+        return ""
+    elif provider.__class__ == UploadProviderLocalDebug:
+        return f"{config.CONST_DEBUG_FOLDER_PATH}/"
+    return "test/"
 
-    fake_backup_dir_path = tmp_path / "fake_env_name"
+
+def test_gcs_post_save(provider: BaseUploadProvider, provider_prefix: str) -> None:
+    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_path = fake_backup_dir_path / "fake_backup"
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
@@ -83,32 +96,38 @@ def test_gcs_post_save(tmp_path: Path, provider: BaseUploadProvider) -> None:
 
     assert (
         provider.post_save(fake_backup_file_path)
-        == f"{prefix}fake_env_name/fake_backup.age"
+        == f"{provider_prefix}fake_env_name/fake_backup.age"
     )
     assert fake_backup_file_age_path.exists()
 
 
-def test_gcs_clean_local_files(tmp_path: Path, provider: BaseUploadProvider) -> None:
-    fake_backup_dir_path = tmp_path / "fake_env_name"
+def test_gcs_clean_local_files(provider: BaseUploadProvider) -> None:
+    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
-    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
+
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup"
     fake_backup_file_age_path.touch()
-    fake_backup_file_age_path2 = fake_backup_dir_path / "fake_backup2.age"
+    fake_backup_file_age_patha = fake_backup_dir_path / "fake_backup.age"
+    fake_backup_file_age_patha.touch()
+
+    fake_backup_file_age_path2 = fake_backup_dir_path / "fake_backup2"
     fake_backup_file_age_path2.touch()
+    fake_backup_file_age_path2a = fake_backup_dir_path / "fake_backup2.age"
+    fake_backup_file_age_path2a.touch()
 
     provider.clean(fake_backup_file_age_path, 2, 1)
 
     assert fake_backup_dir_path.exists()
     assert not fake_backup_file_age_path.exists()
+    assert not fake_backup_file_age_patha.exists()
     assert not fake_backup_file_age_path2.exists()
+    assert not fake_backup_file_age_path2a.exists()
 
 
 def test_gcs_clean_gcs_files_short(
-    tmp_path: Path, provider: BaseUploadProvider
+    provider: BaseUploadProvider, provider_prefix: str
 ) -> None:
-    prefix = "test/" if provider.__class__ != UploadProviderAzure else ""
-
-    fake_backup_dir_path = tmp_path / "fake_env_name"
+    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
 
@@ -120,23 +139,23 @@ def test_gcs_clean_gcs_files_short(
     provider.post_save(fake_backup_dir_path / "file_20230427_0108_dummy_xfcs")
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{prefix}fake_env_name/file_20230427_0108_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_19990427_0108_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230427_0108_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_19990427_0108_dummy_xfcs.age",
     ]
 
     provider.clean(fake_backup_file_age_path, 2, 1)
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{prefix}fake_env_name/file_20230427_0108_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230427_0108_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
     ]
 
 
-def test_gcs_clean_gcs_files_long(tmp_path: Path, provider: BaseUploadProvider) -> None:
-    prefix = "test/" if provider.__class__ != UploadProviderAzure else ""
-
-    fake_backup_dir_path = tmp_path / "fake_env_name"
+def test_gcs_clean_gcs_files_long(
+    provider: BaseUploadProvider, provider_prefix: str
+) -> None:
+    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
 
@@ -154,28 +173,26 @@ def test_gcs_clean_gcs_files_long(tmp_path: Path, provider: BaseUploadProvider) 
     provider.post_save(fake_backup_dir_path / "file_20230427_0105_dummy_xfcs")
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230425_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230327_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230227_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230127_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230425_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230327_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230227_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230127_0105_dummy_xfcs.age",
     ]
 
     provider.clean(fake_backup_file_age_path, 2, 1)
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age",
     ]
 
 
 def test_gcs_clean_respects_max_backups_param_and_not_delete_old_files(
-    tmp_path: Path, provider: BaseUploadProvider
+    provider: BaseUploadProvider, provider_prefix: str
 ) -> None:
-    prefix = "test/" if provider.__class__ != UploadProviderAzure else ""
-
-    fake_backup_dir_path = tmp_path / "fake_env_name"
+    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
 
@@ -185,24 +202,22 @@ def test_gcs_clean_respects_max_backups_param_and_not_delete_old_files(
     provider.post_save(fake_backup_dir_path / "file_20230427_0105_dummy_xfcs")
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age",
     ]
 
     provider.clean(fake_backup_file_age_path, 2, 1)
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age",
     ]
 
 
 def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_backup(
-    tmp_path: Path, provider: BaseUploadProvider
+    provider: BaseUploadProvider, provider_prefix: str
 ) -> None:
-    prefix = "test/" if provider.__class__ != UploadProviderAzure else ""
-
-    fake_backup_dir_path = tmp_path / "fake_env_name"
+    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
 
@@ -218,38 +233,35 @@ def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_backup(
     provider.post_save(fake_backup_dir_path / "file_20230729_0105_dummy_xfcs")
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{prefix}fake_env_name/file_20230826_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230825_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230824_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230823_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230729_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230826_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230825_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230824_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230823_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230729_0105_dummy_xfcs.age",
     ]
 
     provider.clean(fake_backup_file_age_path, 2, 300000)
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{prefix}fake_env_name/file_20230826_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230825_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230824_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230823_0105_dummy_xfcs.age",
-        f"{prefix}fake_env_name/file_20230729_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230826_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230825_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230824_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230823_0105_dummy_xfcs.age",
+        f"{provider_prefix}fake_env_name/file_20230729_0105_dummy_xfcs.age",
     ]
 
 
 def test_gcs_download_backup(
-    tmp_path: Path,
-    provider: BaseUploadProvider,
+    provider: BaseUploadProvider, provider_prefix: str
 ) -> None:
-    prefix = "test/" if provider.__class__ != UploadProviderAzure else ""
-
-    fake_backup_dir_path = tmp_path / "fake_env_name"
+    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_20230426_0105_dummy_xfcs").write_text("abcdef")
     provider.post_save(fake_backup_dir_path / "file_20230426_0105_dummy_xfcs")
 
     out = provider.download_backup(
-        f"{prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age"
+        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.age"
     )
 
     assert out.is_file()

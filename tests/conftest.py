@@ -90,6 +90,9 @@ def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     download_folder_path = tmp_path / "pytest_download"
     monkeypatch.setattr(config, "CONST_DOWNLOADS_FOLDER_PATH", download_folder_path)
     download_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    debug_folder_path = tmp_path / "pytest_data_debug"
+    monkeypatch.setattr(config, "CONST_DEBUG_FOLDER_PATH", debug_folder_path)
+    debug_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
     options = config.Settings(
         LOG_LEVEL="DEBUG",
         BACKUP_PROVIDER="name=debug",

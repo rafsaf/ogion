@@ -6,7 +6,6 @@ import logging.config
 import os
 import re
 import secrets
-import shutil
 import subprocess
 import tempfile
 from datetime import UTC, datetime, timedelta
@@ -55,10 +54,7 @@ def run_subprocess(shell_args: str) -> str:
 
 def remove_path(path: Path) -> None:
     if path.exists():
-        if path.is_file() or path.is_symlink():
-            path.unlink()
-        else:
-            shutil.rmtree(path=path)
+        path.unlink()
 
 
 def get_new_backup_path(env_name: str, name: str) -> Path:
