@@ -17,9 +17,11 @@ CONST_BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
 CONST_BACKUP_FOLDER_PATH: Path = CONST_BASE_DIR / "data"
 CONST_CONFIG_FOLDER_PATH: Path = CONST_BASE_DIR / "conf"
 CONST_DOWNLOADS_FOLDER_PATH: Path = CONST_BACKUP_FOLDER_PATH / "downloads"
+CONST_DEBUG_FOLDER_PATH: Path = CONST_BACKUP_FOLDER_PATH / "debug"
 CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_CONFIG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_DOWNLOADS_FOLDER_PATH.mkdir(mode=0o700, exist_ok=True)
+CONST_DEBUG_FOLDER_PATH.mkdir(mode=0o700, exist_ok=True)
 
 
 try:
@@ -49,6 +51,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: _log_levels = "INFO"
     BACKUP_PROVIDER: str
     AGE_RECIPIENTS: str
+    DEBUG_AGE_SECRET_KEY: str = ""
     INSTANCE_NAME: str = socket.gethostname()
     CPU_ARCH: Literal["amd64", "arm64"] = Field(
         default="amd64", alias_priority=2, alias="OGION_CPU_ARCHITECTURE"

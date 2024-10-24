@@ -6,7 +6,6 @@ import logging.config
 import os
 import re
 import secrets
-import shutil
 import subprocess
 import tempfile
 from datetime import UTC, datetime, timedelta
@@ -55,10 +54,7 @@ def run_subprocess(shell_args: str) -> str:
 
 def remove_path(path: Path) -> None:
     if path.exists():
-        if path.is_file() or path.is_symlink():
-            path.unlink()
-        else:
-            shutil.rmtree(path=path)
+        path.unlink()
 
 
 def get_new_backup_path(env_name: str, name: str) -> Path:
@@ -73,13 +69,13 @@ def get_new_backup_path(env_name: str, name: str) -> Path:
     return base_dir_path / new_file
 
 
-def run_decrypt_age_archive(backup_file: Path, debug_secret: str | None = None) -> Path:
+def run_decrypt_age_archive(backup_file: Path) -> Path:
     log.info("start age decrypt archive in subprocess: %s", backup_file)
 
     out = Path(str(backup_file).removesuffix(".age"))
 
-    if debug_secret:
-        secret = debug_secret
+    if config.options.DEBUG_AGE_SECRET_KEY:
+        secret = config.options.DEBUG_AGE_SECRET_KEY
     else:  # pragma: no cover
         secret = input("please input age private key to decrypt\n")
 

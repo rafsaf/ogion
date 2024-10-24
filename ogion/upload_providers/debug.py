@@ -24,12 +24,20 @@ class UploadProviderLocalDebug(BaseUploadProvider):
     @override
     def post_save(self, backup_file: Path) -> str:
         age_file = core.run_create_age_archive(backup_file=backup_file)
-        return str(age_file)
+
+        out_path = config.CONST_DEBUG_FOLDER_PATH / age_file.parent.name / age_file.name
+        out_path.parent.mkdir(mode=0o700, exist_ok=True)
+
+        shell_copy_to_debug_dir = f"cp {age_file} {out_path}"
+        core.run_subprocess(shell_copy_to_debug_dir)
+
+        return str(out_path)
 
     @override
     def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
-        path = config.CONST_BACKUP_FOLDER_PATH / env_name
+        path = config.CONST_DEBUG_FOLDER_PATH / env_name
+        path.mkdir(mode=0o700, exist_ok=True)
         for backup_path in path.iterdir():
             backups.append(str(backup_path.absolute()))
         backups.sort(reverse=True)
@@ -37,13 +45,18 @@ class UploadProviderLocalDebug(BaseUploadProvider):
 
     @override
     def download_backup(self, path: str) -> Path:
-        return Path(path)
+        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        backup_file.parent.mkdir(parents=True, exist_ok=True)
+
+        return Path(backup_file)
 
     @override
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
-        core.remove_path(backup_file)
+        for backup_path in backup_file.parent.iterdir():
+            core.remove_path(backup_path)
+            log.info("removed %s from local disk", backup_path)
 
         backups = self.all_target_backups(env_name=backup_file.parent.name)
 

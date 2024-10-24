@@ -11,7 +11,6 @@ from freezegun import freeze_time
 from pytest import LogCaptureFixture
 
 from ogion import config, core
-from tests.conftest import CONST_UNSAFE_AGE_KEY
 
 
 @pytest.mark.parametrize(
@@ -84,9 +83,7 @@ def test_run_create_age_archive_can_be_decrypted(
     archive_file = core.run_create_age_archive(fake_backup_file)
     fake_backup_file.unlink()
 
-    fake_backup_file = core.run_decrypt_age_archive(
-        archive_file, debug_secret=CONST_UNSAFE_AGE_KEY
-    )
+    fake_backup_file = core.run_decrypt_age_archive(archive_file)
 
     assert fake_backup_file.exists()
     assert fake_backup_file.read_text() == "xxxąć”©#$%"

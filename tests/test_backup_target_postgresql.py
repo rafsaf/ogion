@@ -14,7 +14,6 @@ from ogion.models.backup_target_models import PostgreSQLTargetModel
 from .conftest import (
     ALL_POSTGRES_DBS_TARGETS,
     CONST_TOKEN_URLSAFE,
-    CONST_UNSAFE_AGE_KEY,
     DB_VERSION_BY_ENV_VAR,
 )
 
@@ -90,9 +89,7 @@ def test_end_to_end_successful_restore_after_backup(
     test_db_backup = test_db.backup()
     backup_age = core.run_create_age_archive(test_db_backup)
     test_db_backup.unlink()
-    test_db_backup = core.run_decrypt_age_archive(
-        backup_age, debug_secret=CONST_UNSAFE_AGE_KEY
-    )
+    test_db_backup = core.run_decrypt_age_archive(backup_age)
 
     core.run_subprocess(
         f"psql -d {db.escaped_conn_uri} -w --command 'DROP DATABASE test_db;'",
