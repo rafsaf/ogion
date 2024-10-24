@@ -61,7 +61,7 @@ def test_run_list_backup_files(
     monkeypatch: pytest.MonkeyPatch,
     provider: BaseUploadProvider,
     provider_prefix: str,
-    capsys: pytest.CaptureFixture,
+    capsys: pytest.CaptureFixture[str],
     target_model: TargetModel,
     mock_main_backup_targets: None,
 ) -> None:
@@ -110,7 +110,7 @@ def test_run_restore_latest(
     monkeypatch: pytest.MonkeyPatch,
     provider: BaseUploadProvider,
     provider_prefix: str,
-    capsys: pytest.CaptureFixture,
+    capsys: pytest.CaptureFixture[str],
     target_model: TargetModel,
     mock_main_backup_targets: None,
 ) -> None:
@@ -178,7 +178,7 @@ def test_run_restore(
     monkeypatch: pytest.MonkeyPatch,
     provider: BaseUploadProvider,
     provider_prefix: str,
-    capsys: pytest.CaptureFixture,
+    capsys: pytest.CaptureFixture[str],
     target_model: TargetModel,
     mock_main_backup_targets: None,
 ) -> None:
