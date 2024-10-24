@@ -15,7 +15,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 ## Project requirements
 
-- Python 3.12.
+- Python 3.13.
 - Poetry [https://python-poetry.org/](https://python-poetry.org/).
 - Docker and docker compose plugin [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/).
 - Debian/Ubuntu are known to work.
@@ -39,7 +39,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 5. Setup databases
 
-   `make docker_dbs_setup_up`
+   `make docker_setup_up`
 
    Note, file `docker/docker-compose.dbs.yml` is automatically updated weekly keeping always latest tag per release cycle and adding new releases and removing those after EOL.
 

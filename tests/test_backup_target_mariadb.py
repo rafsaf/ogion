@@ -95,9 +95,9 @@ def test_end_to_end_successful_restore_after_backup(
     )
 
     test_db_backup = test_db.backup()
-    backup_zip = core.run_create_zip_archive(test_db_backup)
+    backup_age = core.run_create_age_archive(test_db_backup)
     test_db_backup.unlink()
-    test_db_backup = core.run_unzip_zip_archive(backup_zip)
+    test_db_backup = core.run_decrypt_age_archive(backup_age)
 
     core.run_subprocess(
         f"mariadb --defaults-file={db.option_file} {db.db_name} --execute="

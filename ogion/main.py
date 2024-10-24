@@ -268,7 +268,8 @@ def run_list_backup_files(target_name: str) -> NoReturn:
         for i in backups:
             print(i)
         sys.exit(0)
-    log.warning("target '%s' does not exist")
+    log.warning("target '%s' does not exist", target_name)
+    print(f"target '{target_name}' does not exist")
     sys.exit(1)
 
 
@@ -282,13 +283,15 @@ def run_restore_latest(target_name: str) -> NoReturn:
         backups = provider.all_target_backups(target.env_name.lower())
         if not backups:
             log.warning("no backups at all for '%s'", target_name)
+            print(f"no backups at all for '{target_name}'")
             sys.exit(2)
         latest_backup = backups[0]
-        path_zip = provider.download_backup(latest_backup)
-        path = core.run_unzip_zip_archive(path_zip)
+        path_age = provider.download_backup(latest_backup)
+        path = core.run_decrypt_age_archive(path_age)
         target.restore(str(path))
         sys.exit(0)
     log.warning("target '%s' does not exist")
+    print(f"target '{target_name}' does not exist")
     sys.exit(1)
 
 
@@ -302,17 +305,20 @@ def run_restore(backup_name: str, target_name: str) -> NoReturn:
         backups = provider.all_target_backups(target.env_name.lower())
         if not backups:
             log.warning("no backups at all for '%s'", target_name)
+            print(f"no backups at all for '{target_name}'")
             sys.exit(2)
         if backup_name not in backups:
             log.warning(
                 "backup '%s' not exist at all for '%s'", backup_name, target_name
             )
+            print(f"backup '{backup_name}' not exist at all for '{target_name}'")
             sys.exit(2)
-        path_zip = provider.download_backup(backup_name)
-        path = core.run_unzip_zip_archive(path_zip)
+        path_age = provider.download_backup(backup_name)
+        path = core.run_decrypt_age_archive(path_age)
         target.restore(str(path))
         sys.exit(0)
     log.warning("target '%s' does not exist")
+    print(f"target '{target_name}' does not exist")
     sys.exit(1)
 
 
@@ -340,7 +346,7 @@ def run_main_loop() -> NoReturn:  # pragma: no cover
     shutdown()
 
 
-def main() -> NoReturn:
+def main() -> NoReturn:  # pragma: no cover
     log.info("parsing runtime arguments...")
 
     runtime_args = setup_runtime_arguments()
@@ -370,7 +376,7 @@ def main() -> NoReturn:
             log.warning("--target must be defined to use --restore-latest")
             sys.exit(3)
         run_restore(runtime_args.restore, runtime_args.target)
-    else:  # pragma: no cover
+    else:
         run_main_loop()
 
 

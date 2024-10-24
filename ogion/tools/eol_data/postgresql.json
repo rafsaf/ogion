@@ -1,5 +1,15 @@
 [
     {
+        "cycle": "17",
+        "releaseDate": "2024-09-26",
+        "eol": "2029-11-08",
+        "latest": "17.0",
+        "link": null,
+        "support": null,
+        "discontinued": null,
+        "before_eol": true
+    },
+    {
         "cycle": "16",
         "releaseDate": "2023-09-14",
         "eol": "2028-11-09",

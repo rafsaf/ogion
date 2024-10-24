@@ -6,7 +6,6 @@ from ogion.backup_targets import (
     file,
     folder,
     mariadb,
-    mysql,
     postgresql,
 )
 from ogion.config import BackupTargetEnum
@@ -18,5 +17,4 @@ def get_target_cls_map() -> dict[str, type[base_target.BaseBackupTarget]]:
         BackupTargetEnum.FOLDER: folder.Folder,
         BackupTargetEnum.MARIADB: mariadb.MariaDB,
         BackupTargetEnum.POSTGRESQL: postgresql.PostgreSQL,
-        BackupTargetEnum.MYSQL: mysql.MySQL,
     }

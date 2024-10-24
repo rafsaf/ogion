@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/github/license/rafsaf/ogion)](https://github.com/rafsaf/ogion/blob/main/LICENSE)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://docs.python.org/3/whatsnew/3.12.html)
+[![Python 3.13](https://img.shields.io/badge/python-3.13-blue)](https://docs.python.org/3/whatsnew/3.13.html)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Tests](https://github.com/rafsaf/ogion/actions/workflows/tests.yml/badge.svg)](https://github.com/rafsaf/ogion/actions/workflows/tests.yml)
 [![Type check](https://github.com/rafsaf/ogion/actions/workflows/type_check.yml/badge.svg)](https://github.com/rafsaf/ogion/actions/workflows/type_check.yml)
@@ -11,7 +11,7 @@
 
 A tool for performing scheduled database backups and transferring encrypted data to secure public clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms.
 
-Backups are in `zip` format using [7-zip](https://www.7-zip.org/), with strong AES-256 encryption under the hood.
+Backups are in `age` format using [age](https://github.com/FiloSottile/age), with strong encryption under the hood. Why age? it's modern replacement for GnuPG, available for most architectures and systems.
 
 ## Documentation
 
@@ -20,8 +20,8 @@ Backups are in `zip` format using [7-zip](https://www.7-zip.org/), with strong A
 ## Supported backup targets
 
 - PostgreSQL ([all currently supported versions](https://endoflife.date/postgresql))
-- MySQL ([all currently supported versions](https://endoflife.date/mysql))
 - MariaDB ([all currently supported versions](https://endoflife.date/mariadb))
+- MySQL ([currently supported versions after 8.0](https://endoflife.date/mysql), version 8.0 does not work with current mariadb-client)
 - Single file
 - Directory
 
@@ -66,7 +66,7 @@ services:
     image: rafsaf/ogion:latest
     environment:
       - POSTGRESQL_PG16=host=db password=pwd cron_rule=0 0 5 * * port=5432
-      - ZIP_ARCHIVE_PASSWORD=change_me
+      - AGE_RECIPIENTS=age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
       - BACKUP_PROVIDER=name=debug
 ```
 

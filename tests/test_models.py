@@ -10,7 +10,6 @@ from pydantic import ValidationError
 from ogion.models.backup_target_models import (
     DirectoryTargetModel,
     MariaDBTargetModel,
-    MySQLTargetModel,
     PostgreSQLTargetModel,
     SingleFileTargetModel,
     TargetModel,
@@ -48,16 +47,6 @@ from ogion.models.backup_target_models import (
         (
             PostgreSQLTargetModel,
             {"password": "secret", "env_name": "valid", "cron_rule": "5 5 * * *"},
-            True,
-        ),
-        (
-            MySQLTargetModel,
-            {
-                "password": "secret",
-                "db": "xxx",
-                "env_name": "valid",
-                "cron_rule": "5 0 * * *",
-            },
             True,
         ),
         (

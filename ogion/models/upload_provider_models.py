@@ -34,13 +34,15 @@ class GCSProviderModel(ProviderModel):
         return service_account_base64
 
 
-class AWSProviderModel(ProviderModel):
-    name: str = config.UploadProviderEnum.AWS_S3
+class S3ProviderModel(ProviderModel):
+    endpoint: str = "s3.amazonaws.com"
+    name: str = config.UploadProviderEnum.S3
     bucket_name: str
     bucket_upload_path: str
-    key_id: str
-    key_secret: SecretStr
-    region: str
+    secure: bool = False
+    access_key: str | None = None
+    secret_key: SecretStr | None = None
+    region: str | None = None
     max_bandwidth: int | None = None
 
 
