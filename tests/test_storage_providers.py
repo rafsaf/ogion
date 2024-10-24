@@ -1,88 +1,9 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-import time
-
-import google.cloud.storage as storage_client
-import pytest
-from google.auth.credentials import AnonymousCredentials
-from pydantic import SecretStr
 
 from ogion import config
-from ogion.models.upload_provider_models import (
-    AzureProviderModel,
-    DebugProviderModel,
-    GCSProviderModel,
-    S3ProviderModel,
-)
-from ogion.upload_providers.azure import UploadProviderAzure
 from ogion.upload_providers.base_provider import BaseUploadProvider
-from ogion.upload_providers.debug import UploadProviderLocalDebug
-from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
-from ogion.upload_providers.s3 import UploadProviderS3
-
-
-@pytest.fixture(params=["gcs", "s3", "azure", "debug"])
-def provider(request: pytest.FixtureRequest) -> BaseUploadProvider:
-    if request.param == "gcs":
-        bucket = storage_client.Client(
-            credentials=AnonymousCredentials()  # type: ignore[no-untyped-call]
-        ).create_bucket(str(time.time_ns()))
-        return UploadProviderGCS(
-            GCSProviderModel(
-                bucket_name=bucket.name or "",
-                bucket_upload_path="test",
-                service_account_base64=SecretStr("Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="),
-                chunk_size_mb=100,
-                chunk_timeout_secs=100,
-            )
-        )
-
-    elif request.param == "s3":
-        bucket = str(time.time_ns())
-        provider_s3 = UploadProviderS3(
-            S3ProviderModel(
-                endpoint="localhost:9000",
-                bucket_name=bucket,
-                access_key="minioadmin",
-                secret_key=SecretStr("minioadmin"),
-                bucket_upload_path="test",
-                secure=False,
-            )
-        )
-        provider_s3.client.make_bucket(bucket)
-        return provider_s3
-
-    elif request.param == "azure":
-        provider_azure = UploadProviderAzure(
-            # https://github.com/Azure/Azurite?tab=readme-ov-file#connection-strings
-            AzureProviderModel(
-                container_name=str(time.time_ns()),
-                connect_string=SecretStr(
-                    "DefaultEndpointsProtocol=http;"
-                    "AccountName=devstoreaccount1;"
-                    "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;"
-                    "BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
-                    "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
-                    "TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;"
-                ),
-            )
-        )
-        provider_azure.container_client.create_container()
-        return provider_azure
-    elif request.param == "debug":
-        return UploadProviderLocalDebug(DebugProviderModel())
-    else:
-        raise ValueError("unknown")
-
-
-@pytest.fixture
-def provider_prefix(provider: BaseUploadProvider) -> str:
-    if provider.__class__ == UploadProviderAzure:
-        return ""
-    elif provider.__class__ == UploadProviderLocalDebug:
-        return f"{config.CONST_DEBUG_FOLDER_PATH}/"
-    return "test/"
 
 
 def test_gcs_post_save(provider: BaseUploadProvider, provider_prefix: str) -> None:

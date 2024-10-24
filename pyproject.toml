@@ -45,7 +45,7 @@ python-dotenv = "^1.0.1"
 responses = "^0.25.0"
 
 [tool.pytest.ini_options]
-addopts = "-v --cov --cov-report term-missing --cov-fail-under 90 -n auto"
+addopts = "-v --cov --cov-report term-missing --cov-fail-under 100 -n auto"
 env = [
   "AGE_RECIPIENTS=",
   "BACKUP_MAX_NUMBER=1",
@@ -64,12 +64,12 @@ filterwarnings = [
 reportImplicitOverride = true
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py313"
 
 [tool.ruff.lint]
 # pycodestyle, pyflakes, isort, pylint, pyupgrade
+ignore = ["PLR0913"]
 select = ["E", "F", "I", "PL", "UP", "W"]
-
 [tool.coverage.run]
 omit = ["ogion/tools/*"]
 source = ["ogion"]

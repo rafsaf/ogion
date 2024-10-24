@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: _log_levels = "INFO"
     BACKUP_PROVIDER: str
     AGE_RECIPIENTS: str
+    DEBUG_AGE_SECRET_KEY: str = ""
     INSTANCE_NAME: str = socket.gethostname()
     CPU_ARCH: Literal["amd64", "arm64"] = Field(
         default="amd64", alias_priority=2, alias="OGION_CPU_ARCHITECTURE"

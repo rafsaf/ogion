@@ -3,10 +3,13 @@
 
 import os
 import secrets
+import time
 from pathlib import Path
 from typing import TypeVar
 
+import google.cloud.storage as storage_client
 import pytest
+from google.auth.credentials import AnonymousCredentials
 from pydantic import SecretStr
 
 from ogion import config
@@ -15,6 +18,12 @@ from ogion.models.backup_target_models import (
     MariaDBTargetModel,
     PostgreSQLTargetModel,
     SingleFileTargetModel,
+)
+from ogion.models.upload_provider_models import (
+    AzureProviderModel,
+    DebugProviderModel,
+    GCSProviderModel,
+    S3ProviderModel,
 )
 from ogion.tools.compose_db_models import ComposeDatabase
 from ogion.tools.compose_file_generator import (
@@ -25,6 +34,11 @@ from ogion.tools.compose_file_generator import (
     db_compose_mysql_data,
     db_compose_postgresql_data,
 )
+from ogion.upload_providers.azure import UploadProviderAzure
+from ogion.upload_providers.base_provider import BaseUploadProvider
+from ogion.upload_providers.debug import UploadProviderLocalDebug
+from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
+from ogion.upload_providers.s3 import UploadProviderS3
 
 TM = TypeVar("TM", MariaDBTargetModel, PostgreSQLTargetModel)
 
@@ -51,7 +65,10 @@ def _to_target_model(
 
 DOCKER_TESTS: bool = os.environ.get("DOCKER_TESTS", None) is not None
 CONST_TOKEN_URLSAFE = "mock"
-CONST_UNSAFE_AGE_KEY = (
+CONST_UNSAFE_AGE_PUBLIC_KEY = (
+    "age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2"
+)
+CONST_UNSAFE_AGE_SECRET_KEY = (
     "AGE-SECRET-KEY-12L9ETSAZJXK2XLGQRU503VMJ59NGXASGXKAUH05KJ4TDC6UKTAJQGMSN3L"
 )
 DB_VERSION_BY_ENV_VAR: dict[str, str] = {}
@@ -76,6 +93,12 @@ FOLDER_1 = DirectoryTargetModel(
     env_name="directory_1",
     cron_rule="* * * * *",
     abs_path=Path(__file__).absolute().parent / "const/testfolder",
+)
+ALL_TARGETS = (
+    ALL_POSTGRES_DBS_TARGETS
+    + ALL_MYSQL_DBS_TARGETS
+    + ALL_MARIADB_DBS_TARGETS
+    + [FILE_1, FOLDER_1]
 )
 
 
@@ -110,7 +133,8 @@ def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
         SMTP_FROM_ADDR="",
         SMTP_PASSWORD=SecretStr(""),
         SMTP_TO_ADDRS="",
-        AGE_RECIPIENTS="age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2",
+        AGE_RECIPIENTS=CONST_UNSAFE_AGE_PUBLIC_KEY,
+        DEBUG_AGE_SECRET_KEY=CONST_UNSAFE_AGE_SECRET_KEY,
     )
     monkeypatch.setattr(config, "options", options)
 
@@ -121,3 +145,66 @@ def fixed_secrets_token_urlsafe(monkeypatch: pytest.MonkeyPatch) -> None:
         return CONST_TOKEN_URLSAFE
 
     monkeypatch.setattr(secrets, "token_urlsafe", mock_token_urlsafe)
+
+
+@pytest.fixture(params=["gcs", "s3", "azure", "debug"])
+def provider(request: pytest.FixtureRequest) -> BaseUploadProvider:
+    if request.param == "gcs":
+        bucket = storage_client.Client(
+            credentials=AnonymousCredentials()  # type: ignore[no-untyped-call]
+        ).create_bucket(str(time.time_ns()))
+        return UploadProviderGCS(
+            GCSProviderModel(
+                bucket_name=bucket.name or "",
+                bucket_upload_path="test",
+                service_account_base64=SecretStr("Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="),
+                chunk_size_mb=100,
+                chunk_timeout_secs=100,
+            )
+        )
+
+    elif request.param == "s3":
+        bucket = str(time.time_ns())
+        provider_s3 = UploadProviderS3(
+            S3ProviderModel(
+                endpoint="localhost:9000",
+                bucket_name=bucket,
+                access_key="minioadmin",
+                secret_key=SecretStr("minioadmin"),
+                bucket_upload_path="test",
+                secure=False,
+            )
+        )
+        provider_s3.client.make_bucket(bucket)
+        return provider_s3
+
+    elif request.param == "azure":
+        provider_azure = UploadProviderAzure(
+            # https://github.com/Azure/Azurite?tab=readme-ov-file#connection-strings
+            AzureProviderModel(
+                container_name=str(time.time_ns()),
+                connect_string=SecretStr(
+                    "DefaultEndpointsProtocol=http;"
+                    "AccountName=devstoreaccount1;"
+                    "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;"
+                    "BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
+                    "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
+                    "TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;"
+                ),
+            )
+        )
+        provider_azure.container_client.create_container()
+        return provider_azure
+    elif request.param == "debug":
+        return UploadProviderLocalDebug(DebugProviderModel())
+    else:
+        raise ValueError("unknown")
+
+
+@pytest.fixture
+def provider_prefix(provider: BaseUploadProvider) -> str:
+    if provider.__class__ == UploadProviderAzure:
+        return ""
+    elif provider.__class__ == UploadProviderLocalDebug:
+        return f"{config.CONST_DEBUG_FOLDER_PATH}/"
+    return "test/"

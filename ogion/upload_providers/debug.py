@@ -46,7 +46,10 @@ class UploadProviderLocalDebug(BaseUploadProvider):
 
     @override
     def download_backup(self, path: str) -> Path:
-        return Path(path)
+        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        backup_file.parent.mkdir(parents=True, exist_ok=True)
+
+        return Path(backup_file)
 
     @override
     def clean(
