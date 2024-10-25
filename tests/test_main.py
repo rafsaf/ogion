@@ -25,7 +25,7 @@ from .conftest import (
     FOLDER_1,
 )
 
-SECONDS_TIMEOUT = 5
+SECONDS_TIMEOUT = 10
 
 
 @pytest.fixture(autouse=True)
@@ -103,9 +103,11 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
         timeout += 0.05
         time.sleep(0.05)
 
-    for dir in config.CONST_BACKUP_FOLDER_PATH.iterdir():
-        assert dir.is_dir()
-        assert dir.name in target_envs
+    for dir in config.CONST_DEBUG_FOLDER_PATH.iterdir():
+        assert dir.is_dir(), dir
+        assert dir.name in target_envs, dir
+        assert sum(1 for _ in dir.glob("*.age")) == 1, dir
+
         count += 1
     assert count == len(target_envs)
 

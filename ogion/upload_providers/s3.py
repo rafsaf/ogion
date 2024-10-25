@@ -3,66 +3,65 @@
 
 import logging
 from pathlib import Path
-from typing import Any, TypedDict, override
+from typing import override
 
-import boto3
-from boto3.s3.transfer import TransferConfig
+from minio import Minio
+from minio.deleteobjects import DeleteObject
 
 from ogion import config, core
-from ogion.models.upload_provider_models import AWSProviderModel
+from ogion.models.upload_provider_models import S3ProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
 
-class DeleteItemDict(TypedDict):
-    Key: str
+class UploadProviderS3(BaseUploadProvider):
+    """S3 compatibile storage bucket for storing backups"""
 
-
-class UploadProviderAWS(BaseUploadProvider):
-    """AWS S3 bucket for storing backups"""
-
-    def __init__(self, target_provider: AWSProviderModel) -> None:
+    def __init__(self, target_provider: S3ProviderModel) -> None:
         self.bucket_upload_path = target_provider.bucket_upload_path
         self.max_bandwidth = target_provider.max_bandwidth
 
-        s3: Any = boto3.resource(
-            "s3",
-            region_name=target_provider.region,
-            aws_access_key_id=target_provider.key_id,
-            aws_secret_access_key=target_provider.key_secret.get_secret_value(),
+        self.client = Minio(
+            target_provider.endpoint,
+            access_key=target_provider.access_key,
+            secret_key=target_provider.secret_key.get_secret_value()
+            if target_provider.secret_key
+            else None,
+            region=target_provider.region,
+            secure=target_provider.secure,
         )
 
-        self.bucket = s3.Bucket(target_provider.bucket_name)
-        self.transfer_config = TransferConfig(max_bandwidth=self.max_bandwidth)
+        self.bucket = target_provider.bucket_name
 
     @override
     def post_save(self, backup_file: Path) -> str:
-        zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
+        age_backup_file = core.run_create_age_archive(backup_file=backup_file)
 
         backup_dest_in_bucket = (
             f"{self.bucket_upload_path}/"
-            f"{zip_backup_file.parent.name}/"
-            f"{zip_backup_file.name}"
+            f"{age_backup_file.parent.name}/"
+            f"{age_backup_file.name}"
         )
 
-        log.info("start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("start uploading %s to %s", age_backup_file, backup_dest_in_bucket)
 
-        self.bucket.upload_file(
-            Filename=zip_backup_file,
-            Key=backup_dest_in_bucket,
-            Config=self.transfer_config,
+        self.client.fput_object(
+            bucket_name=self.bucket,
+            object_name=backup_dest_in_bucket,
+            file_path=str(age_backup_file),
         )
 
-        log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("uploaded %s to %s", age_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
     @override
     def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
         prefix = f"{self.bucket_upload_path}/{env_name}/"
-        for bucket_obj in self.bucket.objects.filter(Delimiter="/", Prefix=prefix):
-            backups.append(bucket_obj.key)
+
+        for bucket_obj in self.client.list_objects(self.bucket, prefix=prefix):
+            backups.append(bucket_obj.object_name or "")
 
         backups.sort(reverse=True)
         return backups
@@ -73,10 +72,8 @@ class UploadProviderAWS(BaseUploadProvider):
         backup_file.parent.mkdir(parents=True, exist_ok=True)
         backup_file.touch(exist_ok=True)
 
-        self.bucket.upload_file(
-            Filename=backup_file,
-            Key=path,
-            Config=self.transfer_config,
+        self.client.fget_object(
+            self.bucket, object_name=path, file_path=str(backup_file)
         )
 
         return backup_file
@@ -89,7 +86,7 @@ class UploadProviderAWS(BaseUploadProvider):
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
 
-        items_to_delete: list[DeleteItemDict] = []
+        items_to_delete: list[DeleteObject] = []
         backups = self.all_target_backups(env_name=backup_file.parent.name)
 
         while len(backups) > max_backups:
@@ -106,20 +103,18 @@ class UploadProviderAWS(BaseUploadProvider):
                 )
                 break
 
-            items_to_delete.append({"Key": backup_to_remove})
-            log.info("backup %s will be deleted from aws s3 bucket", backup_to_remove)
+            items_to_delete.append(DeleteObject(name=backup_to_remove))
+            log.info("backup %s will be deleted from s3 bucket", backup_to_remove)
 
         if items_to_delete:
-            delete_response = self.bucket.delete_objects(
-                Delete={"Objects": items_to_delete, "Quiet": False}
+            delete_response = self.client.remove_objects(
+                self.bucket, delete_object_list=items_to_delete
             )
-            if (
-                "Errors" in delete_response and delete_response["Errors"]
-            ):  # pragma: no cover
+            if len([error for error in delete_response]):  # pragma: no cover
                 raise RuntimeError(
-                    "Fail to delete backups from aws s3: %s", delete_response["Errors"]
+                    "Fail to delete backups from s3: %s", delete_response
                 )
             log.info(
-                "%s backups were successfully deleted from aws s3 bucket",
+                "%s backups were successfully deleted from s3 bucket",
                 len(items_to_delete),
             )

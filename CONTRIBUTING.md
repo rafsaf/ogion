@@ -15,11 +15,11 @@ Both upload providers and backup targets were created with possibility to easly 
 
 ## Project requirements
 
-- Python 3.12.
+- Python 3.13.
 - Poetry [https://python-poetry.org/](https://python-poetry.org/).
 - Docker and docker compose plugin [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/).
 - Debian/Ubuntu are known to work.
-- To work with databases, `postgresql-client` and `mariadb-client` packages installed on your system.
+- To work with databases natively, `postgresql-client` and `mariadb-client` packages installed on your system, there are scripts in `scripts` that can help.
 
 ## Setup steps
 
@@ -39,7 +39,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 5. Setup databases
 
-   `make docker_dbs_setup_up`
+   `make docker_setup_up`
 
    Note, file `docker/docker-compose.dbs.yml` is automatically updated weekly keeping always latest tag per release cycle and adding new releases and removing those after EOL.
 
@@ -73,7 +73,7 @@ Note, exactly above is being run inside runners in tests github action.
 
 ## Acceptance tests
 
-The tests folder includes tests for cloud providers integrations, but for obvious reasons this cannot replace end-to-end tests with **real** credentials to storage in cloud and eventually costs involved, proceed with caution!
+The tests folder includes tests for cloud providers integrations, including fake gcs server, minio instance and azurite, but for obvious reasons this is only 99% replacement for full end-to-end tests with **real** credentials to storage in cloud and eventually costs involved, proceed with caution!
 
 For `Debug` provider acceptance tests, existing `.env.example` can be ok for `.env` file. To test other providers, you will need to change `BACKUP_PROVIDER` environment variable accordingly.
 
@@ -81,21 +81,16 @@ Then `make acceptance_tests_amd64` (or even for arm64 `make acceptance_tests_arm
 
 ## Coding conventions
 
-We expect that all code contributions have been formatted using `black`. You can
-run `black .` to format your code.
+We expect that all code contributions have been formatted using `ruff format`. You can
+run `ruff format .` to format your code.
 
-The project use `ruff` for style, isort rules etc. This is also included in `pre-commit` rules, but you can use `ruff check .`
+The project use `ruff` for style, isort rules etc. This is also included in `pre-commit` rules, but you can use `ruff check . --fix`
 
 We also expect passing `mypy` static code analysis, that can be run with `mypy .`
 
 ## Commit message conventions
 
 There is no dedicated commit message convention, just use descriptive commit messages and useful branch/PR names.
-
-## Submitting changes
-
-Please create a new PR against the `main` branch which must be based on the
-project's [pull request template](.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Releasing
 

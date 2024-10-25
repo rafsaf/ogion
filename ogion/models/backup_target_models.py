@@ -18,7 +18,7 @@ from ogion import config
 
 
 class TargetModel(BaseModel):
-    name: str = "test"
+    name: config.BackupTargetEnum = config.BackupTargetEnum.FILE
     env_name: str = Field(pattern=r"^[A-Za-z_0-9]{1,}$")
     cron_rule: str
     max_backups: int = Field(ge=1, le=998, default=config.options.BACKUP_MAX_NUMBER)
@@ -43,15 +43,6 @@ class PostgreSQLTargetModel(TargetModel):
     host: str = "localhost"
     port: int = 5432
     db: str = "postgres"
-    password: SecretStr
-
-
-class MySQLTargetModel(TargetModel):
-    name: config.BackupTargetEnum = config.BackupTargetEnum.MYSQL
-    user: str = "root"
-    host: str = "localhost"
-    port: int = 3306
-    db: str = "mysql"
     password: SecretStr
 
 

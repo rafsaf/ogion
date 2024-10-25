@@ -16,19 +16,17 @@ markdown_extensions:
   - pymdownx.superfences
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
   - tables
 
 nav:
   - Ogion: index.md
   - Upload providers:
       - providers/google_cloud_storage.md
-      - providers/aws_s3.md
+      - providers/s3.md
       - providers/azure.md
       - providers/debug.md
   - Backup targets:
       - backup_targets/postgresql.md
-      - backup_targets/mysql.md
       - backup_targets/mariadb.md
       - backup_targets/file.md
       - backup_targets/directory.md
@@ -38,7 +36,8 @@ nav:
       - notifications/slack.md
   - Deployment: deployment.md
   - Configuration: configuration.md
-  - How to restore?: how_to_restore.md
+  - Disaster recovery: disaster_recovery.md
+  - Manual disaster recovery: manual_disaster_recovery.md
 
 plugins:
   - search:

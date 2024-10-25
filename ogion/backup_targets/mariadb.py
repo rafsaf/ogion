@@ -34,8 +34,9 @@ class MariaDB(BaseBackupTarget):
             return s.replace("\\", "\\\\")
 
         password = self.target_model.password.get_secret_value()
-        text = "{}\n{}\n{}\n{}\n{}\n{}".format(
+        text = "{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
             "[client]",
+            "skip-ssl=true",
             f'user="{escape(self.target_model.user)}"',
             f"host={self.target_model.host}",
             f"port={self.target_model.port}",
@@ -59,9 +60,7 @@ class MariaDB(BaseBackupTarget):
             log.debug("output: %s", mariadb_version)
         except core.CoreSubprocessError as version_err:  # pragma: no cover
             log.critical(
-                "mariadb client is not detected on your system (%s)\n"
-                "check out ready script: "
-                "https://github.com/rafsaf/ogion/blob/main/scripts/install_mariadb_mysql_client.sh",
+                "mariadb client is not detected on your system: %s",
                 version_err,
             )
             raise

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import override
 
 import google.cloud.storage as cloud_storage
+from google.auth.credentials import AnonymousCredentials
 
 from ogion import config, core
 from ogion.models.upload_provider_models import GCSProviderModel
@@ -28,7 +29,11 @@ class UploadProviderGCS(BaseUploadProvider):
             f.write(service_account_bytes)
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(sa_path)
 
-        self.storage_client = cloud_storage.Client()
+        self.storage_client = cloud_storage.Client(
+            credentials=AnonymousCredentials()  # type: ignore[no-untyped-call]
+            if os.environ.get("STORAGE_EMULATOR_HOST")
+            else None  # pragma: no cover
+        )
         self.bucket = self.storage_client.bucket(target_provider.bucket_name)
         self.bucket_upload_path = target_provider.bucket_upload_path
         self.chunk_size_bytes = target_provider.chunk_size_mb * 1024 * 1024
@@ -36,25 +41,25 @@ class UploadProviderGCS(BaseUploadProvider):
 
     @override
     def post_save(self, backup_file: Path) -> str:
-        zip_backup_file = core.run_create_zip_archive(backup_file=backup_file)
+        age_backup_file = core.run_create_age_archive(backup_file=backup_file)
 
         backup_dest_in_bucket = (
             f"{self.bucket_upload_path}/"
-            f"{zip_backup_file.parent.name}/"
-            f"{zip_backup_file.name}"
+            f"{age_backup_file.parent.name}/"
+            f"{age_backup_file.name}"
         )
 
-        log.info("start uploading %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("start uploading %s to %s", age_backup_file, backup_dest_in_bucket)
 
         blob = self.bucket.blob(backup_dest_in_bucket, chunk_size=self.chunk_size_bytes)
         blob.upload_from_filename(
-            zip_backup_file,
+            age_backup_file,
             timeout=self.chunk_timeout_secs,
             if_generation_match=0,
-            checksum="crc32c",
+            checksum="md5",
         )
 
-        log.info("uploaded %s to %s", zip_backup_file, backup_dest_in_bucket)
+        log.info("uploaded %s to %s", age_backup_file, backup_dest_in_bucket)
         return backup_dest_in_bucket
 
     @override
@@ -89,7 +94,6 @@ class UploadProviderGCS(BaseUploadProvider):
             log.info("removed %s from local disk", backup_path)
 
         backups = self.all_target_backups(env_name=backup_file.parent.name)
-
         while len(backups) > max_backups:
             backup_to_remove = backups.pop()
             file_name = backup_to_remove.split("/")[-1]

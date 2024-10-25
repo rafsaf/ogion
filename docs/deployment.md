@@ -15,10 +15,9 @@ services:
     image: rafsaf/ogion:latest
     environment:
       - POSTGRESQL_DB1=...
-      - MYSQL_DB2=...
-      - MARIADB_DB3=...
+      - MARIADB_DB2=...
 
-      - ZIP_ARCHIVE_PASSWORD=change_me
+      - AGE_RECIPIENTS=age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
       - BACKUP_PROVIDER=name=gcs bucket_name=my_bucket_name bucket_upload_path=my_ogion_instance_1 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=
 ```
 
@@ -56,9 +55,8 @@ metadata:
 type: Opaque
 stringData:
   POSTGRESQL_DB1: ...
-  MYSQL_DB2: ...
-  MARIADB_DB3: ...
-  ZIP_ARCHIVE_PASSWORD: change_me
+  MARIADB_DB2: ...
+  AGE_RECIPIENTS: age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
   BACKUP_PROVIDER: "name=gcs bucket_name=my_bucket_name bucket_upload_path=my_ogion_instance_1 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="
 ---
 apiVersion: apps/v1
@@ -92,12 +90,12 @@ spec:
   ```
 - There is runtime flag `--single` that **ignores cron, make all databases backups and exits**. To use it when having already running container, use:
   ```bash
-  kubectl exec --stdin --tty ogion-9c8b8b77d-z5xsc -n ogion -- runuser -u ogion -- python -m ogion.main --single
+  kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- python -m ogion.main --single
   ```
   BE CAREFUL, if your setup if fine, this will upload backup files to cloud provider, so costs may apply.
 - There is runtime flag `--debug-notifications` that **setup notifications, raise dummy exception and exits**. This can help ensure notifications are working:
   ```bash
-  kubectl exec --stdin --tty ogion-9c8b8b77d-z5xsc -n ogion -- runuser -u ogion -- python -m ogion.main --debug-notifications
+  kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- python -m ogion.main --debug-notifications
   ```
   <br>
   <br>
