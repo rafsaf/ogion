@@ -1,6 +1,12 @@
 # to run tests with arm64 see https://docs.docker.com/build/building/multi-platform/
 export OGION_ARCH ?= amd64
 
+ifdef CI
+BUILD := 
+else
+BUILD := "--build"
+endif
+
 .PHONY: docker_setup_up
 docker_setup_up:
 	docker compose -f docker/docker-compose.yml up -d gcs minio azurite
@@ -14,7 +20,7 @@ docker_setup_down:
 .PHONY: unit_tests
 unit_tests:
 	$(MAKE) docker_setup_up
-	docker compose -f docker/docker-compose.yml run --rm --build ogion_unit_tests 
+	docker compose -f docker/docker-compose.yml run --rm $(BUILD) ogion_unit_tests
 
 .PHONY: acceptance_tests
 acceptance_tests:
