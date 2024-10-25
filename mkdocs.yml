@@ -36,7 +36,8 @@ nav:
       - notifications/slack.md
   - Deployment: deployment.md
   - Configuration: configuration.md
-  - How to restore?: how_to_restore.md
+  - Disaster recovery: disaster_recovery.md
+  - Manual disaster recovery: manual_disaster_recovery.md
 
 plugins:
   - search:
