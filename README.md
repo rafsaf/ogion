@@ -13,9 +13,26 @@ A tool for performing scheduled database backups and transferring encrypted data
 
 Backups are in `age` format using [age](https://github.com/FiloSottile/age), with strong encryption under the hood. Why age? it's modern replacement for GnuPG, available for most architectures and systems.
 
+This project is more or less well tested cron-like runtime with predefined supported providers and backup targets (see below) with sensible defaults for backup commands. It has rich integration tests using providers container replacements: fake gcs, azurite, minio. Goal was to make 100% sure it will work in the wild.
+
+There is **no compression before age encryption** step whatsoever. This is intentional, prepare for large backups size (compared to ogion 6.0 where 7zip was used, some backups that were 300MB now are 2.2GB). There are known exploits when mixing compression with encryption, and for small systems compression this just seems unnecessary. See:
+
+- [CRIME](https://en.wikipedia.org/wiki/CRIME)
+- [BREACH](https://en.wikipedia.org/wiki/BREACH)
+- [Known plaintext attack](https://en.wikipedia.org/wiki/Known-plaintext_attack)
+- [A Known Plaintext Attack on the PKZIP](https://link.springer.com/content/pdf/10.1007/3-540-60590-8_12.pdf)
+- [TLSv1.3 removes compression](https://blog.cloudflare.com/tls-1-3-overview-and-q-and-a/)
+
 ## Documentation
 
 - [https://ogion.rafsaf.pl](https://ogion.rafsaf.pl)
+
+## Alternatives
+
+There are better tools for big corporate databases and systems:
+
+- [pgBackRest - Reliable PostgreSQL Backup & Restore](https://pgbackrest.org/)
+- [postgres operator for k8s based on pgBackRest from crunchydata](https://access.crunchydata.com/documentation/postgres-operator/latest)
 
 ## Supported backup targets
 
