@@ -28,10 +28,10 @@ class UploadProviderGCS(BaseUploadProvider):
         )
 
         if os.environ.get("STORAGE_EMULATOR_HOST"):
-            creds = AnonymousCredentials()
+            creds = AnonymousCredentials()  # type: ignore[no-untyped-call]
         else:  # pragma: no cover
             sa = json.loads(service_account_bytes.decode())
-            creds = service_account.Credentials.from_service_account_info(sa)
+            creds = service_account.Credentials.from_service_account_info(sa)  # type: ignore[no-untyped-call]
 
         self.storage_client = cloud_storage.Client(credentials=creds)
         self.bucket = self.storage_client.bucket(target_provider.bucket_name)
