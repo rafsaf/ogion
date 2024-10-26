@@ -282,6 +282,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alternatives
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#supported-backup-targets" class="md-nav__link">
     <span class="md-ellipsis">
       Supported backup targets
@@ -825,6 +834,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alternatives
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#supported-backup-targets" class="md-nav__link">
     <span class="md-ellipsis">
       Supported backup targets
@@ -916,9 +934,24 @@
 <h1 id="ogion">Ogion</h1>
 <p>A tool for performing scheduled database backups and transferring encrypted data to secure public clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms.</p>
 <p>Backups are in <code>age</code> format using <a href="https://github.com/FiloSottile/age">age</a>, with strong encryption under the hood. Why age? it's modern replacement for GnuPG, available for most architectures and systems.</p>
+<p>This project is more or less well tested cron-like runtime with predefined supported providers and backup targets (see below) with sensible defaults for backup commands. It has rich integration tests using providers container replacements: fake gcs, azurite, minio. Goal was to make 100% sure it will work in the wild.</p>
+<p>There is <strong>no compression before age encryption</strong> step whatsoever. This is intentional, prepare for large backups size (compared to ogion 6.0 where 7zip was used, some backups that were 300MB now are 2.2GB). There are known exploits when mixing compression with encryption, and for small systems compression this just seems unnecessary. See:</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/CRIME">CRIME</a></li>
+<li><a href="https://en.wikipedia.org/wiki/BREACH">BREACH</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Known-plaintext_attack">Known plaintext attack</a></li>
+<li><a href="https://link.springer.com/content/pdf/10.1007/3-540-60590-8_12.pdf">A Known Plaintext Attack on the PKZIP</a></li>
+<li><a href="https://blog.cloudflare.com/tls-1-3-overview-and-q-and-a/">TLSv1.3 removes compression</a></li>
+</ul>
 <h2 id="documentation">Documentation</h2>
 <ul>
 <li><a href="https://ogion.rafsaf.pl">https://ogion.rafsaf.pl</a></li>
+</ul>
+<h2 id="alternatives">Alternatives</h2>
+<p>There are better tools for big corporate databases and systems:</p>
+<ul>
+<li><a href="https://pgbackrest.org/">pgBackRest - Reliable PostgreSQL Backup &amp; Restore</a></li>
+<li><a href="https://access.crunchydata.com/documentation/postgres-operator/latest">postgres operator for k8s based on pgBackRest from crunchydata</a></li>
 </ul>
 <h2 id="supported-backup-targets">Supported backup targets</h2>
 <ul>
