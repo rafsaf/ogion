@@ -2,6 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import base64
+import json
 import logging
 import os
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import override
 
 import google.cloud.storage as cloud_storage
 from google.auth.credentials import AnonymousCredentials
+from google.oauth2 import service_account
 
 from ogion import config, core
 from ogion.models.upload_provider_models import GCSProviderModel
@@ -24,16 +26,14 @@ class UploadProviderGCS(BaseUploadProvider):
         service_account_bytes = base64.b64decode(
             target_provider.service_account_base64.get_secret_value()
         )
-        sa_path = config.CONST_CONFIG_FOLDER_PATH / "google_auth.json"
-        with open(sa_path, "wb") as f:
-            f.write(service_account_bytes)
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(sa_path)
 
-        self.storage_client = cloud_storage.Client(
-            credentials=AnonymousCredentials()  # type: ignore[no-untyped-call]
-            if os.environ.get("STORAGE_EMULATOR_HOST")
-            else None  # pragma: no cover
-        )
+        if os.environ.get("STORAGE_EMULATOR_HOST"):
+            creds = AnonymousCredentials()
+        else:  # pragma: no cover
+            sa = json.loads(service_account_bytes.decode())
+            creds = service_account.Credentials.from_service_account_info(sa)
+
+        self.storage_client = cloud_storage.Client(credentials=creds)
         self.bucket = self.storage_client.bucket(target_provider.bucket_name)
         self.bucket_upload_path = target_provider.bucket_upload_path
         self.chunk_size_bytes = target_provider.chunk_size_mb * 1024 * 1024

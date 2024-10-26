@@ -4,7 +4,7 @@ description = "A tool for performing scheduled database backups and transferring
 license = "GNU GPLv3"
 name = "ogion"
 package-mode = false
-version = "7.0"
+version = "7.1"
 
 [tool.poetry.dependencies]
 python = "^3.13"
