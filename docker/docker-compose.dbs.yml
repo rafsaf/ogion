@@ -8,7 +8,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.11.9
+    image: mariadb:10.11.10
     networks:
     - ogion
     ports:
@@ -20,7 +20,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.5.26
+    image: mariadb:10.5.27
     networks:
     - ogion
     ports:
@@ -32,7 +32,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:10.6.19
+    image: mariadb:10.6.20
     networks:
     - ogion
     ports:
@@ -44,7 +44,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.2.5
+    image: mariadb:11.2.6
     networks:
     - ogion
     ports:
@@ -56,7 +56,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:11.4.3
+    image: mariadb:11.4.4
     networks:
     - ogion
     ports:
@@ -86,23 +86,12 @@ services:
     ports:
     - 9091:3306
     restart: 'no'
-  ogion_postgres_12:
-    environment:
-    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
-    - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:12.20-bookworm
-    networks:
-    - ogion
-    ports:
-    - 10012:5432
-    restart: 'no'
   ogion_postgres_13:
     environment:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:13.16-bookworm
+    image: postgres:13.17-bookworm
     networks:
     - ogion
     ports:
@@ -113,7 +102,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:14.13-bookworm
+    image: postgres:14.14-bookworm
     networks:
     - ogion
     ports:
@@ -124,7 +113,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:15.8-bookworm
+    image: postgres:15.9-bookworm
     networks:
     - ogion
     ports:
@@ -135,7 +124,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:16.4-bookworm
+    image: postgres:16.5-bookworm
     networks:
     - ogion
     ports:
@@ -146,7 +135,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:17.0-bookworm
+    image: postgres:17.1-bookworm
     networks:
     - ogion
     ports:
