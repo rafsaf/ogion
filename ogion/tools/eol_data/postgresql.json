@@ -52,12 +52,12 @@
     {
         "cycle": "12",
         "releaseDate": "2019-10-03",
-        "eol": "2024-11-14",
+        "eol": "2024-11-21",
         "latest": "12.21",
         "link": null,
         "support": null,
         "discontinued": null,
-        "before_eol": false
+        "before_eol": true
     },
     {
         "cycle": "11",
