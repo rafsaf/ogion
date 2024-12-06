@@ -8,10 +8,6 @@ import os
 from pathlib import Path
 from typing import override
 
-import google.cloud.storage as cloud_storage
-from google.auth.credentials import AnonymousCredentials
-from google.oauth2 import service_account
-
 from ogion import config, core
 from ogion.models.upload_provider_models import GCSProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
@@ -23,6 +19,10 @@ class UploadProviderGCS(BaseUploadProvider):
     """GCS bucket for storing backups"""
 
     def __init__(self, target_provider: GCSProviderModel) -> None:
+        import google.cloud.storage as cloud_storage
+        from google.auth.credentials import AnonymousCredentials
+        from google.oauth2 import service_account
+
         service_account_bytes = base64.b64decode(
             target_provider.service_account_base64.get_secret_value()
         )

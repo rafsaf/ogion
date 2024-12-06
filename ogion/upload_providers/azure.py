@@ -5,8 +5,6 @@ import logging
 from pathlib import Path
 from typing import override
 
-from azure.storage.blob import BlobServiceClient
-
 from ogion import config, core
 from ogion.models.upload_provider_models import AzureProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
@@ -18,6 +16,8 @@ class UploadProviderAzure(BaseUploadProvider):
     """Azure blob storage for storing backups"""
 
     def __init__(self, target_provider: AzureProviderModel) -> None:
+        from azure.storage.blob import BlobServiceClient
+
         self.container_name = target_provider.container_name
 
         blob_service_client = BlobServiceClient.from_connection_string(
