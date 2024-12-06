@@ -5,9 +5,6 @@ import logging
 from pathlib import Path
 from typing import override
 
-from minio import Minio
-from minio.deleteobjects import DeleteObject
-
 from ogion import config, core
 from ogion.models.upload_provider_models import S3ProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
@@ -19,6 +16,8 @@ class UploadProviderS3(BaseUploadProvider):
     """S3 compatibile storage bucket for storing backups"""
 
     def __init__(self, target_provider: S3ProviderModel) -> None:
+        from minio import Minio
+
         self.bucket_upload_path = target_provider.bucket_upload_path
         self.max_bandwidth = target_provider.max_bandwidth
 
@@ -82,6 +81,8 @@ class UploadProviderS3(BaseUploadProvider):
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
+        from minio.deleteobjects import DeleteObject
+
         for backup_path in backup_file.parent.iterdir():
             core.remove_path(backup_path)
             log.info("removed %s from local disk", backup_path)
