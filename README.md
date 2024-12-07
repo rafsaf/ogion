@@ -45,7 +45,7 @@ There are better tools for big corporate databases and systems:
 ## Supported upload providers
 
 - Google Cloud Storage bucket
-- AWS S3 bucket
+- S3 storage compatibile bucket (AWS, Minio)
 - Azure Blob Storage
 - Debug (local)
 
@@ -76,13 +76,13 @@ Everyday 5am backup of PostgreSQL database defined in the same file and running 
 
 services:
   db:
-    image: postgres:16
+    image: postgres:17
     environment:
       - POSTGRES_PASSWORD=pwd
   ogion:
     image: rafsaf/ogion:latest
     environment:
-      - POSTGRESQL_PG16=host=db password=pwd cron_rule=0 0 5 * * port=5432
+      - POSTGRESQL_DB_README=host=db password=pwd cron_rule=0 0 5 * * port=5432
       - AGE_RECIPIENTS=age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
       - BACKUP_PROVIDER=name=debug
 ```
