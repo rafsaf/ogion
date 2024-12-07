@@ -14,13 +14,13 @@ BACKUP_PROVIDER="name=azure container_name=my-ogion-instance connect_string=Defa
 Uses Azure Blob Storage for storing backups.
 
 !!! note
-    _There can be only one upload provider defined per app, using **BACKUP_PROVIDER** environemnt variable_. It's type is guessed by using `name`, in this case `name=azure`. Params must be included in value, splited by single space for example "value1=1 value2=foo".
+_There can be only one upload provider defined per app, using **BACKUP_PROVIDER** environemnt variable_. It's type is guessed by using `name`, in this case `name=azure`. Params must be included in value, splited by single space for example "value1=1 value2=foo".
 
 ## Params
 
 | Name           | Type                 | Description                                                                                   | Default |
 | :------------- | :------------------- | :-------------------------------------------------------------------------------------------- | :------ |
-| name           | string[**requried**] | Must be set literaly to string `azure` to use Google Cloud Storage.                           | -       |
+| name           | string[**requried**] | Must be set literaly to string `azure` to use Azure.                                          | -       |
 | container_name | string[**requried**] | Storage account container name. It must be already created, ogion won't create new container. | -       |
 | connect_string | string[**requried**] | Connection string copied from your storage account "Access keys" section.                     | -       |
 
