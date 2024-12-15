@@ -62,10 +62,23 @@ class PostgreSQL(BaseBackupTarget):
         pgpass_file = self._init_pgpass_file()
         encoded_user = urllib.parse.quote_plus(self.target_model.user)
         encoded_db = urllib.parse.quote_plus(self.target_model.db)
+
+        params = {"passfile": pgpass_file}
+        if self.target_model.model_extra is not None:
+            for param, value in self.target_model.model_extra.items():
+                if not param.startswith("conn_"):
+                    continue
+
+                params[param.removeprefix("conn_")] = value
+
+        log.debug("psql connection params: %s", params)
+
         uri = (
             f"postgresql://{encoded_user}@{self.target_model.host}:{self.target_model.port}/{encoded_db}?"
-            f"passfile={pgpass_file}"
-        )
+        ) + urllib.parse.urlencode(params)
+
+        log.debug("psql connection url: %s", uri)
+
         escaped_uri = shlex.quote(uri)
         return escaped_uri
 
@@ -100,8 +113,8 @@ class PostgreSQL(BaseBackupTarget):
             break
         if version is None:  # pragma: no cover
             msg = (
-                "postgres_connection error processing sql result, "
-                "version unknown: {result}"
+                f"postgres_connection error processing sql result, "
+                f"version unknown: {result}"
             )
             log.error(msg)
             raise ValueError(msg)
