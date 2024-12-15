@@ -50,6 +50,18 @@ services:
     ports:
     - 11114:3306
     restart: 'no'
+  ogion_mysql_8_0:
+    environment:
+    - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
+    - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
+    - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
+    image: mysql:8.0.40
+    networks:
+    - ogion
+    ports:
+    - 9080:3306
+    restart: 'no'
   ogion_mysql_8_4:
     environment:
     - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[

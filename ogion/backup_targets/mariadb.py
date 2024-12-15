@@ -34,15 +34,27 @@ class MariaDB(BaseBackupTarget):
             return s.replace("\\", "\\\\")
 
         password = self.target_model.password.get_secret_value()
-        text = "{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
+        text = "{}\n{}\n{}\n{}\n{}\n{}\n".format(
             "[client]",
-            "skip-ssl=true",
             f'user="{escape(self.target_model.user)}"',
             f"host={self.target_model.host}",
             f"port={self.target_model.port}",
             "protocol=TCP",
             f'password="{escape(password)}"' if self.target_model.password else "",
         )
+
+        # https://mariadb.com/kb/en/mariadb-command-line-client/
+        params = {}
+        if self.target_model.model_extra is not None:
+            for param, value in self.target_model.model_extra.items():
+                if not param.startswith("client_"):
+                    continue
+
+                params[param.removeprefix("client_")] = value
+
+        for param_name, value in params.items():
+            text += f"{param_name}={value}\n"
+
         md5_hash = hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()
         name = f"{self.env_name}.{md5_hash}.mariadb.cnf"
 

@@ -62,6 +62,8 @@ def _to_target_model(
             "db": DB_NAME,
             "user": DB_USERNAME,
             "conn_sslmode": "prefer",
+            "client_max-allowed-packet": "24MB",
+            "client_ssl-verify-server-cert": "false",
             "dummy_extra": "test",
         }
     )
