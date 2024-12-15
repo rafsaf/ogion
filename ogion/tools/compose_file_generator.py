@@ -121,9 +121,7 @@ def db_compose_postgresql_data() -> list[ComposeDatabase]:
 
 
 def db_compose_mysql_data() -> list[ComposeDatabase]:
-    return handle_file(
-        EOL_DATA_DIR / "mysql.json", mysql_db_generator, omit_cycles=["8.0"]
-    )
+    return handle_file(EOL_DATA_DIR / "mysql.json", mysql_db_generator)
 
 
 if __name__ == "__main__":

@@ -38,7 +38,7 @@ There are better tools for big corporate databases and systems:
 
 - PostgreSQL ([all currently supported versions](https://endoflife.date/postgresql))
 - MariaDB ([all currently supported versions](https://endoflife.date/mariadb))
-- MySQL ([currently supported versions after 8.0](https://endoflife.date/mysql), version 8.0 does not work with current mariadb-client)
+- MySQL ([all currently supported versions](https://endoflife.date/mysql))
 - Single file
 - Directory
 
