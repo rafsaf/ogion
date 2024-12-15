@@ -66,7 +66,10 @@ class PostgreSQL(BaseBackupTarget):
         params = {"passfile": pgpass_file}
         if self.target_model.model_extra is not None:
             for param, value in self.target_model.model_extra.items():
-                params[param] = value
+                if not param.startswith("conn_"):
+                    continue
+
+                params[param.removeprefix("conn_")] = value
 
         log.debug("psql connection params: %s", params)
 
@@ -110,8 +113,8 @@ class PostgreSQL(BaseBackupTarget):
             break
         if version is None:  # pragma: no cover
             msg = (
-                "postgres_connection error processing sql result, "
-                "version unknown: {result}"
+                f"postgres_connection error processing sql result, "
+                f"version unknown: {result}"
             )
             log.error(msg)
             raise ValueError(msg)
