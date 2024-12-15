@@ -195,6 +195,16 @@ test_data = [
         ],
         True,
     ),
+    (
+        [
+            (
+                "POSTGRESQL_FIRST_DB",
+                "host=localhost port5432 password=secret "
+                "cron_rule=* * * * * ssl_mode=require",
+            ),
+        ],
+        True,
+    ),
 ]
 
 

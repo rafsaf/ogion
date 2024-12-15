@@ -21,6 +21,7 @@ log = logging.getLogger(__name__)
 
 SAFE_LETTER_PATTERN = re.compile(r"[^A-Za-z0-9_]*")
 DATETIME_BACKUP_FILE_PATTERN = re.compile(r"_[0-9]{8}_[0-9]{4}_")
+MODEL_SPLIT_EQUATION_PATTERN = re.compile(r"( \w*\=|^\w*\=)")
 
 _BM = TypeVar("_BM", bound=BaseModel)
 
@@ -116,26 +117,24 @@ def _validate_model(
     env_name: str,
     env_value: str,
     target: type[_BM],
-    value_whitespace_split: bool = False,
 ) -> _BM:
     target_name: str = target.__name__.lower()
     log.info("validating %s variable: `%s`", target_name, env_name)
     log.debug("%s=%s", target_name, env_value)
     try:
         env_value_parts = env_value.strip()
+        fields_matches = [
+            match.group()
+            for match in MODEL_SPLIT_EQUATION_PATTERN.finditer(env_value_parts)
+        ]
         target_kwargs: dict[str, Any] = {"env_name": env_name}
-        for field_name in target.model_fields.keys():
-            if env_value_parts.startswith(f"{field_name}="):
-                f = f"{field_name}="
-            else:
-                f = f" {field_name}="
-            if f in env_value_parts:
-                _, val = env_value_parts.split(f, maxsplit=1)
-                for other_field in target.model_fields.keys():
-                    val = val.split(f" {other_field}=")[0]
-                if value_whitespace_split:
-                    val = val.split()[0]
-                target_kwargs[field_name] = val
+
+        while fields_matches:
+            field_match = fields_matches.pop()
+            rest, value = env_value_parts.split(field_match, maxsplit=1)
+            env_value_parts = rest.rstrip()
+            target_kwargs[field_match.removesuffix("=").strip()] = value
+
         log.debug("calculated arguments: %s", target_kwargs)
         validated_target = target.model_validate(target_kwargs)
     except Exception:
@@ -173,7 +172,6 @@ def create_provider_model() -> upload_provider_models.ProviderModel:
         "backup_provider",
         config.options.BACKUP_PROVIDER,
         upload_provider_models.ProviderModel,
-        value_whitespace_split=True,
     )
     target_model_cls = provider_map[base_provider.name]
     return _validate_model(

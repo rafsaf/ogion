@@ -45,6 +45,10 @@ class PostgreSQLTargetModel(TargetModel):
     db: str = "postgres"
     password: SecretStr
 
+    model_config = ConfigDict(
+        extra="allow",
+    )
+
 
 class MariaDBTargetModel(TargetModel):
     name: config.BackupTargetEnum = config.BackupTargetEnum.MARIADB
@@ -53,6 +57,10 @@ class MariaDBTargetModel(TargetModel):
     port: int = 3306
     db: str = "mariadb"
     password: SecretStr
+
+    model_config = ConfigDict(
+        extra="allow",
+    )
 
 
 class SingleFileTargetModel(TargetModel):
