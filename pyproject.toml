@@ -1,13 +1,18 @@
-[tool.poetry]
-authors = ["Rafał Safin <rafal.safin@rafsaf.pl>"]
+[project]
+authors = [{ "name" = "Rafał Safin", "email" = "rafal.safin@rafsaf.pl" }]
 description = "A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms."
+dynamic = ["dependencies"]
 license = "GNU GPLv3"
 name = "ogion"
+readme = "README.md"
+requires-python = ">=3.13"
+version = "7.3"
+
+[tool.poetry]
 package-mode = false
-version = "7.2"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = ">=3.13"
 
 azure-identity = "^1.17.1"
 azure-storage-blob = "^12.20.0"
@@ -55,10 +60,7 @@ env = [
   "STORAGE_EMULATOR_HOST=http://localhost:4443",
   "SUBPROCESS_TIMEOUT_SECS=5",
 ]
-filterwarnings = [
-  "ignore:Type google._upb._message.MessageMapContainer uses PyType_Spec",
-  "ignore:Type google._upb._message.ScalarMapContainer uses PyType_Spec",
-]
+filterwarnings = []
 
 [tool.pyright]
 reportImplicitOverride = true
@@ -80,9 +82,12 @@ ignore_missing_imports = true
 python_version = "3.13"
 strict = true
 
-[tool.poetry.scripts]
+[project.scripts]
 ogion = "ogion.main:main"
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.9.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0"]
