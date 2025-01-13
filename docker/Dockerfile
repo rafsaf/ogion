@@ -19,7 +19,7 @@ RUN ./scripts/install_postgresql_client.sh
 RUN apt-get -y remove gpg
 
 FROM base AS poetry
-RUN --mount=type=cache,target=/root/.cache/pip pip install poetry==1.8.2
+RUN --mount=type=cache,target=/root/.cache/pip pip install poetry==2.0.1
 RUN --mount=type=cache,target=/root/.cache/pip poetry self add poetry-plugin-export
 COPY poetry.lock pyproject.toml ./
 RUN poetry export -o /requirements.txt --without-hashes
