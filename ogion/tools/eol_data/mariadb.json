@@ -1,8 +1,18 @@
 [
     {
+        "cycle": "11.7",
+        "releaseDate": "2025-02-13",
+        "eol": false,
+        "latest": "11.7.2",
+        "link": null,
+        "support": null,
+        "discontinued": null,
+        "before_eol": false
+    },
+    {
         "cycle": "11.6",
         "releaseDate": "2024-11-13",
-        "eol": false,
+        "eol": "2025-02-13",
         "latest": "11.6.2",
         "link": null,
         "support": null,
