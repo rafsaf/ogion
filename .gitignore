@@ -140,3 +140,4 @@ dmypy.json
 
 # benchmark
 *massif*
+benchmark_files
