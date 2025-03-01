@@ -31,3 +31,8 @@ acceptance_tests:
 .PHONY: update_compose_db_file
 update_compose_db_file:
 	poetry run python ogion/tools/compose_file_generator.py > docker/docker-compose.dbs.yml
+
+.PHONY: benchmark-mem-massif
+benchmark-mem-massif:
+	valgrind --massif-out-file=massif.benchmark.out --tool=massif python -m ogion.main -s
+	massif-visualizer massif.benchmark.out
