@@ -31,3 +31,17 @@ acceptance_tests:
 .PHONY: update_compose_db_file
 update_compose_db_file:
 	poetry run python ogion/tools/compose_file_generator.py > docker/docker-compose.dbs.yml
+
+.PHONY: benchmark-mem-massif-main
+benchmark-mem-massif-main:
+	valgrind --massif-out-file=massif.benchmark-main.out --tool=massif python -m ogion.main -s
+	massif-visualizer massif.benchmark-main.out
+
+.PHONY: benchmark-time-encrypt-2gb
+benchmark-time-encrypt-2gb:
+	$(MAKE) benchmark_files/test_file_2gb
+	time -f "User: %U seconds, System: %S seconds, Real: %e seconds" python -c "import pathlib;import ogion.core;ogion.core.run_create_age_archive(pathlib.Path('./benchmark_files/test_file_2gb'))"
+
+benchmark_files/test_file_2gb:
+	mkdir -p benchmark_files
+	dd if=/dev/urandom of=benchmark_files/test_file_2gb bs=2G count=1 iflag=fullblock

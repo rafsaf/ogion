@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 SAFE_LETTER_PATTERN = re.compile(r"[^A-Za-z0-9_]*")
 DATETIME_BACKUP_FILE_PATTERN = re.compile(r"_[0-9]{8}_[0-9]{4}_")
-MODEL_SPLIT_EQUATION_PATTERN = re.compile(r"( \w*\=|^\w*\=)")
+MODEL_SPLIT_EQUATION_PATTERN = re.compile(r"( (\w|\-)*\=|^(\w|\-)*\=)")
 
 _BM = TypeVar("_BM", bound=BaseModel)
 
@@ -102,7 +102,7 @@ def run_create_age_archive(backup_file: Path) -> Path:
 
     recipients = config.options.age_recipients_file
 
-    shell_create_age_archive = f"age -R {recipients} " f"-o {out_file} {backup_file}"
+    shell_create_age_archive = f"age -R {recipients} -o {out_file} {backup_file}"
     run_subprocess(shell_create_age_archive)
     log.info("finished age archive creating")
 

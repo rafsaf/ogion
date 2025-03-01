@@ -3,11 +3,13 @@
 
 import logging
 import os
-from pathlib import Path
+from pathlib import Path, PosixPath
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
 from freezegun import freeze_time
+from pydantic import SecretStr
 from pytest import LogCaptureFixture
 
 from ogion import config, core
@@ -98,29 +100,83 @@ test_data = [
             ),
         ],
         True,
+        [
+            {
+                "cron_rule": "* * * * *",
+                "db": "postgres",
+                "env_name": "postgresql_first_db",
+                "host": "localhost",
+                "max_backups": config.options.BACKUP_MAX_NUMBER,
+                "min_retention_days": config.options.BACKUP_MIN_RETENTION_DAYS,
+                "name": config.BackupTargetEnum.POSTGRESQL,
+                "password": SecretStr("secret"),
+                "port": 5432,
+                "user": "postgres",
+            },
+        ],
     ),
     (
         [
             (
-                "POSTGRESQL_FIRST_DB",
+                "POSTGRESQL_FIRST_OF_TWO_DB",
                 "host=localhost port=5432 password=secret cron_rule=* * * * *",
             ),
             (
-                "MYSQL_FIRST_DB",
+                "MARIADB_SECOND_OF_TWO_DB",
                 "host=localhost port=3306 password=secret cron_rule=* * * * *",
             ),
         ],
         True,
+        [
+            {
+                "cron_rule": "* * * * *",
+                "db": "postgres",
+                "env_name": "postgresql_first_of_two_db",
+                "host": "localhost",
+                "max_backups": config.options.BACKUP_MAX_NUMBER,
+                "min_retention_days": config.options.BACKUP_MIN_RETENTION_DAYS,
+                "name": config.BackupTargetEnum.POSTGRESQL,
+                "password": SecretStr("secret"),
+                "port": 5432,
+                "user": "postgres",
+            },
+            {
+                "cron_rule": "* * * * *",
+                "db": "mariadb",
+                "env_name": "mariadb_second_of_two_db",
+                "host": "localhost",
+                "max_backups": config.options.BACKUP_MAX_NUMBER,
+                "min_retention_days": config.options.BACKUP_MIN_RETENTION_DAYS,
+                "name": config.BackupTargetEnum.MARIADB,
+                "password": SecretStr("secret"),
+                "port": 3306,
+                "user": "root",
+            },
+        ],
     ),
     (
         [
             (
                 "MARIADB_THIRD_DB",
-                "host=192.168.1.5 port=3306 user=root password=change_me_please! "
-                "db=project cron_rule=15 */3 * * * max_backups=20",
+                "host=192.168.1.5 port=3308 user=root password=change_me_please! "
+                "db=project cron_rule=15 */3 * * * max_backups=15 min_retention_days=5",
             )
         ],
         True,
+        [
+            {
+                "cron_rule": "15 */3 * * *",
+                "db": "project",
+                "env_name": "mariadb_third_db",
+                "host": "192.168.1.5",
+                "max_backups": 15,
+                "min_retention_days": 5,
+                "name": config.BackupTargetEnum.MARIADB,
+                "password": SecretStr("change_me_please!"),
+                "port": 3308,
+                "user": "root",
+            },
+        ],
     ),
     (
         [
@@ -130,6 +186,16 @@ test_data = [
             )
         ],
         True,
+        [
+            {
+                "abs_path": PosixPath(Path(__file__)),
+                "cron_rule": "15 */3 * * *",
+                "env_name": "singlefile_third",
+                "max_backups": 20,
+                "min_retention_days": config.options.BACKUP_MIN_RETENTION_DAYS,
+                "name": config.BackupTargetEnum.FILE,
+            },
+        ],
     ),
     (
         [
@@ -140,6 +206,16 @@ test_data = [
             )
         ],
         True,
+        [
+            {
+                "abs_path": PosixPath(Path(__file__).parent),
+                "cron_rule": "15 */3 * * *",
+                "env_name": "directory_first",
+                "max_backups": 20,
+                "min_retention_days": config.options.BACKUP_MIN_RETENTION_DAYS,
+                "name": config.BackupTargetEnum.FOLDER,
+            },
+        ],
     ),
     (
         [
@@ -149,6 +225,20 @@ test_data = [
             ),
         ],
         True,
+        [
+            {
+                "cron_rule": "* * * * *",
+                "db": "postgres",
+                "env_name": "postgresql_first_db",
+                "host": "localhostport=5432",
+                "max_backups": config.options.BACKUP_MAX_NUMBER,
+                "min_retention_days": config.options.BACKUP_MIN_RETENTION_DAYS,
+                "name": config.BackupTargetEnum.POSTGRESQL,
+                "password": SecretStr("secret"),
+                "port": 5432,
+                "user": "postgres",
+            },
+        ],
     ),
     (
         [
@@ -158,6 +248,7 @@ test_data = [
             ),
         ],
         False,
+        [],
     ),
     (
         [
@@ -167,6 +258,7 @@ test_data = [
             ),
         ],
         False,
+        [],
     ),
     (
         [
@@ -176,6 +268,7 @@ test_data = [
             ),
         ],
         False,
+        [],
     ),
     (
         [
@@ -185,6 +278,7 @@ test_data = [
             ),
         ],
         False,
+        [],
     ),
     (
         [
@@ -194,6 +288,20 @@ test_data = [
             ),
         ],
         True,
+        [
+            {
+                "cron_rule": "* * * * *",
+                "db": "postgres",
+                "env_name": "postgresql_first_db",
+                "host": "localhost port5432",
+                "max_backups": config.options.BACKUP_MAX_NUMBER,
+                "min_retention_days": config.options.BACKUP_MIN_RETENTION_DAYS,
+                "name": config.BackupTargetEnum.POSTGRESQL,
+                "password": SecretStr("secret"),
+                "port": 5432,
+                "user": "postgres",
+            },
+        ],
     ),
     (
         [
@@ -204,18 +312,67 @@ test_data = [
             ),
         ],
         True,
+        [
+            {
+                "cron_rule": "* * * * *",
+                "db": "postgres",
+                "env_name": "postgresql_first_db",
+                "host": "localhost port5432",
+                "max_backups": config.options.BACKUP_MAX_NUMBER,
+                "min_retention_days": config.options.BACKUP_MIN_RETENTION_DAYS,
+                "name": config.BackupTargetEnum.POSTGRESQL,
+                "password": SecretStr("secret"),
+                "port": 5432,
+                "ssl_mode": "require",
+                "user": "postgres",
+            },
+        ],
+    ),
+    (
+        [
+            (
+                "MARIADB_DB",
+                "host=localhost client_skip-ssl=true client_ssl=false port=12011 "
+                "client_tee=name password=password cron_rule=* * * * * "
+                "client_ssl-verify-server-cert=true",
+            ),
+        ],
+        True,
+        [
+            {
+                "client_skip-ssl": "true",
+                "client_ssl": "false",
+                "client_ssl-verify-server-cert": "true",
+                "client_tee": "name",
+                "cron_rule": "* * * * *",
+                "db": "mariadb",
+                "env_name": "mariadb_db",
+                "host": "localhost",
+                "max_backups": config.options.BACKUP_MAX_NUMBER,
+                "min_retention_days": config.options.BACKUP_MIN_RETENTION_DAYS,
+                "name": config.BackupTargetEnum.MARIADB,
+                "password": SecretStr("password"),
+                "port": 12011,
+                "user": "root",
+            },
+        ],
     ),
 ]
 
 
-@pytest.mark.parametrize("env_lst,valid", test_data)
+@pytest.mark.parametrize("env_lst,valid,result_lst", test_data)
 def test_create_backup_targets(
-    env_lst: list[tuple[str, str]], valid: bool, monkeypatch: pytest.MonkeyPatch
+    env_lst: list[tuple[str, str]],
+    valid: bool,
+    result_lst: list[dict[str, Any]],
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     items_mock = Mock(return_value=env_lst)
     monkeypatch.setattr(os.environ, "items", items_mock)
     if valid:
-        assert core.create_target_models()
+        targets = core.create_target_models()
+
+        assert [target.model_dump() for target in targets] == result_lst
     else:
         with pytest.raises(Exception):
             core.create_target_models()

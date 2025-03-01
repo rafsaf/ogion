@@ -35,7 +35,7 @@ DEFAULT_NETWORK = "ogion"
 
 def mariadb_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
     host_port = 11000 + int(cycle.cycle.replace(".", ""))
-    name = f"ogion_mariadb_{cycle.cycle.replace('.','_')}"
+    name = f"ogion_mariadb_{cycle.cycle.replace('.', '_')}"
     compose_db = ComposeDatabase(
         name=name,
         restart="no",
@@ -56,7 +56,7 @@ def mariadb_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
 
 def mysql_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
     host_port = 9000 + int(cycle.cycle.replace(".", ""))
-    name = f"ogion_mysql_{cycle.cycle.replace('.','_')}"
+    name = f"ogion_mysql_{cycle.cycle.replace('.', '_')}"
     compose_db = ComposeDatabase(
         name=name,
         restart="no",
@@ -77,7 +77,7 @@ def mysql_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
 
 def postgres_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
     host_port = 10000 + int(cycle.cycle.replace(".", ""))
-    name = f"ogion_postgres_{cycle.cycle.replace('.','_')}"
+    name = f"ogion_postgres_{cycle.cycle.replace('.', '_')}"
     compose_db = ComposeDatabase(
         name=name,
         restart="no",

@@ -137,3 +137,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# benchmark
+*massif*
+benchmark_files

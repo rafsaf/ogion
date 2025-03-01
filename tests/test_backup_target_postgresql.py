@@ -78,8 +78,7 @@ def test_end_to_end_successful_restore_after_backup(
     )
 
     insert_query = shlex.quote(
-        "INSERT INTO my_table (name, age) "
-        "VALUES ('Geralt z Rivii', 60),('rafsaf', 24);"
+        "INSERT INTO my_table (name, age) VALUES ('Geralt z Rivii', 60),('rafsaf', 24);"
     )
 
     core.run_subprocess(

@@ -56,7 +56,7 @@ COPY --from=poetry /requirements-tests.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-tests.txt
 COPY pyproject.toml .
 COPY tests tests
-CMD ["pytest"]
+CMD ["pytest", "-vv"]
 
 FROM common AS build
 CMD ["python", "-m", "ogion.main"] 
