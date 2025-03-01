@@ -85,8 +85,7 @@ def test_end_to_end_successful_restore_after_backup(
     )
 
     insert_query = shlex.quote(
-        "INSERT INTO my_table (name, age) "
-        "VALUES ('Geralt z Rivii', 60),('rafsaf', 24);"
+        "INSERT INTO my_table (name, age) VALUES ('Geralt z Rivii', 60),('rafsaf', 24);"
     )
 
     core.run_subprocess(
@@ -115,7 +114,7 @@ def test_end_to_end_successful_restore_after_backup(
         " --execute='select * from my_table order by id asc;'",
     )
 
-    assert result == ("id\tname\tage\n" "1\tGeralt z Rivii\t60\n" "2\trafsaf\t24\n")
+    assert result == ("id\tname\tage\n1\tGeralt z Rivii\t60\n2\trafsaf\t24\n")
 
     result = core.run_subprocess(
         f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"
@@ -126,7 +125,7 @@ def test_end_to_end_successful_restore_after_backup(
         " --execute='select * from my_table order by id asc;'",
     )
 
-    assert result == ("id\tname\tage\n" "1\tGeralt z Rivii\t60\n")
+    assert result == ("id\tname\tage\n1\tGeralt z Rivii\t60\n")
 
     test_db.restore(str(test_db_backup))
 
@@ -135,4 +134,4 @@ def test_end_to_end_successful_restore_after_backup(
         " --execute='select * from my_table order by id asc;'",
     )
 
-    assert result == ("id\tname\tage\n" "1\tGeralt z Rivii\t60\n" "2\trafsaf\t24\n")
+    assert result == ("id\tname\tage\n1\tGeralt z Rivii\t60\n2\trafsaf\t24\n")

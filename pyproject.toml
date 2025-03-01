@@ -57,6 +57,7 @@ env = [
   "BACKUP_PROVIDER=",
   "FAKE_GCS_PORT=4443",
   "LOG_FOLDER_PATH=/tmp/pytest_ogion_env_vars_hook_logs_folder",
+  "LOG_LEVEL=DEBUG",
   "STORAGE_EMULATOR_HOST=http://localhost:4443",
   "SUBPROCESS_TIMEOUT_SECS=5",
 ]
