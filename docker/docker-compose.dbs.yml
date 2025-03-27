@@ -86,17 +86,17 @@ services:
     ports:
     - 9084:3306
     restart: 'no'
-  ogion_mysql_9_1:
+  ogion_mysql_9_2:
     environment:
     - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:9.1.0
+    image: mysql:9.2.0
     networks:
     - ogion
     ports:
-    - 9091:3306
+    - 9092:3306
     restart: 'no'
   ogion_postgres_13:
     environment:
