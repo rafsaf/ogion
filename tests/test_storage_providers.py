@@ -7,7 +7,7 @@ from ogion.upload_providers.base_provider import BaseUploadProvider
 
 
 def test_gcs_post_save(provider: BaseUploadProvider, provider_prefix: str) -> None:
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_path = fake_backup_dir_path / "fake_backup"
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
@@ -23,7 +23,7 @@ def test_gcs_post_save(provider: BaseUploadProvider, provider_prefix: str) -> No
 
 
 def test_gcs_clean_local_files(provider: BaseUploadProvider) -> None:
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
 
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup"
@@ -48,7 +48,7 @@ def test_gcs_clean_local_files(provider: BaseUploadProvider) -> None:
 def test_gcs_clean_gcs_files_short(
     provider: BaseUploadProvider, provider_prefix: str
 ) -> None:
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
 
@@ -76,7 +76,7 @@ def test_gcs_clean_gcs_files_short(
 def test_gcs_clean_gcs_files_long(
     provider: BaseUploadProvider, provider_prefix: str
 ) -> None:
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
 
@@ -113,7 +113,7 @@ def test_gcs_clean_gcs_files_long(
 def test_gcs_clean_respects_max_backups_param_and_not_delete_old_files(
     provider: BaseUploadProvider, provider_prefix: str
 ) -> None:
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
 
@@ -138,7 +138,7 @@ def test_gcs_clean_respects_max_backups_param_and_not_delete_old_files(
 def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_backup(
     provider: BaseUploadProvider, provider_prefix: str
 ) -> None:
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.age"
 
@@ -175,7 +175,7 @@ def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_backup(
 def test_gcs_download_backup(
     provider: BaseUploadProvider, provider_prefix: str
 ) -> None:
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_20230426_0105_dummy_xfcs").write_text("abcdef")

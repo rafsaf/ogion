@@ -55,7 +55,7 @@ def test_run_subprocess_success(caplog: LogCaptureFixture) -> None:
 def test_get_new_backup_path() -> None:
     new_path = core.get_new_backup_path("env_name", "db_string")
     expected_file = "env_name/env_name_20221211_0000_db_string_mock"
-    expected_path = config.CONST_BACKUP_FOLDER_PATH / expected_file
+    expected_path = config.CONST_DATA_FOLDER_PATH / expected_file
     assert str(new_path) == str(expected_path)
 
 

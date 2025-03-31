@@ -47,7 +47,7 @@ def test_run_pg_dump(postgres_target: PostgreSQLTargetModel) -> None:
         f"{db.env_name}/"
         f"{db.env_name}_20221211_0000_{escaped_name}_{escaped_version}_{CONST_TOKEN_URLSAFE}.sql"
     )
-    out_path = config.CONST_BACKUP_FOLDER_PATH / out_file
+    out_path = config.CONST_DATA_FOLDER_PATH / out_file
     assert out_backup == out_path
 
 

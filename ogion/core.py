@@ -2,7 +2,6 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
-import logging.config
 import os
 import re
 import secrets
@@ -59,7 +58,7 @@ def remove_path(path: Path) -> None:
 
 
 def get_new_backup_path(env_name: str, name: str) -> Path:
-    base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
+    base_dir_path = config.CONST_DATA_FOLDER_PATH / env_name
     base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
     new_file = (
         f"{env_name}_"
@@ -80,7 +79,9 @@ def run_decrypt_age_archive(backup_file: Path) -> Path:
     else:  # pragma: no cover
         secret = input("please input age private key to decrypt\n")
 
-    with tempfile.NamedTemporaryFile("w") as identity_file:
+    with tempfile.NamedTemporaryFile(
+        "w", dir=config.CONST_CONFIG_FOLDER_PATH
+    ) as identity_file:
         identity_file.write(secret)
         identity_file.flush()
 

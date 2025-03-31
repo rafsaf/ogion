@@ -14,11 +14,11 @@ from pydantic_settings import BaseSettings
 _log_levels = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 CONST_BASE_DIR = Path(__file__).resolve().parent.parent.absolute()
-CONST_BACKUP_FOLDER_PATH: Path = CONST_BASE_DIR / "data"
-CONST_CONFIG_FOLDER_PATH: Path = CONST_BASE_DIR / "conf"
-CONST_DOWNLOADS_FOLDER_PATH: Path = CONST_BACKUP_FOLDER_PATH / "downloads"
-CONST_DEBUG_FOLDER_PATH: Path = CONST_BACKUP_FOLDER_PATH / "debug"
-CONST_BACKUP_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
+CONST_DATA_FOLDER_PATH: Path = CONST_BASE_DIR / "data"
+CONST_CONFIG_FOLDER_PATH: Path = CONST_DATA_FOLDER_PATH / "_conf"
+CONST_DOWNLOADS_FOLDER_PATH: Path = CONST_DATA_FOLDER_PATH / "_downloads"
+CONST_DEBUG_FOLDER_PATH: Path = CONST_DATA_FOLDER_PATH / "_debug_upload_provider"
+CONST_DATA_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_CONFIG_FOLDER_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 CONST_DOWNLOADS_FOLDER_PATH.mkdir(mode=0o700, exist_ok=True)
 CONST_DEBUG_FOLDER_PATH.mkdir(mode=0o700, exist_ok=True)
@@ -47,7 +47,6 @@ class BackupTargetEnum(StrEnum):
 
 
 class Settings(BaseSettings):
-    LOG_FOLDER_PATH: Path = CONST_BASE_DIR / "logs"
     LOG_LEVEL: _log_levels = "INFO"
     BACKUP_PROVIDER: str
     AGE_RECIPIENTS: str
@@ -97,7 +96,6 @@ options = Settings()  # type: ignore
 
 
 def logging_config(log_level: _log_levels) -> None:
-    options.LOG_FOLDER_PATH.mkdir(0o700, parents=True, exist_ok=True)
     conf = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -113,44 +111,12 @@ def logging_config(log_level: _log_levels) -> None:
                 "formatter": "verbose",
                 "level": "DEBUG",
             },
-            "error": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": options.LOG_FOLDER_PATH / "ogion_error.log",
-                "formatter": "verbose",
-                "maxBytes": 5 * 10**6,
-                "backupCount": 1,
-                "level": "ERROR",
-            },
-            "warning": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": options.LOG_FOLDER_PATH / "ogion_warning.log",
-                "formatter": "verbose",
-                "maxBytes": 5 * 10**6,
-                "backupCount": 1,
-                "level": "WARNING",
-            },
-            "info": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": options.LOG_FOLDER_PATH / "ogion_info.log",
-                "formatter": "verbose",
-                "maxBytes": 5 * 10**6,
-                "backupCount": 1,
-                "level": "INFO",
-            },
-            "debug": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": options.LOG_FOLDER_PATH / "ogion_debug.log",
-                "formatter": "verbose",
-                "maxBytes": 5 * 10**7,
-                "backupCount": 1,
-                "level": "DEBUG",
-            },
         },
         "loggers": {
             "": {
                 "level": log_level,
-                "handlers": ["debug", "info", "warning", "error", "stream"],
-                "propagate": False,
+                "handlers": ["stream"],
+                "propagate": True,
             },
         },
     }

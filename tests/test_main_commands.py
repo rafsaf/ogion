@@ -16,9 +16,7 @@ from .conftest import (
 
 @pytest.fixture
 def mock_main_backup_targets() -> None:
-    from _pytest.monkeypatch import MonkeyPatch
-
-    monkeypatch = MonkeyPatch()
+    monkeypatch = pytest.MonkeyPatch()
 
     monkeypatch.setattr(
         core,
@@ -42,7 +40,7 @@ def test_run_download_backup_file(
         Mock(return_value=provider),
     )
 
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_19990427_0108_dummy_xfcs").touch()
@@ -71,7 +69,7 @@ def test_run_list_backup_files(
         Mock(return_value=provider),
     )
 
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / target_model.env_name
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / target_model.env_name
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_19990427_0108_dummy_xfcs").touch()
@@ -133,7 +131,7 @@ def test_run_restore_latest(
         restore_mock,
     )
 
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / backup_target.env_name
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / backup_target.env_name
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_19990427_0108_dummy_xfcs").touch()
@@ -201,7 +199,7 @@ def test_run_restore(
         restore_mock,
     )
 
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / backup_target.env_name
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / backup_target.env_name
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_19990427_0108_dummy_xfcs").touch()
