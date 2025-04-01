@@ -65,7 +65,7 @@ def test_run_create_age_archive_out_path_exists(tmp_path: Path) -> None:
         f.write("abcdefghijk\n12345")
 
     fake_backup_file_out = core.run_create_age_archive(fake_backup_file)
-    assert fake_backup_file_out == tmp_path / "fake_backup.age"
+    assert fake_backup_file_out == tmp_path / "fake_backup.lz.age"
     assert fake_backup_file_out.exists()
 
 

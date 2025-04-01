@@ -63,6 +63,8 @@ class Settings(BaseSettings):
     DISCORD_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
     SLACK_WEBHOOK_URL: HttpUrl | None = None
     SLACK_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
+    LZIP_LEVEL: int = Field(ge=0, le=9, default=0)
+    LZIP_THREADS: int = Field(ge=1, le=1024, default=1)
     SMTP_HOST: str = ""
     SMTP_PORT: int = 587
     SMTP_FROM_ADDR: str = ""
