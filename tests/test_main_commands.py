@@ -151,7 +151,9 @@ def test_run_restore_latest(
         "/file_20230427_0108_dummy_xfcs.lz.age"
     )
 
-    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / provider_file
+    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / str(
+        provider_file
+    ).removeprefix("/")
     assert not provider_file_download.exists()
 
     restore_mock.assert_called_once_with(
@@ -222,7 +224,9 @@ def test_run_restore(
     with pytest.raises(SystemExit):
         main.run_restore(backup_name=provider_file, target_name=backup_target.env_name)
 
-    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / provider_file
+    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / str(
+        provider_file
+    ).removeprefix("/")
 
     assert not provider_file_download.exists()
     restore_mock.assert_called_once_with(

@@ -283,7 +283,6 @@ def run_restore_latest(target_name: str) -> NoReturn:
             continue
         backups = provider.all_target_backups(target.env_name.lower())
         if not backups:
-            log.critical(backups)
             log.warning("no backups at all for '%s'", target_name)
             print(f"no backups at all for '{target_name}'")
             sys.exit(2)
@@ -307,7 +306,6 @@ def run_restore(backup_name: str, target_name: str) -> NoReturn:
             continue
         backups = provider.all_target_backups(target.env_name.lower())
         if not backups:
-            log.critical(backups)
             log.warning("no backups at all for '%s'", target_name)
             print(f"no backups at all for '{target_name}'")
             sys.exit(2)

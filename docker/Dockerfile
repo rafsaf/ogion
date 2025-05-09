@@ -11,7 +11,7 @@ WORKDIR ${FOLDER_PATH}
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get -y update && apt-get -y install age curl wget tar gpg
+    apt-get -y update && apt-get -y install age curl wget tar gpg plzip lzip
 
 COPY scripts scripts
 RUN ./scripts/install_mariadb_client.sh

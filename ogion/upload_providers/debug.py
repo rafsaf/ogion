@@ -45,10 +45,20 @@ class UploadProviderLocalDebug(BaseUploadProvider):
 
     @override
     def download_backup(self, path: str) -> Path:
-        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        log.debug(
+            "concate %s and %s",
+            config.CONST_DOWNLOADS_FOLDER_PATH,
+            path.removeprefix("/"),
+        )
+        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path.removeprefix("/")
+        log.debug("debug provider download backup file %s", backup_file)
         backup_file.parent.mkdir(parents=True, exist_ok=True)
 
-        return Path(backup_file)
+        p = Path(path)
+
+        backup_file.write_bytes(p.read_bytes())
+
+        return backup_file
 
     @override
     def clean(
