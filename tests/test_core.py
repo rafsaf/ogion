@@ -74,6 +74,30 @@ def test_run_create_age_archive_dir_raise_error(tmp_path: Path) -> None:
         core.run_create_age_archive(tmp_path)
 
 
+def test_run_lzip_decrypt_not_encrypted(tmp_path: Path) -> None:
+    fake_backup_file = tmp_path / "fake_backup"
+    fake_backup_file.touch()
+
+    p = core.run_lzip_decrypt(fake_backup_file)
+    assert p == fake_backup_file
+
+
+def test_lzip_works_with_encrypt_and_decrypt(tmp_path: Path) -> None:
+    init_fake_backup_file = tmp_path / "fake_backup_file"
+    init_fake_backup_file.write_text("something")
+
+    p = core.run_lzip_compression(init_fake_backup_file)
+
+    assert p == init_fake_backup_file.with_suffix(".lz")
+    assert p.exists()
+    assert p.read_text() != "something"
+
+    fake_backup_file = core.run_lzip_decrypt(p)
+    assert fake_backup_file == init_fake_backup_file
+    assert fake_backup_file.exists()
+    assert fake_backup_file.read_text() == "something"
+
+
 def test_run_create_age_archive_can_be_decrypted(
     tmp_path: Path,
 ) -> None:

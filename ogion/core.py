@@ -101,9 +101,6 @@ def run_lzip_decrypt(backup_file: Path) -> Path:
     )
     out = Path(str(backup_file).removesuffix(".lz"))
 
-    if out.exists():
-        return out
-
     shell_lzip_decompression = f"plzip -dv -o {out} {backup_file}"
 
     run_subprocess(shell_lzip_decompression)
