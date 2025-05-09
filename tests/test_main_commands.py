@@ -16,9 +16,7 @@ from .conftest import (
 
 @pytest.fixture
 def mock_main_backup_targets() -> None:
-    from _pytest.monkeypatch import MonkeyPatch
-
-    monkeypatch = MonkeyPatch()
+    monkeypatch = pytest.MonkeyPatch()
 
     monkeypatch.setattr(
         core,
@@ -42,13 +40,15 @@ def test_run_download_backup_file(
         Mock(return_value=provider),
     )
 
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_19990427_0108_dummy_xfcs").touch()
     provider.post_save(fake_backup_dir_path / "file_19990427_0108_dummy_xfcs")
 
-    provider_file = f"{provider_prefix}fake_env_name/file_19990427_0108_dummy_xfcs.age"
+    provider_file = (
+        f"{provider_prefix}fake_env_name/file_19990427_0108_dummy_xfcs.lz.age"
+    )
     with pytest.raises(SystemExit):
         main.run_download_backup_file(provider_file)
 
@@ -71,7 +71,7 @@ def test_run_list_backup_files(
         Mock(return_value=provider),
     )
 
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / target_model.env_name
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / target_model.env_name
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_19990427_0108_dummy_xfcs").touch()
@@ -86,13 +86,13 @@ def test_run_list_backup_files(
         main.run_list_backup_files(target_model.env_name)
 
     provider_file_1 = (
-        f"{provider_prefix}{target_model.env_name}/file_19990427_0108_dummy_xfcs.age"
+        f"{provider_prefix}{target_model.env_name}/file_19990427_0108_dummy_xfcs.lz.age"
     )
     provider_file_2 = (
-        f"{provider_prefix}{target_model.env_name}/file_20230427_0105_dummy_xfcs.age"
+        f"{provider_prefix}{target_model.env_name}/file_20230427_0105_dummy_xfcs.lz.age"
     )
     provider_file_3 = (
-        f"{provider_prefix}{target_model.env_name}/file_20230427_0108_dummy_xfcs.age"
+        f"{provider_prefix}{target_model.env_name}/file_20230427_0108_dummy_xfcs.lz.age"
     )
 
     captured = capsys.readouterr()
@@ -133,7 +133,7 @@ def test_run_restore_latest(
         restore_mock,
     )
 
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / backup_target.env_name
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / backup_target.env_name
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_19990427_0108_dummy_xfcs").touch()
@@ -147,15 +147,20 @@ def test_run_restore_latest(
         main.run_restore_latest(backup_target.env_name)
 
     provider_file = (
-        f"{provider_prefix}{backup_target.env_name}/file_20230427_0108_dummy_xfcs.age"
+        f"{provider_prefix}{backup_target.env_name}"
+        "/file_20230427_0108_dummy_xfcs.lz.age"
     )
 
-    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / provider_file
+    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / str(
+        provider_file
+    ).removeprefix("/")
+    assert not provider_file_download.exists()
 
-    assert provider_file_download.exists()
-    restore_mock.assert_called_once_with(str(provider_file_download.with_suffix("")))
+    restore_mock.assert_called_once_with(
+        str(provider_file_download).removesuffix(".lz.age")
+    )
 
-    captured = capsys.readouterr()
+    _ = capsys.readouterr()
 
     with pytest.raises(SystemExit):
         main.run_restore_latest("random")
@@ -163,7 +168,7 @@ def test_run_restore_latest(
 
     assert captured.out == "target 'random' does not exist\n"
 
-    captured = capsys.readouterr()
+    _ = capsys.readouterr()
 
     other_target_model = [t for t in ALL_TARGETS if t != target_model][0]
     with pytest.raises(SystemExit):
@@ -201,7 +206,7 @@ def test_run_restore(
         restore_mock,
     )
 
-    fake_backup_dir_path = config.CONST_BACKUP_FOLDER_PATH / backup_target.env_name
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / backup_target.env_name
     fake_backup_dir_path.mkdir()
 
     (fake_backup_dir_path / "file_19990427_0108_dummy_xfcs").touch()
@@ -212,16 +217,21 @@ def test_run_restore(
     provider.post_save(fake_backup_dir_path / "file_20230427_0108_dummy_xfcs")
 
     provider_file = (
-        f"{provider_prefix}{backup_target.env_name}/file_19990427_0108_dummy_xfcs.age"
+        f"{provider_prefix}{backup_target.env_name}"
+        "/file_19990427_0108_dummy_xfcs.lz.age"
     )
 
     with pytest.raises(SystemExit):
         main.run_restore(backup_name=provider_file, target_name=backup_target.env_name)
 
-    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / provider_file
+    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / str(
+        provider_file
+    ).removeprefix("/")
 
-    assert provider_file_download.exists()
-    restore_mock.assert_called_once_with(str(provider_file_download.with_suffix("")))
+    assert not provider_file_download.exists()
+    restore_mock.assert_called_once_with(
+        str(provider_file_download).removesuffix(".lz.age")
+    )
 
     captured = capsys.readouterr()
 

@@ -23,7 +23,7 @@ def test_run_file_backup_output_file_has_proper_name() -> None:
         f"{file.env_name}/"
         f"{file.env_name}_20240314_0000_{escaped_file_name}_{CONST_TOKEN_URLSAFE}"
     )
-    out_path = config.CONST_BACKUP_FOLDER_PATH / out_file
+    out_path = config.CONST_DATA_FOLDER_PATH / out_file
 
     assert out_path.is_file()
     assert out_backup == out_path

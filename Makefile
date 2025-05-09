@@ -40,7 +40,7 @@ benchmark-mem-massif-main:
 .PHONY: benchmark-time-encrypt-2gb
 benchmark-time-encrypt-2gb:
 	$(MAKE) benchmark_files/test_file_2gb
-	time -f "User: %U seconds, System: %S seconds, Real: %e seconds" python -c "import pathlib;import ogion.core;ogion.core.run_create_age_archive(pathlib.Path('./benchmark_files/test_file_2gb'))"
+	time -f "User: %U seconds, System: %S seconds, Real: %e seconds" python -c "import pathlib;import ogion.core;ogion.core.run_create_age_archive(pathlib.Path('./benchmark_files/test.tar2'))"
 
 benchmark_files/test_file_2gb:
 	mkdir -p benchmark_files

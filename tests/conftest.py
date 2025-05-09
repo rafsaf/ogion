@@ -111,7 +111,7 @@ ALL_TARGETS = (
 @pytest.fixture(autouse=True)
 def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     backup_folder_path = tmp_path / "pytest_data"
-    monkeypatch.setattr(config, "CONST_BACKUP_FOLDER_PATH", backup_folder_path)
+    monkeypatch.setattr(config, "CONST_DATA_FOLDER_PATH", backup_folder_path)
     backup_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
     config_folder_path = tmp_path / "pytest_config"
     monkeypatch.setattr(config, "CONST_CONFIG_FOLDER_PATH", config_folder_path)

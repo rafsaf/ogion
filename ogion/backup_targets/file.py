@@ -31,7 +31,9 @@ class File(BaseBackupTarget):
 
     @override
     def restore(self, path: str) -> None:
+        log.info("start restore of %s", path)
         shell_cp_file = f"cp {path} {self.target_model.abs_path}"
         log.debug("start cp in subprocess: %s", shell_cp_file)
         core.run_subprocess(shell_cp_file)
         log.debug("finished cp to %s", self.target_model.abs_path)
+        log.info("success restore of %s", path)

@@ -23,7 +23,7 @@ def test_run_folder_backup_output_folder_has_proper_name() -> None:
         f"{folder.env_name}/"
         f"{folder.env_name}_20240314_0000_{folder_name}_{CONST_TOKEN_URLSAFE}.tar"
     )
-    out_path = config.CONST_BACKUP_FOLDER_PATH / out_file
+    out_path = config.CONST_DATA_FOLDER_PATH / out_file
 
     assert out_path.is_file()
     assert out_backup == out_path

@@ -36,6 +36,7 @@ class Folder(BaseBackupTarget):
 
     @override
     def restore(self, path: str) -> None:
+        log.info("start restore of %s", path)
         self.target_model.abs_path.mkdir(parents=True, exist_ok=True)
 
         shell_untar_file = (
@@ -44,3 +45,4 @@ class Folder(BaseBackupTarget):
         log.debug("start tar extract in subprocess: %s", shell_untar_file)
         core.run_subprocess(shell_untar_file)
         log.debug("finished tar extract to %s", self.target_model.abs_path)
+        log.info("success restore of %s", path)

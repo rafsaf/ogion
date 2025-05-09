@@ -3,6 +3,7 @@
 
 import argparse
 import logging
+import shutil
 import signal
 import sys
 import threading
@@ -289,8 +290,9 @@ def run_restore_latest(target_name: str) -> NoReturn:
         path_age = provider.download_backup(latest_backup)
         path = core.run_decrypt_age_archive(path_age)
         target.restore(str(path))
+        shutil.rmtree(path.parent)
         sys.exit(0)
-    log.warning("target '%s' does not exist")
+    log.warning("target '%s' does not exist", target_name)
     print(f"target '{target_name}' does not exist")
     sys.exit(1)
 
@@ -316,8 +318,9 @@ def run_restore(backup_name: str, target_name: str) -> NoReturn:
         path_age = provider.download_backup(backup_name)
         path = core.run_decrypt_age_archive(path_age)
         target.restore(str(path))
+        shutil.rmtree(path.parent)
         sys.exit(0)
-    log.warning("target '%s' does not exist")
+    log.warning("target '%s' does not exist", target_name)
     print(f"target '{target_name}' does not exist")
     sys.exit(1)
 

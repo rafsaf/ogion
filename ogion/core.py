@@ -2,7 +2,6 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
-import logging.config
 import os
 import re
 import secrets
@@ -59,7 +58,7 @@ def remove_path(path: Path) -> None:
 
 
 def get_new_backup_path(env_name: str, name: str) -> Path:
-    base_dir_path = config.CONST_BACKUP_FOLDER_PATH / env_name
+    base_dir_path = config.CONST_DATA_FOLDER_PATH / env_name
     base_dir_path.mkdir(mode=0o700, exist_ok=True, parents=True)
     new_file = (
         f"{env_name}_"
@@ -70,17 +69,63 @@ def get_new_backup_path(env_name: str, name: str) -> Path:
     return base_dir_path / new_file
 
 
+def size(path: Path) -> str:
+    file_size = round(path.stat().st_size / 1024 / 1024, 2)
+    return f"{file_size} MB"
+
+
+def run_lzip_compression(backup_file: Path) -> Path:
+    log.info("start lzip compression on %s: %s", backup_file, size(backup_file))
+    out = Path(f"{backup_file}.lz")
+
+    shell_lzip_compression = (
+        f"plzip -v -{config.options.LZIP_LEVEL} -n "
+        f"{config.options.LZIP_THREADS} -o {out} {backup_file}"
+    )
+
+    run_subprocess(shell_lzip_compression)
+
+    log.info("created compressed file %s: %s", out, size(out))
+
+    return out
+
+
+def run_lzip_decrypt(backup_file: Path) -> Path:
+    if not backup_file.name.endswith(".lz"):
+        return backup_file
+
+    log.info(
+        "start lzip decompression on %s: %s",
+        backup_file,
+        size(backup_file),
+    )
+    out = Path(str(backup_file).removesuffix(".lz"))
+
+    shell_lzip_decompression = f"plzip -dv -o {out} {backup_file}"
+
+    run_subprocess(shell_lzip_decompression)
+
+    log.info("created decompressed file %s: %s", out, size(out))
+
+    return out
+
+
 def run_decrypt_age_archive(backup_file: Path) -> Path:
     log.info("start age decrypt archive in subprocess: %s", backup_file)
 
     out = Path(str(backup_file).removesuffix(".age"))
+
+    if out.exists():
+        return run_lzip_decrypt(out)
 
     if config.options.DEBUG_AGE_SECRET_KEY:
         secret = config.options.DEBUG_AGE_SECRET_KEY
     else:  # pragma: no cover
         secret = input("please input age private key to decrypt\n")
 
-    with tempfile.NamedTemporaryFile("w") as identity_file:
+    with tempfile.NamedTemporaryFile(
+        "w", dir=config.CONST_CONFIG_FOLDER_PATH
+    ) as identity_file:
         identity_file.write(secret)
         identity_file.flush()
 
@@ -90,12 +135,14 @@ def run_decrypt_age_archive(backup_file: Path) -> Path:
         run_subprocess(shell_age_decrypt_archive)
         log.info("finished age archive decrypt")
 
-    return out
+    return run_lzip_decrypt(out)
 
 
 def run_create_age_archive(backup_file: Path) -> Path:
     if not backup_file.is_file():
         raise ValueError(f"backup_file must be file, not dir: {backup_file}")
+
+    backup_file = run_lzip_compression(backup_file)
 
     log.info("start creating age archive in subprocess: %s", backup_file)
     out_file = Path(f"{backup_file}.age")
@@ -105,6 +152,8 @@ def run_create_age_archive(backup_file: Path) -> Path:
     shell_create_age_archive = f"age -R {recipients} -o {out_file} {backup_file}"
     run_subprocess(shell_create_age_archive)
     log.info("finished age archive creating")
+
+    log.info("removed unencrypted compressed file: %s", backup_file)
 
     return out_file
 

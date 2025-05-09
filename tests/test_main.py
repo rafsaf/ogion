@@ -106,7 +106,7 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
     for dir in config.CONST_DEBUG_FOLDER_PATH.iterdir():
         assert dir.is_dir(), dir
         assert dir.name in target_envs, dir
-        assert sum(1 for _ in dir.glob("*.age")) == 1, dir
+        assert sum(1 for _ in dir.glob("*.lz.age")) == 1, dir
 
         count += 1
     assert count == len(target_envs)
