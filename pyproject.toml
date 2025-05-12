@@ -6,7 +6,7 @@ license = "GNU GPLv3"
 name = "ogion"
 readme = "README.md"
 requires-python = ">=3.13,<4"
-version = "7.4"
+version = "8.0"
 
 [tool.poetry]
 package-mode = false
