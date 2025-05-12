@@ -90,7 +90,7 @@ def test_lzip_works_with_encrypt_and_decrypt(tmp_path: Path) -> None:
 
     assert p == init_fake_backup_file.with_suffix(".lz")
     assert p.exists()
-    assert init_fake_backup_file.unlink()
+    init_fake_backup_file.unlink()
 
     fake_backup_file = core.run_lzip_decrypt(p)
     assert fake_backup_file == init_fake_backup_file
