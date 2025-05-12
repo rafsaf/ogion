@@ -122,9 +122,11 @@ class MariaDB(BaseBackupTarget):
 
     @override
     def restore(self, path: str) -> None:
+        log.info("start restore of %s", path)
         shell_mariadb_restore = (
             f"mariadb --defaults-file={self.option_file} {self.db_name} < {path}"
         )
         log.debug("start restore in subprocess: %s", shell_mariadb_restore)
         core.run_subprocess(shell_mariadb_restore)
         log.debug("finished restore")
+        log.info("success restore of %s", path)

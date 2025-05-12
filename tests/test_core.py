@@ -55,7 +55,7 @@ def test_run_subprocess_success(caplog: LogCaptureFixture) -> None:
 def test_get_new_backup_path() -> None:
     new_path = core.get_new_backup_path("env_name", "db_string")
     expected_file = "env_name/env_name_20221211_0000_db_string_mock"
-    expected_path = config.CONST_BACKUP_FOLDER_PATH / expected_file
+    expected_path = config.CONST_DATA_FOLDER_PATH / expected_file
     assert str(new_path) == str(expected_path)
 
 
@@ -65,13 +65,37 @@ def test_run_create_age_archive_out_path_exists(tmp_path: Path) -> None:
         f.write("abcdefghijk\n12345")
 
     fake_backup_file_out = core.run_create_age_archive(fake_backup_file)
-    assert fake_backup_file_out == tmp_path / "fake_backup.age"
+    assert fake_backup_file_out == tmp_path / "fake_backup.lz.age"
     assert fake_backup_file_out.exists()
 
 
 def test_run_create_age_archive_dir_raise_error(tmp_path: Path) -> None:
     with pytest.raises(ValueError):
         core.run_create_age_archive(tmp_path)
+
+
+def test_run_lzip_decrypt_not_encrypted(tmp_path: Path) -> None:
+    fake_backup_file = tmp_path / "fake_backup"
+    fake_backup_file.touch()
+
+    p = core.run_lzip_decrypt(fake_backup_file)
+    assert p == fake_backup_file
+
+
+def test_lzip_works_with_encrypt_and_decrypt(tmp_path: Path) -> None:
+    init_fake_backup_file = tmp_path / "fake_backup_file"
+    init_fake_backup_file.write_text("something")
+
+    p = core.run_lzip_compression(init_fake_backup_file)
+
+    assert p == init_fake_backup_file.with_suffix(".lz")
+    assert p.exists()
+    init_fake_backup_file.unlink()
+
+    fake_backup_file = core.run_lzip_decrypt(p)
+    assert fake_backup_file == init_fake_backup_file
+    assert fake_backup_file.exists()
+    assert fake_backup_file.read_text() == "something"
 
 
 def test_run_create_age_archive_can_be_decrypted(

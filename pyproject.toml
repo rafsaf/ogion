@@ -6,7 +6,7 @@ license = "GNU GPLv3"
 name = "ogion"
 readme = "README.md"
 requires-python = ">=3.13,<4"
-version = "7.3"
+version = "8.0"
 
 [tool.poetry]
 package-mode = false
@@ -19,7 +19,7 @@ azure-storage-blob = ">=12.20.0"
 croniter = ">=6.0.0"
 google-cloud-storage = ">=2.18.2"
 minio = ">=7.2.13"
-pydantic = { version = ">=2.11.0a2", allow-prereleases = true }
+pydantic = ">=2.11.0"
 pydantic-settings = ">=2.7.1"
 
 [tool.poetry.group.dev.dependencies]
