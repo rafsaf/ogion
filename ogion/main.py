@@ -366,16 +366,22 @@ def main() -> NoReturn:  # pragma: no cover
         run_download_backup_file(runtime_args.debug_download)
     elif runtime_args.list:
         if runtime_args.target is None:
+            targets = backup_targets()
+            log.warning("available targets: %s", [t.env_name for t in targets])
             log.warning("--target must be defined to use --list")
             sys.exit(3)
         run_list_backup_files(runtime_args.target)
     elif runtime_args.restore_latest:
         if runtime_args.target is None:
+            targets = backup_targets()
+            log.warning("available targets: %s", [t.env_name for t in targets])
             log.warning("--target must be defined to use --restore-latest")
             sys.exit(3)
         run_restore_latest(runtime_args.target)
     elif runtime_args.restore is not None:
         if runtime_args.target is None:
+            targets = backup_targets()
+            log.warning("available targets: %s", [t.env_name for t in targets])
             log.warning("--target must be defined to use --restore-latest")
             sys.exit(3)
         run_restore(runtime_args.restore, runtime_args.target)
