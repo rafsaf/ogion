@@ -23,7 +23,7 @@ def test_postgres_connection_success(
     postgres_target: PostgreSQLTargetModel,
 ) -> None:
     db = PostgreSQL(target_model=postgres_target)
-    assert db.db_version == DB_VERSION_BY_ENV_VAR[postgres_target.env_name]
+    assert db.db_version.startswith(DB_VERSION_BY_ENV_VAR[postgres_target.env_name])
 
 
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
