@@ -40,8 +40,8 @@ def mariadb_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
         name=name,
         restart="no",
         networks=[DEFAULT_NETWORK],
-        version=cycle.latest,
-        image=f"mariadb:{cycle.latest}",
+        version=cycle.cycle,
+        image=f"mariadb:{cycle.cycle}",
         ports=[f"{host_port}:3306"],
         environment=[
             f"MARIADB_ROOT_PASSWORD=root-{DB_PWD}",
@@ -61,8 +61,8 @@ def mysql_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
         name=name,
         restart="no",
         networks=[DEFAULT_NETWORK],
-        version=cycle.latest,
-        image=f"mysql:{cycle.latest}",
+        version=cycle.cycle,
+        image=f"mysql:{cycle.cycle}",
         ports=[f"{host_port}:3306"],
         environment=[
             f"MYSQL_ROOT_PASSWORD=root-{DB_PWD}",
@@ -82,8 +82,8 @@ def postgres_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
         name=name,
         restart="no",
         networks=[DEFAULT_NETWORK],
-        version=cycle.latest,
-        image=f"postgres:{cycle.latest}-bookworm",
+        version=cycle.cycle,
+        image=f"postgres:{cycle.cycle}-bookworm",
         ports=[f"{host_port}:5432"],
         environment=[
             f"POSTGRES_PASSWORD={DB_PWD}",
