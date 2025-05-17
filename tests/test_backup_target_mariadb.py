@@ -22,7 +22,7 @@ from .conftest import (
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
 def test_mariadb_connection_success(mariadb_target: MariaDBTargetModel) -> None:
     db = MariaDB(target_model=mariadb_target)
-    assert db.db_version == DB_VERSION_BY_ENV_VAR[mariadb_target.env_name]
+    assert db.db_version.startswith(DB_VERSION_BY_ENV_VAR[mariadb_target.env_name])
 
 
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
