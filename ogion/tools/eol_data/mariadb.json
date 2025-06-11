@@ -1,5 +1,15 @@
 [
     {
+        "cycle": "11.8",
+        "releaseDate": "2025-06-04",
+        "eol": "2028-06-04",
+        "latest": "11.8.2",
+        "link": null,
+        "support": null,
+        "discontinued": null,
+        "before_eol": true
+    },
+    {
         "cycle": "11.7",
         "releaseDate": "2025-02-12",
         "eol": "2025-05-12",
