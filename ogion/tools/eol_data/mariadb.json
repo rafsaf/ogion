@@ -184,7 +184,7 @@
         "releaseDate": "2017-05-23",
         "eol": "2022-05-23",
         "latest": "10.2.44",
-        "link": null,
+        "link": "https://mariadb.com/kb/en/mariadb-10244-release-notes/",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -194,7 +194,7 @@
         "releaseDate": "2015-10-17",
         "eol": "2020-10-17",
         "latest": "10.1.48",
-        "link": null,
+        "link": "https://mariadb.com/kb/en/mariadb-10148-release-notes/",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -204,7 +204,7 @@
         "releaseDate": "2014-03-31",
         "eol": "2019-03-31",
         "latest": "10.0.38",
-        "link": null,
+        "link": "https://mariadb.com/kb/en/mariadb-10038-release-notes/",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -214,7 +214,7 @@
         "releaseDate": "2012-04-11",
         "eol": "2020-04-11",
         "latest": "5.5.68",
-        "link": null,
+        "link": "https://mariadb.com/kb/en/mariadb-5568-release-notes/",
         "support": null,
         "discontinued": null,
         "before_eol": false
