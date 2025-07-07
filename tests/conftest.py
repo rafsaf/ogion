@@ -5,7 +5,6 @@ import os
 import secrets
 import time
 from pathlib import Path
-from typing import TypeVar
 
 import google.cloud.storage as storage_client
 import pytest
@@ -39,8 +38,6 @@ from ogion.upload_providers.base_provider import BaseUploadProvider
 from ogion.upload_providers.debug import UploadProviderLocalDebug
 from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
 from ogion.upload_providers.s3 import UploadProviderS3
-
-TM = TypeVar("TM", MariaDBTargetModel, PostgreSQLTargetModel)
 
 
 def _to_target_model[TM: (MariaDBTargetModel, PostgreSQLTargetModel)](
