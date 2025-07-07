@@ -43,7 +43,7 @@ from ogion.upload_providers.s3 import UploadProviderS3
 TM = TypeVar("TM", MariaDBTargetModel, PostgreSQLTargetModel)
 
 
-def _to_target_model(
+def _to_target_model[TM: (MariaDBTargetModel, PostgreSQLTargetModel)](
     compose_db: ComposeDatabase,
     model: type[TM],
 ) -> TM:

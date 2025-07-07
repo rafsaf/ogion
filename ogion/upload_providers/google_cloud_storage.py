@@ -19,9 +19,9 @@ class UploadProviderGCS(BaseUploadProvider):
     """GCS bucket for storing backups"""
 
     def __init__(self, target_provider: GCSProviderModel) -> None:
-        import google.cloud.storage as cloud_storage
-        from google.auth.credentials import AnonymousCredentials
-        from google.oauth2 import service_account
+        import google.cloud.storage as cloud_storage  # noqa: PLC0415
+        from google.auth.credentials import AnonymousCredentials  # noqa: PLC0415
+        from google.oauth2 import service_account  # noqa: PLC0415
 
         service_account_bytes = base64.b64decode(
             target_provider.service_account_base64.get_secret_value()

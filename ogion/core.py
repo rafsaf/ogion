@@ -162,11 +162,11 @@ def safe_text_version(text: str) -> str:
     return re.sub(SAFE_LETTER_PATTERN, "", text)
 
 
-def _validate_model(
+def _validate_model[BM: BaseModel](
     env_name: str,
     env_value: str,
-    target: type[_BM],
-) -> _BM:
+    target: type[BM],
+) -> BM:
     target_name: str = target.__name__.lower()
     log.info("validating %s variable: `%s`", target_name, env_name)
     log.debug("%s=%s", target_name, env_value)
