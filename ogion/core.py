@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -21,8 +21,6 @@ log = logging.getLogger(__name__)
 SAFE_LETTER_PATTERN = re.compile(r"[^A-Za-z0-9_]*")
 DATETIME_BACKUP_FILE_PATTERN = re.compile(r"_[0-9]{8}_[0-9]{4}_")
 MODEL_SPLIT_EQUATION_PATTERN = re.compile(r"( (\w|\-)*\=|^(\w|\-)*\=)")
-
-_BM = TypeVar("_BM", bound=BaseModel)
 
 
 class CoreSubprocessError(Exception):
@@ -162,11 +160,11 @@ def safe_text_version(text: str) -> str:
     return re.sub(SAFE_LETTER_PATTERN, "", text)
 
 
-def _validate_model(
+def _validate_model[BM: BaseModel](
     env_name: str,
     env_value: str,
-    target: type[_BM],
-) -> _BM:
+    target: type[BM],
+) -> BM:
     target_name: str = target.__name__.lower()
     log.info("validating %s variable: `%s`", target_name, env_name)
     log.debug("%s=%s", target_name, env_value)

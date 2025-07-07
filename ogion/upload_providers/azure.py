@@ -16,7 +16,7 @@ class UploadProviderAzure(BaseUploadProvider):
     """Azure blob storage for storing backups"""
 
     def __init__(self, target_provider: AzureProviderModel) -> None:
-        from azure.storage.blob import BlobServiceClient
+        from azure.storage.blob import BlobServiceClient  # noqa: PLC0415
 
         self.container_name = target_provider.container_name
 

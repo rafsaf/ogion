@@ -3,8 +3,8 @@ updates:
   - package-ecosystem: pip
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 2
+      interval: monthly
+    open-pull-requests-limit: 1
     allow:
       - dependency-type: "all"
     groups:
@@ -16,8 +16,20 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    allow:
+      - dependency-type: "all"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
 
   - package-ecosystem: docker
     directory: docker/
     schedule:
       interval: monthly
+    allow:
+      - dependency-type: "all"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
