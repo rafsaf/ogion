@@ -400,3 +400,22 @@ def test_create_backup_targets(
     else:
         with pytest.raises(Exception):
             core.create_target_models()
+
+
+@pytest.mark.parametrize(
+    "exception,expected",
+    [
+        (core.CoreSubprocessError("Temporary failure in name resolution"), True),
+        (core.CoreSubprocessError("Can't connect to server on 'host' (115)"), True),
+        (core.CoreSubprocessError("Connection refused"), True),
+        (core.CoreSubprocessError("Network is unreachable"), True),
+        (core.CoreSubprocessError("Host is unreachable"), True),
+        (core.CoreSubprocessError("Timeout occurred"), True),
+        (core.CoreSubprocessError("Some other error"), False),
+        (ValueError("Temporary failure in name resolution"), False),
+        (RuntimeError("Can't connect to server"), False),
+        (Exception("Network is unreachable"), False),
+    ],
+)
+def test_is_network_error(exception: Exception, expected: bool) -> None:
+    assert core.is_network_error(exception) == expected
