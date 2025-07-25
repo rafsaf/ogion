@@ -7,10 +7,12 @@ import re
 import secrets
 import subprocess
 import tempfile
+import typing
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+import tenacity
 from pydantic import BaseModel
 
 from ogion import config
@@ -25,6 +27,43 @@ MODEL_SPLIT_EQUATION_PATTERN = re.compile(r"( (\w|\-)*\=|^(\w|\-)*\=)")
 
 class CoreSubprocessError(Exception):
     pass
+
+
+def is_network_error(exception: Exception) -> bool:
+    """Check if exception is a network-related error that should be retried."""
+    if not isinstance(exception, CoreSubprocessError):
+        return False
+
+    error_msg = str(exception).lower()
+    network_error_patterns = [
+        "temporary failure in name resolution",
+        "can't connect to server",
+        "connection refused",
+        "network is unreachable",
+        "host is unreachable",
+        "timeout",
+    ]
+
+    return any(pattern in error_msg for pattern in network_error_patterns)
+
+
+def retry_before_sleep(retry_state: tenacity.RetryCallState) -> None:
+    log.warning(
+        "Network error detected, retrying in %s seconds (attempt %s): %s",
+        retry_state.next_action.sleep if retry_state.next_action else "unknown",
+        retry_state.attempt_number,
+        retry_state.outcome.exception() if retry_state.outcome else "No outcome",
+    )
+
+
+def retry_on_network_errors(attempts: int = 3) -> typing.Callable:
+    return tenacity.retry(
+        retry=tenacity.retry_if_exception_type(CoreSubprocessError),
+        stop=tenacity.stop_after_attempt(attempts),
+        wait=tenacity.wait_exponential(multiplier=1, min=2, max=16),
+        before_sleep=retry_before_sleep,
+        reraise=True,
+    )
 
 
 def run_subprocess(shell_args: str) -> str:
