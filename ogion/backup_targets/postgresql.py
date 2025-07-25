@@ -82,6 +82,7 @@ class PostgreSQL(BaseBackupTarget):
         escaped_uri = shlex.quote(uri)
         return escaped_uri
 
+    @core.retry_on_network_errors()
     def _postgres_connection(self) -> str:
         try:
             log.debug("check psql installation")
@@ -122,6 +123,7 @@ class PostgreSQL(BaseBackupTarget):
         return version
 
     @override
+    @core.retry_on_network_errors(5)
     def backup(self) -> Path:
         escaped_dbname = core.safe_text_version(self.target_model.db)
         escaped_version = core.safe_text_version(self.db_version)
@@ -139,6 +141,7 @@ class PostgreSQL(BaseBackupTarget):
         return out_file
 
     @override
+    @core.retry_on_network_errors()
     def restore(self, path: str) -> None:
         log.info("start restore of %s", path)
         shell_psql_restore = f"psql {self.escaped_conn_uri} < {path}"

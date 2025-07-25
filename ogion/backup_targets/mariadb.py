@@ -65,6 +65,7 @@ class MariaDB(BaseBackupTarget):
 
         return path
 
+    @core.retry_on_network_errors()
     def _mariadb_connection(self) -> str:
         try:
             log.debug("check mariadb installation")
@@ -104,6 +105,7 @@ class MariaDB(BaseBackupTarget):
         return version
 
     @override
+    @core.retry_on_network_errors(5)
     def backup(self) -> Path:
         escaped_dbname = core.safe_text_version(self.target_model.db)
         escaped_version = core.safe_text_version(self.db_version)
@@ -121,6 +123,7 @@ class MariaDB(BaseBackupTarget):
         return out_file
 
     @override
+    @core.retry_on_network_errors()
     def restore(self, path: str) -> None:
         log.info("start restore of %s", path)
         shell_mariadb_restore = (
