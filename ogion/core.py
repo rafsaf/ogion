@@ -56,7 +56,7 @@ def retry_before_sleep(retry_state: tenacity.RetryCallState) -> None:
     )
 
 
-def retry_on_network_errors(attempts: int = 3) -> typing.Callable:
+def retry_on_network_errors(attempts: int = 3) -> typing.Callable:  # type: ignore
     return tenacity.retry(
         retry=tenacity.retry_if_exception_type(CoreSubprocessError),
         stop=tenacity.stop_after_attempt(attempts),
