@@ -218,5 +218,35 @@
         "support": null,
         "discontinued": null,
         "before_eol": false
+    },
+    {
+        "cycle": "5.3",
+        "releaseDate": "2012-02-29",
+        "eol": "2017-03-01",
+        "latest": "5.3.12",
+        "link": "https://mariadb.com/kb/en/mariadb-5312-release-notes/",
+        "support": null,
+        "discontinued": null,
+        "before_eol": false
+    },
+    {
+        "cycle": "5.2",
+        "releaseDate": "2010-11-10",
+        "eol": "2015-11-10",
+        "latest": "5.2.14",
+        "link": "https://mariadb.com/kb/en/mariadb-5214-release-notes/",
+        "support": null,
+        "discontinued": null,
+        "before_eol": false
+    },
+    {
+        "cycle": "5.1",
+        "releaseDate": "2010-02-01",
+        "eol": "2015-02-01",
+        "latest": "5.1.67",
+        "link": "https://mariadb.com/kb/en/mariadb-5167-release-notes/",
+        "support": null,
+        "discontinued": null,
+        "before_eol": false
     }
 ]
