@@ -1,5 +1,15 @@
 [
     {
+        "cycle": "12.0",
+        "releaseDate": "2025-06-05",
+        "eol": "2025-11-07",
+        "latest": "12.0.2",
+        "link": "https://mariadb.com/docs/release-notes/community-server/release-notes-mariadb-__RELEASE_CYCLE__-rolling-releases/mariadb-__LATEST__-release-notes",
+        "support": null,
+        "discontinued": null,
+        "before_eol": true
+    },
+    {
         "cycle": "11.8",
         "releaseDate": "2025-06-04",
         "eol": "2028-06-04",
@@ -14,7 +24,7 @@
         "releaseDate": "2025-02-12",
         "eol": "2025-05-12",
         "latest": "11.7.2",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/mariadb-11-7-rolling-releases/mariadb-11-7-2-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -24,7 +34,7 @@
         "releaseDate": "2024-11-13",
         "eol": "2025-02-13",
         "latest": "11.6.2",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-11-6-rolling-releases/mariadb-11-6-2-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -34,7 +44,7 @@
         "releaseDate": "2024-08-14",
         "eol": "2024-11-21",
         "latest": "11.5.2",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-11-5-rolling-releases/mariadb-11-5-2-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -54,7 +64,7 @@
         "releaseDate": "2024-02-16",
         "eol": "2024-05-29",
         "latest": "11.3.2",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-11-3-rolling-releases/mariadb-11-3-2-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -64,7 +74,7 @@
         "releaseDate": "2023-11-21",
         "eol": "2024-11-21",
         "latest": "11.2.6",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-11-2-series/mariadb-11-2-6-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -74,7 +84,7 @@
         "releaseDate": "2023-08-21",
         "eol": "2024-08-21",
         "latest": "11.1.6",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-11-1-series/mariadb-11-1-6-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -84,7 +94,7 @@
         "releaseDate": "2023-06-06",
         "eol": "2024-06-06",
         "latest": "11.0.6",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-11-0-series/mariadb-11-0-6-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -104,7 +114,7 @@
         "releaseDate": "2022-11-07",
         "eol": "2023-11-17",
         "latest": "10.10.7",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-10-10-series/mariadb-10-10-7-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -114,7 +124,7 @@
         "releaseDate": "2022-08-15",
         "eol": "2023-08-22",
         "latest": "10.9.8",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-10-9-series/mariadb-10-9-8-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -124,7 +134,7 @@
         "releaseDate": "2022-05-20",
         "eol": "2023-05-20",
         "latest": "10.8.8",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-10-8-series/mariadb-10-8-8-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -134,7 +144,7 @@
         "releaseDate": "2022-02-08",
         "eol": "2023-02-09",
         "latest": "10.7.8",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-10-7-series/mariadb-10-7-8-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -154,7 +164,7 @@
         "releaseDate": "2020-06-24",
         "eol": "2025-06-24",
         "latest": "10.5.29",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/mariadb-10-5-series/mariadb-10-5-29-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -164,7 +174,7 @@
         "releaseDate": "2019-06-18",
         "eol": "2024-06-18",
         "latest": "10.4.34",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-10-4-series/mariadb-10-4-34-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -174,7 +184,7 @@
         "releaseDate": "2018-05-25",
         "eol": "2023-05-25",
         "latest": "10.3.39",
-        "link": null,
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/release-notes-mariadb-10-3-series/mariadb-10-3-39-release-notes",
         "support": null,
         "discontinued": null,
         "before_eol": false
