@@ -56,7 +56,7 @@ services:
     - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mariadb:12.0-rc
+    image: mariadb:12.0
     networks:
     - ogion
     ports:
