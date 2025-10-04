@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import final
 
 from croniter import croniter
+from croniter.croniter import TIMESTAMP_TO_DT_CACHE
 
 from ogion.models.backup_target_models import TargetModel
 
@@ -49,6 +50,9 @@ class BaseBackupTarget(ABC):
             start_time=now,
         )
         next_backup: datetime = cron.get_next(ret_type=datetime)
+        # dirty fix for memory leak in croniter
+        # https://github.com/pallets-eco/croniter/issues/182
+        TIMESTAMP_TO_DT_CACHE.clear()
         return next_backup
 
     @final

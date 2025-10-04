@@ -153,3 +153,14 @@ services:
     ports:
     - 10017:5432
     restart: 'no'
+  ogion_postgres_18:
+    environment:
+    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
+    image: postgres:18-bookworm
+    networks:
+    - ogion
+    ports:
+    - 10018:5432
+    restart: 'no'

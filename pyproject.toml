@@ -40,6 +40,7 @@ types-croniter = ">=5.0.1.20241205"
 types-google-cloud-ndb = ">=2.3.0.20240813"
 types-pyyaml = ">=6.0.12.20241230"
 types-requests = ">=2.32.0.20240907"
+psutil = "^7.1.0"
 
 [tool.poetry.group.tests.dependencies]
 freezegun = ">=1.5.1"
