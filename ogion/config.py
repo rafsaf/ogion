@@ -1,6 +1,7 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import hashlib
 import logging
 import logging.config
 import socket
@@ -73,7 +74,10 @@ class Settings(BaseSettings):
 
     @property
     def age_recipients_file(self) -> Path:
-        p = CONST_CONFIG_FOLDER_PATH / "age_public_keys.txt"
+        md5_hash = hashlib.md5(
+            self.AGE_RECIPIENTS.encode(), usedforsecurity=False
+        ).hexdigest()
+        p = CONST_CONFIG_FOLDER_PATH / f"age_public_keys.{md5_hash}.txt"
         if p.exists():
             return p
         p.write_text(self.AGE_RECIPIENTS.replace(",", "\n"))
