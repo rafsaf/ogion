@@ -1,6 +1,7 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import getpass
 import logging
 import os
 import re
@@ -158,7 +159,7 @@ def run_decrypt_age_archive(backup_file: Path) -> Path:
     if config.options.DEBUG_AGE_SECRET_KEY:
         secret = config.options.DEBUG_AGE_SECRET_KEY
     else:  # pragma: no cover
-        secret = input("please input age private key to decrypt\n")
+        secret = getpass.getpass("please input age private key to decrypt:\n")
 
     with tempfile.NamedTemporaryFile(
         "w", dir=config.CONST_CONFIG_FOLDER_PATH
