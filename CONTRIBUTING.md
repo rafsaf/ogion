@@ -15,7 +15,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 ## Project requirements
 
-- Python 3.13.
+- Python 3.14.
 - Uv [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/).
 - Docker and docker compose plugin [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/).
 - Debian/Ubuntu are known to work.

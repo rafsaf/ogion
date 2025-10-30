@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/github/license/rafsaf/ogion)](https://github.com/rafsaf/ogion/blob/main/LICENSE)
-[![Python 3.13](https://img.shields.io/badge/python-3.13-blue)](https://docs.python.org/3/whatsnew/3.13.html)
+[![Python 3.14](https://img.shields.io/badge/python-3.14-blue)](https://docs.python.org/3/whatsnew/3.14.html)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Tests](https://github.com/rafsaf/ogion/actions/workflows/tests.yml/badge.svg)](https://github.com/rafsaf/ogion/actions/workflows/tests.yml)
 [![Type check](https://github.com/rafsaf/ogion/actions/workflows/type_check.yml/badge.svg)](https://github.com/rafsaf/ogion/actions/workflows/type_check.yml)

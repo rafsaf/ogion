@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Migrated from Poetry to uv for dependency management
 - Added this Changelog file
+- Migrate to python 3.14 and Debian Trixie
 
 ### Fixed
 
@@ -87,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure Blob Storage testing with Azurite
 - Minio client for S3 testing
 - Fake GCS server for testing
-- Python 3.13 support
+- Migrate to python 3.13
 - Database restore commands (`restore` and `restore-latest`)
 - `download` and `list` commands for backups
 - `all_target_backups` functionality
