@@ -18,15 +18,14 @@ RUN ./scripts/install_mariadb_client.sh
 RUN ./scripts/install_postgresql_client.sh
 RUN apt-get -y remove gpg
 
-FROM base AS poetry
-RUN --mount=type=cache,target=/root/.cache/pip pip install poetry==2.1.3
-RUN --mount=type=cache,target=/root/.cache/pip poetry self add poetry-plugin-export
-COPY poetry.lock pyproject.toml ./
-RUN poetry export -o /requirements.txt --without-hashes
-RUN poetry export -o /requirements-tests.txt --without-hashes --with tests
+FROM base AS uv
+COPY --from=ghcr.io/astral-sh/uv:0.9.2 /uv /uvx /bin/
+COPY uv.lock pyproject.toml ./
+RUN uv export --no-dev --no-group tests --no-hashes -o /requirements.txt --no-install-workspace --frozen
+RUN uv export --only-group tests --no-hashes -o /requirements-tests.txt --no-install-workspace --frozen
 
 FROM base AS common
-COPY --from=poetry /requirements.txt .
+COPY --from=uv /requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 RUN rm -f requirements.txt
 
@@ -52,7 +51,7 @@ RUN rm -f \
 COPY LICENSE LICENSE
 
 FROM common AS tests
-COPY --from=poetry /requirements-tests.txt .
+COPY --from=uv /requirements-tests.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-tests.txt
 COPY pyproject.toml .
 COPY tests tests

@@ -30,7 +30,7 @@ acceptance_tests:
 
 .PHONY: update_compose_db_file
 update_compose_db_file:
-	poetry run python ogion/tools/compose_file_generator.py > docker/docker-compose.dbs.yml
+	uv run python ogion/tools/compose_file_generator.py > docker/docker-compose.dbs.yml
 
 .PHONY: benchmark-mem-massif-main
 benchmark-mem-massif-main:
