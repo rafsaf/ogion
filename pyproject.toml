@@ -3,7 +3,7 @@ name = "ogion"
 version = "8.3"
 description = "A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms."
 authors = [{ name = "Rafał Safin", email = "rafal.safin@rafsaf.pl" }]
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.14,<3.15"
 readme = "README.md"
 license = "GNU GPLv3"
 dependencies = [
@@ -25,7 +25,7 @@ dev = [
   "mkdocs>=1.6.1",
   "mkdocs-material>=9.5.49",
   "mkdocstrings[python]>=0.27.0",
-  "mypy>=1.18.2",
+  "mypy==1.18.2",
   "pre-commit>=4.0.1",
   "pymdown-extensions>=10.13",
   "pyyaml>=6.0.2",
@@ -73,7 +73,7 @@ filterwarnings = []
 reportImplicitOverride = true
 
 [tool.ruff]
-target-version = "py313"
+target-version = "py314"
 
 [tool.ruff.lint]
 # pycodestyle, pyflakes, isort, pylint, pyupgrade
@@ -87,5 +87,5 @@ source = ["ogion"]
 [tool.mypy]
 enable_error_code = "explicit-override"
 ignore_missing_imports = true
-python_version = "3.13"
+python_version = "3.14"
 strict = true
