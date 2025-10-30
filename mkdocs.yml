@@ -39,6 +39,7 @@ nav:
   - Configuration: configuration.md
   - Disaster recovery: disaster_recovery.md
   - Manual disaster recovery: manual_disaster_recovery.md
+  - Changelog: changelog.md
 
 plugins:
   - search:
@@ -55,6 +56,7 @@ watch:
   - docs
   - mkdocs.yml
   - README.md
+  - CHANGELOG.md
 
 extra:
   version:
