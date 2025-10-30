@@ -65,7 +65,7 @@ class UploadProviderGCS(BaseUploadProvider):
     @override
     def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
-        prefix = f"{self.bucket_upload_path}/{env_name}"
+        prefix = f"{self.bucket_upload_path}/{env_name}/"
         for blob in self.storage_client.list_blobs(self.bucket, prefix=prefix):
             backups.append(blob.name)
 

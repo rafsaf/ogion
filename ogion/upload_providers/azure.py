@@ -56,7 +56,7 @@ class UploadProviderAzure(BaseUploadProvider):
     @override
     def all_target_backups(self, env_name: str) -> list[str]:
         backups: list[str] = []
-        for blob in self.container_client.list_blobs(name_starts_with=env_name):
+        for blob in self.container_client.list_blobs(name_starts_with=f"{env_name}/"):
             backups.append(blob.name)
 
         backups.sort(reverse=True)
