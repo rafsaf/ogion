@@ -41,7 +41,7 @@ jobs:
             var-cache-pip
             var-cache-apt
             var-lib-apt
-          key: ${{ runner.os }}-cache-${{ hashFiles('docker/Dockerfile') }}
+          key: ${{ runner.os }}-trixie-${{ matrix.arch }}-cache-${{ hashFiles('docker/Dockerfile') }}
 
       - name: Inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.3.0
@@ -60,8 +60,8 @@ jobs:
           file: docker/Dockerfile
           context: .
           target: tests
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=python:3.14-slim-trixie
+          cache-to: type=gha,mode=max,scope=python:3.14-slim-trixie
           push: false
           tags: rafsaf/ogion:dev
           load: true
