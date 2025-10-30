@@ -186,3 +186,49 @@ def test_gcs_download_backup(
     )
 
     assert out.is_file()
+
+
+def test_all_target_backups_edge_cases_with_similar_names(
+    provider: BaseUploadProvider, provider_prefix: str
+) -> None:
+    """Test various edge cases with similar env_names to ensure exact matching.
+
+    Covers cases like:
+    - 'db' and 'db_2'
+    - 'app' and 'application'
+    - 'test' and 'test_env' and 'testing'
+    """
+
+    env_names = [
+        "db",
+        "db_2",
+        "db_backup",
+        "app",
+        "application",
+        "test",
+        "test_env",
+        "testing",
+    ]
+
+    for env_name in env_names:
+        backup_dir = config.CONST_DATA_FOLDER_PATH / env_name
+        backup_dir.mkdir()
+        backup_file = backup_dir / f"backup_20230427_0105_{env_name}"
+        backup_file.touch()
+        provider.post_save(backup_file)
+
+    expected_backup_count = 1
+    for env_name in env_names:
+        backups = provider.all_target_backups(env_name)
+        assert len(backups) == expected_backup_count, (
+            f"Expected {expected_backup_count} backup for {env_name}, "
+            f"got {len(backups)}: {backups}"
+        )
+        assert env_name in backups[0], (
+            f"Backup path {backups[0]} doesn't contain {env_name}"
+        )
+
+        expected_prefix = f"{provider_prefix}{env_name}/"
+        assert backups[0].startswith(expected_prefix), (
+            f"Backup {backups[0]} doesn't start with expected prefix {expected_prefix}"
+        )
