@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Migrated from Poetry to uv for dependency management
 - Added this Changelog file
-- Migrate to python 3.14 and Debian Trixie
+- Migrate to Python 3.14 and Debian Trixie
 
 ### Fixed
 
-- Edge case fixes for `all_target_backups` with similar names
+- Edge case fixes for `--list` and `--restore-latest` commands when using many similar env names for azure and gcs (eg. POSTGRESQL_TEST, POSTGRESQL_TEST_HOURLY could lead to use of wrong backup file name in `--restore-latest` and wrong list in `--list`).
 
 ## [8.2] - 2025-10-05
 
