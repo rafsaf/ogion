@@ -16,7 +16,7 @@ Both upload providers and backup targets were created with possibility to easly 
 ## Project requirements
 
 - Python 3.13.
-- Poetry [https://python-poetry.org/](https://python-poetry.org/).
+- Uv [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/).
 - Docker and docker compose plugin [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/).
 - Debian/Ubuntu are known to work.
 - To work with databases natively, `postgresql-client` and `mariadb-client` packages installed on your system, there are scripts in `scripts` that can help.
@@ -25,7 +25,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 1. Install python dependencies
 
-   `poetry install`
+   `uv sync`
 
 2. Install pre-commit hooks.
 
@@ -49,7 +49,7 @@ Both upload providers and backup targets were created with possibility to easly 
 
 ## Docs
 
-To play with documentation, after dependencies are in place installed with poetry:
+To play with documentation, after dependencies are in place installed with uv:
 
 `mkdocs serve` will start development server.
 
