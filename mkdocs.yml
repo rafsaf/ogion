@@ -37,8 +37,8 @@ nav:
       - notifications/slack.md
   - Deployment: deployment.md
   - Configuration: configuration.md
-  - Disaster recovery: disaster_recovery.md
-  - Manual disaster recovery: manual_disaster_recovery.md
+  - CLI Reference: cli.md
+  - Manual Recovery: recovery.md
   - Changelog: changelog.md
 
 plugins:

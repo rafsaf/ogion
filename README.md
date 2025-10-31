@@ -88,5 +88,20 @@ See how it looks for ~2GB size database:
 
 ![ogion_gcp_example_twp-min.jpg](https://raw.githubusercontent.com/rafsaf/ogion/main/docs/images/ogion_gcp_example_twp-min.jpg)
 
+## Why it works
+
+Ogion has 100% test coverage with end-to-end integration tests that guarantee it works in real scenarios. Tests run inside containers on all architectures against actual database instances (PostgreSQL 13-18, MariaDB 10.6-12.0, MySQL 8.0-9.5) defined in `docker-compose.dbs.yml`. Database versions are automatically updated daily via GitHub Actions to ensure compatibility with latest releases.
+
+Each test executes the complete backup/restore cycle:
+1. Create test data in real database
+2. Run backup using actual database clients (`pg_dump`, `mariadb-dump`)
+3. Compress with lzip and encrypt with age
+4. Upload to simulated cloud storage (Azurite for Azure, fake-gcs-server for GCS, Minio for S3)
+5. Download the backup
+6. Decrypt with age and decompress with lzip
+7. Restore to database and verify data integrity
+
+This end-to-end testing against real databases and cloud storage simulators ensures ogion will work reliably in production.
+
 <br>
 <br>
