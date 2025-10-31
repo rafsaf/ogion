@@ -1,6 +1,7 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import argparse
 import sys
 import threading
 import time
@@ -112,6 +113,64 @@ def test_main_single(monkeypatch: pytest.MonkeyPatch) -> None:
     assert count == len(target_envs)
 
 
+def test_main_single_with_target(monkeypatch: pytest.MonkeyPatch) -> None:
+    target_name = ALL_POSTGRES_DBS_TARGETS[0].env_name
+    monkeypatch.setattr(sys, "argv", ["main.py", "--single", "--target", target_name])
+    monkeypatch.setattr(config.options, "BACKUP_PROVIDER", "name=debug")
+
+    def dummy_shutdown() -> NoReturn:
+        sys.exit(0)
+
+    monkeypatch.setattr(main, "shutdown", dummy_shutdown)
+    models = (
+        ALL_MARIADB_DBS_TARGETS
+        + ALL_MYSQL_DBS_TARGETS
+        + ALL_POSTGRES_DBS_TARGETS
+        + [FILE_1, FOLDER_1]
+    )
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=models),
+    )
+    with pytest.raises(SystemExit) as system_exit:
+        main.main()
+    assert system_exit.type is SystemExit
+
+    timeout: float = 0
+    while threading.active_count() > 1 and timeout < SECONDS_TIMEOUT:
+        timeout += 0.05
+        time.sleep(0.05)
+
+    # Only the specified target should have been backed up
+    backup_count = 0
+    for dir in config.CONST_DEBUG_FOLDER_PATH.iterdir():
+        if dir.is_dir() and dir.name == target_name.lower():
+            assert sum(1 for _ in dir.glob("*.lz.age")) == 1, dir
+            backup_count += 1
+    assert backup_count == 1
+
+
+def test_main_single_with_nonexistent_target(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(sys, "argv", ["main.py", "--single", "--target", "nonexistent"])
+    monkeypatch.setattr(config.options, "BACKUP_PROVIDER", "name=debug")
+
+    models = (
+        ALL_MARIADB_DBS_TARGETS
+        + ALL_MYSQL_DBS_TARGETS
+        + ALL_POSTGRES_DBS_TARGETS
+        + [FILE_1, FOLDER_1]
+    )
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=models),
+    )
+    with pytest.raises(SystemExit) as system_exit:
+        main.main()
+    assert system_exit.value.code == 1
+
+
 def test_main_debug_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["main.py", "--debug-notifications"])
 
@@ -166,17 +225,27 @@ def test_quit(monkeypatch: pytest.MonkeyPatch) -> None:
     "cli_args,expected_attributes",
     [
         (["main.py", "--single"], {"single": True}),
+        (
+            ["main.py", "--single", "--target", "mytarget"],
+            {"single": True, "target": "mytarget"},
+        ),
         (["main.py", "--debug-notifications"], {"debug_notifications": True}),
         (
             ["main.py", "--debug-download", "example.log"],
             {"debug_download": "example.log"},
         ),
-        (["main.py", "--list"], {"list": True}),
-        (["main.py", "--restore-latest"], {"restore_latest": True}),
+        (
+            ["main.py", "--target", "example_target", "--list"],
+            {"target": "example_target", "list": True},
+        ),
+        (
+            ["main.py", "--target", "example_target", "--restore-latest"],
+            {"target": "example_target", "restore_latest": True},
+        ),
         (["main.py", "--target", "example_target"], {"target": "example_target"}),
         (
-            ["main.py", "--restore", "example_restore"],
-            {"restore": "example_restore"},
+            ["main.py", "--target", "example_target", "--restore", "example_restore"],
+            {"restore": "example_restore", "target": "example_target"},
         ),
     ],
 )
@@ -193,3 +262,127 @@ def test_setup_runtime_arguments_parametrized(
 
     for attribute, expected_value in expected_attributes.items():
         assert getattr(args, attribute) == expected_value
+
+
+@pytest.mark.parametrize(
+    "cli_args,expected_error",
+    [
+        (
+            ["main.py", "--debug-notifications", "--single"],
+            "--debug-notifications cannot be combined with other options",
+        ),
+        (
+            ["main.py", "--debug-notifications", "--target", "test"],
+            "--debug-notifications cannot be combined with other options",
+        ),
+        (
+            ["main.py", "--single", "--list"],
+            "--single can only be combined with --target",
+        ),
+        (
+            ["main.py", "--single", "--restore-latest"],
+            "--single can only be combined with --target",
+        ),
+        (
+            ["main.py", "--debug-download", "file.age", "--target", "test"],
+            "--debug-download cannot be combined with",
+        ),
+        (
+            ["main.py", "--list"],
+            "--list, --restore-latest, and --restore require --target",
+        ),
+        (
+            ["main.py", "--restore-latest"],
+            "--list, --restore-latest, and --restore require --target",
+        ),
+        (
+            ["main.py", "--restore", "backup.age"],
+            "--list, --restore-latest, and --restore require --target",
+        ),
+        (
+            ["main.py", "--target", "test", "--restore-latest", "--restore", "file"],
+            "--restore-latest and --restore cannot be used together",
+        ),
+        (
+            ["main.py", "--target", "test", "--list", "--restore-latest"],
+            "--list cannot be combined with --restore-latest or --restore",
+        ),
+        (
+            ["main.py", "--target", "test", "--list", "--restore", "file"],
+            "--list cannot be combined with --restore-latest or --restore",
+        ),
+    ],
+)
+def test_setup_runtime_arguments_validation_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    cli_args: list[str],
+    expected_error: str,
+) -> None:
+    monkeypatch.setattr("sys.argv", cli_args)
+
+    with pytest.raises(SystemExit):
+        main.setup_runtime_arguments()
+    # Note: argparse.error() calls sys.exit(2) and prints to stderr
+
+
+def test_target_completer(monkeypatch: pytest.MonkeyPatch) -> None:
+    models = [ALL_POSTGRES_DBS_TARGETS[0], ALL_MARIADB_DBS_TARGETS[0], FILE_1]
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=models),
+    )
+
+    completions = main.target_completer()
+
+    assert isinstance(completions, list)
+    assert len(completions) == len(models)
+    assert all(model.env_name.lower() in completions for model in models)
+
+
+def test_target_completer_handles_exception(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(side_effect=ValueError("Test error")),
+    )
+
+    completions = main.target_completer()
+
+    assert completions == []
+
+
+def test_backup_file_completer(monkeypatch: pytest.MonkeyPatch) -> None:
+    test_backups = ["backup1.sql.lz.age", "backup2.sql.lz.age", "backup3.sql.lz.age"]
+    provider_mock = Mock()
+    provider_mock.all_target_backups = Mock(return_value=test_backups)
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider_mock))
+
+    parsed_args = argparse.Namespace(target="test_target")
+
+    completions = main.backup_file_completer("", parsed_args)
+
+    assert completions == test_backups
+    provider_mock.all_target_backups.assert_called_once_with("test_target")
+
+
+def test_backup_file_completer_no_target(monkeypatch: pytest.MonkeyPatch) -> None:
+    parsed_args = argparse.Namespace()
+
+    completions = main.backup_file_completer("", parsed_args)
+
+    assert completions == []
+
+
+def test_backup_file_completer_handles_exception(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider_mock = Mock()
+    provider_mock.all_target_backups = Mock(side_effect=ValueError("Test error"))
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider_mock))
+
+    parsed_args = argparse.Namespace(target="test_target")
+
+    completions = main.backup_file_completer("", parsed_args)
+
+    assert completions == []

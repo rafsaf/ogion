@@ -26,7 +26,7 @@ options:
 
 To eg. restore to the latest point for example backup target `postgresql_my-instance` you can use:
 
-- k8s: `kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- python -m ogion.main --target postgresql_my-instance --restore-latest`
-- docker: `docker compose run --rm ogion python -m ogion.main --target postgresql_my-instance --restore-latest`
+- k8s: `kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- ogion --target postgresql_my-instance --restore-latest`
+- docker: `docker compose run --rm ogion ogion --target postgresql_my-instance --restore-latest`
 
 PS. In the process, prgram will ask for age secret key in input.

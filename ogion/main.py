@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
+
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -11,6 +14,8 @@ import time
 from dataclasses import dataclass
 from types import FrameType
 from typing import NoReturn
+
+import argcomplete
 
 from ogion import config, core
 from ogion.backup_targets import (
@@ -166,6 +171,24 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
     )
 
 
+def target_completer(**kwargs) -> list[str]:  # type: ignore[no-untyped-def]
+    targets = core.create_target_models()
+    return [target.env_name.lower() for target in targets]
+
+
+def backup_file_completer(  # type: ignore[no-untyped-def]
+    prefix: str,
+    parsed_args: argparse.Namespace,
+    **kwargs,
+) -> list[str]:
+    if not hasattr(parsed_args, "target") or not parsed_args.target:
+        return []
+
+    provider = backup_provider()
+    backups = provider.all_target_backups(parsed_args.target.lower())
+    return backups
+
+
 @dataclass
 class RuntimeArgs:
     single: bool
@@ -178,9 +201,26 @@ class RuntimeArgs:
 
 
 def setup_runtime_arguments() -> RuntimeArgs:
-    parser = argparse.ArgumentParser(description="Ogion program")
+    parser = argparse.ArgumentParser(
+        description="Ogion - Automated database backup and secure cloud upload tool",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  ogion                           Run in continuous backup mode
+  ogion -s                        Run a single backup for all targets
+  ogion --target mytarget -s      Run a single backup for specific target
+  ogion --target mytarget --list  List all backups for 'mytarget' target
+  ogion --target mytarget --restore-latest
+                                  Restore the latest backup for 'mytarget'
+  ogion --target mytarget --restore backup_file.sql.lz.age
+                                  Restore specific backup file for 'mytarget'
+        """,
+    )
     parser.add_argument(
-        "-s", "--single", action="store_true", help="Only single backup then exit"
+        "-s",
+        "--single",
+        action="store_true",
+        help="Run single backup then exit (optionally for specific --target)",
     )
     parser.add_argument(
         "-n",
@@ -194,18 +234,18 @@ def setup_runtime_arguments() -> RuntimeArgs:
         default=None,
         required=False,
         help="Download given backup file locally and print path",
-    )
+    ).completer = backup_file_completer  # type: ignore[attr-defined]
     parser.add_argument(
         "--target",
         type=str,
         default=None,
         required=False,
-        help="Backup target",
-    )
+        help="Backup target (required with --list, --restore-latest, --restore)",
+    ).completer = target_completer  # type: ignore[attr-defined]
     parser.add_argument(
         "--restore-latest",
         action="store_true",
-        help="Restore given target to latest database",
+        help="Restore given target to latest backup",
     )
     parser.add_argument(
         "-r",
@@ -213,15 +253,77 @@ def setup_runtime_arguments() -> RuntimeArgs:
         type=str,
         default=None,
         required=False,
-        help="Restore given target to backup file",
-    )
+        help="Restore given target to specific backup file",
+    ).completer = backup_file_completer  # type: ignore[attr-defined]
     parser.add_argument(
         "-l",
         "--list",
         action="store_true",
         help="List all backups for given target",
     )
-    return RuntimeArgs(**vars(parser.parse_args()))
+
+    argcomplete.autocomplete(parser)
+
+    args = parser.parse_args()
+
+    # Validate argument combinations
+    runtime_args = RuntimeArgs(**vars(args))
+
+    # -n/--debug-notifications should not be combined with other options
+    if runtime_args.debug_notifications:
+        if (
+            runtime_args.single
+            or runtime_args.debug_download is not None
+            or runtime_args.target is not None
+            or runtime_args.restore_latest
+            or runtime_args.restore is not None
+            or runtime_args.list
+        ):
+            parser.error("--debug-notifications cannot be combined with other options")
+
+    # -s/--single should not be combined with other options (except --target)
+    if runtime_args.single:
+        if (
+            runtime_args.debug_download is not None
+            or runtime_args.restore_latest
+            or runtime_args.restore is not None
+            or runtime_args.list
+        ):
+            parser.error(
+                "--single can only be combined with --target, not with other options"
+            )
+
+    # --debug-download should not be combined with other options except itself
+    if runtime_args.debug_download is not None:
+        if (
+            runtime_args.target is not None
+            or runtime_args.restore_latest
+            or runtime_args.restore is not None
+            or runtime_args.list
+        ):
+            parser.error(
+                "--debug-download cannot be combined with "
+                "--target, --list, --restore-latest, or --restore"
+            )
+
+    # --list, --restore-latest, and --restore require --target
+    if runtime_args.list or runtime_args.restore_latest or runtime_args.restore:
+        if runtime_args.target is None:
+            parser.error(
+                "--list, --restore-latest, and --restore "
+                "require --target to be specified"
+            )
+
+    # --restore-latest and --restore are mutually exclusive
+    if runtime_args.restore_latest and runtime_args.restore is not None:
+        parser.error("--restore-latest and --restore cannot be used together")
+
+    # --list should not be combined with --restore-latest or --restore
+    if runtime_args.list:
+        if runtime_args.restore_latest or runtime_args.restore is not None:
+            parser.error("--list cannot be combined with --restore-latest or --restore")
+
+    return runtime_args
 
 
 def run_debug_notifications_and_exit() -> NoReturn:
@@ -233,11 +335,22 @@ def run_debug_notifications_and_exit() -> NoReturn:
         sys.exit(0)
 
 
-def run_single_all_backups() -> NoReturn:
-    log.info("start run_single_all_backups")
+def run_single_all_backups(target_name: str | None = None) -> NoReturn:
+    if target_name:
+        log.info("start run_single_all_backups for target: %s", target_name)
+    else:
+        log.info("start run_single_all_backups")
 
     backup_provider()
     targets = backup_targets()
+
+    # Filter targets if specific target is requested
+    if target_name:
+        targets = [t for t in targets if t.env_name.lower() == target_name.lower()]
+        if not targets:
+            log.warning("target '%s' does not exist", target_name)
+            print(f"target '{target_name}' does not exist")
+            sys.exit(1)
 
     for target in targets:
         threading.Thread(
@@ -361,29 +474,17 @@ def main() -> NoReturn:  # pragma: no cover
     if runtime_args.debug_notifications:
         run_debug_notifications_and_exit()
     elif runtime_args.single:
-        run_single_all_backups()
+        run_single_all_backups(runtime_args.target)
     elif runtime_args.debug_download is not None:
         run_download_backup_file(runtime_args.debug_download)
     elif runtime_args.list:
-        if runtime_args.target is None:
-            targets = backup_targets()
-            log.warning("available targets: %s", [t.env_name for t in targets])
-            log.warning("--target must be defined to use --list")
-            sys.exit(3)
+        assert runtime_args.target is not None
         run_list_backup_files(runtime_args.target)
     elif runtime_args.restore_latest:
-        if runtime_args.target is None:
-            targets = backup_targets()
-            log.warning("available targets: %s", [t.env_name for t in targets])
-            log.warning("--target must be defined to use --restore-latest")
-            sys.exit(3)
+        assert runtime_args.target is not None
         run_restore_latest(runtime_args.target)
     elif runtime_args.restore is not None:
-        if runtime_args.target is None:
-            targets = backup_targets()
-            log.warning("available targets: %s", [t.env_name for t in targets])
-            log.warning("--target must be defined to use --restore-latest")
-            sys.exit(3)
+        assert runtime_args.target is not None
         run_restore(runtime_args.restore, runtime_args.target)
     else:
         run_main_loop()

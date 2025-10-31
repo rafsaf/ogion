@@ -9,14 +9,17 @@ ENV LOG_FOLDER_PATH="/var/log/ogion"
 ENV OGION_CPU_ARCHITECTURE=${TARGETARCH}
 WORKDIR ${FOLDER_PATH}
 
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get -y update && apt-get -y install age curl wget tar gpg plzip lzip
+    apt-get -y update && apt-get -y install age curl wget tar gpg plzip lzip bash-completion
 
 COPY scripts scripts
 RUN ./scripts/install_mariadb_client.sh
 RUN ./scripts/install_postgresql_client.sh
-RUN apt-get -y remove gpg
+RUN apt-get -y remove gpg curl wget
 
 FROM base AS uv
 COPY --from=ghcr.io/astral-sh/uv:0.9.2 /uv /uvx /bin/
@@ -28,8 +31,12 @@ FROM base AS common
 COPY --from=uv /requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 RUN rm -f requirements.txt
+RUN activate-global-python-argcomplete -y
 
 COPY ogion ogion
+
+RUN ln -s ${FOLDER_PATH}/ogion/bin/ogion /usr/bin/ogion
+RUN python -m compileall -b ${FOLDER_PATH}/ogion
 
 # rm to save ~65M
 RUN rm -f \
@@ -58,4 +65,4 @@ COPY tests tests
 CMD ["pytest", "-vv"]
 
 FROM common AS build
-CMD ["python", "-m", "ogion.main"] 
+CMD ["ogion"] 
