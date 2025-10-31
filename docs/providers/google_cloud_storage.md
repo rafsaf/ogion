@@ -58,6 +58,9 @@ Give it following roles so it will have **read access for whole bucket "my_bucke
 1. **Storage Object Admin** (with IAM condition: NAME starts with `projects/_/buckets/my_bucket_name/objects/my_ogion_instance_1`)
 2. **Storage Object Viewer** (with IAM condition: NAME starts with `projects/_/buckets/my_bucket_name`)
 
+!!! tip "Reduced Permissions with BACKUP_DELETE=false"
+    If you set `BACKUP_DELETE=false` in your configuration, Ogion will only upload backups without performing cleanup operations. In this case, you can use reduced permissions - only **Storage Object Creator** role is needed (no delete or list permissions required). This is useful when using GCS bucket lifecycle rules to manage backup expiration instead of Ogion's built-in cleanup.
+
 After sucessfully creating service account, create new private key with JSON type and download it. File similar to `your_project_name-03189413be28.json` will appear in your Downloads.
 
 To get base64 (without any new lines) from it, use command:

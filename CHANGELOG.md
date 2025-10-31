@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Improved `--single` flag** - Can now backup a specific target using `--single --target <name>` instead of running all backups
 - Dynamic autocomplete for `--target` argument that suggests available backup targets from your configuration
 - Dynamic autocomplete for `--restore` and `--debug-download` arguments that suggests available backup files
+- **`BACKUP_DELETE` environment variable** - New boolean configuration option (default: `true`) to control automatic cleanup operations. When set to `false`, Ogion only uploads backups without deleting old ones, allowing external tools like GCS bucket expiry rules, S3 lifecycle policies, or Azure blob lifecycle management to handle cleanup. This reduces required cloud storage permissions - when disabled, only write/upload permissions are needed (no delete/list permissions required)
 
 ### Changed
 
@@ -24,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enhanced CLI help text** - More descriptive help messages with practical examples for common use cases
 - **Better argument validation** - CLI now validates argument combinations upfront and shows clear error messages (e.g., `--list` requires `--target`, `--restore-latest` and `--restore` are mutually exclusive)
 - Container entrypoint changed to `ogion` command for consistency
+- **Reduced permission requirements when `BACKUP_DELETE=false`** - Cloud storage providers (GCS, S3, Azure) now only require write/upload permissions when cleanup is disabled, eliminating the need for delete and list permissions
 
 ### Fixed
 

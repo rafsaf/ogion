@@ -40,5 +40,8 @@ BACKUP_PROVIDER="name=azure container_name=birds connect_string=DefaultEndpoints
 
 [https://learn.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal)
 
+!!! tip "Reduced Permissions with BACKUP_DELETE=false"
+    If you set `BACKUP_DELETE=false` in your configuration, Ogion will only upload backups without performing cleanup operations. The built-in [Storage Blob Data Contributor](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/storage#storage-blob-data-contributor) role includes read, write, AND delete permissions. For minimum permissions with BACKUP_DELETE=false, create a **custom RBAC role** with only `Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write` permission. Alternatively, connection strings bypass RBAC and work with container-level access. This is useful when using Azure Blob Storage lifecycle management policies to handle backup expiration.
+
 <br>
 <br>
