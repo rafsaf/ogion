@@ -29,12 +29,12 @@ services:
   ```
 - There is runtime flag `--single` that **ignores cron, make all databases backups and exits**. To use it when having already running container, use:
   ```bash
-  docker compose run --rm ogion python -m ogion.main --single
+  docker compose run --rm ogion ogion --single
   ```
   BE CAREFUL, if your setup if fine, this will upload backup files to cloud provider, so costs may apply.
 - There is runtime flag `--debug-notifications` that **setup notifications, raise dummy exception and exits**. This can help ensure notifications are working:
   ```bash
-  docker compose run --rm ogion python -m ogion.main --debug-notifications
+  docker compose run --rm ogion ogion --debug-notifications
   ```
 
 ## Kubernetes
@@ -90,12 +90,12 @@ spec:
   ```
 - There is runtime flag `--single` that **ignores cron, make all databases backups and exits**. To use it when having already running container, use:
   ```bash
-  kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- python -m ogion.main --single
+  kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- ogion --single
   ```
   BE CAREFUL, if your setup if fine, this will upload backup files to cloud provider, so costs may apply.
 - There is runtime flag `--debug-notifications` that **setup notifications, raise dummy exception and exits**. This can help ensure notifications are working:
   ```bash
-  kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- python -m ogion.main --debug-notifications
+  kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- ogion --debug-notifications
   ```
   <br>
   <br>

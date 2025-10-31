@@ -64,6 +64,10 @@ def check_docker_image_exists(image_name: str) -> bool:
 
 def get_mariadb_image_tag(cycle_version: str) -> str:
     regular_tag = f"mariadb:{cycle_version}"
+    if "pytest" in sys.modules:
+        # During tests, skip actual network calls
+        return regular_tag
+
     if check_docker_image_exists(regular_tag):
         log.info(f"Using regular tag: {regular_tag}")
         return regular_tag
