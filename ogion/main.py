@@ -172,8 +172,11 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
 
 
 def target_completer(**kwargs) -> list[str]:  # type: ignore[no-untyped-def]
-    targets = core.create_target_models()
-    return [target.env_name.lower() for target in targets]
+    try:
+        targets = core.create_target_models()
+        return [target.env_name.lower() for target in targets]
+    except Exception:
+        return []
 
 
 def backup_file_completer(  # type: ignore[no-untyped-def]
@@ -184,9 +187,12 @@ def backup_file_completer(  # type: ignore[no-untyped-def]
     if not hasattr(parsed_args, "target") or not parsed_args.target:
         return []
 
-    provider = backup_provider()
-    backups = provider.all_target_backups(parsed_args.target.lower())
-    return backups
+    try:
+        provider = backup_provider()
+        backups = provider.all_target_backups(parsed_args.target.lower())
+        return backups
+    except Exception:
+        return []
 
 
 @dataclass
