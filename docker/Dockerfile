@@ -35,7 +35,10 @@ RUN activate-global-python-argcomplete -y
 
 COPY ogion ogion
 
-RUN ln -s ${FOLDER_PATH}/ogion/bin/ogion /usr/bin/ogion
+RUN ln -s ${FOLDER_PATH}/ogion/bin/ogion /usr/bin/ogion && \
+    register-python-argcomplete ogion > /etc/bash_completion.d/ogion && \
+    echo '[ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion' >> /etc/bash.bashrc
+
 RUN python -m compileall -b ${FOLDER_PATH}/ogion
 
 # rm to save ~65M

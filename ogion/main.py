@@ -184,6 +184,19 @@ def backup_file_completer(  # type: ignore[no-untyped-def]
     parsed_args: argparse.Namespace,
     **kwargs,
 ) -> list[str]:
+    action = kwargs.get("action")
+    if action and action.dest == "debug_download":
+        try:
+            targets = core.create_target_models()
+            all_backups: list[str] = []
+            for target in targets:
+                backups = backup_provider().all_target_backups(target.env_name.lower())
+                all_backups += backups
+            return all_backups
+        except Exception:
+            return []
+
+    # For --restore, require --target to be specified first
     if not hasattr(parsed_args, "target") or not parsed_args.target:
         return []
 
@@ -212,14 +225,15 @@ def setup_runtime_arguments() -> RuntimeArgs:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  ogion                           Run in continuous backup mode
-  ogion -s                        Run a single backup for all targets
-  ogion --target mytarget -s      Run a single backup for specific target
-  ogion --target mytarget --list  List all backups for 'mytarget' target
+  ogion                                 Run in continuous backup mode
+  ogion -s                              Run a single backup for all targets
+  ogion --target mytarget -s            Run a single backup for specific target
+  ogion --target mytarget --list
+                                        List all backups for 'mytarget' target
   ogion --target mytarget --restore-latest
-                                  Restore the latest backup for 'mytarget'
+                                        Restore the latest backup for 'mytarget'
   ogion --target mytarget --restore backup_file.sql.lz.age
-                                  Restore specific backup file for 'mytarget'
+                                        Restore specific backup file for 'mytarget'
         """,
     )
     parser.add_argument(

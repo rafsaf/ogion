@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -6,4 +6,4 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export PYTHONPATH="${SCRIPT_DIR}:${PYTHONPATH}"
 
-exec python3 -m ogion.main "$@"
+exec python -m ogion.main "$@"

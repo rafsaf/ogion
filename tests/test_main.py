@@ -352,29 +352,87 @@ def test_target_completer_handles_exception(monkeypatch: pytest.MonkeyPatch) -> 
     assert completions == []
 
 
-def test_backup_file_completer(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_backup_file_completer_for_restore_with_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     test_backups = ["backup1.sql.lz.age", "backup2.sql.lz.age", "backup3.sql.lz.age"]
     provider_mock = Mock()
     provider_mock.all_target_backups = Mock(return_value=test_backups)
     monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider_mock))
 
     parsed_args = argparse.Namespace(target="test_target")
+    action_mock = Mock()
+    action_mock.dest = "restore"
 
-    completions = main.backup_file_completer("", parsed_args)
+    completions = main.backup_file_completer("", parsed_args, action=action_mock)
 
     assert completions == test_backups
     provider_mock.all_target_backups.assert_called_once_with("test_target")
 
 
-def test_backup_file_completer_no_target(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_backup_file_completer_for_restore_no_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     parsed_args = argparse.Namespace()
+    action_mock = Mock()
+    action_mock.dest = "restore"
 
-    completions = main.backup_file_completer("", parsed_args)
+    completions = main.backup_file_completer("", parsed_args, action=action_mock)
 
     assert completions == []
 
 
-def test_backup_file_completer_handles_exception(
+def test_backup_file_completer_for_debug_download(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    models = [ALL_POSTGRES_DBS_TARGETS[0], ALL_MARIADB_DBS_TARGETS[0]]
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=models),
+    )
+
+    postgres_backups = ["pg_backup1.sql.lz.age", "pg_backup2.sql.lz.age"]
+    mariadb_backups = ["maria_backup1.sql.lz.age"]
+    provider_mock = Mock()
+    provider_mock.all_target_backups = Mock(
+        side_effect=[postgres_backups, mariadb_backups]
+    )
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider_mock))
+
+    parsed_args = argparse.Namespace()
+    action_mock = Mock()
+    action_mock.dest = "debug_download"
+
+    completions = main.backup_file_completer("", parsed_args, action=action_mock)
+
+    # Should return all backups from all targets
+    assert len(completions) == len(postgres_backups) + len(mariadb_backups)
+    assert all(backup in completions for backup in postgres_backups)
+    assert all(backup in completions for backup in mariadb_backups)
+    # Should be called once per target
+    assert provider_mock.all_target_backups.call_count == len(models)
+
+
+def test_backup_file_completer_for_debug_download_handles_exception(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(side_effect=ValueError("Test error")),
+    )
+
+    parsed_args = argparse.Namespace()
+    action_mock = Mock()
+    action_mock.dest = "debug_download"
+
+    completions = main.backup_file_completer("", parsed_args, action=action_mock)
+
+    assert completions == []
+
+
+def test_backup_file_completer_for_restore_handles_exception(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     provider_mock = Mock()
@@ -382,7 +440,9 @@ def test_backup_file_completer_handles_exception(
     monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider_mock))
 
     parsed_args = argparse.Namespace(target="test_target")
+    action_mock = Mock()
+    action_mock.dest = "restore"
 
-    completions = main.backup_file_completer("", parsed_args)
+    completions = main.backup_file_completer("", parsed_args, action=action_mock)
 
     assert completions == []

@@ -17,7 +17,7 @@ services:
       context: ./../
       dockerfile: docker/Dockerfile
       target: build
-    command: python -m ogion.main --single
+    command: bash
     env_file:
       - ./../.env
 
