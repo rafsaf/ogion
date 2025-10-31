@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **GitHub Copilot instructions** - Added `.github/copilot-instructions.md` with project-specific guidelines for AI assistants, including testing requirements, code quality standards, and changelog maintenance rules
 - **Shell autocomplete support** - Added bash autocomplete for all CLI commands and arguments using `argcomplete` library. Autocomplete works for target names, backup files, and all command options
 - **New `ogion` command** - Added `ogion` bash script as a convenient shortcut for `python -m ogion.main`. Both commands work identically and support autocomplete
 - **Improved `--single` flag** - Can now backup a specific target using `--single --target <name>` instead of running all backups
