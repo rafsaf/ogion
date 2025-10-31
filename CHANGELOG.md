@@ -7,15 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Shell autocomplete support** - Added bash autocomplete for all CLI commands and arguments using `argcomplete` library. Autocomplete works for target names, backup files, and all command options
+- **New `ogion` command** - Added `ogion` bash script as a convenient shortcut for `python -m ogion.main`. Both commands work identically and support autocomplete
+- **Improved `--single` flag** - Can now backup a specific target using `--single --target <name>` instead of running all backups
+- Dynamic autocomplete for `--target` argument that suggests available backup targets from your configuration
+- Dynamic autocomplete for `--restore` and `--debug-download` arguments that suggests available backup files
+
 ### Changed
 
 - Migrated from Poetry to uv for dependency management
 - Added this Changelog file
 - Migrate to Python 3.14 and Debian Trixie
+- **Enhanced CLI help text** - More descriptive help messages with practical examples for common use cases
+- **Better argument validation** - CLI now validates argument combinations upfront and shows clear error messages (e.g., `--list` requires `--target`, `--restore-latest` and `--restore` are mutually exclusive)
+- Container entrypoint changed to `ogion` command for consistency
 
 ### Fixed
 
-- Edge case fixes for `--list` and `--restore-latest` commands when using many similar env names for azure and gcs (eg. POSTGRESQL_TEST, POSTGRESQL_TEST_HOURLY could lead to use of wrong backup file name in `--restore-latest` and wrong list in `--list`).
+- Edge case fixes for `--list` and `--restore-latest` commands when using many similar env names for azure and gcs (eg. POSTGRESQL_TEST, POSTGRESQL_TEST_HOURLY could lead to use of wrong backup file name in `--restore-latest` and wrong list in `--list`)
 
 ## [8.2] - 2025-10-05
 
