@@ -154,15 +154,18 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
     ):
         provider.post_save(backup_file=backup_file)
 
-    with NotificationsContext(
-        step_name=PROGRAM_STEP.CLEANUP,
-        env_name=target.env_name,
-    ):
-        provider.clean(
-            backup_file=backup_file,
-            max_backups=target.max_backups,
-            min_retention_days=target.min_retention_days,
-        )
+    if config.options.BACKUP_DELETE:
+        with NotificationsContext(
+            step_name=PROGRAM_STEP.CLEANUP,
+            env_name=target.env_name,
+        ):
+            provider.clean(
+                backup_file=backup_file,
+                max_backups=target.max_backups,
+                min_retention_days=target.min_retention_days,
+            )
+    else:
+        log.info("BACKUP_DELETE is disabled, skipping cleanup step")
 
     log.info(
         "backup and upload finished, next backup of target `%s` is: %s",

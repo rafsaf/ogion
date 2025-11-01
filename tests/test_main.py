@@ -221,6 +221,66 @@ def test_quit(monkeypatch: pytest.MonkeyPatch) -> None:
     exit_mock.set.assert_called_once()
 
 
+def test_run_backup_with_backup_delete_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that cleanup is skipped when BACKUP_DELETE is False."""
+    monkeypatch.setattr(config.options, "BACKUP_DELETE", False)
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=[FILE_1]),
+    )
+    target = main.backup_targets()[0]
+    backup_file = Path("/tmp/fake")
+    backup_mock = Mock(return_value=backup_file)
+    monkeypatch.setattr(target, "backup", backup_mock)
+    provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
+    post_save_mock = Mock(return_value="/path/to/backup")
+    clean_mock = Mock()
+    monkeypatch.setattr(provider, "post_save", post_save_mock)
+    monkeypatch.setattr(provider, "clean", clean_mock)
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider))
+
+    main.run_backup(target=target)
+
+    backup_mock.assert_called_once()
+    post_save_mock.assert_called_once_with(backup_file=backup_file)
+    clean_mock.assert_not_called()
+
+
+def test_run_backup_with_backup_delete_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that cleanup is called when BACKUP_DELETE is True."""
+    monkeypatch.setattr(config.options, "BACKUP_DELETE", True)
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=[FILE_1]),
+    )
+    target = main.backup_targets()[0]
+    backup_file = Path("/tmp/fake")
+    backup_mock = Mock(return_value=backup_file)
+    monkeypatch.setattr(target, "backup", backup_mock)
+    provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
+    post_save_mock = Mock(return_value="/path/to/backup")
+    clean_mock = Mock()
+    monkeypatch.setattr(provider, "post_save", post_save_mock)
+    monkeypatch.setattr(provider, "clean", clean_mock)
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider))
+
+    main.run_backup(target=target)
+
+    backup_mock.assert_called_once()
+    post_save_mock.assert_called_once_with(backup_file=backup_file)
+    clean_mock.assert_called_once_with(
+        backup_file=backup_file,
+        max_backups=target.max_backups,
+        min_retention_days=target.min_retention_days,
+    )
+
+
 @pytest.mark.parametrize(
     "cli_args,expected_attributes",
     [
