@@ -66,7 +66,7 @@ class Settings(BaseSettings):
     SLACK_WEBHOOK_URL: HttpUrl | None = None
     SLACK_MAX_MSG_LEN: int = Field(ge=150, le=10000, default=1500)
     LZIP_LEVEL: int = Field(ge=0, le=9, default=0)
-    LZIP_THREADS: int = Field(ge=1, le=1024, default=1)
+    LZIP_THREADS: int | None = Field(ge=1, le=1024, default=None)
     SMTP_HOST: str = ""
     SMTP_PORT: int = 587
     SMTP_FROM_ADDR: str = ""

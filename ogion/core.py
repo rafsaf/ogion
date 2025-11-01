@@ -116,9 +116,11 @@ def run_lzip_compression(backup_file: Path) -> Path:
     log.info("start lzip compression on %s: %s", backup_file, size(backup_file))
     out = Path(f"{backup_file}.lz")
 
+    threads_arg = (
+        f"-n {config.options.LZIP_THREADS} " if config.options.LZIP_THREADS else ""
+    )
     shell_lzip_compression = (
-        f"plzip -v -{config.options.LZIP_LEVEL} -n "
-        f"{config.options.LZIP_THREADS} -o {out} {backup_file}"
+        f"plzip -{config.options.LZIP_LEVEL} {threads_arg}-o {out} {backup_file}"
     )
 
     run_subprocess(shell_lzip_compression)
@@ -139,7 +141,10 @@ def run_lzip_decrypt(backup_file: Path) -> Path:
     )
     out = Path(str(backup_file).removesuffix(".lz"))
 
-    shell_lzip_decompression = f"plzip -dv -o {out} {backup_file}"
+    threads_arg = (
+        f"-n {config.options.LZIP_THREADS} " if config.options.LZIP_THREADS else ""
+    )
+    shell_lzip_decompression = f"plzip -d {threads_arg}-o {out} {backup_file}"
 
     run_subprocess(shell_lzip_decompression)
 
@@ -152,9 +157,6 @@ def run_decrypt_age_archive(backup_file: Path) -> Path:
     log.info("start age decrypt archive in subprocess: %s", backup_file)
 
     out = Path(str(backup_file).removesuffix(".age"))
-
-    if out.exists():
-        return run_lzip_decrypt(out)
 
     if config.options.DEBUG_AGE_SECRET_KEY:
         secret = config.options.DEBUG_AGE_SECRET_KEY

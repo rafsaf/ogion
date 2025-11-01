@@ -1,10 +1,10 @@
 # Deployment
 
-In general, use docker image `rafsaf/ogion` (here [available tags on dockerhub](https://hub.docker.com/r/rafsaf/ogion/tags)), it supports both `amd64` and `arm64` architectures. Standard way would be to run it with docker compose or as a kubernetes deployment. If not sure, use `latest`.
+Use docker image `rafsaf/ogion` ([available tags on dockerhub](https://hub.docker.com/r/rafsaf/ogion/tags)). Supports both `amd64` and `arm64` architectures. Standard deployment methods are docker compose or kubernetes. Using `latest` tag is not recommended.
+
+For runtime flags and CLI commands, see [CLI Reference](cli.md). For environment variables and configuration, see [Configuration](configuration.md).
 
 ## Docker Compose
-
-### Docker compose file
 
 ```yml
 # docker-compose.yml
@@ -12,53 +12,27 @@ In general, use docker image `rafsaf/ogion` (here [available tags on dockerhub](
 services:
   ogion:
     container_name: ogion
-    image: rafsaf/ogion:latest
-    environment:
-      - POSTGRESQL_DB1=...
-      - MARIADB_DB2=...
+    image: rafsaf/ogion:8.2
+    network_mode: host
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    volumes:
+      - ogion_data:/var/lib/ogion/data
+    env_file:
+      - .env
 
-      - AGE_RECIPIENTS=age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
-      - BACKUP_PROVIDER=name=gcs bucket_name=my_bucket_name bucket_upload_path=my_ogion_instance_1 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo=
+volumes:
+  ogion_data:
 ```
-
-### Notes
-
-- For hard debug you can set `LOG_LEVEL=DEBUG` and use (container name is ogion):
-  ```bash
-  docker logs ogion
-  ```
-- There is runtime flag `--single` that **ignores cron, make all databases backups and exits**. To use it when having already running container, use:
-  ```bash
-  docker compose run --rm ogion ogion --single
-  ```
-  BE CAREFUL, if your setup if fine, this will upload backup files to cloud provider, so costs may apply.
-- There is runtime flag `--debug-notifications` that **setup notifications, raise dummy exception and exits**. This can help ensure notifications are working:
-  ```bash
-  docker compose run --rm ogion ogion --debug-notifications
-  ```
 
 ## Kubernetes
 
 ```yml
 # ogion-deployment.yml
 
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: ogion
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ogion-secrets
-  namespace: ogion
-type: Opaque
-stringData:
-  POSTGRESQL_DB1: ...
-  MARIADB_DB2: ...
-  AGE_RECIPIENTS: age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
-  BACKUP_PROVIDER: "name=gcs bucket_name=my_bucket_name bucket_upload_path=my_ogion_instance_1 service_account_base64=Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -66,6 +40,8 @@ metadata:
   name: ogion
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: ogion
@@ -74,28 +50,45 @@ spec:
       labels:
         app: ogion
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        runAsNonRoot: true
       containers:
-        - image: rafsaf/ogion:latest
-          name: ogion
+        - name: ogion
+          image: rafsaf/ogion:8.2
+          imagePullPolicy: Always
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           envFrom:
             - secretRef:
                 name: ogion-secrets
+          env:
+            - name: LZIP_THREADS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "512Mi"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/ogion/data
+      volumes:
+        - name: data
+          emptyDir: {}
 ```
 
-### Notes
-
-- For hard debug you can set `LOG_LEVEL: DEBUG` and use (for brevity random pod name used):
-  ```bash
-  kubectl logs ogion-9c8b8b77d-z5xsc -n ogion
-  ```
-- There is runtime flag `--single` that **ignores cron, make all databases backups and exits**. To use it when having already running container, use:
-  ```bash
-  kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- ogion --single
-  ```
-  BE CAREFUL, if your setup if fine, this will upload backup files to cloud provider, so costs may apply.
-- There is runtime flag `--debug-notifications` that **setup notifications, raise dummy exception and exits**. This can help ensure notifications are working:
-  ```bash
-  kubectl exec --it ogion-9c8b8b77d-z5xsc -n ogion -- ogion --debug-notifications
-  ```
-  <br>
-  <br>
+<br>
+<br>
