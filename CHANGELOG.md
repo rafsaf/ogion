@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Better argument validation** - CLI now validates argument combinations upfront and shows clear error messages (e.g., `--list` requires `--target`, `--restore-latest` and `--restore` are mutually exclusive)
 - Container entrypoint changed to `ogion` command for consistency
 - **Reduced permission requirements when `BACKUP_DELETE=false`** - Cloud storage providers (GCS, S3, Azure) now only require write/upload permissions when cleanup is disabled, eliminating the need for delete and list permissions
+- Performance: removed verbose flags (`-v`) from archive/DB tools to cut excessive stdout and logging overhead
+- Performance: debug provider downloads now stream in chunks instead of reading entire files into memory
+- **LZIP_THREADS default behavior** - Changed default from `1` to automatic CPU detection (no value set). When `LZIP_THREADS` is not set, plzip now automatically detects and uses the number of available CPU cores. Setting a specific value overrides this automatic detection. The `-n` flag is now used for both compression and decompression operations when `LZIP_THREADS` is set
 
 ### Fixed
 

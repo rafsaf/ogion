@@ -115,7 +115,7 @@ class MariaDB(BaseBackupTarget):
 
         shell_mariadb_dump_db = (
             f"mariadb-dump --defaults-file={self.option_file} "
-            f"--result-file={out_file} --verbose {self.db_name}"
+            f"--result-file={out_file} {self.db_name}"
         )
         log.debug("start mariadbdump in subprocess: %s", shell_mariadb_dump_db)
         core.run_subprocess(shell_mariadb_dump_db)

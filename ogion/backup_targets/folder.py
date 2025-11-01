@@ -27,7 +27,7 @@ class Folder(BaseBackupTarget):
 
         shell_create_dir_tar = (
             f"tar -C {self.target_model.abs_path.parent} "
-            f"-cvf {out_file} {self.target_model.abs_path.name}"
+            f"-cf {out_file} {self.target_model.abs_path.name}"
         )
         log.debug("start tar in subprocess: %s", shell_create_dir_tar)
         core.run_subprocess(shell_create_dir_tar)

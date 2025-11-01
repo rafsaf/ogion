@@ -2,6 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
+import shutil
 from pathlib import Path
 from typing import override
 
@@ -56,7 +57,9 @@ class UploadProviderLocalDebug(BaseUploadProvider):
 
         p = Path(path)
 
-        backup_file.write_bytes(p.read_bytes())
+        # Stream copy to avoid loading entire file into memory
+        with open(p, "rb") as src, open(backup_file, "wb") as dst:
+            shutil.copyfileobj(src, dst, length=16 * 1024 * 1024)
 
         return backup_file
 
