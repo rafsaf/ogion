@@ -1,6 +1,7 @@
 # to run tests with arm64 see https://docs.docker.com/build/building/multi-platform/
 export OGION_ARCH ?= amd64
-export PROVIDER ?= debug
+export BACKUP_PROVIDER_NAME ?= debug
+export STRESS_ITERATIONS ?= 1000
 
 ifdef CI
 BUILD := 
