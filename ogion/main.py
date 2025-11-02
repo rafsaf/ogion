@@ -5,6 +5,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import argparse
+import functools
 import logging
 import shutil
 import signal
@@ -40,6 +41,7 @@ def quit(sig: int, frame: FrameType | None) -> None:
     exit_event.set()
 
 
+@functools.lru_cache(maxsize=1)
 @NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
 def backup_provider() -> base_provider.BaseUploadProvider:
     provider_cls_map = providers_mapping.get_provider_cls_map()
@@ -134,9 +136,6 @@ def shutdown() -> NoReturn:  # pragma: no cover
 def run_backup(target: base_target.BaseBackupTarget) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
 
-    # init provider every time in each new thread
-    # eg. s3 session are not thread safe
-    # this should add only minimal overhead
     provider = backup_provider()
 
     with NotificationsContext(

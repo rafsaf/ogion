@@ -11,7 +11,7 @@ import pytest
 from google.auth.credentials import AnonymousCredentials
 from pydantic import SecretStr
 
-from ogion import config
+from ogion import config, main
 from ogion.models.backup_target_models import (
     DirectoryTargetModel,
     MariaDBTargetModel,
@@ -107,6 +107,9 @@ ALL_TARGETS = (
 
 @pytest.fixture(autouse=True)
 def fixed_const_config_setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Clear backup_provider cache before each test
+    main.backup_provider.cache_clear()
+
     backup_folder_path = tmp_path / "pytest_data"
     monkeypatch.setattr(config, "CONST_DATA_FOLDER_PATH", backup_folder_path)
     backup_folder_path.mkdir(mode=0o700, parents=True, exist_ok=True)
