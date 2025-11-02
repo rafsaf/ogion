@@ -365,7 +365,7 @@ def test_gcs_clean_handles_not_found_error(monkeypatch: pytest.MonkeyPatch) -> N
 
     # Mock blob.delete() to raise NotFound
     mock_blob_to_delete = Mock()
-    mock_blob_to_delete.delete.side_effect = NotFound("Blob not found")
+    mock_blob_to_delete.delete.side_effect = NotFound("Blob not found")  # type: ignore[no-untyped-call]
 
     mock_bucket = Mock()
     mock_bucket.blob.return_value = mock_blob_to_delete
