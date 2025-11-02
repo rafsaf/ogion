@@ -28,26 +28,22 @@ def test_gcs_post_save(provider: BaseUploadProvider, provider_prefix: str) -> No
 
 
 def test_gcs_clean_local_files(provider: BaseUploadProvider) -> None:
+    """Test that clean() doesn't fail when local files don't exist.
+
+    Local files are now cleaned up in post_save(), so clean() only
+    handles remote storage cleanup.
+    """
     fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
 
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup"
-    fake_backup_file_age_path.touch()
-    fake_backup_file_age_patha = fake_backup_dir_path / "fake_backup.lz.age"
-    fake_backup_file_age_patha.touch()
 
-    fake_backup_file_age_path2 = fake_backup_dir_path / "fake_backup2"
-    fake_backup_file_age_path2.touch()
-    fake_backup_file_age_path2a = fake_backup_dir_path / "fake_backup2.lz.age"
-    fake_backup_file_age_path2a.touch()
-
+    # clean() should work even when local files don't exist
+    # (they're already cleaned in post_save())
     provider.clean(fake_backup_file_age_path, 2, 1)
 
+    # Directory should still exist
     assert fake_backup_dir_path.exists()
-    assert not fake_backup_file_age_path.exists()
-    assert not fake_backup_file_age_patha.exists()
-    assert not fake_backup_file_age_path2.exists()
-    assert not fake_backup_file_age_path2a.exists()
 
 
 def test_gcs_clean_gcs_files_short(
