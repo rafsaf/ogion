@@ -394,6 +394,7 @@ def run_debug_loop(iterations: int) -> NoReturn:
         log.info("=== ITERATION %s/%s ===", iteration, iterations)
 
         for target in targets:
+            target.next_backup()
             threading.Thread(
                 target=run_backup,
                 args=(target,),
