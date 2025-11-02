@@ -66,7 +66,8 @@ class UploadProviderS3(BaseUploadProvider):
         prefix = f"{self.bucket_upload_path}/{env_name}/"
 
         for bucket_obj in self.client.list_objects(self.bucket, prefix=prefix):
-            backups.append(bucket_obj.object_name or "")
+            if bucket_obj.object_name:
+                backups.append(bucket_obj.object_name)
 
         backups.sort(reverse=True)
         return backups
