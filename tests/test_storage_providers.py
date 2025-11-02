@@ -22,7 +22,9 @@ def test_gcs_post_save(provider: BaseUploadProvider, provider_prefix: str) -> No
         provider.post_save(fake_backup_file_path)
         == f"{provider_prefix}fake_env_name/fake_backup.lz.age"
     )
-    assert fake_backup_file_age_path.exists()
+    # Files are cleaned up immediately after upload in post_save()
+    assert not fake_backup_file_age_path.exists()
+    assert not fake_backup_file_path.exists()
 
 
 def test_gcs_clean_local_files(provider: BaseUploadProvider) -> None:

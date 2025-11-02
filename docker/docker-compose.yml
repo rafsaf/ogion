@@ -32,7 +32,7 @@ services:
     env_file:
       - ./../.env.stress_test
     environment:
-      - PROVIDER=${PROVIDER:-debug}
+      - BACKUP_PROVIDER_NAME=${BACKUP_PROVIDER_NAME:-debug}
       - STRESS_ITERATIONS=${STRESS_ITERATIONS:-10}
     volumes:
       - /tmp:/tmp  # Mount /tmp to preserve stress test logs
