@@ -878,6 +878,7 @@ dev = [
 ]
 tests = [
     { name = "freezegun" },
+    { name = "psutil" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-env" },
@@ -921,6 +922,7 @@ dev = [
 ]
 tests = [
     { name = "freezegun", specifier = ">=1.5.1" },
+    { name = "psutil", specifier = ">=7.1.2" },
     { name = "pytest", specifier = ">=8.3.2" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
     { name = "pytest-env", specifier = ">=1.1.4" },
