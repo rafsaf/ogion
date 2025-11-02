@@ -98,6 +98,102 @@ def test_lzip_works_with_encrypt_and_decrypt(tmp_path: Path) -> None:
     assert fake_backup_file.read_text() == "something"
 
 
+def test_lzip_compression_with_threads_none(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(config.options, "LZIP_THREADS", None)
+    monkeypatch.setattr(config.options, "LZIP_LEVEL", 0)
+
+    init_fake_backup_file = tmp_path / "fake_backup_file"
+    init_fake_backup_file.write_text("test data")
+
+    run_subprocess_mock = Mock(return_value="")
+    monkeypatch.setattr(core, "run_subprocess", run_subprocess_mock)
+    size_mock = Mock(return_value="0.0 MB")
+    monkeypatch.setattr(core, "size", size_mock)
+
+    result = core.run_lzip_compression(init_fake_backup_file)
+
+    run_subprocess_mock.assert_called_once()
+    called_command = run_subprocess_mock.call_args[0][0]
+    assert "-n" not in called_command
+    expected = f"plzip -0 -o {tmp_path / 'fake_backup_file.lz'} {init_fake_backup_file}"
+    assert expected == called_command
+    assert result == tmp_path / "fake_backup_file.lz"
+
+
+def test_lzip_compression_with_threads_value(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(config.options, "LZIP_THREADS", 4)
+    monkeypatch.setattr(config.options, "LZIP_LEVEL", 0)
+
+    init_fake_backup_file = tmp_path / "fake_backup_file"
+    init_fake_backup_file.write_text("test data")
+
+    run_subprocess_mock = Mock(return_value="")
+    monkeypatch.setattr(core, "run_subprocess", run_subprocess_mock)
+    size_mock = Mock(return_value="0.0 MB")
+    monkeypatch.setattr(core, "size", size_mock)
+
+    result = core.run_lzip_compression(init_fake_backup_file)
+
+    run_subprocess_mock.assert_called_once()
+    called_command = run_subprocess_mock.call_args[0][0]
+    assert "-n 4" in called_command
+    expected = (
+        f"plzip -0 -n 4 -o {tmp_path / 'fake_backup_file.lz'} {init_fake_backup_file}"
+    )
+    assert expected == called_command
+    assert result == tmp_path / "fake_backup_file.lz"
+
+
+def test_lzip_decompression_with_threads_none(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(config.options, "LZIP_THREADS", None)
+
+    fake_backup_file = tmp_path / "fake_backup_file.lz"
+    fake_backup_file.write_text("compressed data")
+
+    run_subprocess_mock = Mock(return_value="")
+    monkeypatch.setattr(core, "run_subprocess", run_subprocess_mock)
+    size_mock = Mock(return_value="0.0 MB")
+    monkeypatch.setattr(core, "size", size_mock)
+
+    result = core.run_lzip_decrypt(fake_backup_file)
+
+    run_subprocess_mock.assert_called_once()
+    called_command = run_subprocess_mock.call_args[0][0]
+    assert "-n" not in called_command
+    expected = f"plzip -d -o {tmp_path / 'fake_backup_file'} {fake_backup_file}"
+    assert expected == called_command
+    assert result == tmp_path / "fake_backup_file"
+
+
+def test_lzip_decompression_with_threads_value(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(config.options, "LZIP_THREADS", 8)
+
+    fake_backup_file = tmp_path / "fake_backup_file.lz"
+    fake_backup_file.write_text("compressed data")
+
+    run_subprocess_mock = Mock(return_value="")
+    monkeypatch.setattr(core, "run_subprocess", run_subprocess_mock)
+    size_mock = Mock(return_value="0.0 MB")
+    monkeypatch.setattr(core, "size", size_mock)
+
+    result = core.run_lzip_decrypt(fake_backup_file)
+
+    run_subprocess_mock.assert_called_once()
+    called_command = run_subprocess_mock.call_args[0][0]
+    assert "-n 8" in called_command
+    expected = f"plzip -d -n 8 -o {tmp_path / 'fake_backup_file'} {fake_backup_file}"
+    assert expected == called_command
+    assert result == tmp_path / "fake_backup_file"
+
+
 def test_run_create_age_archive_can_be_decrypted(
     tmp_path: Path,
 ) -> None:
