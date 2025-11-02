@@ -4,9 +4,9 @@
 
 set -euo pipefail
 
-# Configuration - only accept PROVIDER and STRESS_ITERATIONS from environment
+# Configuration - only accept BACKUP_PROVIDER_NAME and STRESS_ITERATIONS from environment
 ITERATIONS="${STRESS_ITERATIONS:-10}"
-PROVIDER="${PROVIDER:-debug}"
+PROVIDER="${BACKUP_PROVIDER_NAME:-debug}"
 MEMORY_LOG="/tmp/ogion_stress_memory.log"
 RESULTS_LOG="/tmp/ogion_stress_results.log"
 MEMORY_MONITOR_SCRIPT="/tmp/ogion_memory_monitor.py"
