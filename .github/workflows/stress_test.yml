@@ -55,8 +55,8 @@ jobs:
           file: docker/Dockerfile
           context: .
           target: stress
-          cache-from: type=gha,scope=python:3.14-slim-trixie
-          cache-to: type=gha,mode=max,scope=python:3.14-slim-trixie
+          # cache-from: type=gha,scope=python:3.14-slim-trixie
+          # cache-to: type=gha,mode=max,scope=python:3.14-slim-trixie
           push: false
           tags: rafsaf/ogion:stress
           load: true
@@ -67,7 +67,6 @@ jobs:
           OGION_ARCH: ${{ matrix.arch }}
           BACKUP_PROVIDER_NAME: ${{ matrix.provider }}
           STRESS_ITERATIONS: 1000
-          MEMORY_SAMPLE_INTERVAL: 2
         run: |
           touch .env
           make stress_test

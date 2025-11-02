@@ -62,6 +62,68 @@ case "$PROVIDER" in
 esac
 echo ""
 
+# Setup storage buckets/containers for providers
+echo -e "${YELLOW}Setting up storage...${NC}"
+case "$PROVIDER" in
+    gcs)
+        # GCS fake server auto-creates buckets
+        echo "  GCS: Using fake-gcs-server (auto-creates buckets)"
+        ;;
+    s3)
+        # Create MinIO bucket using mc (MinIO Client)
+        echo "  S3: Creating bucket 'stresstest' in MinIO..."
+        # Use Python with minio library since it's already available
+        /opt/venv/bin/python3 << 'SETUP_S3'
+from minio import Minio
+
+client = Minio(
+    "localhost:9000",
+    access_key="minioadmin",
+    secret_key="minioadmin",
+    secure=False
+)
+
+bucket_name = "stresstest"
+if not client.bucket_exists(bucket_name):
+    client.make_bucket(bucket_name)
+    print(f"  Created bucket: {bucket_name}")
+else:
+    print(f"  Bucket already exists: {bucket_name}")
+SETUP_S3
+        ;;
+    azure)
+        # Create Azure container
+        echo "  Azure: Creating container 'stresstest'..."
+        /opt/venv/bin/python3 << 'SETUP_AZURE'
+from azure.storage.blob import BlobServiceClient
+
+connect_string = (
+    "DefaultEndpointsProtocol=http;"
+    "AccountName=devstoreaccount1;"
+    "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;"
+    "BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
+    "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
+    "TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;"
+)
+
+blob_service_client = BlobServiceClient.from_connection_string(connect_string)
+container_name = "stresstest"
+try:
+    container_client = blob_service_client.create_container(container_name)
+    print(f"  Created container: {container_name}")
+except Exception as e:
+    if "ContainerAlreadyExists" in str(e):
+        print(f"  Container already exists: {container_name}")
+    else:
+        raise
+SETUP_AZURE
+        ;;
+    debug)
+        echo "  Debug: Using local filesystem (no setup needed)"
+        ;;
+esac
+echo ""
+
 # Clean up old logs
 rm -f "$MEMORY_LOG" "$RESULTS_LOG"
 
