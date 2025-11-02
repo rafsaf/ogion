@@ -417,6 +417,10 @@ def run_debug_loop(iterations: int) -> NoReturn:  # pragma: no cover
                 round(iteration / iterations * 100, 1),
             )
 
+    for _ in range(100000):
+        for target in targets:
+            target.next_backup()
+
     log.info("debug-loop completed successfully: %s iterations", iterations)
     sys.exit(0)
 

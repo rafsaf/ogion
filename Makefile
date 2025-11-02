@@ -30,13 +30,10 @@ acceptance_tests:
 	$(MAKE) docker_setup_up
 	docker compose -f docker/docker-compose.yml run --rm --build ogion_acceptance_tests
 
-.PHONY: stress_test
-stress_test:
+.PHONY: mem_stress_test
+mem_stress_test:
 	$(MAKE) docker_setup_up
-	docker compose -f docker/docker-compose.yml run --rm $(BUILD) ogion_stress_test
-# Run with specific provider: BACKUP_PROVIDER_NAME=gcs make stress_test
-# Available providers: debug (default), gcs, s3, azure
-# Set iterations: STRESS_ITERATIONS=1000 BACKUP_PROVIDER_NAME=s3 make stress_test
+	docker compose -f docker/docker-compose.yml run --rm $(BUILD) ogion_mem_stress_test
 
 .PHONY: update_compose_db_file
 update_compose_db_file:

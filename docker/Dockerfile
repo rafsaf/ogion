@@ -68,13 +68,12 @@ COPY tests tests
 CMD ["pytest", "-vv"]
 
 FROM tests AS stress
-# Install procps for process monitoring
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get -y update && apt-get -y install procps
-COPY scripts/stress_test.sh /usr/local/bin/stress_test.sh
-RUN chmod +x /usr/local/bin/stress_test.sh
-CMD ["/usr/local/bin/stress_test.sh"]
+COPY scripts/mem_stress_test.sh /usr/local/bin/mem_stress_test.sh
+RUN chmod +x /usr/local/bin/mem_stress_test.sh
+CMD ["/usr/local/bin/mem_stress_test.sh"]
 
 FROM common AS build
 CMD ["ogion"] 

@@ -1,4 +1,4 @@
-name: stress_test
+name: mem_stress_test
 on:
   push:
     branches:
@@ -9,7 +9,7 @@ on:
     - cron: "30 3 * * 0"  # Weekly on Sunday at 3:30 AM
 
 jobs:
-  stress_test:
+  mem_stress_test:
     strategy:
       fail-fast: false
       matrix:
@@ -63,20 +63,20 @@ jobs:
           load: true
           platforms: linux/${{ matrix.arch }}
 
-      - name: Run stress test with ${{ matrix.provider }} provider
+      - name: Run memory stress test with ${{ matrix.provider }} provider
         env:
           OGION_ARCH: ${{ matrix.arch }}
           BACKUP_PROVIDER_NAME: ${{ matrix.provider }}
-          STRESS_ITERATIONS: 1000
+          STRESS_ITERATIONS: 2000
         run: |
           touch .env
-          make stress_test
+          make mem_stress_test
 
-      - name: Upload stress test results
+      - name: Upload memory stress test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stress-test-results-${{ matrix.provider }}-${{ matrix.arch }}
+          name: mem-stress-test-results-${{ matrix.provider }}-${{ matrix.arch }}
           path: |
             /tmp/ogion_stress_memory.log
             /tmp/ogion_stress_results.log
