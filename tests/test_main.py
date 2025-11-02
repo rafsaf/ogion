@@ -295,6 +295,10 @@ def test_run_backup_with_backup_delete_enabled(
             {"debug_download": "example.log"},
         ),
         (
+            ["main.py", "--debug-loop", "100"],
+            {"debug_loop": 100},
+        ),
+        (
             ["main.py", "--target", "example_target", "--list"],
             {"target": "example_target", "list": True},
         ),
@@ -346,6 +350,22 @@ def test_setup_runtime_arguments_parametrized(
         (
             ["main.py", "--debug-download", "file.age", "--target", "test"],
             "--debug-download cannot be combined with",
+        ),
+        (
+            ["main.py", "--debug-loop", "100", "--single"],
+            "--debug-loop cannot be combined with other options",
+        ),
+        (
+            ["main.py", "--debug-loop", "100", "--debug-notifications"],
+            "--debug-loop cannot be combined with other options",
+        ),
+        (
+            ["main.py", "--debug-loop", "100", "--target", "test"],
+            "--debug-loop cannot be combined with other options",
+        ),
+        (
+            ["main.py", "--debug-loop", "100", "--list"],
+            "--debug-loop cannot be combined with other options",
         ),
         (
             ["main.py", "--list"],

@@ -11,6 +11,7 @@ on:
 jobs:
   stress_test:
     strategy:
+      fail-fast: false
       matrix:
         provider: ["gcs", "s3", "azure", "debug"]
         arch: ["amd64"]

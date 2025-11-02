@@ -382,7 +382,7 @@ def run_debug_notifications_and_exit() -> NoReturn:
         sys.exit(0)
 
 
-def run_debug_loop(iterations: int) -> NoReturn:
+def run_debug_loop(iterations: int) -> NoReturn:  # pragma: no cover
     log.info("starting debug-loop mode with %s iterations", iterations)
 
     backup_provider()

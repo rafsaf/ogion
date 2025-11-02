@@ -2,11 +2,23 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
+from azure.core.exceptions import ResourceNotFoundError
+from google.cloud.exceptions import NotFound
+from pydantic import SecretStr
 
 from ogion import config
+from ogion.models.upload_provider_models import (
+    AzureProviderModel,
+    GCSProviderModel,
+    S3ProviderModel,
+)
+from ogion.upload_providers.azure import UploadProviderAzure
 from ogion.upload_providers.base_provider import BaseUploadProvider
+from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
+from ogion.upload_providers.s3 import UploadProviderS3
 
 
 def test_gcs_post_save(provider: BaseUploadProvider, provider_prefix: str) -> None:
@@ -281,3 +293,203 @@ def test_gcs_clean_handles_already_deleted_blob(
     # Should still end up with 2 backups
     expected_final_count = 2
     assert len(provider.all_target_backups("fake_env_name")) == expected_final_count
+
+
+def test_azure_clean_handles_resource_not_found_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test Azure clean() handles ResourceNotFoundError during deletion."""
+    # Create a mock Azure provider
+    mock_container_client = Mock()
+    mock_blob_service_client = Mock()
+    mock_blob_service_client.get_container_client.return_value = mock_container_client
+
+    # Mock list_blobs to return 3 backups
+    mock_blob_1 = Mock()
+    mock_blob_1.name = "fake_env/file_20230425_0105_dummy.lz.age"
+    mock_blob_2 = Mock()
+    mock_blob_2.name = "fake_env/file_20230426_0105_dummy.lz.age"
+    mock_blob_3 = Mock()
+    mock_blob_3.name = "fake_env/file_20230427_0105_dummy.lz.age"
+    mock_container_client.list_blobs.return_value = [
+        mock_blob_1,
+        mock_blob_2,
+        mock_blob_3,
+    ]
+
+    # Mock delete_blob to raise ResourceNotFoundError (concurrent deletion)
+    mock_container_client.delete_blob.side_effect = ResourceNotFoundError(
+        "Blob not found"
+    )
+
+    # Patch BlobServiceClient
+    mock_blob_service_client_class = Mock(return_value=mock_blob_service_client)
+    mock_blob_service_client_class.from_connection_string = Mock(
+        return_value=mock_blob_service_client
+    )
+
+    monkeypatch.setattr(
+        "azure.storage.blob.BlobServiceClient",
+        mock_blob_service_client_class,
+    )
+
+    provider_model = AzureProviderModel(
+        name="azure",
+        container_name="test-container",
+        connect_string=SecretStr(
+            "DefaultEndpointsProtocol=https;AccountName=test;AccountKey=test=="
+        ),
+    )
+    provider = UploadProviderAzure(provider_model)
+
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env"
+    fake_backup_dir_path.mkdir(parents=True, exist_ok=True)
+    fake_backup_file = fake_backup_dir_path / "file_20230427_0105_dummy.lz.age"
+
+    # Should not raise exception with ResourceNotFoundError
+    provider.clean(fake_backup_file, max_backups=2, min_retention_days=1)
+
+    # Verify delete_blob was called (trying to delete the oldest backup)
+    assert mock_container_client.delete_blob.called
+
+
+def test_gcs_clean_handles_not_found_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test GCS clean() handles NotFound error during deletion."""
+    # Create mock GCS components
+    mock_blob_1 = Mock()
+    mock_blob_1.name = "backups/fake_env/file_20230425_0105_dummy.lz.age"
+    mock_blob_2 = Mock()
+    mock_blob_2.name = "backups/fake_env/file_20230426_0105_dummy.lz.age"
+    mock_blob_3 = Mock()
+    mock_blob_3.name = "backups/fake_env/file_20230427_0105_dummy.lz.age"
+
+    # Mock blob.delete() to raise NotFound
+    mock_blob_to_delete = Mock()
+    mock_blob_to_delete.delete.side_effect = NotFound("Blob not found")
+
+    mock_bucket = Mock()
+    mock_bucket.blob.return_value = mock_blob_to_delete
+
+    mock_storage_client = Mock()
+    mock_storage_client.bucket.return_value = mock_bucket
+    # Mock list_blobs on storage_client (not bucket)
+    mock_storage_client.list_blobs.return_value = [
+        mock_blob_1,
+        mock_blob_2,
+        mock_blob_3,
+    ]
+
+    # Patch storage.Client
+    mock_client_class = Mock(return_value=mock_storage_client)
+    monkeypatch.setattr(
+        "google.cloud.storage.Client",
+        mock_client_class,
+    )
+
+    provider_model = GCSProviderModel(
+        name="gcs",
+        bucket_name="test-bucket",
+        bucket_upload_path="backups",
+        service_account_base64=SecretStr("dGVzdA=="),  # base64 "test"
+    )
+    provider = UploadProviderGCS(provider_model)
+
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env"
+    fake_backup_dir_path.mkdir(parents=True, exist_ok=True)
+    fake_backup_file = fake_backup_dir_path / "file_20230427_0105_dummy.lz.age"
+
+    # This should not raise an exception even though blob.delete() raises NotFound
+    provider.clean(fake_backup_file, max_backups=2, min_retention_days=1)
+
+    # Verify delete was attempted
+    assert mock_blob_to_delete.delete.called
+
+
+def test_s3_clean_filters_no_such_key_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test S3 clean() filters out NoSuchKey errors from delete responses."""
+    # Create mock S3 components
+    mock_obj_1 = Mock()
+    mock_obj_1.object_name = "fake_env/file_20230425_0105_dummy.lz.age"
+    mock_obj_2 = Mock()
+    mock_obj_2.object_name = "fake_env/file_20230426_0105_dummy.lz.age"
+    mock_obj_3 = Mock()
+    mock_obj_3.object_name = "fake_env/file_20230427_0105_dummy.lz.age"
+
+    mock_client = Mock()
+    mock_client.list_objects.return_value = [mock_obj_1, mock_obj_2, mock_obj_3]
+
+    # Mock remove_objects to return an error with code "NoSuchKey"
+    mock_error = Mock()
+    mock_error.code = "NoSuchKey"
+    mock_client.remove_objects.return_value = [mock_error]
+
+    # Patch Minio
+    mock_minio_class = Mock(return_value=mock_client)
+    monkeypatch.setattr(
+        "minio.Minio",
+        mock_minio_class,
+    )
+
+    provider_model = S3ProviderModel(
+        name="s3",
+        bucket_name="test-bucket",
+        bucket_upload_path="backups",
+        access_key="test",
+        secret_key=SecretStr("test"),
+    )
+    provider = UploadProviderS3(provider_model)
+
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env"
+    fake_backup_dir_path.mkdir(parents=True, exist_ok=True)
+    fake_backup_file = fake_backup_dir_path / "file_20230427_0105_dummy.lz.age"
+
+    # This should not raise an exception even though NoSuchKey is in the errors
+    provider.clean(fake_backup_file, max_backups=2, min_retention_days=1)
+
+    # Verify remove_objects was called
+    assert mock_client.remove_objects.called
+
+
+def test_s3_clean_raises_on_non_no_such_key_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test S3 clean() raises RuntimeError for non-NoSuchKey errors."""
+    # Create mock S3 components
+    mock_obj_1 = Mock()
+    mock_obj_1.object_name = "backups/fake_env/file_20230425_0105_dummy.lz.age"
+    mock_obj_2 = Mock()
+    mock_obj_2.object_name = "backups/fake_env/file_20230426_0105_dummy.lz.age"
+    mock_obj_3 = Mock()
+    mock_obj_3.object_name = "backups/fake_env/file_20230427_0105_dummy.lz.age"
+
+    mock_client = Mock()
+    mock_client.list_objects.return_value = [mock_obj_1, mock_obj_2, mock_obj_3]
+
+    # Mock remove_objects to return an error with a different code
+    mock_error = Mock()
+    mock_error.code = "AccessDenied"  # Different error code
+    mock_client.remove_objects.return_value = [mock_error]
+
+    # Patch Minio
+    mock_minio_class = Mock(return_value=mock_client)
+    monkeypatch.setattr(
+        "minio.Minio",
+        mock_minio_class,
+    )
+
+    provider_model = S3ProviderModel(
+        name="s3",
+        bucket_name="test-bucket",
+        bucket_upload_path="backups",
+        access_key="test",
+        secret_key=SecretStr("test"),
+    )
+    provider = UploadProviderS3(provider_model)
+
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env"
+    fake_backup_dir_path.mkdir(parents=True, exist_ok=True)
+    fake_backup_file = fake_backup_dir_path / "file_20230427_0105_dummy.lz.age"
+
+    # This should raise RuntimeError for non-NoSuchKey errors
+    with pytest.raises(RuntimeError):
+        provider.clean(fake_backup_file, max_backups=2, min_retention_days=1)
