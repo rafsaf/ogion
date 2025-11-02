@@ -52,6 +52,12 @@ class UploadProviderS3(BaseUploadProvider):
         )
 
         log.info("uploaded %s to %s", age_backup_file, backup_dest_in_bucket)
+
+        core.remove_path(age_backup_file)
+        core.remove_path(backup_file)
+
+        log.info("removed %s and %s from local disk", backup_file, age_backup_file)
+
         return backup_dest_in_bucket
 
     @override
@@ -83,10 +89,6 @@ class UploadProviderS3(BaseUploadProvider):
     ) -> None:
         from minio.deleteobjects import DeleteObject  # noqa: PLC0415
 
-        for backup_path in backup_file.parent.iterdir():
-            core.remove_path(backup_path)
-            log.info("removed %s from local disk", backup_path)
-
         items_to_delete: list[DeleteObject] = []
         backups = self.all_target_backups(env_name=backup_file.parent.name)
 
@@ -111,10 +113,10 @@ class UploadProviderS3(BaseUploadProvider):
             delete_response = self.client.remove_objects(
                 self.bucket, delete_object_list=items_to_delete
             )
-            if [error for error in delete_response]:  # pragma: no cover
-                raise RuntimeError(
-                    "Fail to delete backups from s3: %s", delete_response
-                )
+            # Filter out NoSuchKey errors (happens with concurrent cleanup)
+            errors = [error for error in delete_response if error.code != "NoSuchKey"]
+            if errors:
+                raise RuntimeError("Fail to delete backups from s3: %s", errors)
             log.info(
                 "%s backups were successfully deleted from s3 bucket",
                 len(items_to_delete),

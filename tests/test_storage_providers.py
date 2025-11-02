@@ -1,6 +1,9 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+from pathlib import Path
+
+import pytest
 
 from ogion import config
 from ogion.upload_providers.base_provider import BaseUploadProvider
@@ -232,3 +235,51 @@ def test_all_target_backups_edge_cases_with_similar_names(
         assert backups[0].startswith(expected_prefix), (
             f"Backup {backups[0]} doesn't start with expected prefix {expected_prefix}"
         )
+
+
+def test_gcs_clean_handles_already_deleted_blob(
+    provider: BaseUploadProvider,
+    provider_prefix: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test clean() handles gracefully when blob already deleted (concurrent)."""
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
+    fake_backup_dir_path.mkdir()
+    fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.lz.age"
+
+    (fake_backup_dir_path / "file_20230425_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "file_20230425_0105_dummy_xfcs")
+    (fake_backup_dir_path / "file_20230426_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "file_20230426_0105_dummy_xfcs")
+    (fake_backup_dir_path / "file_20230427_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "file_20230427_0105_dummy_xfcs")
+
+    expected_backups_count = 3
+    assert len(provider.all_target_backups("fake_env_name")) == expected_backups_count
+
+    # Simulate concurrent deletion by manually deleting one backup
+    backups = provider.all_target_backups("fake_env_name")
+    oldest_backup = backups[-1]
+
+    # Delete the oldest backup manually to simulate another thread deleting it
+    provider_type = type(provider).__name__
+    if provider_type == "UploadProviderGCS":
+        client = provider.storage_client  # type: ignore[attr-defined]
+        bucket = client.bucket(provider.bucket.name)  # type: ignore[attr-defined]
+        blob = bucket.blob(oldest_backup)
+        blob.delete()
+    elif provider_type == "UploadProviderAzure":
+        provider.container_client.delete_blob(blob=oldest_backup)  # type: ignore[attr-defined]
+    elif provider_type == "UploadProviderS3":
+        provider.client.remove_object(provider.bucket, oldest_backup)  # type: ignore[attr-defined]
+    elif provider_type == "UploadProviderLocalDebug":
+        # For debug provider, manually delete the file
+        Path(oldest_backup).unlink(missing_ok=True)
+
+    # Now clean should handle the already-deleted blob gracefully
+    # This should not raise an exception even though the oldest backup is gone
+    provider.clean(fake_backup_file_age_path, 2, 1)
+
+    # Should still end up with 2 backups
+    expected_final_count = 2
+    assert len(provider.all_target_backups("fake_env_name")) == expected_final_count

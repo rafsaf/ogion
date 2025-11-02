@@ -51,6 +51,12 @@ class UploadProviderAzure(BaseUploadProvider):
             backup_dest_in_azure_container,
             self.container_name,
         )
+
+        core.remove_path(age_backup_file)
+        core.remove_path(backup_file)
+
+        log.info("removed %s and %s from local disk", backup_file, age_backup_file)
+
         return backup_dest_in_azure_container
 
     @override
@@ -77,9 +83,7 @@ class UploadProviderAzure(BaseUploadProvider):
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
-        for backup_path in backup_file.parent.iterdir():
-            core.remove_path(backup_path)
-            log.info("removed %s from local disk", backup_path)
+        from azure.core.exceptions import ResourceNotFoundError  # noqa: PLC0415
 
         backups = self.all_target_backups(env_name=backup_file.parent.name)
 
@@ -97,5 +101,10 @@ class UploadProviderAzure(BaseUploadProvider):
                 )
                 break
 
-            self.container_client.delete_blob(blob=backup_to_remove)
-            log.info("deleted backup %s from azure blob storage", backup_to_remove)
+            try:
+                self.container_client.delete_blob(blob=backup_to_remove)
+                log.info("deleted backup %s from azure blob storage", backup_to_remove)
+            except ResourceNotFoundError:
+                log.info(
+                    "backup %s already deleted (concurrent cleanup)", backup_to_remove
+                )

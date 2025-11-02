@@ -1,5 +1,6 @@
 # to run tests with arm64 see https://docs.docker.com/build/building/multi-platform/
 export OGION_ARCH ?= amd64
+export PROVIDER ?= debug
 
 ifdef CI
 BUILD := 
@@ -27,6 +28,14 @@ unit_tests:
 acceptance_tests:
 	$(MAKE) docker_setup_up
 	docker compose -f docker/docker-compose.yml run --rm --build ogion_acceptance_tests
+
+.PHONY: stress_test
+stress_test:
+	$(MAKE) docker_setup_up
+	docker compose -f docker/docker-compose.yml run --rm $(BUILD) ogion_stress_test
+# Run with specific provider: PROVIDER=gcs make stress_test
+# Available providers: debug (default), gcs, s3, azure
+# Set iterations: STRESS_ITERATIONS=1000 PROVIDER=s3 make stress_test
 
 .PHONY: update_compose_db_file
 update_compose_db_file:

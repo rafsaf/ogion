@@ -60,6 +60,15 @@ RUN rm -f \
 
 COPY LICENSE LICENSE
 
+FROM common AS stress
+# Install bc for floating point calculations in stress test script
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get -y update && apt-get -y install bc procps
+COPY scripts/stress_test.sh /usr/local/bin/stress_test.sh
+RUN chmod +x /usr/local/bin/stress_test.sh
+CMD ["/usr/local/bin/stress_test.sh"]
+
 FROM common AS tests
 COPY --from=uv /requirements-tests.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-tests.txt

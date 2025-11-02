@@ -21,12 +21,30 @@ services:
     env_file:
       - ./../.env
 
+  ogion_stress_test:
+    restart: "no"
+    network_mode: "host"
+    platform: linux/${OGION_ARCH:-amd64}
+    build:
+      context: ./../
+      dockerfile: docker/Dockerfile
+      target: stress
+    env_file:
+      - ./../.env.stress_test
+    environment:
+      - PROVIDER=${PROVIDER:-debug}
+      - STRESS_ITERATIONS=${STRESS_ITERATIONS:-10}
+    volumes:
+      - /tmp:/tmp  # Mount /tmp to preserve stress test logs
+
   gcs:
     restart: "no"
     image: "fsouza/fake-gcs-server:latest"
     command: "-scheme http"
     ports:
       - 4443:4443
+    volumes:
+      - gcs-data:/data/stresstest
 
   minio:
     restart: "no"
@@ -40,3 +58,6 @@ services:
     image: "mcr.microsoft.com/azure-storage/azurite:latest"
     ports:
       - 10000:10000
+
+volumes:
+  gcs-data:

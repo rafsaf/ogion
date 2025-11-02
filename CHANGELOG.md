@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Concurrent backup clean race condition (local)** - Previously, the `clean()` method would delete **all files** in the source backup directory using `iterdir()`, causing failures when multiple backup threads ran simultaneously. Now, `post_save()` immediately removes local files after upload, and `clean()` only handles remote storage cleanup. This prevents threads from deleting each other's in-progress backup files
+- **Concurrent backup clean race condition (remote)** - Fixed crash when multiple backups run simultaneously and try to delete the same old backup file. GCS, Azure, and S3 providers now gracefully handle "file not found" errors during cleanup, treating them as success since the file was already deleted by another thread
+- **Missing cleanup of intermediate .lz files** - Now `run_create_age_archive()` properly calls `remove_path()` to delete the intermediate compressed file after creating the `.lz.age` archive instead of this being side effect of `clean()`
+- **TOCTOU race condition in file deletion** - Fixed Time-of-Check-Time-of-Use issue in `remove_path()` where checking `path.exists()` before `path.unlink()` could cause crashes in concurrent scenarios when another thread deletes the file between the check and unlink. Now uses exception handling for atomic, thread-safe file deletion
 - Edge case fixes for `--list` and `--restore-latest` commands when using many similar env names for azure and gcs (eg. POSTGRESQL_TEST, POSTGRESQL_TEST_HOURLY could lead to use of wrong backup file name in `--restore-latest` and wrong list in `--list`)
 
 ## [8.2] - 2025-10-05

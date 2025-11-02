@@ -216,13 +216,14 @@ class RuntimeArgs:
     single: bool
     debug_notifications: bool
     debug_download: str | None
+    debug_loop: int | None
     list: bool
     restore_latest: bool
     target: str | None
     restore: str
 
 
-def setup_runtime_arguments() -> RuntimeArgs:
+def setup_runtime_arguments() -> RuntimeArgs:  # noqa: PLR0912
     parser = argparse.ArgumentParser(
         description="Ogion - Automated database backup and secure cloud upload tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -258,6 +259,15 @@ Examples:
         required=False,
         help="Download given backup file locally and print path",
     ).completer = backup_file_completer  # type: ignore[attr-defined]
+    parser.add_argument(
+        "--debug-loop",
+        type=int,
+        default=None,
+        required=False,
+        help=(
+            "Run N backup iterations ignoring cron schedule (for stress/memory testing)"
+        ),
+    )
     parser.add_argument(
         "--target",
         type=str,
@@ -297,6 +307,7 @@ Examples:
         if (
             runtime_args.single
             or runtime_args.debug_download is not None
+            or runtime_args.debug_loop is not None
             or runtime_args.target is not None
             or runtime_args.restore_latest
             or runtime_args.restore is not None
@@ -308,6 +319,7 @@ Examples:
     if runtime_args.single:
         if (
             runtime_args.debug_download is not None
+            or runtime_args.debug_loop is not None
             or runtime_args.restore_latest
             or runtime_args.restore is not None
             or runtime_args.list
@@ -319,15 +331,27 @@ Examples:
     # --debug-download should not be combined with other options except itself
     if runtime_args.debug_download is not None:
         if (
-            runtime_args.target is not None
+            runtime_args.single
+            or runtime_args.debug_notifications
+            or runtime_args.debug_loop is not None
+            or runtime_args.target is not None
             or runtime_args.restore_latest
             or runtime_args.restore is not None
             or runtime_args.list
         ):
-            parser.error(
-                "--debug-download cannot be combined with "
-                "--target, --list, --restore-latest, or --restore"
-            )
+            parser.error("--debug-download cannot be combined with other options")
+
+    # --debug-loop should not be combined with other options
+    if runtime_args.debug_loop is not None:
+        if (
+            runtime_args.single
+            or runtime_args.debug_notifications
+            or runtime_args.target is not None
+            or runtime_args.restore_latest
+            or runtime_args.restore is not None
+            or runtime_args.list
+        ):
+            parser.error("--debug-loop cannot be combined with other options")
 
     # --list, --restore-latest, and --restore require --target
     if runtime_args.list or runtime_args.restore_latest or runtime_args.restore:
@@ -358,7 +382,45 @@ def run_debug_notifications_and_exit() -> NoReturn:
         sys.exit(0)
 
 
-def run_single_all_backups(target_name: str | None = None) -> NoReturn:
+def run_debug_loop(iterations: int) -> NoReturn:
+    log.info("starting debug-loop mode with %s iterations", iterations)
+
+    backup_provider()
+    targets = backup_targets()
+
+    log.info("running %s iterations across %s targets", iterations, len(targets))
+
+    for iteration in range(1, iterations + 1):
+        log.info("=== ITERATION %s/%s ===", iteration, iterations)
+
+        for target in targets:
+            threading.Thread(
+                target=run_backup,
+                args=(target,),
+                daemon=True,
+                name=target.pretty_thread_name,
+            ).start()
+
+        while any(
+            t.is_alive()
+            for t in threading.enumerate()
+            if t.name.startswith("BACKUP_TARGET_")
+        ):
+            exit_event.wait(0.5)
+
+        if iteration % 10 == 0 or iteration == iterations:
+            log.info(
+                "completed %s/%s iterations (%s%%)",
+                iteration,
+                iterations,
+                round(iteration / iterations * 100, 1),
+            )
+
+    log.info("debug-loop completed successfully: %s iterations", iterations)
+    sys.exit(0)
+
+
+def run_single_all_backups(target_name: str | None) -> NoReturn:
     if target_name:
         log.info("start run_single_all_backups for target: %s", target_name)
     else:
@@ -496,6 +558,8 @@ def main() -> NoReturn:  # pragma: no cover
 
     if runtime_args.debug_notifications:
         run_debug_notifications_and_exit()
+    elif runtime_args.debug_loop is not None:
+        run_debug_loop(runtime_args.debug_loop)
     elif runtime_args.single:
         run_single_all_backups(runtime_args.target)
     elif runtime_args.debug_download is not None:

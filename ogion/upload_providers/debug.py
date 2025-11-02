@@ -32,6 +32,13 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         shell_copy_to_debug_dir = f"cp {age_file} {out_path}"
         core.run_subprocess(shell_copy_to_debug_dir)
 
+        # Clean up source files immediately after copy
+        core.remove_path(age_file)
+        core.remove_path(backup_file)
+        log.info(
+            "removed source files %s and %s from local disk", backup_file, age_file
+        )
+
         return str(out_path)
 
     @override
@@ -67,10 +74,6 @@ class UploadProviderLocalDebug(BaseUploadProvider):
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
-        for backup_path in backup_file.parent.iterdir():
-            core.remove_path(backup_path)
-            log.info("removed %s from local disk", backup_path)
-
         backups = self.all_target_backups(env_name=backup_file.parent.name)
 
         while len(backups) > max_backups:
