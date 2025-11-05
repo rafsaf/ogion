@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Memory leaks for (GCS, S3, Azure) upload providers - objects are now cached and reused across threads, preventing memory growth from unclosed client connections during long-running operations. Currently all provider clients are thread-safe. 
 - Edge case fixes for `--list` and `--restore-latest` commands when using many similar env names for azure and gcs (eg. POSTGRESQL_TEST, POSTGRESQL_TEST_HOURLY could lead to use of wrong backup file name in `--restore-latest` and wrong list in `--list`)
 - Concurrent backup clean race condition (local) - Previously, the `clean()` method would delete *all files* in the source backup directory using `iterdir()`, causing failures when multiple backup threads ran simultaneously. Now, `post_save()` immediately removes local files after upload, and `clean()` only handles remote storage cleanup. This prevents threads from deleting each other's in-progress backup files
 - Concurrent backup clean race condition (remote) - Fixed crash when multiple backups run simultaneously and try to delete the same old backup file. GCS, Azure, and S3 providers now gracefully handle "file not found" errors during cleanup, treating them as success
