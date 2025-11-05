@@ -21,12 +21,39 @@ services:
     env_file:
       - ./../.env
 
+  ogion_mem_stress_test:
+    restart: "no"
+    network_mode: "host"
+    platform: linux/${OGION_ARCH:-amd64}
+    build:
+      context: ./../
+      dockerfile: docker/Dockerfile
+      target: stress
+    environment:
+      - POSTGRESQL_DB_PG_18=host=localhost port=10016 password=password-_-12!@#%^&*()/;><.,]}{[ user=user-_-12!@#%^&*()/;><.,]}{[ db=database-_-12!@#%^&*()/;><.,]}{[ cron_rule=* * * * *
+      - MARIADB_DB_TEST_11_4=host=localhost port=11114 password=password-_-12!@#%^&*()/;><.,]}{[ user=user-_-12!@#%^&*()/;><.,]}{[ db=database-_-12!@#%^&*()/;><.,]}{[ cron_rule=* * * * * client_ssl=false
+      - SINGLEFILE_STRESS=abs_path=/etc/hostname cron_rule=* * * * *
+      - DIRECTORY_STRESS=abs_path=/etc/ssl/certs cron_rule=* * * * *
+      - BACKUP_MAX_NUMBER=2
+      - BACKUP_MIN_RETENTION_DAYS=0
+      - LZIP_THREADS=1
+      - AGE_RECIPIENTS=age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2
+      - SUBPROCESS_TIMEOUT_SECS=60
+      - SIGTERM_TIMEOUT_SECS=10
+      - LOG_LEVEL=WARNING
+      - BACKUP_PROVIDER_NAME=${BACKUP_PROVIDER_NAME:-debug}
+      - STRESS_ITERATIONS=${STRESS_ITERATIONS:-10}
+    volumes:
+      - /tmp:/tmp
+
   gcs:
     restart: "no"
     image: "fsouza/fake-gcs-server:latest"
     command: "-scheme http"
     ports:
       - 4443:4443
+    volumes:
+      - gcs-data:/data/stresstest
 
   minio:
     restart: "no"
@@ -40,3 +67,6 @@ services:
     image: "mcr.microsoft.com/azure-storage/azurite:latest"
     ports:
       - 10000:10000
+
+volumes:
+  gcs-data:

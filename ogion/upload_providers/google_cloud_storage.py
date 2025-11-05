@@ -60,6 +60,12 @@ class UploadProviderGCS(BaseUploadProvider):
         )
 
         log.info("uploaded %s to %s", age_backup_file, backup_dest_in_bucket)
+
+        core.remove_path(age_backup_file)
+        core.remove_path(backup_file)
+
+        log.info("removed %s and %s from local disk", backup_file, age_backup_file)
+
         return backup_dest_in_bucket
 
     @override
@@ -89,10 +95,9 @@ class UploadProviderGCS(BaseUploadProvider):
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
-        for backup_path in backup_file.parent.iterdir():
-            core.remove_path(backup_path)
-            log.info("removed %s from local disk", backup_path)
+        from google.api_core.exceptions import NotFound  # noqa: PLC0415
 
+        # Local files already cleaned up in post_save()
         backups = self.all_target_backups(env_name=backup_file.parent.name)
         while len(backups) > max_backups:
             backup_to_remove = backups.pop()
@@ -109,5 +114,12 @@ class UploadProviderGCS(BaseUploadProvider):
                 break
 
             blob = self.bucket.blob(backup_to_remove)
-            blob.delete()
-            log.info("deleted backup %s from google cloud storage", backup_to_remove)
+            try:
+                blob.delete()
+                log.info(
+                    "deleted backup %s from google cloud storage", backup_to_remove
+                )
+            except NotFound:
+                log.info(
+                    "backup %s already deleted (concurrent cleanup)", backup_to_remove
+                )

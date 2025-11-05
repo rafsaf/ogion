@@ -67,5 +67,13 @@ COPY pyproject.toml .
 COPY tests tests
 CMD ["pytest", "-vv"]
 
+FROM tests AS stress
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get -y update && apt-get -y install procps
+COPY scripts/mem_stress_test.sh /usr/local/bin/mem_stress_test.sh
+RUN chmod +x /usr/local/bin/mem_stress_test.sh
+CMD ["/usr/local/bin/mem_stress_test.sh"]
+
 FROM common AS build
 CMD ["ogion"] 

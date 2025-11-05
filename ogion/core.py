@@ -91,8 +91,10 @@ def run_subprocess(shell_args: str) -> str:
 
 
 def remove_path(path: Path) -> None:
-    if path.exists():
+    try:
         path.unlink()
+    except FileNotFoundError:
+        pass
 
 
 def get_new_backup_path(env_name: str, name: str) -> Path:
@@ -193,6 +195,7 @@ def run_create_age_archive(backup_file: Path) -> Path:
     run_subprocess(shell_create_age_archive)
     log.info("finished age archive creating")
 
+    remove_path(backup_file)
     log.info("removed unencrypted compressed file: %s", backup_file)
 
     return out_file

@@ -67,6 +67,8 @@ def test_run_create_age_archive_out_path_exists(tmp_path: Path) -> None:
     fake_backup_file_out = core.run_create_age_archive(fake_backup_file)
     assert fake_backup_file_out == tmp_path / "fake_backup.lz.age"
     assert fake_backup_file_out.exists()
+    # Verify intermediate .lz file was cleaned up
+    assert not (tmp_path / "fake_backup.lz").exists()
 
 
 def test_run_create_age_archive_dir_raise_error(tmp_path: Path) -> None:
@@ -496,6 +498,25 @@ def test_create_backup_targets(
     else:
         with pytest.raises(Exception):
             core.create_target_models()
+
+
+def test_remove_path_file_exists(tmp_path: Path) -> None:
+    test_file = tmp_path / "test_file.txt"
+    test_file.write_text("test content")
+    assert test_file.exists()
+
+    core.remove_path(test_file)
+    assert not test_file.exists()
+
+
+def test_remove_path_file_not_found(tmp_path: Path) -> None:
+    """Test that remove_path handles FileNotFoundError gracefully."""
+    non_existent_file = tmp_path / "non_existent_file.txt"
+    assert not non_existent_file.exists()
+
+    # Should not raise an exception
+    core.remove_path(non_existent_file)
+    assert not non_existent_file.exists()
 
 
 @pytest.mark.parametrize(

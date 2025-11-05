@@ -55,9 +55,9 @@ jobs:
           file: docker/Dockerfile
           context: .
           target: build
-          cache-from: type=gha,scope=python:3.14-slim-trixie
-          cache-to: type=gha,mode=max,scope=python:3.14-slim-trixie
-          # no-cache: true
+          # cache-from: type=gha,scope=python:3.14-slim-trixie
+          # cache-to: type=gha,mode=max,scope=python:3.14-slim-trixie
+          no-cache: true
           push: true
           tags: rafsaf/ogion:dev
           platforms: linux/amd64,linux/arm64

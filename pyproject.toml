@@ -40,6 +40,7 @@ dev = [
 ]
 tests = [
   "freezegun>=1.5.1",
+  "psutil>=7.1.2",
   "pytest>=8.3.2",
   "pytest-cov>=6.0.0",
   "pytest-env>=1.1.4",

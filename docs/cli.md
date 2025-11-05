@@ -3,6 +3,7 @@
 ```bash
 usage: python3 -m ogion.main [-h] [-s] [-n]
                              [--debug-download DEBUG_DOWNLOAD]
+                             [--debug-loop DEBUG_LOOP]
                              [--target TARGET]
                              [--restore-latest]
                              [-r RESTORE] [-l]
@@ -19,6 +20,10 @@ options:
   --debug-download DEBUG_DOWNLOAD
                         Download given backup file locally
                         and print path
+  --debug-loop DEBUG_LOOP
+                        Run N backup iterations ignoring
+                        cron schedule (for stress/memory
+                        testing)
   --target TARGET       Backup target (required with
                         --list, --restore-latest,
                         --restore)

@@ -1,5 +1,7 @@
 # to run tests with arm64 see https://docs.docker.com/build/building/multi-platform/
 export OGION_ARCH ?= amd64
+export BACKUP_PROVIDER_NAME ?= debug
+export STRESS_ITERATIONS ?= 10
 
 ifdef CI
 BUILD := 
@@ -27,6 +29,11 @@ unit_tests:
 acceptance_tests:
 	$(MAKE) docker_setup_up
 	docker compose -f docker/docker-compose.yml run --rm --build ogion_acceptance_tests
+
+.PHONY: mem_stress_test
+mem_stress_test:
+	$(MAKE) docker_setup_up
+	docker compose -f docker/docker-compose.yml run --rm $(BUILD) ogion_mem_stress_test
 
 .PHONY: update_compose_db_file
 update_compose_db_file:
