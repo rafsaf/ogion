@@ -9,34 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **GitHub Copilot instructions** - Added `.github/copilot-instructions.md` with project-specific guidelines for AI assistants, including testing requirements, code quality standards, and changelog maintenance rules
-- **Shell autocomplete support** - Added bash autocomplete for all CLI commands and arguments using `argcomplete` library. Autocomplete works for target names, backup files, and all command options
-- **New `ogion` command** - Added `ogion` bash script as a convenient shortcut for `python -m ogion.main`. Both commands work identically and support autocomplete
-- **Improved `--single` flag** - Can now backup a specific target using `--single --target <name>` instead of running all backups
-- Dynamic autocomplete for `--target` argument that suggests available backup targets from your configuration
-- Dynamic autocomplete for `--restore` and `--debug-download` arguments that suggests available backup files
-- **`BACKUP_DELETE` environment variable** - New boolean configuration option (default: `true`) to control automatic cleanup operations. When set to `false`, Ogion only uploads backups without deleting old ones, allowing external tools like GCS bucket expiry rules, S3 lifecycle policies, or Azure blob lifecycle management to handle cleanup. This reduces required cloud storage permissions - when disabled, only write/upload permissions are needed (no delete/list permissions required)
+- Shell autocomplete support - Added bash autocomplete for all CLI commands and arguments using `argcomplete` library. Autocomplete works for target names, backup files, and all command options
+- New `ogion` command (default entrypoint) - Added `ogion` bash script as a convenient shortcut for `python -m ogion.main`. Both commands work identically
+- Improved `--single` flag - Can now backup a specific target using `--single --target <name>` instead of running all backups
+- `BACKUP_DELETE` environment variable - New boolean configuration option (default: `true`) to control automatic cleanup operations.
+- GitHub Copilot instructions
+- Added `--debug-loop` command and `mem_stress_test` CI/CD
 
 ### Changed
 
 - Migrated from Poetry to uv for dependency management
 - Added this Changelog file
 - Migrate to Python 3.14 and Debian Trixie
-- **Enhanced CLI help text** - More descriptive help messages with practical examples for common use cases
-- **Better argument validation** - CLI now validates argument combinations upfront and shows clear error messages (e.g., `--list` requires `--target`, `--restore-latest` and `--restore` are mutually exclusive)
-- Container entrypoint changed to `ogion` command for consistency
-- **Reduced permission requirements when `BACKUP_DELETE=false`** - Cloud storage providers (GCS, S3, Azure) now only require write/upload permissions when cleanup is disabled, eliminating the need for delete and list permissions
+- Better argument validation - CLI now validates argument combinations upfront and shows clear error messages
 - Performance: removed verbose flags (`-v`) from archive/DB tools to cut excessive stdout and logging overhead
 - Performance: debug provider downloads now stream in chunks instead of reading entire files into memory
-- **LZIP_THREADS default behavior** - Changed default from `1` to automatic CPU detection (no value set). When `LZIP_THREADS` is not set, plzip now automatically detects and uses the number of available CPU cores. Setting a specific value overrides this automatic detection. The `-n` flag is now used for both compression and decompression operations when `LZIP_THREADS` is set
+- `LZIP_THREADS` default behavior - Changed from `1` to `null` which translate to automatic CPU detection
 
 ### Fixed
 
-- **Concurrent backup clean race condition (local)** - Previously, the `clean()` method would delete **all files** in the source backup directory using `iterdir()`, causing failures when multiple backup threads ran simultaneously. Now, `post_save()` immediately removes local files after upload, and `clean()` only handles remote storage cleanup. This prevents threads from deleting each other's in-progress backup files
-- **Concurrent backup clean race condition (remote)** - Fixed crash when multiple backups run simultaneously and try to delete the same old backup file. GCS, Azure, and S3 providers now gracefully handle "file not found" errors during cleanup, treating them as success since the file was already deleted by another thread
-- **Missing cleanup of intermediate .lz files** - Now `run_create_age_archive()` properly calls `remove_path()` to delete the intermediate compressed file after creating the `.lz.age` archive instead of this being side effect of `clean()`
-- **TOCTOU race condition in file deletion** - Fixed Time-of-Check-Time-of-Use issue in `remove_path()` where checking `path.exists()` before `path.unlink()` could cause crashes in concurrent scenarios when another thread deletes the file between the check and unlink. Now uses exception handling for atomic, thread-safe file deletion
 - Edge case fixes for `--list` and `--restore-latest` commands when using many similar env names for azure and gcs (eg. POSTGRESQL_TEST, POSTGRESQL_TEST_HOURLY could lead to use of wrong backup file name in `--restore-latest` and wrong list in `--list`)
+- Concurrent backup clean race condition (local) - Previously, the `clean()` method would delete *all files* in the source backup directory using `iterdir()`, causing failures when multiple backup threads ran simultaneously. Now, `post_save()` immediately removes local files after upload, and `clean()` only handles remote storage cleanup. This prevents threads from deleting each other's in-progress backup files
+- Concurrent backup clean race condition (remote) - Fixed crash when multiple backups run simultaneously and try to delete the same old backup file. GCS, Azure, and S3 providers now gracefully handle "file not found" errors during cleanup, treating them as success
+- Missing cleanup of intermediate .lz files - Now `run_create_age_archive()` properly calls `remove_path()` to delete the intermediate compressed file after creating the `.lz.age` archive instead of this being side effect of `clean()`
+- TOCTOU race condition in file deletion - Fixed Time-of-Check-Time-of-Use issue in `remove_path()` could cause errors in concurrent scenarios
+- Use `recursive=True` in minio client `list_objects` method. In mem stress test concurrent scenario, it was possible to get object with incorrect name with `/` at the end.
 
 ## [8.2] - 2025-10-05
 
