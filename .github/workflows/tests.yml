@@ -62,7 +62,7 @@ jobs:
           target: tests
           # cache-from: type=gha,scope=python:3.14-slim-trixie
           # cache-to: type=gha,mode=max,scope=python:3.14-slim-trixie
-          # no-cache: true
+          no-cache: true
           push: false
           tags: rafsaf/ogion:dev
           load: true

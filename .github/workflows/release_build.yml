@@ -55,7 +55,7 @@ jobs:
           target: build
           # cache-from: type=gha,scope=python:3.14-slim-trixie
           # cache-to: type=gha,mode=max,scope=python:3.14-slim-trixie
-          # no-cache: true
+          no-cache: true
           push: true
           tags: rafsaf/ogion:${{ github.ref_name }},rafsaf/ogion:latest
           platforms: linux/amd64,linux/arm64
