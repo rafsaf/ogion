@@ -124,3 +124,10 @@ class UploadProviderS3(BaseUploadProvider):
                 "%s backups were successfully deleted from s3 bucket",
                 len(items_to_delete),
             )
+
+    @override
+    def close(self) -> None:
+        """Close S3/Minio client connection."""
+        if hasattr(self, "client") and hasattr(self.client, "_http"):
+            self.client._http.clear()
+            log.debug("closed S3 client connection")

@@ -12,11 +12,13 @@ from pydantic import SecretStr
 from ogion import config
 from ogion.models.upload_provider_models import (
     AzureProviderModel,
+    DebugProviderModel,
     GCSProviderModel,
     S3ProviderModel,
 )
 from ogion.upload_providers.azure import UploadProviderAzure
 from ogion.upload_providers.base_provider import BaseUploadProvider
+from ogion.upload_providers.debug import UploadProviderLocalDebug
 from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
 from ogion.upload_providers.s3 import UploadProviderS3
 
@@ -493,3 +495,229 @@ def test_s3_clean_raises_on_non_no_such_key_errors(
     # This should raise RuntimeError for non-NoSuchKey errors
     with pytest.raises(RuntimeError):
         provider.clean(fake_backup_file, max_backups=2, min_retention_days=1)
+
+
+def test_provider_close(provider: BaseUploadProvider) -> None:
+    """Test that close() method can be called without errors on all providers."""
+    # close() should work for all providers
+    provider.close()
+    # Calling close() multiple times should be safe
+    provider.close()
+
+
+def test_debug_provider_close() -> None:
+    """Test debug provider close() method has no side effects."""
+    provider = UploadProviderLocalDebug(DebugProviderModel())
+    # Should not raise any exception
+    provider.close()
+    provider.close()  # Multiple calls should be safe
+
+
+def test_gcs_provider_close(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test GCS provider close() properly closes the storage client."""
+    mock_storage_client = Mock()
+    mock_bucket = Mock()
+    mock_storage_client.bucket.return_value = mock_bucket
+
+    # Mock the Client class
+    mock_client_class = Mock(return_value=mock_storage_client)
+    monkeypatch.setattr(
+        "google.cloud.storage.Client",
+        mock_client_class,
+    )
+
+    # Mock AnonymousCredentials
+    mock_anon_creds = Mock()
+    monkeypatch.setattr(
+        "google.oauth2.service_account.Credentials.from_service_account_info",
+        Mock(return_value=mock_anon_creds),
+    )
+
+    provider_model = GCSProviderModel(
+        bucket_name="test-bucket",
+        bucket_upload_path="test",
+        service_account_base64=SecretStr("Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="),
+        chunk_size_mb=100,
+        chunk_timeout_secs=100,
+    )
+    provider = UploadProviderGCS(provider_model)
+
+    # Verify storage_client exists
+    assert hasattr(provider, "storage_client")
+
+    # Call close
+    provider.close()
+
+    # Verify close was called on storage_client
+    mock_storage_client.close.assert_called_once()
+
+    # Multiple calls should be safe
+    provider.close()
+    expected_calls = 2
+    assert mock_storage_client.close.call_count == expected_calls
+
+
+def test_azure_provider_close(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test Azure provider close() properly closes the container client."""
+    mock_container_client = Mock()
+    mock_blob_service_client = Mock()
+    mock_blob_service_client.get_container_client.return_value = mock_container_client
+
+    # Mock BlobServiceClient
+    mock_blob_service_class = Mock()
+    mock_blob_service_class.from_connection_string.return_value = (
+        mock_blob_service_client
+    )
+    monkeypatch.setattr(
+        "azure.storage.blob.BlobServiceClient",
+        mock_blob_service_class,
+    )
+
+    provider_model = AzureProviderModel(
+        container_name="test-container",
+        connect_string=SecretStr("DefaultEndpointsProtocol=http;AccountName=test;"),
+    )
+    provider = UploadProviderAzure(provider_model)
+
+    # Verify container_client exists
+    assert hasattr(provider, "container_client")
+
+    # Call close
+    provider.close()
+
+    # Verify close was called on container_client
+    mock_container_client.close.assert_called_once()
+
+    # Multiple calls should be safe
+    provider.close()
+    expected_calls = 2
+    assert mock_container_client.close.call_count == expected_calls
+
+
+def test_s3_provider_close(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test S3 provider close() properly clears the HTTP connection pool."""
+    mock_http = Mock()
+    mock_client = Mock()
+    mock_client._http = mock_http
+
+    # Mock Minio class
+    mock_minio_class = Mock(return_value=mock_client)
+    monkeypatch.setattr(
+        "minio.Minio",
+        mock_minio_class,
+    )
+
+    provider_model = S3ProviderModel(
+        bucket_name="test-bucket",
+        bucket_upload_path="test",
+        access_key="test",
+        secret_key=SecretStr("test"),
+    )
+    provider = UploadProviderS3(provider_model)
+
+    # Verify client exists
+    assert hasattr(provider, "client")
+    assert hasattr(provider.client, "_http")
+
+    # Call close
+    provider.close()
+
+    # Verify clear was called on _http
+    mock_http.clear.assert_called_once()
+
+    # Multiple calls should be safe
+    provider.close()
+    expected_calls = 2
+    assert mock_http.clear.call_count == expected_calls
+
+
+def test_s3_provider_close_no_http_attribute(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test S3 provider close() handles missing _http attribute gracefully."""
+    mock_client = Mock(spec=[])  # Client without _http attribute
+
+    # Mock Minio class
+    mock_minio_class = Mock(return_value=mock_client)
+    monkeypatch.setattr(
+        "minio.Minio",
+        mock_minio_class,
+    )
+
+    provider_model = S3ProviderModel(
+        bucket_name="test-bucket",
+        bucket_upload_path="test",
+        access_key="test",
+        secret_key=SecretStr("test"),
+    )
+    provider = UploadProviderS3(provider_model)
+
+    # Should not raise exception even without _http attribute
+    provider.close()
+
+
+def test_gcs_provider_close_no_storage_client(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test GCS provider close() handles missing storage_client gracefully."""
+    mock_storage_client = Mock()
+    mock_bucket = Mock()
+    mock_storage_client.bucket.return_value = mock_bucket
+
+    # Mock the Client class
+    mock_client_class = Mock(return_value=mock_storage_client)
+    monkeypatch.setattr(
+        "google.cloud.storage.Client",
+        mock_client_class,
+    )
+
+    # Mock AnonymousCredentials
+    mock_anon_creds = Mock()
+    monkeypatch.setattr(
+        "google.oauth2.service_account.Credentials.from_service_account_info",
+        Mock(return_value=mock_anon_creds),
+    )
+
+    provider_model = GCSProviderModel(
+        bucket_name="test-bucket",
+        bucket_upload_path="test",
+        service_account_base64=SecretStr("Z29vZ2xlX3NlcnZpY2VfYWNjb3VudAo="),
+        chunk_size_mb=100,
+        chunk_timeout_secs=100,
+    )
+    provider = UploadProviderGCS(provider_model)
+
+    # Remove storage_client attribute
+    delattr(provider, "storage_client")
+
+    # Should not raise exception
+    provider.close()
+
+
+def test_azure_provider_close_no_container_client(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test Azure provider close() handles missing container_client gracefully."""
+    mock_container_client = Mock()
+    mock_blob_service_client = Mock()
+    mock_blob_service_client.get_container_client.return_value = mock_container_client
+
+    # Mock BlobServiceClient
+    mock_blob_service_class = Mock()
+    mock_blob_service_class.from_connection_string.return_value = (
+        mock_blob_service_client
+    )
+    monkeypatch.setattr(
+        "azure.storage.blob.BlobServiceClient",
+        mock_blob_service_class,
+    )
+
+    provider_model = AzureProviderModel(
+        container_name="test-container",
+        connect_string=SecretStr("DefaultEndpointsProtocol=http;AccountName=test;"),
+    )
+    provider = UploadProviderAzure(provider_model)
+
+    # Remove container_client attribute
+    delattr(provider, "container_client")
+
+    # Should not raise exception
+    provider.close()

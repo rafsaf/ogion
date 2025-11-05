@@ -281,6 +281,118 @@ def test_run_backup_with_backup_delete_enabled(
     )
 
 
+def test_run_backup_calls_provider_close_on_success(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that provider.close() is called after successful backup."""
+    monkeypatch.setattr(config.options, "BACKUP_DELETE", True)
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=[FILE_1]),
+    )
+    target = main.backup_targets()[0]
+    backup_file = Path("/tmp/fake")
+    backup_mock = Mock(return_value=backup_file)
+    monkeypatch.setattr(target, "backup", backup_mock)
+    provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
+    close_mock = Mock()
+    monkeypatch.setattr(provider, "post_save", Mock(return_value="/path/to/backup"))
+    monkeypatch.setattr(provider, "clean", Mock())
+    monkeypatch.setattr(provider, "close", close_mock)
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider))
+
+    main.run_backup(target=target)
+
+    # Ensure close was called
+    close_mock.assert_called_once()
+
+
+def test_run_backup_calls_provider_close_on_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that provider.close() is called even when backup fails."""
+    monkeypatch.setattr(config.options, "BACKUP_DELETE", True)
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=[FILE_1]),
+    )
+    target = main.backup_targets()[0]
+    backup_mock = Mock(side_effect=RuntimeError("Backup failed"))
+    monkeypatch.setattr(target, "backup", backup_mock)
+    provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
+    close_mock = Mock()
+    monkeypatch.setattr(provider, "close", close_mock)
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider))
+
+    # Backup should raise an error
+    with pytest.raises(RuntimeError, match="Backup failed"):
+        main.run_backup(target=target)
+
+    # But close should still be called
+    close_mock.assert_called_once()
+
+
+def test_run_backup_calls_provider_close_on_post_save_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that provider.close() is called even when post_save fails."""
+    monkeypatch.setattr(config.options, "BACKUP_DELETE", False)
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=[FILE_1]),
+    )
+    target = main.backup_targets()[0]
+    backup_file = Path("/tmp/fake")
+    backup_mock = Mock(return_value=backup_file)
+    monkeypatch.setattr(target, "backup", backup_mock)
+    provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
+    close_mock = Mock()
+    post_save_mock = Mock(side_effect=RuntimeError("Upload failed"))
+    monkeypatch.setattr(provider, "post_save", post_save_mock)
+    monkeypatch.setattr(provider, "close", close_mock)
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider))
+
+    # Post save should raise an error
+    with pytest.raises(RuntimeError, match="Upload failed"):
+        main.run_backup(target=target)
+
+    # But close should still be called
+    close_mock.assert_called_once()
+
+
+def test_run_backup_calls_provider_close_on_clean_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that provider.close() is called even when clean fails."""
+    monkeypatch.setattr(config.options, "BACKUP_DELETE", True)
+    monkeypatch.setattr(
+        core,
+        "create_target_models",
+        Mock(return_value=[FILE_1]),
+    )
+    target = main.backup_targets()[0]
+    backup_file = Path("/tmp/fake")
+    backup_mock = Mock(return_value=backup_file)
+    monkeypatch.setattr(target, "backup", backup_mock)
+    provider = UploadProviderLocalDebug(upload_provider_models.DebugProviderModel())
+    close_mock = Mock()
+    clean_mock = Mock(side_effect=RuntimeError("Clean failed"))
+    monkeypatch.setattr(provider, "post_save", Mock(return_value="/path/to/backup"))
+    monkeypatch.setattr(provider, "clean", clean_mock)
+    monkeypatch.setattr(provider, "close", close_mock)
+    monkeypatch.setattr(main, "backup_provider", Mock(return_value=provider))
+
+    # Clean should raise an error
+    with pytest.raises(RuntimeError, match="Clean failed"):
+        main.run_backup(target=target)
+
+    # But close should still be called
+    close_mock.assert_called_once()
+
+
 @pytest.mark.parametrize(
     "cli_args,expected_attributes",
     [

@@ -20,10 +20,10 @@ class UploadProviderAzure(BaseUploadProvider):
 
         self.container_name = target_provider.container_name
 
-        blob_service_client = BlobServiceClient.from_connection_string(
+        self.blob_service_client = BlobServiceClient.from_connection_string(
             target_provider.connect_string.get_secret_value()
         )
-        self.container_client = blob_service_client.get_container_client(
+        self.container_client = self.blob_service_client.get_container_client(
             container=self.container_name
         )
 
@@ -108,3 +108,13 @@ class UploadProviderAzure(BaseUploadProvider):
                 log.info(
                     "backup %s already deleted (concurrent cleanup)", backup_to_remove
                 )
+
+    @override
+    def close(self) -> None:
+        """Close Azure container client and blob service client."""
+        if hasattr(self, "container_client"):
+            self.container_client.close()
+            log.debug("closed Azure container client")
+        if hasattr(self, "blob_service_client"):
+            self.blob_service_client.close()
+            log.debug("closed Azure blob service client")

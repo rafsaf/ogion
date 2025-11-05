@@ -95,3 +95,8 @@ class UploadProviderLocalDebug(BaseUploadProvider):
                 log.error(
                     "could not remove path %s: %s", backup_to_remove, e, exc_info=True
                 )
+
+    @override
+    def close(self) -> None:
+        """Debug provider has no resources to clean up."""
+        pass

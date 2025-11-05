@@ -32,3 +32,7 @@ class BaseUploadProvider(ABC):
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:  # pragma: no cover
         pass
+
+    @abstractmethod
+    def close(self) -> None:  # pragma: no cover
+        pass

@@ -123,3 +123,10 @@ class UploadProviderGCS(BaseUploadProvider):
                 log.info(
                     "backup %s already deleted (concurrent cleanup)", backup_to_remove
                 )
+
+    @override
+    def close(self) -> None:
+        """Close Google Cloud Storage client."""
+        if hasattr(self, "storage_client"):
+            self.storage_client.close()
+            log.debug("closed GCS storage client")

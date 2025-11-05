@@ -139,39 +139,42 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
     # this should add only minimal overhead
     provider = backup_provider()
 
-    with NotificationsContext(
-        step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name
-    ):
-        backup_file = target.backup()
-    log.info(
-        "backup file created: %s, starting post save upload to provider %s",
-        backup_file,
-        provider.__class__.__name__,
-    )
-    with NotificationsContext(
-        step_name=PROGRAM_STEP.UPLOAD,
-        env_name=target.env_name,
-    ):
-        provider.post_save(backup_file=backup_file)
-
-    if config.options.BACKUP_DELETE:
+    try:
         with NotificationsContext(
-            step_name=PROGRAM_STEP.CLEANUP,
+            step_name=PROGRAM_STEP.BACKUP_CREATE, env_name=target.env_name
+        ):
+            backup_file = target.backup()
+        log.info(
+            "backup file created: %s, starting post save upload to provider %s",
+            backup_file,
+            provider.__class__.__name__,
+        )
+        with NotificationsContext(
+            step_name=PROGRAM_STEP.UPLOAD,
             env_name=target.env_name,
         ):
-            provider.clean(
-                backup_file=backup_file,
-                max_backups=target.max_backups,
-                min_retention_days=target.min_retention_days,
-            )
-    else:
-        log.info("BACKUP_DELETE is disabled, skipping cleanup step")
+            provider.post_save(backup_file=backup_file)
 
-    log.info(
-        "backup and upload finished, next backup of target `%s` is: %s",
-        target.env_name,
-        target.next_backup_time,
-    )
+        if config.options.BACKUP_DELETE:
+            with NotificationsContext(
+                step_name=PROGRAM_STEP.CLEANUP,
+                env_name=target.env_name,
+            ):
+                provider.clean(
+                    backup_file=backup_file,
+                    max_backups=target.max_backups,
+                    min_retention_days=target.min_retention_days,
+                )
+        else:
+            log.info("BACKUP_DELETE is disabled, skipping cleanup step")
+
+        log.info(
+            "backup and upload finished, next backup of target `%s` is: %s",
+            target.env_name,
+            target.next_backup_time,
+        )
+    finally:
+        provider.close()
 
 
 def target_completer(**kwargs) -> list[str]:  # type: ignore[no-untyped-def]
