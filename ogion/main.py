@@ -135,8 +135,6 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
 
     # init provider every time in each new thread
-    # eg. s3 session are not thread safe
-    # this should add only minimal overhead
     provider = backup_provider()
 
     try:
@@ -173,7 +171,13 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
             target.env_name,
             target.next_backup_time,
         )
-    finally:
+    except Exception as e:
+        try:
+            provider.close()
+        except Exception:  # pragma: no cover
+            log.error("could not close provider after exception: %s", e, exc_info=True)
+        raise
+    else:
         provider.close()
 
 
@@ -388,7 +392,7 @@ def run_debug_notifications_and_exit() -> NoReturn:
 def run_debug_loop(iterations: int) -> NoReturn:  # pragma: no cover
     log.info("starting debug-loop mode with %s iterations", iterations)
 
-    backup_provider()
+    backup_provider().close()
     targets = backup_targets()
 
     log.info("running %s iterations across %s targets", iterations, len(targets))
@@ -434,7 +438,7 @@ def run_single_all_backups(target_name: str | None) -> NoReturn:
     else:
         log.info("start run_single_all_backups")
 
-    backup_provider()
+    backup_provider().close()
     targets = backup_targets()
 
     # Filter targets if specific target is requested
@@ -534,7 +538,7 @@ def run_restore(backup_name: str, target_name: str) -> NoReturn:
 def run_main_loop() -> NoReturn:  # pragma: no cover
     log.info("start run_main_loop")
 
-    backup_provider()
+    backup_provider().close()
     targets = backup_targets()
 
     while not exit_event.is_set():

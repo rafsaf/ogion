@@ -292,7 +292,7 @@ if len(samples) < 10:
 
 # Calculate statistics
 total_samples = len(samples)
-initial_samples = samples[:max(10, int(total_samples * 0.05))]  # First 5%
+initial_samples = samples[int(total_samples * 0.45):int(total_samples * 0.55)]  # Mid 45-55%
 final_samples = samples[-max(10, int(total_samples * 0.1)):]    # Last 10%
 
 initial_rss = sum(s['rss_mb'] for s in initial_samples) / len(initial_samples)

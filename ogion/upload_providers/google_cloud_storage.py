@@ -126,7 +126,5 @@ class UploadProviderGCS(BaseUploadProvider):
 
     @override
     def close(self) -> None:
-        """Close Google Cloud Storage client."""
-        if hasattr(self, "storage_client"):
-            self.storage_client.close()
-            log.debug("closed GCS storage client")
+        self.storage_client.close()
+        log.debug("closed GCS storage client")

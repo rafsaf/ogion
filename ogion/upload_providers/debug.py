@@ -98,5 +98,4 @@ class UploadProviderLocalDebug(BaseUploadProvider):
 
     @override
     def close(self) -> None:
-        """Debug provider has no resources to clean up."""
-        pass
+        log.debug("closed local debug provider")
