@@ -1,9 +1,13 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import contextlib
+import hashlib
 import logging
+import threading
+from dataclasses import dataclass
 from pathlib import Path
-from typing import override
+from typing import Any, ClassVar, override
 
 from ogion import config, core
 from ogion.models.upload_provider_models import AzureProviderModel
@@ -12,20 +16,49 @@ from ogion.upload_providers.base_provider import BaseUploadProvider
 log = logging.getLogger(__name__)
 
 
+@dataclass
+class _AzureClientCacheEntry:
+    blob_service_client: Any
+    container_client: Any
+    refcount: int
+
+
 class UploadProviderAzure(BaseUploadProvider):
     """Azure blob storage for storing backups"""
+
+    _cache_lock: ClassVar[threading.Lock] = threading.Lock()
+    _client_cache: ClassVar[dict[str, _AzureClientCacheEntry]] = {}
 
     def __init__(self, target_provider: AzureProviderModel) -> None:
         from azure.storage.blob import BlobServiceClient  # noqa: PLC0415
 
         self.container_name = target_provider.container_name
+        self._closed = False
 
-        self.blob_service_client = BlobServiceClient.from_connection_string(
-            target_provider.connect_string.get_secret_value()
-        )
-        self.container_client = self.blob_service_client.get_container_client(
-            container=self.container_name
-        )
+        connect_string = target_provider.connect_string.get_secret_value()
+        connect_hash = hashlib.sha256(connect_string.encode()).hexdigest()
+        self._cache_key = f"{connect_hash}::{self.container_name}"
+
+        with self._cache_lock:
+            cache_entry = self._client_cache.get(self._cache_key)
+
+            if cache_entry is None:
+                blob_service_client = BlobServiceClient.from_connection_string(
+                    connect_string
+                )
+                container_client = blob_service_client.get_container_client(
+                    container=self.container_name
+                )
+                cache_entry = _AzureClientCacheEntry(
+                    blob_service_client=blob_service_client,
+                    container_client=container_client,
+                    refcount=0,
+                )
+                self._client_cache[self._cache_key] = cache_entry
+
+            cache_entry.refcount += 1
+            self.blob_service_client = cache_entry.blob_service_client
+            self.container_client = cache_entry.container_client
 
     @override
     def post_save(self, backup_file: Path) -> str:
@@ -112,8 +145,36 @@ class UploadProviderAzure(BaseUploadProvider):
 
     @override
     def close(self) -> None:
-        self.container_client.close()
-        log.debug("closed Azure container client")
+        if self._closed:
+            return
 
-        self.blob_service_client.close()
-        log.debug("closed Azure blob service client")
+        with self._cache_lock:
+            cache_entry = self._client_cache.get(self._cache_key)
+
+            if cache_entry is None:
+                self._closed = True
+                return
+
+            cache_entry.refcount -= 1
+
+            if cache_entry.refcount <= 0:
+                cache_entry.container_client.close()
+                log.debug("closed Azure container client")
+
+                cache_entry.blob_service_client.close()
+                log.debug("closed Azure blob service client")
+
+                del self._client_cache[self._cache_key]
+
+        self._closed = True
+
+    @classmethod
+    def _clear_cache_for_tests(cls) -> None:  # pragma: no cover
+        with cls._cache_lock:
+            for entry in cls._client_cache.values():
+                with contextlib.suppress(Exception):  # pragma: no cover
+                    entry.container_client.close()
+                with contextlib.suppress(Exception):  # pragma: no cover
+                    entry.blob_service_client.close()
+
+            cls._client_cache.clear()

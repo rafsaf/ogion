@@ -4,6 +4,7 @@
 import os
 import secrets
 import time
+from collections.abc import Iterator
 from pathlib import Path
 
 import google.cloud.storage as storage_client
@@ -151,12 +152,14 @@ def fixed_secrets_token_urlsafe(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture(params=["gcs", "s3", "azure", "debug"])
-def provider(request: pytest.FixtureRequest) -> BaseUploadProvider:
+def provider(request: pytest.FixtureRequest) -> Iterator[BaseUploadProvider]:
+    provider_instance: BaseUploadProvider
+
     if request.param == "gcs":
         bucket = storage_client.Client(
             credentials=AnonymousCredentials()  # type: ignore[no-untyped-call]
         ).create_bucket(str(time.time_ns()))
-        return UploadProviderGCS(
+        provider_instance = UploadProviderGCS(
             GCSProviderModel(
                 bucket_name=bucket.name or "",
                 bucket_upload_path="test",
@@ -168,7 +171,7 @@ def provider(request: pytest.FixtureRequest) -> BaseUploadProvider:
 
     elif request.param == "s3":
         bucket = str(time.time_ns())
-        provider_s3 = UploadProviderS3(
+        provider_instance = UploadProviderS3(
             S3ProviderModel(
                 endpoint="localhost:9000",
                 bucket_name=bucket,
@@ -178,11 +181,10 @@ def provider(request: pytest.FixtureRequest) -> BaseUploadProvider:
                 secure=False,
             )
         )
-        provider_s3.client.make_bucket(bucket)
-        return provider_s3
+        provider_instance.client.make_bucket(bucket)
 
     elif request.param == "azure":
-        provider_azure = UploadProviderAzure(
+        provider_instance = UploadProviderAzure(
             # https://github.com/Azure/Azurite?tab=readme-ov-file#connection-strings
             AzureProviderModel(
                 container_name=str(time.time_ns()),
@@ -196,12 +198,14 @@ def provider(request: pytest.FixtureRequest) -> BaseUploadProvider:
                 ),
             )
         )
-        provider_azure.container_client.create_container()
-        return provider_azure
+        provider_instance.container_client.create_container()
     elif request.param == "debug":
-        return UploadProviderLocalDebug(DebugProviderModel())
+        provider_instance = UploadProviderLocalDebug(DebugProviderModel())
     else:
         raise ValueError("unknown")
+
+    yield provider_instance
+    provider_instance.close()
 
 
 @pytest.fixture

@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing cleanup of intermediate .lz files - Now `run_create_age_archive()` properly calls `remove_path()` to delete the intermediate compressed file after creating the `.lz.age` archive instead of this being side effect of `clean()`
 - TOCTOU race condition in file deletion - Fixed Time-of-Check-Time-of-Use issue in `remove_path()` could cause errors in concurrent scenarios
 - Use `recursive=True` in minio client `list_objects` method. In mem stress test concurrent scenario, it was possible to get object with incorrect name with `/` at the end.
+- Memory leaks in upload providers - Fixed persistent client connections in GCS, S3, and Azure providers that caused memory growth during repeated backups
 
 ## [8.2] - 2025-10-05
 

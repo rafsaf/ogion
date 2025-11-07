@@ -304,7 +304,7 @@ growth_mb = final_rss - initial_rss
 growth_pct = (growth_mb / initial_rss * 100) if initial_rss > 0 else 0
 
 print(f"  Total samples:  {total_samples}")
-print(f"  Initial RSS:    {initial_rss:.2f}MB (avg of first {len(initial_samples)} samples)")
+print(f"  Baseline RSS:   {initial_rss:.2f}MB (avg of mid {len(initial_samples)} samples, 45-55%)")
 print(f"  Final RSS:      {final_rss:.2f}MB (avg of last {len(final_samples)} samples)")
 print(f"  Peak RSS:       {peak_rss:.2f}MB")
 print(f"  Min RSS:        {min_rss:.2f}MB")
@@ -315,7 +315,7 @@ if samples[0]['num_fds'] != -1 and samples[-1]['num_fds'] != -1:
     initial_fds = sum(s['num_fds'] for s in initial_samples if s['num_fds'] != -1) / len([s for s in initial_samples if s['num_fds'] != -1])
     final_fds = sum(s['num_fds'] for s in final_samples if s['num_fds'] != -1) / len([s for s in final_samples if s['num_fds'] != -1])
     fd_growth = final_fds - initial_fds
-    print(f"  Initial FDs:    {initial_fds:.0f}")
+    print(f"  Baseline FDs:   {initial_fds:.0f}")
     print(f"  Final FDs:      {final_fds:.0f}")
     print(f"  FD Growth:      {fd_growth:+.0f}")
 else:

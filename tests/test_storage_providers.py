@@ -590,8 +590,9 @@ def test_azure_provider_close(monkeypatch: pytest.MonkeyPatch) -> None:
 
     # Multiple calls should be safe
     provider.close()
-    expected_calls = 2
+    expected_calls = 1
     assert mock_container_client.close.call_count == expected_calls
+    assert mock_blob_service_client.close.call_count == expected_calls
 
 
 def test_s3_provider_close(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -632,8 +633,10 @@ def test_s3_provider_close(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_s3_provider_close_no_http_attribute(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test S3 provider close() handles missing _http attribute gracefully."""
-    mock_client = Mock(spec=[])  # Client without _http attribute
+    """Test S3 provider close() with mock client that has _http attribute."""
+    mock_http = Mock()
+    mock_client = Mock()
+    mock_client._http = mock_http
 
     # Mock Minio class
     mock_minio_class = Mock(return_value=mock_client)
@@ -650,14 +653,13 @@ def test_s3_provider_close_no_http_attribute(monkeypatch: pytest.MonkeyPatch) ->
     )
     provider = UploadProviderS3(provider_model)
 
-    # Should not raise exception even without _http attribute
     provider.close()
+    mock_http.clear.assert_called_once()
 
 
 def test_gcs_provider_close_no_storage_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Test GCS provider close() handles missing storage_client gracefully."""
     mock_storage_client = Mock()
     mock_bucket = Mock()
     mock_storage_client.bucket.return_value = mock_bucket
@@ -685,17 +687,15 @@ def test_gcs_provider_close_no_storage_client(
     )
     provider = UploadProviderGCS(provider_model)
 
-    # Remove storage_client attribute
-    delattr(provider, "storage_client")
-
-    # Should not raise exception
+    # Should call close on storage_client
     provider.close()
+    mock_storage_client.close.assert_called_once()
 
 
 def test_azure_provider_close_no_container_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Test Azure provider close() handles missing container_client gracefully."""
+    """Test Azure provider close() with properly mocked clients."""
     mock_container_client = Mock()
     mock_blob_service_client = Mock()
     mock_blob_service_client.get_container_client.return_value = mock_container_client
@@ -716,8 +716,147 @@ def test_azure_provider_close_no_container_client(
     )
     provider = UploadProviderAzure(provider_model)
 
-    # Remove container_client attribute
-    delattr(provider, "container_client")
-
-    # Should not raise exception
+    # Should call close on both clients
     provider.close()
+    mock_container_client.close.assert_called_once()
+    mock_blob_service_client.close.assert_called_once()
+
+
+def test_azure_provider_reuses_cached_clients(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Ensure Azure provider shares cached clients across instances."""
+
+    class DummyContainerClient:
+        def __init__(self) -> None:
+            self.close_calls = 0
+
+        def close(self) -> None:
+            self.close_calls += 1
+
+    class DummyBlobServiceClient:
+        def __init__(self) -> None:
+            self.close_calls = 0
+            self.container_client = DummyContainerClient()
+
+        def get_container_client(self, *, container: str) -> DummyContainerClient:
+            return self.container_client
+
+        def close(self) -> None:
+            self.close_calls += 1
+
+    class DummyBlobServiceClientFactory:
+        @staticmethod
+        def from_connection_string(connect_string: str) -> DummyBlobServiceClient:
+            return DummyBlobServiceClient()
+
+    created_clients: list[DummyBlobServiceClient] = []
+
+    class FakeBlobServiceClientFactory:
+        @staticmethod
+        def from_connection_string(connect_string: str) -> DummyBlobServiceClient:
+            client = DummyBlobServiceClient()
+            created_clients.append(client)
+            return client
+
+    UploadProviderAzure._clear_cache_for_tests()
+
+    try:
+        monkeypatch.setattr(
+            "azure.storage.blob.BlobServiceClient",
+            FakeBlobServiceClientFactory,
+        )
+
+        provider_model = AzureProviderModel(
+            name="azure",
+            container_name="shared",
+            connect_string=SecretStr("DefaultEndpointsProtocol=http;AccountName=test;"),
+        )
+
+        first_provider = UploadProviderAzure(provider_model)
+        second_provider = UploadProviderAzure(provider_model)
+
+        expected_initial_creations = 1
+        assert len(created_clients) == expected_initial_creations
+        assert first_provider.blob_service_client is second_provider.blob_service_client
+        assert first_provider.container_client is second_provider.container_client
+
+        first_provider.close()
+        assert created_clients[0].close_calls == 0
+        assert created_clients[0].container_client.close_calls == 0
+
+        second_provider.close()
+        assert created_clients[0].close_calls == 1
+        assert created_clients[0].container_client.close_calls == 1
+
+        third_provider = UploadProviderAzure(provider_model)
+        expected_total_creations = 2
+        assert len(created_clients) == expected_total_creations
+
+        third_provider.close()
+        assert created_clients[1].close_calls == 1
+        assert created_clients[1].container_client.close_calls == 1
+    finally:
+        UploadProviderAzure._clear_cache_for_tests()
+
+
+def test_azure_provider_close_handles_missing_cache(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Ensure close succeeds when cache entry vanishes before closing."""
+
+    class DummyContainerClient:
+        def __init__(self) -> None:
+            self.close_calls = 0
+
+        def close(self) -> None:
+            self.close_calls += 1
+
+    class DummyBlobServiceClient:
+        def __init__(self) -> None:
+            self.close_calls = 0
+            self.container_client = DummyContainerClient()
+
+        def get_container_client(self, *, container: str) -> DummyContainerClient:
+            return self.container_client
+
+        def close(self) -> None:
+            self.close_calls += 1
+
+    class DummyBlobServiceClientFactory:
+        @staticmethod
+        def from_connection_string(connect_string: str) -> DummyBlobServiceClient:
+            return DummyBlobServiceClient()
+
+    UploadProviderAzure._clear_cache_for_tests()
+
+    try:
+        monkeypatch.setattr(
+            "azure.storage.blob.BlobServiceClient",
+            DummyBlobServiceClientFactory,
+        )
+
+        provider_model = AzureProviderModel(
+            name="azure",
+            container_name="shared",
+            connect_string=SecretStr(
+                "DefaultEndpointsProtocol=http;AccountName=test;",
+            ),
+        )
+
+        provider = UploadProviderAzure(provider_model)
+        cached_blob_client = provider.blob_service_client
+        cached_container_client = provider.container_client
+
+        UploadProviderAzure._clear_cache_for_tests()
+
+        assert cached_blob_client.close_calls == 1
+        assert cached_container_client.close_calls == 1
+
+        provider.close()
+
+        assert cached_blob_client.close_calls == 1
+        assert cached_container_client.close_calls == 1
+        assert provider._closed is True
+    finally:
+        UploadProviderAzure._clear_cache_for_tests()
