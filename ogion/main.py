@@ -5,6 +5,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import argparse
+import functools
 import logging
 import shutil
 import signal
@@ -40,6 +41,7 @@ def quit(sig: int, frame: FrameType | None) -> None:
     exit_event.set()
 
 
+@functools.lru_cache(maxsize=1)
 @NotificationsContext(step_name=PROGRAM_STEP.SETUP_PROVIDER)
 def backup_provider() -> base_provider.BaseUploadProvider:
     provider_cls_map = providers_mapping.get_provider_cls_map()
@@ -134,9 +136,6 @@ def shutdown() -> NoReturn:  # pragma: no cover
 def run_backup(target: base_target.BaseBackupTarget) -> None:
     log.info("start making backup of target: `%s`", target.env_name)
 
-    # init provider every time in each new thread
-    # eg. s3 session are not thread safe
-    # this should add only minimal overhead
     provider = backup_provider()
 
     with NotificationsContext(
@@ -402,11 +401,7 @@ def run_debug_loop(iterations: int) -> NoReturn:  # pragma: no cover
                 name=target.pretty_thread_name,
             ).start()
 
-        while any(
-            t.is_alive()
-            for t in threading.enumerate()
-            if t.name.startswith("BACKUP_TARGET_")
-        ):
+        while len(threading.enumerate()) > 6:  # noqa: PLR2004
             exit_event.wait(0.5)
 
         if iteration % 10 == 0 or iteration == iterations:
@@ -535,6 +530,14 @@ def run_main_loop() -> NoReturn:  # pragma: no cover
     targets = backup_targets()
 
     while not exit_event.is_set():
+        if len(threading.enumerate()) - 1 > 3 * len(targets):
+            log.warning(
+                "too many threads running (%s), waiting before next iteration...",
+                len(threading.enumerate()),
+            )
+            exit_event.wait(5)
+            continue
+
         for target in targets:
             if not target.next_backup():
                 continue
