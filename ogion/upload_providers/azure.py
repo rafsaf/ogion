@@ -34,23 +34,25 @@ class UploadProviderAzure(BaseUploadProvider):
         backup_dest_in_azure_container = (
             f"{age_backup_file.parent.name}/{age_backup_file.name}"
         )
-        blob_client = self.container_client.get_blob_client(
+
+        with self.container_client.get_blob_client(
             blob=backup_dest_in_azure_container
-        )
+        ) as blob_client:
+            log.info(
+                "start uploading %s to %s",
+                age_backup_file,
+                backup_dest_in_azure_container,
+            )
 
-        log.info(
-            "start uploading %s to %s", age_backup_file, backup_dest_in_azure_container
-        )
+            with open(file=age_backup_file, mode="rb") as data:
+                blob_client.upload_blob(data=data)
 
-        with open(file=age_backup_file, mode="rb") as data:
-            blob_client.upload_blob(data=data)
-
-        log.info(
-            "uploaded %s to %s in %s",
-            age_backup_file,
-            backup_dest_in_azure_container,
-            self.container_name,
-        )
+            log.info(
+                "uploaded %s to %s in %s",
+                age_backup_file,
+                backup_dest_in_azure_container,
+                self.container_name,
+            )
 
         core.remove_path(age_backup_file)
         core.remove_path(backup_file)
