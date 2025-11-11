@@ -401,11 +401,7 @@ def run_debug_loop(iterations: int) -> NoReturn:  # pragma: no cover
                 name=target.pretty_thread_name,
             ).start()
 
-        while any(
-            t.is_alive()
-            for t in threading.enumerate()
-            if t.name.startswith("BACKUP_TARGET_")
-        ):
+        while len(threading.enumerate()) > 6:  # noqa: PLR2004
             exit_event.wait(0.5)
 
         if iteration % 10 == 0 or iteration == iterations:
