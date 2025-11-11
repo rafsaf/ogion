@@ -530,6 +530,14 @@ def run_main_loop() -> NoReturn:  # pragma: no cover
     targets = backup_targets()
 
     while not exit_event.is_set():
+        if len(threading.enumerate()) - 1 > 3 * len(targets):
+            log.warning(
+                "too many threads running (%s), waiting before next iteration...",
+                len(threading.enumerate()),
+            )
+            exit_event.wait(5)
+            continue
+
         for target in targets:
             if not target.next_backup():
                 continue
