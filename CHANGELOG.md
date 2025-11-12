@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [8.3] - 2025-11-12
+
+### Added
+
 - Shell autocomplete support - Added bash autocomplete for all CLI commands and arguments using `argcomplete` library. Autocomplete works for target names, backup files, and all command options
 - New `ogion` command (default entrypoint) - Added `ogion` bash script as a convenient shortcut for `python -m ogion.main`. Both commands work identically
 - Improved `--single` flag - Can now backup a specific target using `--single --target <name>` instead of running all backups
