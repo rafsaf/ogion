@@ -86,17 +86,6 @@ services:
     ports:
     - 9095:3306
     restart: 'no'
-  ogion_postgres_13:
-    environment:
-    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
-    - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:13-bookworm
-    networks:
-    - ogion
-    ports:
-    - 10013:5432
-    restart: 'no'
   ogion_postgres_14:
     environment:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
