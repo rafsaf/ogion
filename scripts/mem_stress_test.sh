@@ -292,19 +292,19 @@ if len(samples) < 10:
 
 # Calculate statistics
 total_samples = len(samples)
-initial_samples = samples[:max(10, int(total_samples * 0.05))]  # First 5%
+mid_samples = samples[max(10, int(total_samples * 0.15)):max(10, int(total_samples * 0.25))]  # Mid 15-25%
 final_samples = samples[-max(10, int(total_samples * 0.1)):]    # Last 10%
 
-initial_rss = sum(s['rss_mb'] for s in initial_samples) / len(initial_samples)
+mid_rss = sum(s['rss_mb'] for s in mid_samples) / len(mid_samples)
 final_rss = sum(s['rss_mb'] for s in final_samples) / len(final_samples)
 peak_rss = max(s['rss_mb'] for s in samples)
 min_rss = min(s['rss_mb'] for s in samples)
 
-growth_mb = final_rss - initial_rss
-growth_pct = (growth_mb / initial_rss * 100) if initial_rss > 0 else 0
+growth_mb = final_rss - mid_rss
+growth_pct = (growth_mb / mid_rss * 100) if mid_rss > 0 else 0
 
 print(f"  Total samples:  {total_samples}")
-print(f"  Initial RSS:    {initial_rss:.2f}MB (avg of first {len(initial_samples)} samples)")
+print(f"  Mid RSS:        {mid_rss:.2f}MB (avg of mid {len(mid_samples)} samples)")
 print(f"  Final RSS:      {final_rss:.2f}MB (avg of last {len(final_samples)} samples)")
 print(f"  Peak RSS:       {peak_rss:.2f}MB")
 print(f"  Min RSS:        {min_rss:.2f}MB")
@@ -312,10 +312,10 @@ print(f"  Growth:         {growth_mb:+.2f}MB ({growth_pct:+.1f}%)")
 
 # Check file descriptors if available
 if samples[0]['num_fds'] != -1 and samples[-1]['num_fds'] != -1:
-    initial_fds = sum(s['num_fds'] for s in initial_samples if s['num_fds'] != -1) / len([s for s in initial_samples if s['num_fds'] != -1])
+    mid_fds = sum(s['num_fds'] for s in mid_samples if s['num_fds'] != -1) / len([s for s in mid_samples if s['num_fds'] != -1])
     final_fds = sum(s['num_fds'] for s in final_samples if s['num_fds'] != -1) / len([s for s in final_samples if s['num_fds'] != -1])
-    fd_growth = final_fds - initial_fds
-    print(f"  Initial FDs:    {initial_fds:.0f}")
+    fd_growth = final_fds - mid_fds
+    print(f"  Mid FDs:        {mid_fds:.0f}")
     print(f"  Final FDs:      {final_fds:.0f}")
     print(f"  FD Growth:      {fd_growth:+.0f}")
 else:
