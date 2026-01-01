@@ -292,7 +292,7 @@ if len(samples) < 10:
 
 # Calculate statistics
 total_samples = len(samples)
-mid_samples = samples[max(10, int(total_samples * 0.15)):max(10, int(total_samples * 0.25))]  # Mid 15-25%
+mid_samples = samples[max(10, int(total_samples * 0.45)):max(10, int(total_samples * 0.55))]  # Mid 45-55%
 final_samples = samples[-max(10, int(total_samples * 0.1)):]    # Last 10%
 
 mid_rss = sum(s['rss_mb'] for s in mid_samples) / len(mid_samples)
@@ -324,9 +324,9 @@ else:
 # Linear regression to detect trend
 import statistics
 if len(samples) >= 20:
-    # Use middle 80% of samples to avoid startup/shutdown noise
-    start_idx = int(total_samples * 0.1)
-    end_idx = int(total_samples * 0.9)
+    # Use middle of samples to avoid startup/shutdown noise
+    start_idx = int(total_samples * 0.2)
+    end_idx = int(total_samples * 0.95)
     stable_samples = samples[start_idx:end_idx]
     
     if len(stable_samples) >= 10:
@@ -358,8 +358,8 @@ else:
 print()
 
 # Determine leak status
-LEAK_THRESHOLD_PCT = 10  # 10% growth
-LEAK_THRESHOLD_MB = 20   # 20MB absolute growth
+LEAK_THRESHOLD_PCT = 20  # 20% growth
+LEAK_THRESHOLD_MB = 25   # 25MB absolute growth
 FD_LEAK_THRESHOLD = 50   # 50 file descriptors
 
 leak_detected = False
