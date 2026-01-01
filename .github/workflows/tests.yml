@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: "12 12 * * *"
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   tests:
     strategy:
@@ -33,36 +37,14 @@ jobs:
           touch .env
           make docker_setup_up
 
-      - name: Cache
-        uses: actions/cache@v4
-        id: cache
-        with:
-          path: |
-            var-cache-pip
-            var-cache-apt
-            var-lib-apt
-          key: ${{ runner.os }}-cache-${{ hashFiles('docker/Dockerfile') }}
-
-      - name: Inject cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v3.3.0
-        with:
-          cache-map: |
-            {
-              "var-cache-pip": "/var/cache/pip",
-              "var-cache-apt": "/var/cache/apt",
-              "var-lib-apt": "/var/lib/apt"
-            }
-          skip-extraction: ${{ steps.cache.outputs.cache-hit }}
-
       - name: Build and cache images
         uses: docker/build-push-action@v6
         with:
           file: docker/Dockerfile
           context: .
           target: tests
-          # cache-from: type=gha,scope=python:3.14-slim-trixie
-          # cache-to: type=gha,mode=max,scope=python:3.14-slim-trixie
-          no-cache: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           push: false
           tags: rafsaf/ogion:dev
           load: true

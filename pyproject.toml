@@ -1,6 +1,6 @@
 [project]
 name = "ogion"
-version = "8.3"
+version = "8.4"
 description = "A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms."
 authors = [{ name = "Rafał Safin", email = "rafal.safin@rafsaf.pl" }]
 requires-python = ">=3.14,<3.15"
