@@ -1,13 +1,23 @@
 [
     {
-        "cycle": "12.1",
-        "releaseDate": "2025-11-18",
-        "eol": "2026-02-18",
-        "latest": "12.1.2",
+        "cycle": "12.2",
+        "releaseDate": "2026-02-13",
+        "eol": "2026-05-13",
+        "latest": "12.2.2",
         "link": null,
         "support": null,
         "discontinued": null,
         "before_eol": true
+    },
+    {
+        "cycle": "12.1",
+        "releaseDate": "2025-11-18",
+        "eol": "2026-02-13",
+        "latest": "12.1.2",
+        "link": null,
+        "support": null,
+        "discontinued": null,
+        "before_eol": false
     },
     {
         "cycle": "12.0",
