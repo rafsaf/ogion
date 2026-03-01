@@ -56,7 +56,7 @@ jobs:
           make mem_stress_test
 
       - name: Upload memory stress test results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: mem-stress-test-results-${{ matrix.provider }}-${{ matrix.arch }}
           path: |
