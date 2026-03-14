@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [8.4] - 2026-03-14
+
+### Added
+
+- More extensive full end to end tests for backup target X storage provider matrix
+
+### Changed
+
+### Fixed
+
+- Hardened backup and restore subprocess execution to avoid shell injection issues with file paths and backup names
+- Stopped logging sensitive configuration values and PostgreSQL password file contents in debug logs
+- Prevented path traversal when downloading backups from storage providers into the local downloads directory
+- Retry-on-network-errors now retries only real network-related subprocess failures instead of every command failure
+- Added fail-fast shell options to the MariaDB and PostgreSQL client installation scripts so pipeline and command failures stop the scripts immediately
+- Restore flows now always clean downloaded and decrypted local artifacts even when decrypt or restore fails
+- MariaDB option-file generation now rejects newline characters in credentials and `client_` parameters to prevent option injection via multiline values
+- Target and provider config parsing now rejects duplicate fields and leading garbage, and target discovery uses stricter env-name prefix matching
+- Subprocess execution now wraps missing executables and timeouts consistently, avoids logging raw provider secrets, and retention parsing validates backup filenames more strictly in UTC
+
 ## [8.3] - 2025-11-12
 
 ### Added

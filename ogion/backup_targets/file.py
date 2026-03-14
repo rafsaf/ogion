@@ -2,6 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import logging
+import shutil
 from pathlib import Path
 from typing import override
 
@@ -23,17 +24,15 @@ class File(BaseBackupTarget):
 
         out_file = core.get_new_backup_path(self.env_name, escaped_filename)
 
-        shell_create_file_symlink = f"cp {self.target_model.abs_path} {out_file}"
-        log.debug("start ln in subprocess: %s", shell_create_file_symlink)
-        core.run_subprocess(shell_create_file_symlink)
+        log.debug("start copy of %s to %s", self.target_model.abs_path, out_file)
+        shutil.copy2(self.target_model.abs_path, out_file)
         log.debug("finished ln, output: %s", out_file)
         return out_file
 
     @override
     def restore(self, path: str) -> None:
         log.info("start restore of %s", path)
-        shell_cp_file = f"cp {path} {self.target_model.abs_path}"
-        log.debug("start cp in subprocess: %s", shell_cp_file)
-        core.run_subprocess(shell_cp_file)
+        log.debug("start copy of %s to %s", path, self.target_model.abs_path)
+        shutil.copy2(path, self.target_model.abs_path)
         log.debug("finished cp to %s", self.target_model.abs_path)
         log.info("success restore of %s", path)

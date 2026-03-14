@@ -485,14 +485,25 @@ def run_restore_latest(target_name: str) -> NoReturn:
             print(f"no backups at all for '{target_name}'")
             sys.exit(2)
         latest_backup = backups[0]
-        path_age = provider.download_backup(latest_backup)
-        path = core.run_decrypt_age_archive(path_age)
-        target.restore(str(path))
-        shutil.rmtree(path.parent)
+        _restore_backup(target=target, backup_path=latest_backup, provider=provider)
         sys.exit(0)
     log.warning("target '%s' does not exist", target_name)
     print(f"target '{target_name}' does not exist")
     sys.exit(1)
+
+
+def _restore_backup(
+    target: base_target.BaseBackupTarget,
+    backup_path: str,
+    provider: base_provider.BaseUploadProvider,
+) -> None:
+    path_age = provider.download_backup(backup_path)
+    restore_dir = path_age.parent
+    try:
+        path = core.run_decrypt_age_archive(path_age)
+        target.restore(str(path))
+    finally:
+        shutil.rmtree(restore_dir, ignore_errors=True)
 
 
 def run_restore(backup_name: str, target_name: str) -> NoReturn:
@@ -513,10 +524,7 @@ def run_restore(backup_name: str, target_name: str) -> NoReturn:
             )
             print(f"backup '{backup_name}' not exist at all for '{target_name}'")
             sys.exit(2)
-        path_age = provider.download_backup(backup_name)
-        path = core.run_decrypt_age_archive(path_age)
-        target.restore(str(path))
-        shutil.rmtree(path.parent)
+        _restore_backup(target=target, backup_path=backup_name, provider=provider)
         sys.exit(0)
     log.warning("target '%s' does not exist", target_name)
     print(f"target '{target_name}' does not exist")

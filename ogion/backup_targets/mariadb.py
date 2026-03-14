@@ -30,27 +30,41 @@ class MariaDB(BaseBackupTarget):
         self.db_version: str = self._mariadb_connection()
 
     def _init_option_file(self) -> Path:
+        def ensure_single_line(field_name: str, value: str) -> str:
+            if "\n" in value or "\r" in value:
+                raise ValueError(
+                    "MariaDB option file field "
+                    f"{field_name!r} must not contain newlines"
+                )
+            return value
+
         def escape(s: str) -> str:
-            return s.replace("\\", "\\\\")
+            single_line_value = ensure_single_line("option value", s)
+            return single_line_value.replace("\\", "\\\\")
 
         password = self.target_model.password.get_secret_value()
+        host = ensure_single_line("host", self.target_model.host)
+        port = ensure_single_line("port", str(self.target_model.port))
         text = "{}\n{}\n{}\n{}\n{}\n{}\n".format(
             "[client]",
             f'user="{escape(self.target_model.user)}"',
-            f"host={self.target_model.host}",
-            f"port={self.target_model.port}",
+            f"host={host}",
+            f"port={port}",
             "protocol=TCP",
-            f'password="{escape(password)}"' if self.target_model.password else "",
+            f'password="{escape(password)}"',
         )
 
         # https://mariadb.com/kb/en/mariadb-command-line-client/
         params = {}
-        if self.target_model.model_extra is not None:
-            for param, value in self.target_model.model_extra.items():
-                if not param.startswith("client_"):
-                    continue
+        for param, value in (self.target_model.model_extra or {}).items():
+            if not param.startswith("client_"):
+                continue
 
-                params[param.removeprefix("client_")] = value
+            option_name = ensure_single_line(
+                "option name", param.removeprefix("client_")
+            )
+            option_value = ensure_single_line("option value", value)
+            params[option_name] = option_value
 
         for param_name, value in params.items():
             text += f"{param_name}={value}\n"
@@ -69,7 +83,7 @@ class MariaDB(BaseBackupTarget):
     def _mariadb_connection(self) -> str:
         try:
             log.debug("check mariadb installation")
-            mariadb_version = core.run_subprocess("mariadb -V")
+            mariadb_version = core.run_subprocess(["mariadb", "-V"])
             log.debug("output: %s", mariadb_version)
         except core.CoreSubprocessError as version_err:  # pragma: no cover
             log.critical(
@@ -80,8 +94,12 @@ class MariaDB(BaseBackupTarget):
         log.debug("start mariadb connection")
         try:
             result = core.run_subprocess(
-                f"mariadb --defaults-file={self.option_file} {self.db_name} "
-                f"--execute='SELECT version();'",
+                [
+                    "mariadb",
+                    f"--defaults-file={self.option_file}",
+                    self.target_model.db,
+                    "--execute=SELECT version();",
+                ],
             )
         except core.CoreSubprocessError as conn_err:
             log.error(conn_err, exc_info=True)
@@ -113,12 +131,14 @@ class MariaDB(BaseBackupTarget):
 
         out_file = core.get_new_backup_path(self.env_name, name).with_suffix(".sql")
 
-        shell_mariadb_dump_db = (
-            f"mariadb-dump --defaults-file={self.option_file} "
-            f"--result-file={out_file} {self.db_name}"
-        )
-        log.debug("start mariadbdump in subprocess: %s", shell_mariadb_dump_db)
-        core.run_subprocess(shell_mariadb_dump_db)
+        mariadb_dump_args = [
+            "mariadb-dump",
+            f"--defaults-file={self.option_file}",
+            f"--result-file={out_file}",
+            self.target_model.db,
+        ]
+        log.debug("start mariadbdump in subprocess: %s", mariadb_dump_args)
+        core.run_subprocess(mariadb_dump_args)
         log.debug("finished mariadbdump, output: %s", out_file)
         return out_file
 
@@ -126,10 +146,12 @@ class MariaDB(BaseBackupTarget):
     @core.retry_on_network_errors()
     def restore(self, path: str) -> None:
         log.info("start restore of %s", path)
-        shell_mariadb_restore = (
-            f"mariadb --defaults-file={self.option_file} {self.db_name} < {path}"
-        )
-        log.debug("start restore in subprocess: %s", shell_mariadb_restore)
-        core.run_subprocess(shell_mariadb_restore)
+        restore_args = [
+            "mariadb",
+            f"--defaults-file={self.option_file}",
+            self.target_model.db,
+        ]
+        log.debug("start restore in subprocess: %s", restore_args)
+        core.run_subprocess(restore_args, stdin_path=Path(path))
         log.debug("finished restore")
         log.info("success restore of %s", path)

@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -euo pipefail
+
 #########################################################################
 # POSTGRES CLIENT INSTALLATION
 #

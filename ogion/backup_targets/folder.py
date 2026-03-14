@@ -25,12 +25,19 @@ class Folder(BaseBackupTarget):
             self.env_name, escaped_foldername
         ).with_suffix(".tar")
 
-        shell_create_dir_tar = (
-            f"tar -C {self.target_model.abs_path.parent} "
-            f"-cf {out_file} {self.target_model.abs_path.name}"
+        tar_args = [
+            "tar",
+            "-C",
+            str(self.target_model.abs_path.parent),
+            "-cf",
+            str(out_file),
+            self.target_model.abs_path.name,
+        ]
+        log.debug(
+            "start tar in subprocess: %s",
+            tar_args,
         )
-        log.debug("start tar in subprocess: %s", shell_create_dir_tar)
-        core.run_subprocess(shell_create_dir_tar)
+        core.run_subprocess(tar_args)
         log.debug("finished tar, output: %s", out_file)
         return out_file
 
@@ -39,10 +46,18 @@ class Folder(BaseBackupTarget):
         log.info("start restore of %s", path)
         self.target_model.abs_path.mkdir(parents=True, exist_ok=True)
 
-        shell_untar_file = (
-            f"tar xf {path} -C {self.target_model.abs_path} --strip-components=1"
+        untar_args = [
+            "tar",
+            "xf",
+            path,
+            "-C",
+            str(self.target_model.abs_path),
+            "--strip-components=1",
+        ]
+        log.debug(
+            "start tar extract in subprocess: %s",
+            untar_args,
         )
-        log.debug("start tar extract in subprocess: %s", shell_untar_file)
-        core.run_subprocess(shell_untar_file)
+        core.run_subprocess(untar_args)
         log.debug("finished tar extract to %s", self.target_model.abs_path)
         log.info("success restore of %s", path)

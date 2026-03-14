@@ -260,3 +260,88 @@ def test_run_restore(
     captured = capsys.readouterr()
 
     assert captured.out == f"no backups at all for '{other_target_model.env_name}'\n"
+
+
+def test_run_restore_latest_decrypt_failure_cleans_download_dir(
+    monkeypatch: pytest.MonkeyPatch,
+    provider: BaseUploadProvider,
+    provider_prefix: str,
+    mock_main_backup_targets: None,
+) -> None:
+    monkeypatch.setattr(
+        main,
+        "backup_provider",
+        Mock(return_value=provider),
+    )
+
+    backup_target = [
+        target
+        for target in main.backup_targets()
+        if target.env_name == ALL_TARGETS[0].env_name
+    ][0]
+
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / backup_target.env_name
+    fake_backup_dir_path.mkdir()
+
+    (fake_backup_dir_path / "file_20230427_0108_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "file_20230427_0108_dummy_xfcs")
+
+    provider_file = (
+        f"{provider_prefix}{backup_target.env_name}"
+        "/file_20230427_0108_dummy_xfcs.lz.age"
+    )
+    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / str(
+        provider_file
+    ).removeprefix("/")
+
+    monkeypatch.setattr(
+        core,
+        "run_decrypt_age_archive",
+        Mock(side_effect=PermissionError("decrypt failed")),
+    )
+
+    with pytest.raises(PermissionError):
+        main.run_restore_latest(backup_target.env_name)
+
+    assert not provider_file_download.parent.exists()
+
+
+def test_run_restore_restore_failure_cleans_download_dir(
+    monkeypatch: pytest.MonkeyPatch,
+    provider: BaseUploadProvider,
+    provider_prefix: str,
+    mock_main_backup_targets: None,
+) -> None:
+    monkeypatch.setattr(
+        main,
+        "backup_provider",
+        Mock(return_value=provider),
+    )
+
+    backup_target = [
+        target
+        for target in main.backup_targets()
+        if target.env_name == ALL_TARGETS[0].env_name
+    ][0]
+
+    fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / backup_target.env_name
+    fake_backup_dir_path.mkdir()
+
+    (fake_backup_dir_path / "file_20230427_0108_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "file_20230427_0108_dummy_xfcs")
+
+    provider_file = (
+        f"{provider_prefix}{backup_target.env_name}"
+        "/file_20230427_0108_dummy_xfcs.lz.age"
+    )
+    provider_file_download = config.CONST_DOWNLOADS_FOLDER_PATH / str(
+        provider_file
+    ).removeprefix("/")
+
+    restore_mock = Mock(side_effect=PermissionError("restore failed"))
+    monkeypatch.setattr(backup_target.__class__, "restore", restore_mock)
+
+    with pytest.raises(PermissionError):
+        main.run_restore(backup_name=provider_file, target_name=backup_target.env_name)
+
+    assert not provider_file_download.parent.exists()

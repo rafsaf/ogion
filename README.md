@@ -11,11 +11,9 @@
 
 A tool for performing scheduled database backups and transferring encrypted data to secure public clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms.
 
-Backups are in `age` format using [age](https://github.com/FiloSottile/age), with strong encryption under the hood. Why age? it's modern replacement for GnuPG, available for most architectures and systems.
+Backups are in [age](https://github.com/FiloSottile/age) format, with strong encryption under the hood. Why age? it's modern replacement for GnuPG, available for most architectures and systems. [Lzip](https://www.nongnu.org/lzip/) compression is used before encryption step.
 
-This project is more or less well tested cron-like runtime with predefined supported providers and backup targets (see below) with sensible defaults for backup commands. It has rich integration tests using providers container replacements: fake gcs, azurite, minio. Goal was to make 100% sure it will work in the wild.
-
-Starting from version 8.0, [lzip](https://www.nongnu.org/lzip/) compression is used before encryption step. While mixing compression with encryption can be dangerous in some scenarios, `lzip` is used here, because it operates on fixed-size blocks, making it resistant to compression side-channel attacks.
+At this point, no fundamental breaking changes are planned, you may consider this as a stable, feature complete software.
 
 ## Documentation
 

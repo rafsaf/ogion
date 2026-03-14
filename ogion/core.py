@@ -6,11 +6,13 @@ import logging
 import os
 import re
 import secrets
+import shlex
 import subprocess
 import tempfile
 import typing
+from contextlib import nullcontext
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import tenacity
@@ -30,7 +32,7 @@ class CoreSubprocessError(Exception):
     pass
 
 
-def is_network_error(exception: Exception) -> bool:
+def is_network_error(exception: BaseException) -> bool:
     """Check if exception is a network-related error that should be retried."""
     if not isinstance(exception, CoreSubprocessError):
         return False
@@ -59,7 +61,7 @@ def retry_before_sleep(retry_state: tenacity.RetryCallState) -> None:
 
 def retry_on_network_errors(attempts: int = 3) -> typing.Callable:  # type: ignore
     return tenacity.retry(
-        retry=tenacity.retry_if_exception_type(CoreSubprocessError),
+        retry=tenacity.retry_if_exception(is_network_error),
         stop=tenacity.stop_after_attempt(attempts),
         wait=tenacity.wait_exponential(multiplier=1, min=2, max=16),
         before_sleep=retry_before_sleep,
@@ -67,22 +69,58 @@ def retry_on_network_errors(attempts: int = 3) -> typing.Callable:  # type: igno
     )
 
 
-def run_subprocess(shell_args: str) -> str:
-    log.debug("run_subprocess running: '%s'", shell_args)
+def run_subprocess(
+    shell_args: list[str],
+    *,
+    stdin_path: Path | None = None,
+) -> str:
+    display_args = shlex.join(str(arg) for arg in shell_args)
+
+    log.debug("run_subprocess running: '%s'", display_args)
     try:
-        p = subprocess.run(
-            shell_args,
-            capture_output=True,
-            text=True,
-            shell=True,
-            timeout=config.options.SUBPROCESS_TIMEOUT_SECS,
-            check=True,
+        with (
+            open(stdin_path, "rb") if stdin_path is not None else nullcontext(None)
+        ) as stdin_file:
+            p = subprocess.run(
+                shell_args,
+                capture_output=True,
+                text=True,
+                stdin=stdin_file,
+                timeout=config.options.SUBPROCESS_TIMEOUT_SECS,
+                check=True,
+            )
+    except FileNotFoundError as process_error:
+        log.error("run_subprocess executable not found: %s", process_error)
+        raise CoreSubprocessError(str(process_error)) from process_error
+    except subprocess.TimeoutExpired as process_error:
+        stdout_raw = process_error.stdout
+        stderr_raw = process_error.stderr
+        stdout: str | None = (
+            stdout_raw.decode(errors="replace")
+            if isinstance(stdout_raw, bytes)
+            else stdout_raw
         )
+        stderr: str | None = (
+            stderr_raw.decode(errors="replace")
+            if isinstance(stderr_raw, bytes)
+            else stderr_raw
+        )
+
+        log.error("run_subprocess timed out after %s seconds", process_error.timeout)
+        log.error("run_subprocess stdout: %s", stdout)
+        log.error("run_subprocess stderr: %s", stderr)
+        raise CoreSubprocessError(
+            stderr
+            or stdout
+            or f"Command timed out after {process_error.timeout} seconds"
+        ) from process_error
     except subprocess.CalledProcessError as process_error:
         log.error("run_subprocess failed with status %s", process_error.returncode)
         log.error("run_subprocess stdout: %s", process_error.stdout)
         log.error("run_subprocess stderr: %s", process_error.stderr)
-        raise CoreSubprocessError(process_error.stderr)
+        raise CoreSubprocessError(
+            process_error.stderr or process_error.stdout
+        ) from process_error
 
     log.debug("run_subprocess finished with status %s", p.returncode)
     log.debug("run_subprocess stdout: %s", p.stdout)
@@ -114,18 +152,36 @@ def size(path: Path) -> str:
     return f"{file_size} MB"
 
 
+def get_safe_download_path(path: str) -> Path:
+    raw_parts = path.lstrip("/").split("/")
+    if not raw_parts or raw_parts == [""]:
+        raise ValueError("backup path cannot be empty")
+    if any(part in {"", ".", ".."} for part in raw_parts):
+        raise ValueError(f"unsafe backup path: {path}")
+    relative_path = PurePosixPath(*raw_parts)
+    return config.CONST_DOWNLOADS_FOLDER_PATH.joinpath(*relative_path.parts)
+
+
+def get_safe_debug_download_paths(path: str) -> tuple[Path, Path]:
+    source = Path(path).resolve(strict=False)
+    debug_root = config.CONST_DEBUG_FOLDER_PATH.resolve(strict=False)
+    try:
+        source.relative_to(debug_root)
+    except ValueError as err:
+        raise ValueError(f"unsafe debug backup path: {path}") from err
+    return source, get_safe_download_path(path.removeprefix("/"))
+
+
 def run_lzip_compression(backup_file: Path) -> Path:
     log.info("start lzip compression on %s: %s", backup_file, size(backup_file))
     out = Path(f"{backup_file}.lz")
 
-    threads_arg = (
-        f"-n {config.options.LZIP_THREADS} " if config.options.LZIP_THREADS else ""
-    )
-    shell_lzip_compression = (
-        f"plzip -{config.options.LZIP_LEVEL} {threads_arg}-o {out} {backup_file}"
-    )
+    args = ["plzip", f"-{config.options.LZIP_LEVEL}"]
+    if config.options.LZIP_THREADS:
+        args.extend(["-n", str(config.options.LZIP_THREADS)])
+    args.extend(["-o", str(out), str(backup_file)])
 
-    run_subprocess(shell_lzip_compression)
+    run_subprocess(args)
 
     log.info("created compressed file %s: %s", out, size(out))
 
@@ -143,12 +199,12 @@ def run_lzip_decrypt(backup_file: Path) -> Path:
     )
     out = Path(str(backup_file).removesuffix(".lz"))
 
-    threads_arg = (
-        f"-n {config.options.LZIP_THREADS} " if config.options.LZIP_THREADS else ""
-    )
-    shell_lzip_decompression = f"plzip -d {threads_arg}-o {out} {backup_file}"
+    args = ["plzip", "-d"]
+    if config.options.LZIP_THREADS:
+        args.extend(["-n", str(config.options.LZIP_THREADS)])
+    args.extend(["-o", str(out), str(backup_file)])
 
-    run_subprocess(shell_lzip_decompression)
+    run_subprocess(args)
 
     log.info("created decompressed file %s: %s", out, size(out))
 
@@ -171,10 +227,17 @@ def run_decrypt_age_archive(backup_file: Path) -> Path:
         identity_file.write(secret)
         identity_file.flush()
 
-        shell_age_decrypt_archive = (
-            f"age -d -o {out} -i {identity_file.name} {backup_file}"
+        run_subprocess(
+            [
+                "age",
+                "-d",
+                "-o",
+                str(out),
+                "-i",
+                identity_file.name,
+                str(backup_file),
+            ]
         )
-        run_subprocess(shell_age_decrypt_archive)
         log.info("finished age archive decrypt")
 
     return run_lzip_decrypt(out)
@@ -191,8 +254,16 @@ def run_create_age_archive(backup_file: Path) -> Path:
 
     recipients = config.options.age_recipients_file
 
-    shell_create_age_archive = f"age -R {recipients} -o {out_file} {backup_file}"
-    run_subprocess(shell_create_age_archive)
+    run_subprocess(
+        [
+            "age",
+            "-R",
+            str(recipients),
+            "-o",
+            str(out_file),
+            str(backup_file),
+        ]
+    )
     log.info("finished age archive creating")
 
     remove_path(backup_file)
@@ -212,22 +283,32 @@ def _validate_model[BM: BaseModel](
 ) -> BM:
     target_name: str = target.__name__.lower()
     log.info("validating %s variable: `%s`", target_name, env_name)
-    log.debug("%s=%s", target_name, env_value)
     try:
         env_value_parts = env_value.strip()
         fields_matches = [
             match.group()
             for match in MODEL_SPLIT_EQUATION_PATTERN.finditer(env_value_parts)
         ]
+        if not fields_matches:
+            raise ValueError(f"could not parse any fields from: {env_value!r}")
+
         target_kwargs: dict[str, Any] = {"env_name": env_name}
+        seen_fields: set[str] = set()
 
         while fields_matches:
             field_match = fields_matches.pop()
             rest, value = env_value_parts.split(field_match, maxsplit=1)
             env_value_parts = rest.rstrip()
-            target_kwargs[field_match.removesuffix("=").strip()] = value
+            field_name = field_match.removesuffix("=").strip()
+            if field_name in seen_fields:
+                raise ValueError(f"duplicate field in config: {field_name!r}")
+            seen_fields.add(field_name)
+            target_kwargs[field_name] = value
 
-        log.debug("calculated arguments: %s", target_kwargs)
+        if env_value_parts:
+            raise ValueError(f"unexpected unparsed text in config: {env_value_parts!r}")
+
+        log.debug("calculated arguments keys: %s", sorted(target_kwargs))
         validated_target = target.model_validate(target_kwargs)
     except Exception:
         log.critical("error validating environment variable: `%s`", env_name)
@@ -244,12 +325,17 @@ def create_target_models() -> list[backup_target_models.TargetModel]:
         env_name_lowercase = env_name.lower()
         log.debug("processing env variable %s", env_name_lowercase)
         for target_model_name in target_map:
-            if env_name_lowercase.startswith(target_model_name):
-                target_model_cls = target_map[target_model_name]
-                targets.append(
-                    _validate_model(env_name_lowercase, env_value, target_model_cls)
-                )
-                break
+            if (
+                env_name_lowercase != target_model_name
+                and not env_name_lowercase.startswith(f"{target_model_name}_")
+            ):
+                continue
+
+            target_model_cls = target_map[target_model_name]
+            targets.append(
+                _validate_model(env_name_lowercase, env_value, target_model_cls)
+            )
+            break
 
     return targets
 
@@ -258,7 +344,6 @@ def create_provider_model() -> upload_provider_models.ProviderModel:
     provider_map = models_mapping.get_provider_map()
 
     log.info("start validating BACKUP_PROVIDER environment variable")
-    log.debug("BACKUP_PROVIDER: %s", config.options.BACKUP_PROVIDER)
 
     base_provider = _validate_model(
         "backup_provider",
@@ -274,18 +359,18 @@ def create_provider_model() -> upload_provider_models.ProviderModel:
 def file_before_retention_period_ends(
     backup_name: str, min_retention_days: int
 ) -> bool:
-    now = datetime.now()
-    matches = DATETIME_BACKUP_FILE_PATTERN.finditer(backup_name)
+    now = datetime.now(UTC)
+    file_name = PurePosixPath(backup_name).name
+    matches = list(DATETIME_BACKUP_FILE_PATTERN.finditer(file_name))
 
-    datetime_str = ""
-    for match in matches:
-        datetime_str = match.group(0)
-        break
-    if not datetime_str:  # pragma: no cover
+    if len(matches) != 1:
         raise ValueError(
-            f"unexpected backup file name, could not parse datetime: {backup_name}"
+            "unexpected backup file name, expected exactly one datetime segment: "
+            f"{backup_name}"
         )
+    datetime_str = matches[0].group(0)
     backup_datetime = datetime.strptime(datetime_str, "_%Y%m%d_%H%M_")
+    backup_datetime = backup_datetime.replace(tzinfo=UTC)
     delete_not_before = backup_datetime + timedelta(days=min_retention_days)
 
     if now < delete_not_before:

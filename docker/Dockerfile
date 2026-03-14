@@ -12,9 +12,7 @@ WORKDIR ${FOLDER_PATH}
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get -y update && apt-get -y install age curl wget tar gpg plzip lzip bash-completion
+RUN apt-get -y update && apt-get -y install age curl wget tar gpg plzip lzip bash-completion
 
 COPY scripts scripts
 RUN ./scripts/install_mariadb_client.sh
