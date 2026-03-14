@@ -30,27 +30,41 @@ class MariaDB(BaseBackupTarget):
         self.db_version: str = self._mariadb_connection()
 
     def _init_option_file(self) -> Path:
+        def ensure_single_line(field_name: str, value: str) -> str:
+            if "\n" in value or "\r" in value:
+                raise ValueError(
+                    "MariaDB option file field "
+                    f"{field_name!r} must not contain newlines"
+                )
+            return value
+
         def escape(s: str) -> str:
-            return s.replace("\\", "\\\\")
+            single_line_value = ensure_single_line("option value", s)
+            return single_line_value.replace("\\", "\\\\")
 
         password = self.target_model.password.get_secret_value()
+        host = ensure_single_line("host", self.target_model.host)
+        port = ensure_single_line("port", str(self.target_model.port))
         text = "{}\n{}\n{}\n{}\n{}\n{}\n".format(
             "[client]",
             f'user="{escape(self.target_model.user)}"',
-            f"host={self.target_model.host}",
-            f"port={self.target_model.port}",
+            f"host={host}",
+            f"port={port}",
             "protocol=TCP",
-            f'password="{escape(password)}"' if self.target_model.password else "",
+            f'password="{escape(password)}"',
         )
 
         # https://mariadb.com/kb/en/mariadb-command-line-client/
         params = {}
-        if self.target_model.model_extra is not None:
-            for param, value in self.target_model.model_extra.items():
-                if not param.startswith("client_"):
-                    continue
+        for param, value in (self.target_model.model_extra or {}).items():
+            if not param.startswith("client_"):
+                continue
 
-                params[param.removeprefix("client_")] = value
+            option_name = ensure_single_line(
+                "option name", param.removeprefix("client_")
+            )
+            option_value = ensure_single_line("option value", value)
+            params[option_name] = option_value
 
         for param_name, value in params.items():
             text += f"{param_name}={value}\n"

@@ -31,6 +31,84 @@ def test_mariadb_connection_fail(mariadb_target: MariaDBTargetModel) -> None:
         MariaDB(target_model=target_model)
 
 
+def test_mariadb_option_file_rejects_newlines_in_client_option(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(MariaDB, "_mariadb_connection", lambda self: "11.4.2")
+
+    target_model = MariaDBTargetModel.model_validate(
+        {
+            "env_name": "mariadb_newline_client",
+            "cron_rule": "* * * * *",
+            "host": "localhost",
+            "port": 3306,
+            "db": "mariadb",
+            "user": "root",
+            "password": SecretStr("secret"),
+            "client_tee": "safe\nunsafe=true",
+        }
+    )
+
+    with pytest.raises(ValueError, match="must not contain newlines"):
+        MariaDB(target_model=target_model)
+
+
+def test_mariadb_option_file_accepts_valid_client_option(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(MariaDB, "_mariadb_connection", lambda self: "11.4.2")
+
+    target_model = MariaDBTargetModel.model_validate(
+        {
+            "env_name": "mariadb_valid_client",
+            "cron_rule": "* * * * *",
+            "host": "localhost",
+            "port": 3306,
+            "db": "mariadb",
+            "user": "root",
+            "password": SecretStr("secret"),
+            "client_tee": "safe-option",
+        }
+    )
+
+    db = MariaDB(target_model=target_model)
+
+    assert "tee=safe-option\n" in db.option_file.read_text()
+
+
+@pytest.mark.parametrize(
+    ("field_name", "field_value"),
+    [
+        ("host", "localhost\nunsafe=true"),
+        ("host", "localhost\runsafe=true"),
+        ("user", "root\nunsafe=true"),
+        ("password", SecretStr("secret\nunsafe=true")),
+    ],
+)
+def test_mariadb_option_file_rejects_newlines_in_credentials(
+    monkeypatch: pytest.MonkeyPatch,
+    field_name: str,
+    field_value: str | SecretStr,
+) -> None:
+    monkeypatch.setattr(MariaDB, "_mariadb_connection", lambda self: "11.4.2")
+
+    target_kwargs: dict[str, str | int | SecretStr] = {
+        "env_name": "mariadb_newline_user",
+        "cron_rule": "* * * * *",
+        "host": "localhost",
+        "port": 3306,
+        "db": "mariadb",
+        "user": "root",
+        "password": SecretStr("secret"),
+    }
+    target_kwargs[field_name] = field_value
+
+    target_model = MariaDBTargetModel.model_validate(target_kwargs)
+
+    with pytest.raises(ValueError, match="must not contain newlines"):
+        MariaDB(target_model=target_model)
+
+
 @freeze_time("2022-12-11")
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
 def test_run_mariadb_dump(mariadb_target: MariaDBTargetModel) -> None:
