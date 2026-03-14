@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- More extensive full end to end tests for backup target X storage provider matrix
+
 ### Changed
 
 ### Fixed
