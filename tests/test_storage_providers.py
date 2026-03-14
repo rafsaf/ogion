@@ -242,6 +242,7 @@ def test_download_backup_rejects_path_traversal(
     path: str,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    provider: BaseUploadProvider
     if isinstance(provider_model, GCSProviderModel):
         storage_client = Mock()
         storage_client.bucket.return_value = Mock()
