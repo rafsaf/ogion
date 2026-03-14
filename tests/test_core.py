@@ -32,9 +32,9 @@ def test_safe_text_version(text: str, result: str) -> None:
 def test_run_subprocess_fail(caplog: LogCaptureFixture) -> None:
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(core.CoreSubprocessError):
-            core.run_subprocess("exit 1")
+            core.run_subprocess(["false"])
         assert caplog.messages == [
-            "run_subprocess running: 'exit 1'",
+            "run_subprocess running: 'false'",
             "run_subprocess failed with status 1",
             "run_subprocess stdout: ",
             "run_subprocess stderr: ",
@@ -43,9 +43,9 @@ def test_run_subprocess_fail(caplog: LogCaptureFixture) -> None:
 
 def test_run_subprocess_success(caplog: LogCaptureFixture) -> None:
     with caplog.at_level(logging.DEBUG):
-        core.run_subprocess("echo 'welcome'")
+        core.run_subprocess(["echo", "welcome"])
         assert caplog.messages == [
-            "run_subprocess running: 'echo 'welcome''",
+            "run_subprocess running: 'echo welcome'",
             "run_subprocess finished with status 0",
             "run_subprocess stdout: welcome\n",
             "run_subprocess stderr: ",

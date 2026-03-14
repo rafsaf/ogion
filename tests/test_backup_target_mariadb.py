@@ -2,8 +2,6 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 
-import shlex
-
 import pytest
 from freezegun import freeze_time
 from pydantic import SecretStr
@@ -62,12 +60,20 @@ def test_end_to_end_successful_restore_after_backup(
 
     db = MariaDB(target_model=root_target_model)
     core.run_subprocess(
-        f"mariadb --defaults-file={db.option_file} {db.db_name} --execute="
-        "'DROP DATABASE IF EXISTS test_db;'",
+        [
+            "mariadb",
+            f"--defaults-file={db.option_file}",
+            db.target_model.db,
+            "--execute=DROP DATABASE IF EXISTS test_db;",
+        ],
     )
     core.run_subprocess(
-        f"mariadb --defaults-file={db.option_file} {db.db_name} --execute="
-        "'CREATE DATABASE test_db;'",
+        [
+            "mariadb",
+            f"--defaults-file={db.option_file}",
+            db.target_model.db,
+            "--execute=CREATE DATABASE test_db;",
+        ],
     )
 
     test_db_target = root_target_model.model_copy(update={"db": "test_db"})
@@ -80,17 +86,25 @@ def test_end_to_end_successful_restore_after_backup(
         "age INTEGER);"
     )
     core.run_subprocess(
-        f"mariadb --defaults-file={test_db.option_file} {test_db.db_name} "
-        f"--execute='{table_query}'",
+        [
+            "mariadb",
+            f"--defaults-file={test_db.option_file}",
+            test_db.target_model.db,
+            f"--execute={table_query}",
+        ],
     )
 
-    insert_query = shlex.quote(
+    insert_query = (
         "INSERT INTO my_table (name, age) VALUES ('Geralt z Rivii', 60),('rafsaf', 24);"
     )
 
     core.run_subprocess(
-        f"mariadb --defaults-file={test_db.option_file} {test_db.db_name} "
-        f"--execute={insert_query}",
+        [
+            "mariadb",
+            f"--defaults-file={test_db.option_file}",
+            test_db.target_model.db,
+            f"--execute={insert_query}",
+        ],
     )
 
     test_db_backup = test_db.backup()
@@ -99,30 +113,50 @@ def test_end_to_end_successful_restore_after_backup(
     test_db_backup = core.run_decrypt_age_archive(backup_age)
 
     core.run_subprocess(
-        f"mariadb --defaults-file={db.option_file} {db.db_name} --execute="
-        "'DROP DATABASE test_db;'",
+        [
+            "mariadb",
+            f"--defaults-file={db.option_file}",
+            db.target_model.db,
+            "--execute=DROP DATABASE test_db;",
+        ],
     )
     core.run_subprocess(
-        f"mariadb --defaults-file={db.option_file} {db.db_name} --execute="
-        "'CREATE DATABASE test_db;'",
+        [
+            "mariadb",
+            f"--defaults-file={db.option_file}",
+            db.target_model.db,
+            "--execute=CREATE DATABASE test_db;",
+        ],
     )
 
     test_db.restore(str(test_db_backup))
 
     result = core.run_subprocess(
-        f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"
-        " --execute='select * from my_table order by id asc;'",
+        [
+            "mariadb",
+            f"--defaults-file={test_db.option_file}",
+            test_db.target_model.db,
+            "--execute=select * from my_table order by id asc;",
+        ],
     )
 
     assert result == ("id\tname\tage\n1\tGeralt z Rivii\t60\n2\trafsaf\t24\n")
 
     result = core.run_subprocess(
-        f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"
-        " --execute='delete from my_table where id = '2';'",
+        [
+            "mariadb",
+            f"--defaults-file={test_db.option_file}",
+            test_db.target_model.db,
+            "--execute=delete from my_table where id = '2';",
+        ],
     )
     result = core.run_subprocess(
-        f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"
-        " --execute='select * from my_table order by id asc;'",
+        [
+            "mariadb",
+            f"--defaults-file={test_db.option_file}",
+            test_db.target_model.db,
+            "--execute=select * from my_table order by id asc;",
+        ],
     )
 
     assert result == ("id\tname\tage\n1\tGeralt z Rivii\t60\n")
@@ -130,8 +164,12 @@ def test_end_to_end_successful_restore_after_backup(
     test_db.restore(str(test_db_backup))
 
     result = core.run_subprocess(
-        f"mariadb --defaults-file={test_db.option_file} {test_db.db_name}"
-        " --execute='select * from my_table order by id asc;'",
+        [
+            "mariadb",
+            f"--defaults-file={test_db.option_file}",
+            test_db.target_model.db,
+            "--execute=select * from my_table order by id asc;",
+        ],
     )
 
     assert result == ("id\tname\tage\n1\tGeralt z Rivii\t60\n2\trafsaf\t24\n")

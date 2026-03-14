@@ -2,8 +2,6 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 
-import shlex
-
 import pytest
 from freezegun import freeze_time
 
@@ -57,11 +55,24 @@ def test_end_to_end_successful_restore_after_backup(
 ) -> None:
     db = PostgreSQL(target_model=postgres_target)
     core.run_subprocess(
-        f"psql -d {db.escaped_conn_uri} -w --command "
-        "'DROP DATABASE IF EXISTS test_db;'",
+        [
+            "psql",
+            "-d",
+            db.conn_uri,
+            "-w",
+            "--command",
+            "DROP DATABASE IF EXISTS test_db;",
+        ],
     )
     core.run_subprocess(
-        f"psql -d {db.escaped_conn_uri} -w --command 'CREATE DATABASE test_db;'",
+        [
+            "psql",
+            "-d",
+            db.conn_uri,
+            "-w",
+            "--command",
+            "CREATE DATABASE test_db;",
+        ],
     )
 
     test_db_target = postgres_target.model_copy(update={"db": "test_db"})
@@ -74,15 +85,15 @@ def test_end_to_end_successful_restore_after_backup(
         "age INTEGER);"
     )
     core.run_subprocess(
-        f"psql -d {test_db.escaped_conn_uri} -w --command '{table_query}'",
+        ["psql", "-d", test_db.conn_uri, "-w", "--command", table_query],
     )
 
-    insert_query = shlex.quote(
+    insert_query = (
         "INSERT INTO my_table (name, age) VALUES ('Geralt z Rivii', 60),('rafsaf', 24);"
     )
 
     core.run_subprocess(
-        f"psql -d {test_db.escaped_conn_uri} -w --command {insert_query}",
+        ["psql", "-d", test_db.conn_uri, "-w", "--command", insert_query],
     )
 
     test_db_backup = test_db.backup()
@@ -91,17 +102,30 @@ def test_end_to_end_successful_restore_after_backup(
     test_db_backup = core.run_decrypt_age_archive(backup_age)
 
     core.run_subprocess(
-        f"psql -d {db.escaped_conn_uri} -w --command 'DROP DATABASE test_db;'",
+        ["psql", "-d", db.conn_uri, "-w", "--command", "DROP DATABASE test_db;"],
     )
     core.run_subprocess(
-        f"psql -d {db.escaped_conn_uri} -w --command 'CREATE DATABASE test_db;'",
+        [
+            "psql",
+            "-d",
+            db.conn_uri,
+            "-w",
+            "--command",
+            "CREATE DATABASE test_db;",
+        ],
     )
 
     test_db.restore(str(test_db_backup))
 
     result = core.run_subprocess(
-        f"psql -d {test_db.escaped_conn_uri} -w --command "
-        "'select * from my_table order by id asc;'",
+        [
+            "psql",
+            "-d",
+            test_db.conn_uri,
+            "-w",
+            "--command",
+            "select * from my_table order by id asc;",
+        ],
     )
 
     assert result == (
@@ -113,15 +137,27 @@ def test_end_to_end_successful_restore_after_backup(
     )
 
     core.run_subprocess(
-        f"psql -d {test_db.escaped_conn_uri} -w --command "
-        "'delete from my_table where id = '2';'",
+        [
+            "psql",
+            "-d",
+            test_db.conn_uri,
+            "-w",
+            "--command",
+            "delete from my_table where id = '2';",
+        ],
     )
 
     test_db.restore(str(test_db_backup))
 
     result = core.run_subprocess(
-        f"psql -d {test_db.escaped_conn_uri} -w --command "
-        "'select * from my_table order by id asc;'",
+        [
+            "psql",
+            "-d",
+            test_db.conn_uri,
+            "-w",
+            "--command",
+            "select * from my_table order by id asc;",
+        ],
     )
 
     assert result == (

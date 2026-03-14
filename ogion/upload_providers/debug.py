@@ -29,8 +29,7 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         out_path = config.CONST_DEBUG_FOLDER_PATH / age_file.parent.name / age_file.name
         out_path.parent.mkdir(mode=0o700, exist_ok=True)
 
-        shell_copy_to_debug_dir = f"cp {age_file} {out_path}"
-        core.run_subprocess(shell_copy_to_debug_dir)
+        shutil.copy2(age_file, out_path)
 
         # Clean up source files immediately after copy
         core.remove_path(age_file)

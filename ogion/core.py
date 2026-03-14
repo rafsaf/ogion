@@ -70,12 +70,11 @@ def retry_on_network_errors(attempts: int = 3) -> typing.Callable:  # type: igno
 
 
 def run_subprocess(
-    shell_args: str | list[str],
+    shell_args: list[str],
     *,
     stdin_path: Path | None = None,
 ) -> str:
-    shell = isinstance(shell_args, str)
-    display_args = shell_args if shell else shlex.join(str(arg) for arg in shell_args)
+    display_args = shlex.join(str(arg) for arg in shell_args)
 
     log.debug("run_subprocess running: '%s'", display_args)
     try:
@@ -88,7 +87,6 @@ def run_subprocess(
                 shell_args,
                 capture_output=True,
                 text=True,
-                shell=shell,
                 stdin=stdin_file,
                 timeout=config.options.SUBPROCESS_TIMEOUT_SECS,
                 check=True,

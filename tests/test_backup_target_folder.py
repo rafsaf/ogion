@@ -38,7 +38,14 @@ def test_run_folder_backup_output_file_in_folder_has_same_content_after_extract(
     out_folder_for_tar.mkdir()
 
     core.run_subprocess(
-        f"tar -xf {out_backup} -C {out_folder_for_tar} --strip-components=1"
+        [
+            "tar",
+            "-xf",
+            str(out_backup),
+            "-C",
+            str(out_folder_for_tar),
+            "--strip-components=1",
+        ]
     )
 
     file_in_folder = FOLDER_1.abs_path / "file.txt"
