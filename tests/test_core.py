@@ -3,6 +3,7 @@
 
 import logging
 import os
+import subprocess
 from pathlib import Path, PosixPath
 from typing import Any
 from unittest.mock import Mock
@@ -72,6 +73,52 @@ def test_run_subprocess_with_stdin_path(tmp_path: Path) -> None:
     result = core.run_subprocess(["cat"], stdin_path=stdin_file)
 
     assert result == "welcome"
+
+
+def test_run_subprocess_opens_stdin_path_in_binary_mode(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    stdin_file = tmp_path / "stdin.txt"
+    stdin_file.write_bytes(b"welcome\xff")
+
+    def mock_run(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        del args
+        assert kwargs["stdin"] is not None
+        assert kwargs["stdin"].mode == "rb"
+        return subprocess.CompletedProcess([], 0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(core.subprocess, "run", mock_run)
+
+    result = core.run_subprocess(["cat"], stdin_path=stdin_file)
+
+    assert result == "ok"
+
+
+def test_run_subprocess_missing_executable(caplog: LogCaptureFixture) -> None:
+    with caplog.at_level(logging.DEBUG):
+        with pytest.raises(core.CoreSubprocessError, match="No such file or directory"):
+            core.run_subprocess(["definitely-not-a-real-command-ogion"])
+
+    assert any(
+        message.startswith("run_subprocess executable not found:")
+        for message in caplog.messages
+    )
+
+
+def test_run_subprocess_timeout_is_wrapped(
+    monkeypatch: pytest.MonkeyPatch, caplog: LogCaptureFixture
+) -> None:
+    timeout_error = subprocess.TimeoutExpired(
+        cmd=["sleep", "1"], timeout=0.01, output="", stderr=""
+    )
+    run_mock = Mock(side_effect=timeout_error)
+    monkeypatch.setattr(core.subprocess, "run", run_mock)
+
+    with caplog.at_level(logging.DEBUG):
+        with pytest.raises(core.CoreSubprocessError, match="Command timed out"):
+            core.run_subprocess(["sleep", "1"])
+
+    assert "run_subprocess timed out after 0.01 seconds" in caplog.messages
 
 
 @freeze_time("2022-12-11")
@@ -670,6 +717,22 @@ def test_create_provider_model() -> None:
     }
 
 
+def test_create_provider_model_does_not_log_provider_secrets(
+    monkeypatch: pytest.MonkeyPatch, caplog: LogCaptureFixture
+) -> None:
+    provider_config = (
+        "name=s3 bucket_name=test bucket_upload_path=backups "
+        "access_key=user secret_key=supersecret"
+    )
+    monkeypatch.setattr(config.options, "BACKUP_PROVIDER", provider_config)
+
+    with caplog.at_level(logging.DEBUG):
+        provider = core.create_provider_model()
+
+    assert provider.name == config.UploadProviderEnum.S3
+    assert "supersecret" not in "\n".join(caplog.messages)
+
+
 @pytest.mark.parametrize(
     "provider_config",
     [
@@ -704,6 +767,29 @@ def test_remove_path_file_not_found(tmp_path: Path) -> None:
     # Should not raise an exception
     core.remove_path(non_existent_file)
     assert not non_existent_file.exists()
+
+
+@freeze_time("2026-03-14 12:00:00")
+def test_file_before_retention_period_ends() -> None:
+    assert core.file_before_retention_period_ends(
+        "backup_20260314_1159_payload_token.lz.age", min_retention_days=1
+    )
+
+
+@freeze_time("2026-03-14 12:00:00")
+def test_file_before_retention_period_ends_uses_file_name_only() -> None:
+    assert not core.file_before_retention_period_ends(
+        "/tmp/20200101_0000/backup_20260313_1100_payload_token.lz.age",
+        min_retention_days=0,
+    )
+
+
+def test_file_before_retention_period_ends_rejects_ambiguous_datetime() -> None:
+    with pytest.raises(ValueError, match="expected exactly one datetime segment"):
+        core.file_before_retention_period_ends(
+            "backup_20260314_1200_payload_20260315_1201_token.lz.age",
+            min_retention_days=1,
+        )
 
 
 @pytest.mark.parametrize(

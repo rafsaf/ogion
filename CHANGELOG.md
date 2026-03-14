@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restore flows now always clean downloaded and decrypted local artifacts even when decrypt or restore fails
 - MariaDB option-file generation now rejects newline characters in credentials and `client_` parameters to prevent option injection via multiline values
 - Target and provider config parsing now rejects duplicate fields and leading garbage, and target discovery uses stricter env-name prefix matching
+- Subprocess execution now wraps missing executables and timeouts consistently, avoids logging raw provider secrets, and retention parsing validates backup filenames more strictly in UTC
 
 ## [8.3] - 2025-11-12
 
