@@ -12,11 +12,13 @@ from pydantic import SecretStr
 from ogion import config
 from ogion.models.upload_provider_models import (
     AzureProviderModel,
+    DebugProviderModel,
     GCSProviderModel,
     S3ProviderModel,
 )
 from ogion.upload_providers.azure import UploadProviderAzure
 from ogion.upload_providers.base_provider import BaseUploadProvider
+from ogion.upload_providers.debug import UploadProviderLocalDebug
 from ogion.upload_providers.google_cloud_storage import UploadProviderGCS
 from ogion.upload_providers.s3 import UploadProviderS3
 
@@ -199,6 +201,78 @@ def test_gcs_download_backup(
     )
 
     assert out.is_file()
+
+
+@pytest.mark.parametrize(
+    "provider_model,path",
+    [
+        (
+            GCSProviderModel(
+                name="gcs",
+                bucket_name="test-bucket",
+                bucket_upload_path="backups",
+                service_account_base64=SecretStr("dGVzdA=="),
+            ),
+            "../escape.lz.age",
+        ),
+        (
+            S3ProviderModel(
+                name="s3",
+                bucket_name="test-bucket",
+                bucket_upload_path="backups",
+                access_key="test",
+                secret_key=SecretStr("test"),
+            ),
+            "../escape.lz.age",
+        ),
+        (
+            AzureProviderModel(
+                name="azure",
+                container_name="test-container",
+                connect_string=SecretStr(
+                    "DefaultEndpointsProtocol=https;AccountName=test;AccountKey=test=="
+                ),
+            ),
+            "../escape.lz.age",
+        ),
+    ],
+)
+def test_download_backup_rejects_path_traversal(
+    provider_model: GCSProviderModel | S3ProviderModel | AzureProviderModel,
+    path: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if isinstance(provider_model, GCSProviderModel):
+        storage_client = Mock()
+        storage_client.bucket.return_value = Mock()
+        monkeypatch.setattr(
+            "google.cloud.storage.Client", Mock(return_value=storage_client)
+        )
+        provider = UploadProviderGCS(provider_model)
+    elif isinstance(provider_model, S3ProviderModel):
+        monkeypatch.setattr("minio.Minio", Mock(return_value=Mock()))
+        provider = UploadProviderS3(provider_model)
+    else:
+        blob_service_client = Mock()
+        blob_service_client.get_container_client.return_value = Mock()
+        blob_service_client_cls = Mock()
+        blob_service_client_cls.from_connection_string = Mock(
+            return_value=blob_service_client
+        )
+        monkeypatch.setattr(
+            "azure.storage.blob.BlobServiceClient", blob_service_client_cls
+        )
+        provider = UploadProviderAzure(provider_model)
+
+    with pytest.raises(ValueError):
+        provider.download_backup(path)
+
+
+def test_debug_download_backup_rejects_outside_path() -> None:
+    provider = UploadProviderLocalDebug(DebugProviderModel())
+
+    with pytest.raises(ValueError):
+        provider.download_backup("/tmp/not-in-debug/backup.lz.age")
 
 
 def test_all_target_backups_edge_cases_with_similar_names(

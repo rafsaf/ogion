@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 from typing import override
 
-from ogion import config, core
+from ogion import core
 from ogion.models.upload_provider_models import GCSProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
 
@@ -80,7 +80,7 @@ class UploadProviderGCS(BaseUploadProvider):
 
     @override
     def download_backup(self, path: str) -> Path:
-        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        backup_file = core.get_safe_download_path(path)
         backup_file.parent.mkdir(parents=True, exist_ok=True)
 
         blob = self.bucket.blob(path, chunk_size=self.chunk_size_bytes)

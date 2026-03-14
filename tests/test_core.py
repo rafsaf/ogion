@@ -8,6 +8,7 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
+import tenacity
 from freezegun import freeze_time
 from pydantic import SecretStr
 from pytest import LogCaptureFixture
@@ -49,6 +50,28 @@ def test_run_subprocess_success(caplog: LogCaptureFixture) -> None:
             "run_subprocess stdout: welcome\n",
             "run_subprocess stderr: ",
         ]
+
+
+def test_run_subprocess_with_args_list(caplog: LogCaptureFixture) -> None:
+    with caplog.at_level(logging.DEBUG):
+        result = core.run_subprocess(["echo", "welcome"])
+
+    assert result == "welcome\n"
+    assert caplog.messages == [
+        "run_subprocess running: 'echo welcome'",
+        "run_subprocess finished with status 0",
+        "run_subprocess stdout: welcome\n",
+        "run_subprocess stderr: ",
+    ]
+
+
+def test_run_subprocess_with_stdin_path(tmp_path: Path) -> None:
+    stdin_file = tmp_path / "stdin.txt"
+    stdin_file.write_text("welcome")
+
+    result = core.run_subprocess(["cat"], stdin_path=stdin_file)
+
+    assert result == "welcome"
 
 
 @freeze_time("2022-12-11")
@@ -119,7 +142,13 @@ def test_lzip_compression_with_threads_none(
     run_subprocess_mock.assert_called_once()
     called_command = run_subprocess_mock.call_args[0][0]
     assert "-n" not in called_command
-    expected = f"plzip -0 -o {tmp_path / 'fake_backup_file.lz'} {init_fake_backup_file}"
+    expected = [
+        "plzip",
+        "-0",
+        "-o",
+        str(tmp_path / "fake_backup_file.lz"),
+        str(init_fake_backup_file),
+    ]
     assert expected == called_command
     assert result == tmp_path / "fake_backup_file.lz"
 
@@ -142,10 +171,16 @@ def test_lzip_compression_with_threads_value(
 
     run_subprocess_mock.assert_called_once()
     called_command = run_subprocess_mock.call_args[0][0]
-    assert "-n 4" in called_command
-    expected = (
-        f"plzip -0 -n 4 -o {tmp_path / 'fake_backup_file.lz'} {init_fake_backup_file}"
-    )
+    assert called_command[2:4] == ["-n", "4"]
+    expected = [
+        "plzip",
+        "-0",
+        "-n",
+        "4",
+        "-o",
+        str(tmp_path / "fake_backup_file.lz"),
+        str(init_fake_backup_file),
+    ]
     assert expected == called_command
     assert result == tmp_path / "fake_backup_file.lz"
 
@@ -168,7 +203,13 @@ def test_lzip_decompression_with_threads_none(
     run_subprocess_mock.assert_called_once()
     called_command = run_subprocess_mock.call_args[0][0]
     assert "-n" not in called_command
-    expected = f"plzip -d -o {tmp_path / 'fake_backup_file'} {fake_backup_file}"
+    expected = [
+        "plzip",
+        "-d",
+        "-o",
+        str(tmp_path / "fake_backup_file"),
+        str(fake_backup_file),
+    ]
     assert expected == called_command
     assert result == tmp_path / "fake_backup_file"
 
@@ -190,10 +231,94 @@ def test_lzip_decompression_with_threads_value(
 
     run_subprocess_mock.assert_called_once()
     called_command = run_subprocess_mock.call_args[0][0]
-    assert "-n 8" in called_command
-    expected = f"plzip -d -n 8 -o {tmp_path / 'fake_backup_file'} {fake_backup_file}"
+    assert called_command[2:4] == ["-n", "8"]
+    expected = [
+        "plzip",
+        "-d",
+        "-n",
+        "8",
+        "-o",
+        str(tmp_path / "fake_backup_file"),
+        str(fake_backup_file),
+    ]
     assert expected == called_command
     assert result == tmp_path / "fake_backup_file"
+
+
+def test_get_safe_download_path() -> None:
+    path = core.get_safe_download_path("folder/backup.lz.age")
+
+    assert path == config.CONST_DOWNLOADS_FOLDER_PATH / "folder/backup.lz.age"
+
+
+@pytest.mark.parametrize("path", ["", "../backup", "folder/../backup", "./x"])
+def test_get_safe_download_path_rejects_unsafe_paths(path: str) -> None:
+    with pytest.raises(ValueError):
+        core.get_safe_download_path(path)
+
+
+def test_get_safe_debug_download_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    debug_root = tmp_path / "debug"
+    debug_root.mkdir()
+    monkeypatch.setattr(config, "CONST_DEBUG_FOLDER_PATH", debug_root)
+
+    source = debug_root / "env" / "backup.lz.age"
+    source.parent.mkdir()
+    source.touch()
+
+    safe_source, safe_destination = core.get_safe_debug_download_paths(str(source))
+
+    assert safe_source == source
+    assert safe_destination == config.CONST_DOWNLOADS_FOLDER_PATH / str(
+        source
+    ).removeprefix("/")
+
+
+def test_get_safe_debug_download_paths_rejects_outside_paths(tmp_path: Path) -> None:
+    outside = tmp_path / "outside.lz.age"
+    outside.touch()
+
+    with pytest.raises(ValueError):
+        core.get_safe_debug_download_paths(str(outside))
+
+
+def test_retry_on_network_errors_only_retries_network_errors() -> None:
+    expected_network_attempts = 2
+    expected_non_network_attempts = 1
+    attempts_network = 0
+    attempts_non_network = 0
+
+    def no_sleep(seconds: float) -> None:
+        del seconds
+
+    retry_network = core.retry_on_network_errors(expected_network_attempts)
+    retry_non_network = core.retry_on_network_errors(expected_network_attempts)
+
+    @retry_network
+    def fail_network() -> None:
+        nonlocal attempts_network
+        attempts_network += 1
+        raise core.CoreSubprocessError("Connection refused")
+
+    @retry_non_network
+    def fail_non_network() -> None:
+        nonlocal attempts_non_network
+        attempts_non_network += 1
+        raise core.CoreSubprocessError("permission denied")
+
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        monkeypatch.setattr(tenacity.nap, "sleep", no_sleep)
+
+        with pytest.raises(core.CoreSubprocessError):
+            fail_network()
+
+        with pytest.raises(core.CoreSubprocessError):
+            fail_non_network()
+
+    assert attempts_network == expected_network_attempts
+    assert attempts_non_network == expected_non_network_attempts
 
 
 def test_run_create_age_archive_can_be_decrypted(

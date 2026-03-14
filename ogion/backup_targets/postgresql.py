@@ -25,7 +25,8 @@ class PostgreSQL(BaseBackupTarget):
     def __init__(self, target_model: PostgreSQLTargetModel) -> None:
         super().__init__(target_model)
         self.target_model: PostgreSQLTargetModel = target_model
-        self.escaped_conn_uri: str = self._get_escaped_conn_uri()
+        self.conn_uri: str = self._get_conn_uri()
+        self.escaped_conn_uri: str = shlex.quote(self.conn_uri)
         self.db_version: str = self._postgres_connection()
 
     def _init_pgpass_file(self) -> Path:
@@ -51,10 +52,9 @@ class PostgreSQL(BaseBackupTarget):
         path.touch(0o600)
         with open(path, "w") as file:
             file.write(text)
-        log.debug("content of %s: %s", path, path.read_text())
         return path
 
-    def _get_escaped_conn_uri(self) -> str:
+    def _get_conn_uri(self) -> str:
         # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
         # The connection URI needs to be encoded with percent-encoding if
         # it includes symbols with special meaning in any of its parts.
@@ -79,14 +79,13 @@ class PostgreSQL(BaseBackupTarget):
 
         log.debug("psql connection url: %s", uri)
 
-        escaped_uri = shlex.quote(uri)
-        return escaped_uri
+        return uri
 
     @core.retry_on_network_errors()
     def _postgres_connection(self) -> str:
         try:
             log.debug("check psql installation")
-            psql_version = core.run_subprocess("psql -V")
+            psql_version = core.run_subprocess(["psql", "-V"])
             log.debug("output: %s", psql_version)
         except core.CoreSubprocessError as version_err:  # pragma: no cover
             log.critical(
@@ -99,7 +98,14 @@ class PostgreSQL(BaseBackupTarget):
         log.debug("start postgres connection")
         try:
             result = core.run_subprocess(
-                f"psql -d {self.escaped_conn_uri} -w --command 'SELECT version();'",
+                [
+                    "psql",
+                    "-d",
+                    self.conn_uri,
+                    "-w",
+                    "--command",
+                    "SELECT version();",
+                ],
             )
         except core.CoreSubprocessError as err:
             log.error(err, exc_info=True)
@@ -131,11 +137,18 @@ class PostgreSQL(BaseBackupTarget):
 
         out_file = core.get_new_backup_path(self.env_name, name).with_suffix(".sql")
 
-        shell_pg_dump_db = (
-            f"pg_dump --clean --if-exists -O -d {self.escaped_conn_uri} -f {out_file}"
-        )
-        log.debug("start pg_dump in subprocess: %s", shell_pg_dump_db)
-        core.run_subprocess(shell_pg_dump_db)
+        pg_dump_args = [
+            "pg_dump",
+            "--clean",
+            "--if-exists",
+            "-O",
+            "-d",
+            self.conn_uri,
+            "-f",
+            str(out_file),
+        ]
+        log.debug("start pg_dump in subprocess: %s", pg_dump_args)
+        core.run_subprocess(pg_dump_args)
         log.debug("finished pg_dump, output: %s", out_file)
         return out_file
 
@@ -143,8 +156,8 @@ class PostgreSQL(BaseBackupTarget):
     @core.retry_on_network_errors()
     def restore(self, path: str) -> None:
         log.info("start restore of %s", path)
-        shell_psql_restore = f"psql {self.escaped_conn_uri} < {path}"
-        log.debug("start restore in subprocess: %s", shell_psql_restore)
-        core.run_subprocess(shell_psql_restore)
+        restore_args = ["psql", "-d", self.conn_uri, "-w"]
+        log.debug("start restore in subprocess: %s", restore_args)
+        core.run_subprocess(restore_args, stdin_path=Path(path))
         log.debug("finished restore")
         log.info("success restore of %s", path)

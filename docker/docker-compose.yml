@@ -3,7 +3,7 @@ services:
   ogion_unit_tests:
     restart: "no"
     network_mode: "host"
-    platform: linux/${OGION_ARCH}
+    platform: linux/${OGION_ARCH:-amd64}
     build:
       context: ./../
       dockerfile: docker/Dockerfile

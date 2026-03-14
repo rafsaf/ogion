@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import override
 
-from ogion import config, core
+from ogion import core
 from ogion.models.upload_provider_models import S3ProviderModel
 from ogion.upload_providers.base_provider import BaseUploadProvider
 
@@ -76,7 +76,7 @@ class UploadProviderS3(BaseUploadProvider):
 
     @override
     def download_backup(self, path: str) -> Path:
-        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path
+        backup_file = core.get_safe_download_path(path)
         backup_file.parent.mkdir(parents=True, exist_ok=True)
         backup_file.touch(exist_ok=True)
 

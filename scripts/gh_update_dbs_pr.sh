@@ -1,7 +1,8 @@
 #!/bin/sh
 # To be run in github action update_compose_dbs.yml
 
-set -e
+set -euo pipefail
+
 git config user.name "GitHub Actions Bot"
 git config user.email "<>"
 git status

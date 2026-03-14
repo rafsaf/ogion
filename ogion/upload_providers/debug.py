@@ -53,19 +53,12 @@ class UploadProviderLocalDebug(BaseUploadProvider):
 
     @override
     def download_backup(self, path: str) -> Path:
-        log.debug(
-            "concate %s and %s",
-            config.CONST_DOWNLOADS_FOLDER_PATH,
-            path.removeprefix("/"),
-        )
-        backup_file = config.CONST_DOWNLOADS_FOLDER_PATH / path.removeprefix("/")
+        source_path, backup_file = core.get_safe_debug_download_paths(path)
         log.debug("debug provider download backup file %s", backup_file)
         backup_file.parent.mkdir(parents=True, exist_ok=True)
 
-        p = Path(path)
-
         # Stream copy to avoid loading entire file into memory
-        with open(p, "rb") as src, open(backup_file, "wb") as dst:
+        with open(source_path, "rb") as src, open(backup_file, "wb") as dst:
             shutil.copyfileobj(src, dst, length=16 * 1024 * 1024)
 
         return backup_file
