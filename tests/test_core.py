@@ -531,6 +531,27 @@ test_data = [
         [
             (
                 "POSTGRESQL_FIRST_DB",
+                "garbage host=localhost port=5432 password=secret cron_rule=* * * * *",
+            ),
+        ],
+        False,
+        [],
+    ),
+    (
+        [
+            (
+                "POSTGRESQL_FIRST_DB",
+                "host=localhost host=127.0.0.1 port=5432 "
+                "password=secret cron_rule=* * * * *",
+            ),
+        ],
+        False,
+        [],
+    ),
+    (
+        [
+            (
+                "POSTGRESQL_FIRST_DB",
                 "host=localhost port5432 password=secret cron_rule=* * * * *",
             ),
         ],
@@ -623,6 +644,47 @@ def test_create_backup_targets(
     else:
         with pytest.raises(Exception):
             core.create_target_models()
+
+
+def test_create_backup_targets_ignores_non_delimited_prefixes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    items_mock = Mock(
+        return_value=[
+            (
+                "POSTGRESQLISH_DB",
+                "host=localhost port=5432 password=secret cron_rule=* * * * *",
+            )
+        ]
+    )
+    monkeypatch.setattr(os.environ, "items", items_mock)
+
+    assert core.create_target_models() == []
+
+
+def test_create_provider_model() -> None:
+    provider = core.create_provider_model()
+
+    assert provider.model_dump() == {
+        "name": config.UploadProviderEnum.LOCAL_FILES_DEBUG
+    }
+
+
+@pytest.mark.parametrize(
+    "provider_config",
+    [
+        "debug",
+        "garbage name=debug",
+        "name=debug name=debug",
+    ],
+)
+def test_create_provider_model_invalid_config(
+    provider_config: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(config.options, "BACKUP_PROVIDER", provider_config)
+
+    with pytest.raises(Exception):
+        core.create_provider_model()
 
 
 def test_remove_path_file_exists(tmp_path: Path) -> None:

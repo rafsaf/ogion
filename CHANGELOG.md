@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added fail-fast shell options to the MariaDB and PostgreSQL client installation scripts so pipeline and command failures stop the scripts immediately
 - Restore flows now always clean downloaded and decrypted local artifacts even when decrypt or restore fails
 - MariaDB option-file generation now rejects newline characters in credentials and `client_` parameters to prevent option injection via multiline values
+- Target and provider config parsing now rejects duplicate fields and leading garbage, and target discovery uses stricter env-name prefix matching
 
 ## [8.3] - 2025-11-12
 

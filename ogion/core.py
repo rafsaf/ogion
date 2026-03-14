@@ -264,13 +264,24 @@ def _validate_model[BM: BaseModel](
             match.group()
             for match in MODEL_SPLIT_EQUATION_PATTERN.finditer(env_value_parts)
         ]
+        if not fields_matches:
+            raise ValueError(f"could not parse any fields from: {env_value!r}")
+
         target_kwargs: dict[str, Any] = {"env_name": env_name}
+        seen_fields: set[str] = set()
 
         while fields_matches:
             field_match = fields_matches.pop()
             rest, value = env_value_parts.split(field_match, maxsplit=1)
             env_value_parts = rest.rstrip()
-            target_kwargs[field_match.removesuffix("=").strip()] = value
+            field_name = field_match.removesuffix("=").strip()
+            if field_name in seen_fields:
+                raise ValueError(f"duplicate field in config: {field_name!r}")
+            seen_fields.add(field_name)
+            target_kwargs[field_name] = value
+
+        if env_value_parts:
+            raise ValueError(f"unexpected unparsed text in config: {env_value_parts!r}")
 
         log.debug("calculated arguments keys: %s", sorted(target_kwargs))
         validated_target = target.model_validate(target_kwargs)
@@ -289,12 +300,17 @@ def create_target_models() -> list[backup_target_models.TargetModel]:
         env_name_lowercase = env_name.lower()
         log.debug("processing env variable %s", env_name_lowercase)
         for target_model_name in target_map:
-            if env_name_lowercase.startswith(target_model_name):
-                target_model_cls = target_map[target_model_name]
-                targets.append(
-                    _validate_model(env_name_lowercase, env_value, target_model_cls)
-                )
-                break
+            if (
+                env_name_lowercase != target_model_name
+                and not env_name_lowercase.startswith(f"{target_model_name}_")
+            ):
+                continue
+
+            target_model_cls = target_map[target_model_name]
+            targets.append(
+                _validate_model(env_name_lowercase, env_value, target_model_cls)
+            )
+            break
 
     return targets
 
