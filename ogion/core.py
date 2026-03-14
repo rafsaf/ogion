@@ -93,12 +93,18 @@ def run_subprocess(
         log.error("run_subprocess executable not found: %s", process_error)
         raise CoreSubprocessError(str(process_error)) from process_error
     except subprocess.TimeoutExpired as process_error:
-        stdout = process_error.stdout
-        stderr = process_error.stderr
-        if isinstance(stdout, bytes):
-            stdout = stdout.decode(errors="replace")
-        if isinstance(stderr, bytes):
-            stderr = stderr.decode(errors="replace")
+        stdout_raw = process_error.stdout
+        stderr_raw = process_error.stderr
+        stdout: str | None = (
+            stdout_raw.decode(errors="replace")
+            if isinstance(stdout_raw, bytes)
+            else stdout_raw
+        )
+        stderr: str | None = (
+            stderr_raw.decode(errors="replace")
+            if isinstance(stderr_raw, bytes)
+            else stderr_raw
+        )
 
         log.error("run_subprocess timed out after %s seconds", process_error.timeout)
         log.error("run_subprocess stdout: %s", stdout)

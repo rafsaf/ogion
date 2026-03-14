@@ -87,7 +87,7 @@ def test_run_subprocess_opens_stdin_path_in_binary_mode(
         assert kwargs["stdin"].mode == "rb"
         return subprocess.CompletedProcess([], 0, stdout="ok", stderr="")
 
-    monkeypatch.setattr(core.subprocess, "run", mock_run)
+    monkeypatch.setattr("ogion.core.subprocess.run", mock_run)
 
     result = core.run_subprocess(["cat"], stdin_path=stdin_file)
 
@@ -112,7 +112,7 @@ def test_run_subprocess_timeout_is_wrapped(
         cmd=["sleep", "1"], timeout=0.01, output="", stderr=""
     )
     run_mock = Mock(side_effect=timeout_error)
-    monkeypatch.setattr(core.subprocess, "run", run_mock)
+    monkeypatch.setattr("ogion.core.subprocess.run", run_mock)
 
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(core.CoreSubprocessError, match="Command timed out"):
