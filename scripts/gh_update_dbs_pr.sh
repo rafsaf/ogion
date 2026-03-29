@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # To be run in github action update_compose_dbs.yml
 
 set -euo pipefail
