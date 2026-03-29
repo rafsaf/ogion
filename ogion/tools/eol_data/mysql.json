@@ -4,7 +4,7 @@
         "releaseDate": "2026-01-20",
         "eol": false,
         "latest": "9.6.0",
-        "link": null,
+        "link": "https://dev.mysql.com/doc/relnotes/mysql/9.6/en/news-9-6-0.html",
         "support": true,
         "discontinued": null,
         "before_eol": true
@@ -14,7 +14,7 @@
         "releaseDate": "2025-10-21",
         "eol": "2026-01-20",
         "latest": "9.5.2",
-        "link": null,
+        "link": "https://dev.mysql.com/doc/relnotes/mysql/9.6/en/news-9-5-0.html",
         "support": "2026-01-20",
         "discontinued": null,
         "before_eol": false
@@ -24,7 +24,7 @@
         "releaseDate": "2025-07-09",
         "eol": "2025-10-21",
         "latest": "9.4.2",
-        "link": null,
+        "link": "https://dev.mysql.com/doc/relnotes/mysql/9.6/en/news-9-4-0.html",
         "support": "2025-10-21",
         "discontinued": null,
         "before_eol": false
@@ -34,7 +34,7 @@
         "releaseDate": "2025-03-31",
         "eol": "2025-07-22",
         "latest": "9.3.2",
-        "link": null,
+        "link": "https://dev.mysql.com/doc/relnotes/mysql/9.6/en/news-9-3-0.html",
         "support": "2025-07-22",
         "discontinued": null,
         "before_eol": false
@@ -44,7 +44,7 @@
         "releaseDate": "2024-12-15",
         "eol": "2025-04-15",
         "latest": "9.2.2",
-        "link": null,
+        "link": "https://dev.mysql.com/doc/relnotes/mysql/9.6/en/news-9-2-0.html",
         "support": "2025-04-15",
         "discontinued": null,
         "before_eol": false
@@ -54,7 +54,7 @@
         "releaseDate": "2024-09-24",
         "eol": "2025-01-21",
         "latest": "9.1.2",
-        "link": null,
+        "link": "https://dev.mysql.com/doc/relnotes/mysql/9.6/en/news-9-1-0.html",
         "support": "2025-01-21",
         "discontinued": null,
         "before_eol": false
