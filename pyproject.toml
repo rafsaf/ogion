@@ -13,8 +13,8 @@ dependencies = [
   "croniter>=6.0.0",
   "google-cloud-storage>=2.18.2",
   "minio>=7.2.13",
-  "pydantic>=2.11.0",
-  "pydantic-settings>=2.7.1",
+  "pydantic>=2.13.3",
+  "pydantic-settings>=2.14.0",
   "tenacity>=9.1.2",
 ]
 
