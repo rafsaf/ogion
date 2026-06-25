@@ -1,4 +1,4 @@
-FROM python:3.14-5-slim-trixie AS base
+FROM python:3.14.5-slim-trixie AS base
 ARG TARGETARCH
 ARG PYTHONUNBUFFERED=1
 ARG PIP_DISABLE_PIP_VERSION_CHECK=1
