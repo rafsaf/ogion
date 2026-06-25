@@ -1,4 +1,4 @@
-FROM python:3.14-slim-trixie AS base
+FROM python:3.14-5-slim-trixie AS base
 ARG TARGETARCH
 ARG PYTHONUNBUFFERED=1
 ARG PIP_DISABLE_PIP_VERSION_CHECK=1
@@ -20,7 +20,7 @@ RUN ./scripts/install_postgresql_client.sh
 RUN apt-get -y remove gpg curl wget
 
 FROM base AS uv
-COPY --from=ghcr.io/astral-sh/uv:0.9.2 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.11.19 /uv /uvx /bin/
 COPY uv.lock pyproject.toml ./
 RUN uv export --no-dev --no-group tests --no-hashes -o /requirements.txt --no-install-workspace --frozen
 RUN uv export --only-group tests --no-hashes -o /requirements-tests.txt --no-install-workspace --frozen

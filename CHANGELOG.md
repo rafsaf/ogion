@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Explicite supported database versions in README.
+
 ### Fixed
 
 ## [8.4] - 2026-03-14

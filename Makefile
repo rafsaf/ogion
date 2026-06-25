@@ -37,7 +37,7 @@ mem_stress_test:
 
 .PHONY: update_compose_db_file
 update_compose_db_file:
-	uv run python ogion/tools/compose_file_generator.py > docker/docker-compose.dbs.yml
+	uv run python ogion/tools/compose_file_generator.py
 
 .PHONY: benchmark-mem-massif-main
 benchmark-mem-massif-main:
