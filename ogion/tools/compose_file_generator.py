@@ -3,6 +3,7 @@
 
 import json
 import logging
+import re
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -38,6 +39,12 @@ DB_NAME = "database-_-12!@#%^&*()/;><.,]}{["
 DB_USERNAME = "user-_-12!@#%^&*()/;><.,]}{["
 DEFAULT_NETWORK = "ogion"
 HTTP_OK = 200
+CONST_ROOT_DIR = Path(__file__).resolve().parent.parent.parent.absolute()
+DOCKER_COMPOSE_OUTPUT_FILE = CONST_ROOT_DIR / "docker" / "docker-compose.dbs.yml"
+README_OUTPUT_FILE = CONST_ROOT_DIR / "README.md"
+POSTGRESQL_VERSION_PATTERN = re.compile(r"^- PostgreSQL:.*$", re.MULTILINE)
+MARIADB_VERSION_PATTERN = re.compile(r"^- MariaDB:.*$", re.MULTILINE)
+MYSQL_VERSION_PATTERN = re.compile(r"^- MySQL:.*$", re.MULTILINE)
 
 
 def check_docker_image_exists(image_name: str) -> bool:
@@ -190,4 +197,26 @@ if __name__ == "__main__":
             exclude={"name", "version"}
         )
     yml_data = yaml.safe_dump(data, indent=2)
-    sys.stdout.write(yml_data)
+    DOCKER_COMPOSE_OUTPUT_FILE.write_text(yml_data)
+
+    new_readme = README_OUTPUT_FILE.read_text()
+    new_readme = POSTGRESQL_VERSION_PATTERN.sub(
+        f"- PostgreSQL: "
+        f"{', '.join([f'`{c.version}`' for c in db_compose_postgresql_data()])}.",
+        new_readme,
+    )
+
+    new_readme = MARIADB_VERSION_PATTERN.sub(
+        (
+            f"- MariaDB: "
+            f"{', '.join([f'`{c.version}`' for c in db_compose_mariadb_data()])}."
+        ),
+        new_readme,
+    )
+
+    new_readme = MYSQL_VERSION_PATTERN.sub(
+        f"- MySQL: {', '.join([f'`{c.version}`' for c in db_compose_mysql_data()])}.",
+        new_readme,
+    )
+
+    README_OUTPUT_FILE.write_text(new_readme)
