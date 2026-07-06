@@ -7,10 +7,10 @@ requires-python = ">=3.14,<3.15"
 readme = "README.md"
 license = "GNU GPLv3"
 dependencies = [
-  "argcomplete>=3.6.3",
+  "argcomplete>=3.7.0",
   "azure-identity>=1.17.1",
   "azure-storage-blob>=12.20.0",
-  "croniter>=6.0.0",
+  "croniter>=6.2.3",
   "google-cloud-storage>=2.18.2",
   "minio>=7.2.13",
   "pydantic>=2.11.0",
