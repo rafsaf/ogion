@@ -26,7 +26,7 @@ There are better tools for bigger databases like [pgBackRest - Reliable PostgreS
 ## Supported backup targets
 
 - PostgreSQL: `18`, `17`, `16`, `15`, `14`.
-- MariaDB: `12.3`, `11.8`, `11.4`, `10.11`.
+- MariaDB: `11.8`, `11.4`, `10.11`.
 - MySQL: `9.7`, `8.4`.
 - Single file
 - Directory
