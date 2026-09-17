@@ -29,11 +29,12 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         out_path = config.CONST_DEBUG_FOLDER_PATH / age_file.parent.name / age_file.name
         out_path.parent.mkdir(mode=0o700, exist_ok=True)
 
-        shutil.copy2(age_file, out_path)
+        try:
+            shutil.copy2(age_file, out_path)
+        finally:
+            core.remove_path(age_file)
+            core.remove_path(backup_file)
 
-        # Clean up source files immediately after copy
-        core.remove_path(age_file)
-        core.remove_path(backup_file)
         log.info(
             "removed source files %s and %s from local disk", backup_file, age_file
         )

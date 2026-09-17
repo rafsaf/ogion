@@ -120,6 +120,32 @@ def test_run_file_backup_output_file_has_same_content_after_restore(
     assert test_file.read_text() == "abcdef"
 
 
+def test_run_file_backup_removes_partial_output_on_copy_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    test_file = tmp_path / "test_file.txt"
+    test_file.write_text("abcdef")
+
+    file = File(
+        target_model=SingleFileTargetModel(
+            env_name="singlefile",
+            cron_rule="* * * * *",
+            abs_path=test_file,
+        )
+    )
+    out_backup = core.get_new_backup_path(file.env_name, test_file.name)
+    monkeypatch.setattr(core, "get_new_backup_path", lambda *_args: out_backup)
+    monkeypatch.setattr(
+        "ogion.backup_targets.file.shutil.copy2",
+        Mock(side_effect=OSError("copy failed")),
+    )
+
+    with pytest.raises(OSError, match="copy failed"):
+        file.backup()
+
+    assert not out_backup.exists()
+
+
 def test_end_to_end_restore_specific_stored_backup_via_provider(
     tmp_path: Path,
     provider: BaseUploadProvider,

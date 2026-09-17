@@ -147,11 +147,15 @@ def run_backup(target: base_target.BaseBackupTarget) -> None:
         backup_file,
         provider.__class__.__name__,
     )
-    with NotificationsContext(
-        step_name=PROGRAM_STEP.UPLOAD,
-        env_name=target.env_name,
-    ):
-        provider.post_save(backup_file=backup_file)
+    try:
+        with NotificationsContext(
+            step_name=PROGRAM_STEP.UPLOAD,
+            env_name=target.env_name,
+        ):
+            provider.post_save(backup_file=backup_file)
+    except:
+        core.remove_path(backup_file)
+        raise
 
     if config.options.BACKUP_DELETE:
         with NotificationsContext(

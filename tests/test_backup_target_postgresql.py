@@ -169,6 +169,40 @@ def test_run_pg_dump(postgres_target: PostgreSQLTargetModel) -> None:
     assert out_backup == out_path
 
 
+def test_run_pg_dump_removes_partial_output_on_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(PostgreSQL, "_postgres_connection", lambda self: "16.1")
+
+    target_model = PostgreSQLTargetModel.model_validate(
+        {
+            "env_name": "postgresql_dump_error",
+            "cron_rule": "* * * * *",
+            "host": "localhost",
+            "port": 5432,
+            "db": "postgres",
+            "user": "postgres",
+            "password": "secret",
+        }
+    )
+    db = PostgreSQL(target_model=target_model)
+    out_backup = core.get_new_backup_path(db.env_name, "database_16").with_suffix(
+        ".sql"
+    )
+
+    monkeypatch.setattr(core, "get_new_backup_path", lambda *_args: out_backup)
+    monkeypatch.setattr(
+        core,
+        "run_subprocess",
+        Mock(side_effect=core.CoreSubprocessError("pg_dump failed")),
+    )
+
+    with pytest.raises(core.CoreSubprocessError, match="pg_dump failed"):
+        db.backup()
+
+    assert not out_backup.exists()
+
+
 @pytest.mark.parametrize("postgres_target", ALL_POSTGRES_DBS_TARGETS)
 def test_end_to_end_successful_restore_after_backup(
     postgres_target: PostgreSQLTargetModel,

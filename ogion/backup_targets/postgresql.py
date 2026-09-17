@@ -148,7 +148,11 @@ class PostgreSQL(BaseBackupTarget):
             str(out_file),
         ]
         log.debug("start pg_dump in subprocess: %s", pg_dump_args)
-        core.run_subprocess(pg_dump_args)
+        try:
+            core.run_subprocess(pg_dump_args)
+        except:
+            core.remove_path(out_file)
+            raise
         log.debug("finished pg_dump, output: %s", out_file)
         return out_file
 

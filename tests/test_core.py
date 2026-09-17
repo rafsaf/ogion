@@ -141,6 +141,48 @@ def test_run_create_age_archive_out_path_exists(tmp_path: Path) -> None:
     assert not (tmp_path / "fake_backup.lz").exists()
 
 
+def test_run_lzip_compression_removes_partial_output_on_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    backup_file = tmp_path / "fake_backup_file"
+    backup_file.write_text("some data")
+    out_path = backup_file.with_suffix(".lz")
+
+    monkeypatch.setattr(config.options, "LZIP_THREADS", None)
+    monkeypatch.setattr(config.options, "LZIP_LEVEL", 0)
+    monkeypatch.setattr(
+        core,
+        "run_subprocess",
+        Mock(side_effect=core.CoreSubprocessError("compression failed")),
+    )
+
+    with pytest.raises(core.CoreSubprocessError, match="compression failed"):
+        core.run_lzip_compression(backup_file)
+
+    assert not out_path.exists()
+
+
+def test_run_create_age_archive_removes_partial_output_on_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    backup_file = tmp_path / "fake_backup_file"
+    backup_file.write_text("some data")
+    compressed_backup = backup_file.with_suffix(".lz")
+    archive_out = compressed_backup.with_suffix(".lz.age")
+
+    monkeypatch.setattr(core, "run_lzip_compression", lambda _: compressed_backup)
+    monkeypatch.setattr(
+        core,
+        "run_subprocess",
+        Mock(side_effect=core.CoreSubprocessError("age failed")),
+    )
+
+    with pytest.raises(core.CoreSubprocessError, match="age failed"):
+        core.run_create_age_archive(backup_file)
+
+    assert not archive_out.exists()
+
+
 def test_run_create_age_archive_dir_raise_error(tmp_path: Path) -> None:
     with pytest.raises(ValueError):
         core.run_create_age_archive(tmp_path)

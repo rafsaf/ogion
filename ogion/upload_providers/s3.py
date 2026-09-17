@@ -45,16 +45,17 @@ class UploadProviderS3(BaseUploadProvider):
 
         log.info("start uploading %s to %s", age_backup_file, backup_dest_in_bucket)
 
-        self.client.fput_object(
-            bucket_name=self.bucket,
-            object_name=backup_dest_in_bucket,
-            file_path=str(age_backup_file),
-        )
+        try:
+            self.client.fput_object(
+                bucket_name=self.bucket,
+                object_name=backup_dest_in_bucket,
+                file_path=str(age_backup_file),
+            )
 
-        log.info("uploaded %s to %s", age_backup_file, backup_dest_in_bucket)
-
-        core.remove_path(age_backup_file)
-        core.remove_path(backup_file)
+            log.info("uploaded %s to %s", age_backup_file, backup_dest_in_bucket)
+        finally:
+            core.remove_path(age_backup_file)
+            core.remove_path(backup_file)
 
         log.info("removed %s and %s from local disk", backup_file, age_backup_file)
 

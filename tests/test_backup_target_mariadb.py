@@ -233,6 +233,40 @@ def test_run_mariadb_dump(mariadb_target: MariaDBTargetModel) -> None:
     assert out_backup == out_path
 
 
+def test_run_mariadb_dump_removes_partial_output_on_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(MariaDB, "_mariadb_connection", lambda self: "11.4.2")
+
+    target_model = MariaDBTargetModel.model_validate(
+        {
+            "env_name": "mariadb_dump_error",
+            "cron_rule": "* * * * *",
+            "host": "localhost",
+            "port": 3306,
+            "db": "mariadb",
+            "user": "root",
+            "password": SecretStr("secret"),
+        }
+    )
+    db = MariaDB(target_model=target_model)
+    out_backup = core.get_new_backup_path(db.env_name, "database_11").with_suffix(
+        ".sql"
+    )
+
+    monkeypatch.setattr(core, "get_new_backup_path", lambda *_args: out_backup)
+    monkeypatch.setattr(
+        core,
+        "run_subprocess",
+        Mock(side_effect=core.CoreSubprocessError("dump failed")),
+    )
+
+    with pytest.raises(core.CoreSubprocessError, match="dump failed"):
+        db.backup()
+
+    assert not out_backup.exists()
+
+
 @pytest.mark.parametrize("mariadb_target", ALL_MARIADB_DBS_TARGETS)
 def test_end_to_end_successful_restore_after_backup(
     mariadb_target: MariaDBTargetModel,
