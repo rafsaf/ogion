@@ -181,7 +181,11 @@ def run_lzip_compression(backup_file: Path) -> Path:
         args.extend(["-n", str(config.options.LZIP_THREADS)])
     args.extend(["-o", str(out), str(backup_file)])
 
-    run_subprocess(args)
+    try:
+        run_subprocess(args)
+    except:
+        remove_path(out)
+        raise
 
     log.info("created compressed file %s: %s", out, size(out))
 
@@ -254,16 +258,21 @@ def run_create_age_archive(backup_file: Path) -> Path:
 
     recipients = config.options.age_recipients_file
 
-    run_subprocess(
-        [
-            "age",
-            "-R",
-            str(recipients),
-            "-o",
-            str(out_file),
-            str(backup_file),
-        ]
-    )
+    try:
+        run_subprocess(
+            [
+                "age",
+                "-R",
+                str(recipients),
+                "-o",
+                str(out_file),
+                str(backup_file),
+            ]
+        )
+    except:
+        remove_path(out_file)
+        raise
+
     log.info("finished age archive creating")
 
     remove_path(backup_file)

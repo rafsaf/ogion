@@ -20,10 +20,12 @@ import pytest
 from freezegun import freeze_time
 from ogion import config
 
+
 def test_something(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(config, "SOME_CONFIG", "test_value")
     # test logic
     assert result == expected
+
 
 @freeze_time("2022-12-11")
 @pytest.mark.parametrize("target", ALL_POSTGRES_DBS_TARGETS)
@@ -109,8 +111,12 @@ After user-facing changes, verify:
 ## Test Fixtures (conftest.py)
 
 ```python
-CONST_UNSAFE_AGE_PUBLIC_KEY = "age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2"
-CONST_UNSAFE_AGE_SECRET_KEY = "AGE-SECRET-KEY-12L9ETSAZJXK2XLGQRU503VMJ59NGXASGXKAUH05KJ4TDC6UKTAJQGMSN3L"
+CONST_UNSAFE_AGE_PUBLIC_KEY = (
+    "age1q5g88krfjgty48thtctz22h5ja85grufdm0jly3wll6pr9f30qsszmxzm2"
+)
+CONST_UNSAFE_AGE_SECRET_KEY = (
+    "AGE-SECRET-KEY-12L9ETSAZJXK2XLGQRU503VMJ59NGXASGXKAUH05KJ4TDC6UKTAJQGMSN3L"
+)
 CONST_TOKEN_URLSAFE = "mock"
 
 # Fixtures

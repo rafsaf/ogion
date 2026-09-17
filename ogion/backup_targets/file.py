@@ -25,7 +25,11 @@ class File(BaseBackupTarget):
         out_file = core.get_new_backup_path(self.env_name, escaped_filename)
 
         log.debug("start copy of %s to %s", self.target_model.abs_path, out_file)
-        shutil.copy2(self.target_model.abs_path, out_file)
+        try:
+            shutil.copy2(self.target_model.abs_path, out_file)
+        except:
+            core.remove_path(out_file)
+            raise
         log.debug("finished ln, output: %s", out_file)
         return out_file
 

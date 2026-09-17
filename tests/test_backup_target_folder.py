@@ -174,6 +174,36 @@ def test_run_folder_backup_output_file_in_folder_has_same_content_after_restore(
     assert new_file.read_text() == original_file_content
 
 
+def test_run_folder_backup_removes_partial_output_on_tar_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    directory = tmp_path / "directory"
+    directory.mkdir()
+
+    folder = Folder(
+        target_model=DirectoryTargetModel(
+            env_name="directory_backup_error",
+            cron_rule="* * * * *",
+            abs_path=directory,
+        )
+    )
+    out_backup = core.get_new_backup_path(folder.env_name, directory.name).with_suffix(
+        ".tar"
+    )
+
+    monkeypatch.setattr(core, "get_new_backup_path", lambda *_args: out_backup)
+    monkeypatch.setattr(
+        core,
+        "run_subprocess",
+        Mock(side_effect=core.CoreSubprocessError("tar failed")),
+    )
+
+    with pytest.raises(core.CoreSubprocessError, match="tar failed"):
+        folder.backup()
+
+    assert not out_backup.exists()
+
+
 def test_end_to_end_restore_specific_stored_backup_via_provider(
     tmp_path: Path,
     provider: BaseUploadProvider,

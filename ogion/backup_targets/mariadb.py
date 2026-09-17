@@ -138,7 +138,11 @@ class MariaDB(BaseBackupTarget):
             self.target_model.db,
         ]
         log.debug("start mariadbdump in subprocess: %s", mariadb_dump_args)
-        core.run_subprocess(mariadb_dump_args)
+        try:
+            core.run_subprocess(mariadb_dump_args)
+        except:
+            core.remove_path(out_file)
+            raise
         log.debug("finished mariadbdump, output: %s", out_file)
         return out_file
 

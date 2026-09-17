@@ -37,7 +37,11 @@ class Folder(BaseBackupTarget):
             "start tar in subprocess: %s",
             tar_args,
         )
-        core.run_subprocess(tar_args)
+        try:
+            core.run_subprocess(tar_args)
+        except:
+            core.remove_path(out_file)
+            raise
         log.debug("finished tar, output: %s", out_file)
         return out_file
 

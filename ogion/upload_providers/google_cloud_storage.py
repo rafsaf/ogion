@@ -51,18 +51,21 @@ class UploadProviderGCS(BaseUploadProvider):
 
         log.info("start uploading %s to %s", age_backup_file, backup_dest_in_bucket)
 
-        blob = self.bucket.blob(backup_dest_in_bucket, chunk_size=self.chunk_size_bytes)
-        blob.upload_from_filename(
-            age_backup_file,
-            timeout=self.chunk_timeout_secs,
-            if_generation_match=0,
-            checksum="md5",
-        )
+        try:
+            blob = self.bucket.blob(
+                backup_dest_in_bucket, chunk_size=self.chunk_size_bytes
+            )
+            blob.upload_from_filename(
+                age_backup_file,
+                timeout=self.chunk_timeout_secs,
+                if_generation_match=0,
+                checksum="md5",
+            )
 
-        log.info("uploaded %s to %s", age_backup_file, backup_dest_in_bucket)
-
-        core.remove_path(age_backup_file)
-        core.remove_path(backup_file)
+            log.info("uploaded %s to %s", age_backup_file, backup_dest_in_bucket)
+        finally:
+            core.remove_path(age_backup_file)
+            core.remove_path(backup_file)
 
         log.info("removed %s and %s from local disk", backup_file, age_backup_file)
 
