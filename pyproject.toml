@@ -80,7 +80,7 @@ target-version = "py314"
 
 [tool.ruff.lint]
 # pycodestyle, pyflakes, isort, pylint, pyupgrade
-ignore = ["PLR0913"]
+ignore = ["PLR0913", "PLR0917"]
 select = ["E", "F", "I", "PL", "UP", "W"]
 
 [tool.coverage.run]
