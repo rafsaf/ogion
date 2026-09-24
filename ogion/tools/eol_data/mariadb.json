@@ -234,7 +234,7 @@
         "releaseDate": "2017-05-23",
         "eol": "2022-05-23",
         "latest": "10.2.44",
-        "link": "https://mariadb.com/kb/en/mariadb-10244-release-notes/",
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/10.2/10.2.44",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -244,7 +244,7 @@
         "releaseDate": "2015-10-17",
         "eol": "2020-10-17",
         "latest": "10.1.48",
-        "link": "https://mariadb.com/kb/en/mariadb-10148-release-notes/",
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/10.1/10.1.48",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -254,7 +254,7 @@
         "releaseDate": "2014-03-31",
         "eol": "2019-03-31",
         "latest": "10.0.38",
-        "link": "https://mariadb.com/kb/en/mariadb-10038-release-notes/",
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/10.0/10.0.38",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -264,7 +264,7 @@
         "releaseDate": "2012-04-11",
         "eol": "2020-04-11",
         "latest": "5.5.68",
-        "link": "https://mariadb.com/kb/en/mariadb-5568-release-notes/",
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/5.5/5.5.68",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -274,7 +274,7 @@
         "releaseDate": "2012-02-29",
         "eol": "2017-03-01",
         "latest": "5.3.12",
-        "link": "https://mariadb.com/kb/en/mariadb-5312-release-notes/",
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/5.3/5.3.12",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -284,7 +284,7 @@
         "releaseDate": "2010-11-10",
         "eol": "2015-11-10",
         "latest": "5.2.14",
-        "link": "https://mariadb.com/kb/en/mariadb-5214-release-notes/",
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/5.2/5.2.14",
         "support": null,
         "discontinued": null,
         "before_eol": false
@@ -294,7 +294,7 @@
         "releaseDate": "2010-02-01",
         "eol": "2015-02-01",
         "latest": "5.1.67",
-        "link": "https://mariadb.com/kb/en/mariadb-5167-release-notes/",
+        "link": "https://mariadb.com/docs/release-notes/community-server/old-releases/5.1/5.1.67",
         "support": null,
         "discontinued": null,
         "before_eol": false
