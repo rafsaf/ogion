@@ -251,7 +251,9 @@ def test_download_backup_rejects_path_traversal(
         )
         provider = UploadProviderGCS(provider_model)
     elif isinstance(provider_model, S3ProviderModel):
-        monkeypatch.setattr("minio.Minio", Mock(return_value=Mock()))
+        monkeypatch.setattr(
+            "ogion.upload_providers.s3.Minio", Mock(return_value=Mock())
+        )
         provider = UploadProviderS3(provider_model)
     else:
         blob_service_client = Mock()
@@ -261,7 +263,7 @@ def test_download_backup_rejects_path_traversal(
             return_value=blob_service_client
         )
         monkeypatch.setattr(
-            "azure.storage.blob.BlobServiceClient", blob_service_client_cls
+            "ogion.upload_providers.azure.BlobServiceClient", blob_service_client_cls
         )
         provider = UploadProviderAzure(provider_model)
 
@@ -404,7 +406,7 @@ def test_azure_clean_handles_resource_not_found_error(
     )
 
     monkeypatch.setattr(
-        "azure.storage.blob.BlobServiceClient",
+        "ogion.upload_providers.azure.BlobServiceClient",
         mock_blob_service_client_class,
     )
 
@@ -501,7 +503,7 @@ def test_s3_clean_filters_no_such_key_errors(monkeypatch: pytest.MonkeyPatch) ->
     # Patch Minio
     mock_minio_class = Mock(return_value=mock_client)
     monkeypatch.setattr(
-        "minio.Minio",
+        "ogion.upload_providers.s3.Minio",
         mock_minio_class,
     )
 
@@ -548,7 +550,7 @@ def test_s3_clean_raises_on_non_no_such_key_errors(
     # Patch Minio
     mock_minio_class = Mock(return_value=mock_client)
     monkeypatch.setattr(
-        "minio.Minio",
+        "ogion.upload_providers.s3.Minio",
         mock_minio_class,
     )
 

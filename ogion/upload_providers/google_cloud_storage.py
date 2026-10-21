@@ -1,16 +1,21 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-import base64
-import json
-import logging
-import os
-from pathlib import Path
-from typing import override
+lazy import base64
+lazy import json
+lazy import logging
+lazy import os
+lazy from pathlib import Path
+lazy from typing import override
 
-from ogion import core
-from ogion.models.upload_provider_models import GCSProviderModel
-from ogion.upload_providers.base_provider import BaseUploadProvider
+lazy import google.cloud.storage as cloud_storage
+lazy from google.api_core.exceptions import NotFound
+lazy from google.auth.credentials import AnonymousCredentials
+lazy from google.oauth2 import service_account
+
+lazy from ogion import core
+lazy from ogion.models.upload_provider_models import GCSProviderModel
+lazy from ogion.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
@@ -19,10 +24,6 @@ class UploadProviderGCS(BaseUploadProvider):
     """GCS bucket for storing backups"""
 
     def __init__(self, target_provider: GCSProviderModel) -> None:
-        import google.cloud.storage as cloud_storage  # noqa: PLC0415
-        from google.auth.credentials import AnonymousCredentials  # noqa: PLC0415
-        from google.oauth2 import service_account  # noqa: PLC0415
-
         service_account_bytes = base64.b64decode(
             target_provider.service_account_base64.get_secret_value()
         )
@@ -98,8 +99,6 @@ class UploadProviderGCS(BaseUploadProvider):
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
-        from google.api_core.exceptions import NotFound  # noqa: PLC0415
-
         # Local files already cleaned up in post_save()
         backups = self.all_target_backups(env_name=backup_file.parent.name)
         while len(backups) > max_backups:

@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Migrate to Python 3.15
+
 ### Fixed
 
 ## [8.5] - 2026-09-17
