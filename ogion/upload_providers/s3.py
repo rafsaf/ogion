@@ -1,13 +1,16 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-import logging
-from pathlib import Path
-from typing import override
+lazy import logging
+lazy from pathlib import Path
+lazy from typing import override
 
-from ogion import core
-from ogion.models.upload_provider_models import S3ProviderModel
-from ogion.upload_providers.base_provider import BaseUploadProvider
+lazy from minio import Minio
+lazy from minio.deleteobjects import DeleteObject
+
+lazy from ogion import core
+lazy from ogion.models.upload_provider_models import S3ProviderModel
+lazy from ogion.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
@@ -16,8 +19,6 @@ class UploadProviderS3(BaseUploadProvider):
     """S3 compatibile storage bucket for storing backups"""
 
     def __init__(self, target_provider: S3ProviderModel) -> None:
-        from minio import Minio  # noqa: PLC0415
-
         self.bucket_upload_path = target_provider.bucket_upload_path
         self.max_bandwidth = target_provider.max_bandwidth
 
@@ -91,8 +92,6 @@ class UploadProviderS3(BaseUploadProvider):
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
-        from minio.deleteobjects import DeleteObject  # noqa: PLC0415
-
         items_to_delete: list[DeleteObject] = []
         backups = self.all_target_backups(env_name=backup_file.parent.name)
 

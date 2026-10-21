@@ -4,30 +4,30 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-import argparse
-import functools
 import logging
-import shutil
-import signal
-import sys
 import threading
-import time
-from dataclasses import dataclass
-from types import FrameType
-from typing import NoReturn
+lazy import argparse
+lazy import functools
+lazy import shutil
+lazy import signal
+lazy import sys
+lazy import time
+lazy from dataclasses import dataclass
+lazy from types import FrameType
+lazy from typing import NoReturn
 
-import argcomplete
+lazy import argcomplete
 
-from ogion import config, core
-from ogion.backup_targets import (
+lazy from ogion import config, core
+lazy from ogion.backup_targets import (
     base_target,
     targets_mapping,
 )
-from ogion.notifications.notifications_context import (
+lazy from ogion.notifications.notifications_context import (
     PROGRAM_STEP,
     NotificationsContext,
 )
-from ogion.upload_providers import (
+lazy from ogion.upload_providers import (
     base_provider,
     providers_mapping,
 )

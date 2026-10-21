@@ -6,17 +6,17 @@ https://discord.com/developers/docs/resources/webhook#execute-webhook
 """
 
 import logging
-import traceback
-from concurrent.futures import ThreadPoolExecutor
-from contextlib import ContextDecorator
-from datetime import UTC, datetime
 from enum import StrEnum
-from types import TracebackType
+lazy import traceback
+lazy from concurrent.futures import ThreadPoolExecutor
+lazy from contextlib import ContextDecorator
+lazy from datetime import UTC, datetime
+lazy from types import TracebackType
 
 from ogion import config
-from ogion.notifications.discord import Discord
-from ogion.notifications.slack import Slack
-from ogion.notifications.smtp import SMTP
+lazy from ogion.notifications.discord import Discord
+lazy from ogion.notifications.slack import Slack
+lazy from ogion.notifications.smtp import SMTP
 
 log = logging.getLogger(__name__)
 

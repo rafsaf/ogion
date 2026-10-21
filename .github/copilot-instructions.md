@@ -81,7 +81,7 @@ Follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format:
 - **Type hints required** - mypy strict mode enabled
 - **Line length**: 88 characters
 - **Import sorting**: Automatic via ruff
-- **Python version**: 3.14
+- **Python version**: 3.15
 - **Coverage**: 100% required
 
 ## Documentation

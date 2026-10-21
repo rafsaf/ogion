@@ -1,22 +1,22 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-import getpass
 import logging
-import os
-import re
-import secrets
-import shlex
-import subprocess
-import tempfile
-import typing
-from contextlib import nullcontext
-from datetime import UTC, datetime, timedelta
-from pathlib import Path, PurePosixPath
-from typing import Any
+lazy import getpass
+lazy import os
+lazy import re
+lazy import secrets
+lazy import shlex
+lazy import subprocess
+lazy import tempfile
+lazy import typing
+lazy from contextlib import nullcontext
+lazy from datetime import UTC, datetime, timedelta
+lazy from pathlib import Path, PurePosixPath
+lazy from typing import Any
 
-import tenacity
 from pydantic import BaseModel
+lazy import tenacity
 
 from ogion import config
 from ogion.models import backup_target_models, models_mapping, upload_provider_models

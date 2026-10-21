@@ -1,13 +1,16 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-import logging
-from pathlib import Path
-from typing import override
+lazy import logging
+lazy from pathlib import Path
+lazy from typing import override
 
-from ogion import core
-from ogion.models.upload_provider_models import AzureProviderModel
-from ogion.upload_providers.base_provider import BaseUploadProvider
+lazy from azure.core.exceptions import ResourceNotFoundError
+lazy from azure.storage.blob import BlobServiceClient
+
+lazy from ogion import core
+lazy from ogion.models.upload_provider_models import AzureProviderModel
+lazy from ogion.upload_providers.base_provider import BaseUploadProvider
 
 log = logging.getLogger(__name__)
 
@@ -16,8 +19,6 @@ class UploadProviderAzure(BaseUploadProvider):
     """Azure blob storage for storing backups"""
 
     def __init__(self, target_provider: AzureProviderModel) -> None:
-        from azure.storage.blob import BlobServiceClient  # noqa: PLC0415
-
         self.container_name = target_provider.container_name
 
         blob_service_client = BlobServiceClient.from_connection_string(
@@ -86,8 +87,6 @@ class UploadProviderAzure(BaseUploadProvider):
     def clean(
         self, backup_file: Path, max_backups: int, min_retention_days: int
     ) -> None:
-        from azure.core.exceptions import ResourceNotFoundError  # noqa: PLC0415
-
         backups = self.all_target_backups(env_name=backup_file.parent.name)
 
         while len(backups) > max_backups:

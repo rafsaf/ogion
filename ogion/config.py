@@ -1,13 +1,13 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-import hashlib
 import logging
 import logging.config
 import socket
 from enum import StrEnum
 from pathlib import Path
-from typing import Literal, Self
+lazy import hashlib
+lazy from typing import Literal, Self
 
 from pydantic import Field, HttpUrl, SecretStr, model_validator
 from pydantic_settings import BaseSettings
