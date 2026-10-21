@@ -55,9 +55,9 @@ services:
     volumes:
       - gcs-data:/data/stresstest
 
-  minio:
+  silo:
     restart: "no"
-    image: "quay.io/minio/minio:latest"
+    image: "pgsty/silo:RELEASE.2026-10-18T00-00-00Z"
     command: "server /opt"
     ports:
       - 9000:9000
