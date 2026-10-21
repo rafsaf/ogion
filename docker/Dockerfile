@@ -20,7 +20,7 @@ RUN ./scripts/install_postgresql_client.sh
 RUN apt-get -y remove gpg curl wget
 
 FROM base AS uv
-COPY --from=ghcr.io/astral-sh/uv:0.11.19 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.4 /uv /uvx /bin/
 COPY uv.lock pyproject.toml ./
 RUN uv export --no-dev --no-group tests --no-hashes -o /requirements.txt --no-install-workspace --frozen
 RUN uv export --only-group tests --no-hashes -o /requirements-tests.txt --no-install-workspace --frozen
