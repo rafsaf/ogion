@@ -27,7 +27,7 @@ There are better tools for bigger databases like [pgBackRest - Reliable PostgreS
 
 - PostgreSQL: `18`, `17`, `16`, `15`, `14`.
 - MariaDB: `13.0`, `12.3`, `11.8`, `11.4`, `10.11`.
-- MySQL: `9.7`, `8.4`.
+- MySQL: `26.7`, `9.7`, `8.4`.
 - Single file
 - Directory
 
