@@ -62,17 +62,17 @@ services:
     ports:
     - 11130:3306
     restart: 'no'
-  ogion_mysql_26_7:
+  ogion_mysql_26_10:
     environment:
     - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_USER=user-_-12!@#%^&*()/;><.,]}{[
     - MYSQL_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    image: mysql:26.7
+    image: mysql:26.10
     networks:
     - ogion
     ports:
-    - 9267:3306
+    - 11610:3306
     restart: 'no'
   ogion_mysql_8_4:
     environment:
