@@ -1,13 +1,23 @@
 [
     {
-        "cycle": "26.7",
-        "releaseDate": "2026-07-28",
+        "cycle": "26.10",
+        "releaseDate": "2026-10-20",
         "eol": false,
-        "latest": "26.7.0",
-        "link": "https://dev.mysql.com/doc/relnotes/mysql/26.7/en/news-26-7-0.html",
+        "latest": "26.10.0",
+        "link": "https://dev.mysql.com/doc/relnotes/mysql/26.10/en/news-26-10-0.html",
         "support": true,
         "discontinued": null,
         "before_eol": true
+    },
+    {
+        "cycle": "26.7",
+        "releaseDate": "2026-07-28",
+        "eol": "2026-10-20",
+        "latest": "26.7.1",
+        "link": "https://dev.mysql.com/doc/relnotes/mysql/26.7/en/news-26-7-0.html",
+        "support": "2026-10-20",
+        "discontinued": null,
+        "before_eol": false
     },
     {
         "cycle": "9.7",
