@@ -1,6 +1,7 @@
 # Copyright: (c) 2024, Rafał Safin <rafal.safin@rafsaf.pl>
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import shutil
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -9,7 +10,7 @@ from azure.core.exceptions import ResourceNotFoundError
 from google.cloud.exceptions import NotFound
 from pydantic import SecretStr
 
-from ogion import config
+from ogion import config, core
 from ogion.models.upload_provider_models import (
     AzureProviderModel,
     DebugProviderModel,
@@ -276,6 +277,33 @@ def test_debug_download_backup_rejects_outside_path() -> None:
 
     with pytest.raises(ValueError):
         provider.download_backup("/tmp/not-in-debug/backup.lz.age")
+
+
+def test_debug_post_save_is_safe_during_concurrent_cleanup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider = UploadProviderLocalDebug(DebugProviderModel())
+    backup_file = config.CONST_DATA_FOLDER_PATH / "target" / "backup"
+    backup_file.parent.mkdir()
+    backup_file.touch()
+    age_file = backup_file.with_name(f"{backup_file.name}.lz.age")
+    age_file.write_text("encrypted backup")
+    monkeypatch.setattr(core, "run_create_age_archive", lambda backup_file: age_file)
+
+    def copy_and_clean(src: Path, dst: Path) -> Path:
+        shutil.copyfile(src, dst)
+        provider.clean(backup_file, max_backups=0, min_retention_days=0)
+        shutil.copystat(src, dst)
+        return dst
+
+    monkeypatch.setattr("ogion.upload_providers.debug.shutil.copy2", copy_and_clean)
+
+    output = Path(provider.post_save(backup_file))
+
+    assert output.is_file()
+    assert output.read_text() == "encrypted backup"
+    assert not backup_file.exists()
+    assert not age_file.exists()
 
 
 def test_all_target_backups_edge_cases_with_similar_names(

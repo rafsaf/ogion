@@ -14,6 +14,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- A lot of CVE issues
+- Prevented concurrent debug-provider cleanup from deleting a backup while it is being copied
+
 ## [8.5] - 2026-09-17
 
 ### Added

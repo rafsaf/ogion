@@ -3,6 +3,7 @@
 
 import logging
 import shutil
+import tempfile
 from pathlib import Path
 from typing import override
 
@@ -29,9 +30,21 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         out_path = config.CONST_DEBUG_FOLDER_PATH / age_file.parent.name / age_file.name
         out_path.parent.mkdir(mode=0o700, exist_ok=True)
 
+        temp_path: Path | None = None
         try:
-            shutil.copy2(age_file, out_path)
+            with tempfile.NamedTemporaryFile(
+                dir=out_path.parent,
+                prefix=f".{age_file.name}.",
+                suffix=".tmp",
+                delete=False,
+            ) as temp_file:
+                temp_path = Path(temp_file.name)
+
+            shutil.copy2(age_file, temp_path)
+            temp_path.replace(out_path)
         finally:
+            if temp_path is not None:
+                core.remove_path(temp_path)
             core.remove_path(age_file)
             core.remove_path(backup_file)
 
@@ -47,7 +60,8 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         path = config.CONST_DEBUG_FOLDER_PATH / env_name
         path.mkdir(mode=0o700, exist_ok=True)
         for backup_path in path.iterdir():
-            backups.append(str(backup_path.absolute()))
+            if backup_path.is_file() and backup_path.name.endswith(".lz.age"):
+                backups.append(str(backup_path.absolute()))
         backups.sort(reverse=True)
         return backups
 
