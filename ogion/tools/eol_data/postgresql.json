@@ -288,5 +288,35 @@
         "support": null,
         "discontinued": null,
         "before_eol": false
+    },
+    {
+        "cycle": "6.2",
+        "releaseDate": "1997-10-02",
+        "eol": true,
+        "latest": "6.2.1",
+        "link": null,
+        "support": null,
+        "discontinued": null,
+        "before_eol": false
+    },
+    {
+        "cycle": "6.1",
+        "releaseDate": "1997-06-08",
+        "eol": true,
+        "latest": "6.1.1",
+        "link": null,
+        "support": null,
+        "discontinued": null,
+        "before_eol": false
+    },
+    {
+        "cycle": "6.0",
+        "releaseDate": "1997-01-29",
+        "eol": true,
+        "latest": "6.0",
+        "link": null,
+        "support": null,
+        "discontinued": null,
+        "before_eol": false
     }
 ]
