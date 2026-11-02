@@ -103,7 +103,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:14-bookworm
+    image: postgres:14-trixie
     networks:
     - ogion
     ports:
@@ -114,7 +114,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:15-bookworm
+    image: postgres:15-trixie
     networks:
     - ogion
     ports:
@@ -125,7 +125,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:16-bookworm
+    image: postgres:16-trixie
     networks:
     - ogion
     ports:
@@ -136,7 +136,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:17-bookworm
+    image: postgres:17-trixie
     networks:
     - ogion
     ports:
@@ -147,7 +147,7 @@ services:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
     - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:18-bookworm
+    image: postgres:18-trixie
     networks:
     - ogion
     ports:
