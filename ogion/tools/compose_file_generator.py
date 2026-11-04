@@ -138,7 +138,7 @@ def postgres_db_generator(cycle: EOLApiProductCycle) -> ComposeDatabase:
         restart="no",
         networks=[DEFAULT_NETWORK],
         version=cycle.cycle,
-        image=f"postgres:{cycle.cycle}-bookworm",
+        image=f"postgres:{cycle.cycle}-trixie",
         ports=[f"{host_port}:5432"],
         environment=[
             f"POSTGRES_PASSWORD={DB_PWD}",

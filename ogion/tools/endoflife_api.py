@@ -33,7 +33,7 @@ class EOLApiProductCycle(BaseModel):
             )
             return now < eol_date
         if self.eol:
-            return True
+            return False
         if isinstance(self.support, str):
             support_end = datetime.strptime(self.support, "%Y-%m-%d").replace(
                 tzinfo=UTC
