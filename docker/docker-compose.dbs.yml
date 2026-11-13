@@ -98,17 +98,6 @@ services:
     ports:
     - 9097:3306
     restart: 'no'
-  ogion_postgres_14:
-    environment:
-    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
-    - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
-    - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
-    image: postgres:14-trixie
-    networks:
-    - ogion
-    ports:
-    - 10014:5432
-    restart: 'no'
   ogion_postgres_15:
     environment:
     - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
