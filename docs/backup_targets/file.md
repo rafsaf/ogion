@@ -33,7 +33,7 @@ SINGLEFILE_FIRST='abs_path=/home/user/file.txt cron_rule=* * * * *'
 SINGLEFILE_SECOND='abs_path=/etc/hosts cron_rule=0 5 * * *'
 
 # File config.json in mounted dir /mnt/appname with backup on every 6 hours at '15 with max number of backups of 20
-SINGLEFILE_THIRD='abs_path=/mnt/appname/config.json cron_rule=15 */3 * * * max_backups=20'
+SINGLEFILE_THIRD='abs_path=/mnt/appname/config.json cron_rule=15 */6 * * * max_backups=20'
 ```
 
 <br>

@@ -24,7 +24,6 @@ from ogion.models import backup_target_models, models_mapping, upload_provider_m
 log = logging.getLogger(__name__)
 
 SAFE_LETTER_PATTERN = re.compile(r"[^A-Za-z0-9_]*")
-DATETIME_BACKUP_FILE_PATTERN = re.compile(r"_[0-9]{8}_[0-9]{4}_")
 MODEL_SPLIT_EQUATION_PATTERN = re.compile(r"( (\w|\-)*\=|^(\w|\-)*\=)")
 
 
@@ -110,17 +109,18 @@ def run_subprocess(
         log.error("run_subprocess stdout: %s", stdout)
         log.error("run_subprocess stderr: %s", stderr)
         raise CoreSubprocessError(
-            stderr
-            or stdout
-            or f"Command timed out after {process_error.timeout} seconds"
-        ) from process_error
+            f"{shell_args[0]} timed out after {process_error.timeout} seconds: "
+            f"{stderr or stdout or ''}"
+        ) from None
     except subprocess.CalledProcessError as process_error:
         log.error("run_subprocess failed with status %s", process_error.returncode)
         log.error("run_subprocess stdout: %s", process_error.stdout)
         log.error("run_subprocess stderr: %s", process_error.stderr)
+        # no chaining, CalledProcessError text has full args, e.g. psql conn uri
         raise CoreSubprocessError(
-            process_error.stderr or process_error.stdout
-        ) from process_error
+            f"{shell_args[0]} exited with status {process_error.returncode}: "
+            f"{process_error.stderr or process_error.stdout}"
+        ) from None
 
     log.debug("run_subprocess finished with status %s", p.returncode)
     log.debug("run_subprocess stdout: %s", p.stdout)
@@ -271,6 +271,7 @@ def run_create_age_archive(backup_file: Path) -> Path:
         )
     except:
         remove_path(out_file)
+        remove_path(backup_file)
         raise
 
     log.info("finished age archive creating")
@@ -366,19 +367,15 @@ def create_provider_model() -> upload_provider_models.ProviderModel:
 
 
 def file_before_retention_period_ends(
-    backup_name: str, min_retention_days: int
+    backup_name: str, env_name: str, min_retention_days: int
 ) -> bool:
     now = datetime.now(UTC)
     file_name = PurePosixPath(backup_name).name
-    matches = list(DATETIME_BACKUP_FILE_PATTERN.finditer(file_name))
-
-    if len(matches) != 1:
-        raise ValueError(
-            "unexpected backup file name, expected exactly one datetime segment: "
-            f"{backup_name}"
-        )
-    datetime_str = matches[0].group(0)
-    backup_datetime = datetime.strptime(datetime_str, "_%Y%m%d_%H%M_")
+    # name is "{env_name}_%Y%m%d_%H%M_...", see get_new_backup_path
+    if not file_name.startswith(f"{env_name}_"):
+        raise ValueError(f"unexpected backup file name: {backup_name}")
+    datetime_str = file_name.removeprefix(f"{env_name}_")[:13]
+    backup_datetime = datetime.strptime(datetime_str, "%Y%m%d_%H%M")
     backup_datetime = backup_datetime.replace(tzinfo=UTC)
     delete_not_before = backup_datetime + timedelta(days=min_retention_days)
 

@@ -68,24 +68,24 @@ def test_gcs_clean_gcs_files_short(
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.lz.age"
 
-    (fake_backup_dir_path / "file_19990427_0108_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_19990427_0108_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230427_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230427_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230427_0108_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230427_0108_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_19990427_0108_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_19990427_0108_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230427_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230427_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230427_0108_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230427_0108_dummy_xfcs")
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{provider_prefix}fake_env_name/file_20230427_0108_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_19990427_0108_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230427_0108_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230427_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_19990427_0108_dummy_xfcs.lz.age",
     ]
 
     provider.clean(fake_backup_file_age_path, 2, 1)
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{provider_prefix}fake_env_name/file_20230427_0108_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230427_0108_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230427_0105_dummy_xfcs.lz.age",
     ]
 
 
@@ -96,33 +96,33 @@ def test_gcs_clean_gcs_files_long(
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.lz.age"
 
-    (fake_backup_dir_path / "file_20230127_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230127_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230227_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230227_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230327_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230327_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230425_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230425_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230426_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230426_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230427_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230427_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230127_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230127_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230227_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230227_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230327_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230327_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230425_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230425_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230426_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230426_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230427_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230427_0105_dummy_xfcs")
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230425_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230327_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230227_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230127_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230427_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230426_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230425_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230327_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230227_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230127_0105_dummy_xfcs.lz.age",
     ]
 
     provider.clean(fake_backup_file_age_path, 2, 1)
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230427_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230426_0105_dummy_xfcs.lz.age",
     ]
 
 
@@ -133,21 +133,21 @@ def test_gcs_clean_respects_max_backups_param_and_not_delete_old_files(
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.lz.age"
 
-    (fake_backup_dir_path / "file_20230426_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230426_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230427_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230427_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230426_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230426_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230427_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230427_0105_dummy_xfcs")
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230427_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230426_0105_dummy_xfcs.lz.age",
     ]
 
     provider.clean(fake_backup_file_age_path, 2, 1)
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{provider_prefix}fake_env_name/file_20230427_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230427_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230426_0105_dummy_xfcs.lz.age",
     ]
 
 
@@ -158,33 +158,33 @@ def test_gcs_clean_respects_min_retention_days_param_and_not_delete_any_backup(
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.lz.age"
 
-    (fake_backup_dir_path / "file_20230826_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230826_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230825_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230825_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230824_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230824_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230823_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230823_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230729_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230729_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230826_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230826_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230825_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230825_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230824_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230824_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230823_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230823_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230729_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230729_0105_dummy_xfcs")
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{provider_prefix}fake_env_name/file_20230826_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230825_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230824_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230823_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230729_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230826_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230825_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230824_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230823_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230729_0105_dummy_xfcs.lz.age",
     ]
 
     provider.clean(fake_backup_file_age_path, 2, 300000)
 
     assert provider.all_target_backups("fake_env_name") == [
-        f"{provider_prefix}fake_env_name/file_20230826_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230825_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230824_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230823_0105_dummy_xfcs.lz.age",
-        f"{provider_prefix}fake_env_name/file_20230729_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230826_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230825_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230824_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230823_0105_dummy_xfcs.lz.age",
+        f"{provider_prefix}fake_env_name/fake_env_name_20230729_0105_dummy_xfcs.lz.age",
     ]
 
 
@@ -194,11 +194,13 @@ def test_gcs_download_backup(
     fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env_name"
     fake_backup_dir_path.mkdir()
 
-    (fake_backup_dir_path / "file_20230426_0105_dummy_xfcs").write_text("abcdef")
-    provider.post_save(fake_backup_dir_path / "file_20230426_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230426_0105_dummy_xfcs").write_text(
+        "abcdef"
+    )
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230426_0105_dummy_xfcs")
 
     out = provider.download_backup(
-        f"{provider_prefix}fake_env_name/file_20230426_0105_dummy_xfcs.lz.age"
+        f"{provider_prefix}fake_env_name/fake_env_name_20230426_0105_dummy_xfcs.lz.age"
     )
 
     assert out.is_file()
@@ -362,12 +364,12 @@ def test_gcs_clean_handles_already_deleted_blob(
     fake_backup_dir_path.mkdir()
     fake_backup_file_age_path = fake_backup_dir_path / "fake_backup.lz.age"
 
-    (fake_backup_dir_path / "file_20230425_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230425_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230426_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230426_0105_dummy_xfcs")
-    (fake_backup_dir_path / "file_20230427_0105_dummy_xfcs").touch()
-    provider.post_save(fake_backup_dir_path / "file_20230427_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230425_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230425_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230426_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230426_0105_dummy_xfcs")
+    (fake_backup_dir_path / "fake_env_name_20230427_0105_dummy_xfcs").touch()
+    provider.post_save(fake_backup_dir_path / "fake_env_name_20230427_0105_dummy_xfcs")
 
     expected_backups_count = 3
     assert len(provider.all_target_backups("fake_env_name")) == expected_backups_count
@@ -411,11 +413,11 @@ def test_azure_clean_handles_resource_not_found_error(
 
     # Mock list_blobs to return 3 backups
     mock_blob_1 = Mock()
-    mock_blob_1.name = "fake_env/file_20230425_0105_dummy.lz.age"
+    mock_blob_1.name = "fake_env/fake_env_20230425_0105_dummy.lz.age"
     mock_blob_2 = Mock()
-    mock_blob_2.name = "fake_env/file_20230426_0105_dummy.lz.age"
+    mock_blob_2.name = "fake_env/fake_env_20230426_0105_dummy.lz.age"
     mock_blob_3 = Mock()
-    mock_blob_3.name = "fake_env/file_20230427_0105_dummy.lz.age"
+    mock_blob_3.name = "fake_env/fake_env_20230427_0105_dummy.lz.age"
     mock_container_client.list_blobs.return_value = [
         mock_blob_1,
         mock_blob_2,
@@ -449,7 +451,7 @@ def test_azure_clean_handles_resource_not_found_error(
 
     fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env"
     fake_backup_dir_path.mkdir(parents=True, exist_ok=True)
-    fake_backup_file = fake_backup_dir_path / "file_20230427_0105_dummy.lz.age"
+    fake_backup_file = fake_backup_dir_path / "fake_env_20230427_0105_dummy.lz.age"
 
     # Should not raise exception with ResourceNotFoundError
     provider.clean(fake_backup_file, max_backups=2, min_retention_days=1)
@@ -462,11 +464,11 @@ def test_gcs_clean_handles_not_found_error(monkeypatch: pytest.MonkeyPatch) -> N
     """Test GCS clean() handles NotFound error during deletion."""
     # Create mock GCS components
     mock_blob_1 = Mock()
-    mock_blob_1.name = "backups/fake_env/file_20230425_0105_dummy.lz.age"
+    mock_blob_1.name = "backups/fake_env/fake_env_20230425_0105_dummy.lz.age"
     mock_blob_2 = Mock()
-    mock_blob_2.name = "backups/fake_env/file_20230426_0105_dummy.lz.age"
+    mock_blob_2.name = "backups/fake_env/fake_env_20230426_0105_dummy.lz.age"
     mock_blob_3 = Mock()
-    mock_blob_3.name = "backups/fake_env/file_20230427_0105_dummy.lz.age"
+    mock_blob_3.name = "backups/fake_env/fake_env_20230427_0105_dummy.lz.age"
 
     # Mock blob.delete() to raise NotFound
     mock_blob_to_delete = Mock()
@@ -501,7 +503,7 @@ def test_gcs_clean_handles_not_found_error(monkeypatch: pytest.MonkeyPatch) -> N
 
     fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env"
     fake_backup_dir_path.mkdir(parents=True, exist_ok=True)
-    fake_backup_file = fake_backup_dir_path / "file_20230427_0105_dummy.lz.age"
+    fake_backup_file = fake_backup_dir_path / "fake_env_20230427_0105_dummy.lz.age"
 
     # This should not raise an exception even though blob.delete() raises NotFound
     provider.clean(fake_backup_file, max_backups=2, min_retention_days=1)
@@ -514,11 +516,11 @@ def test_s3_clean_filters_no_such_key_errors(monkeypatch: pytest.MonkeyPatch) ->
     """Test S3 clean() filters out NoSuchKey errors from delete responses."""
     # Create mock S3 components
     mock_obj_1 = Mock()
-    mock_obj_1.object_name = "fake_env/file_20230425_0105_dummy.lz.age"
+    mock_obj_1.object_name = "fake_env/fake_env_20230425_0105_dummy.lz.age"
     mock_obj_2 = Mock()
-    mock_obj_2.object_name = "fake_env/file_20230426_0105_dummy.lz.age"
+    mock_obj_2.object_name = "fake_env/fake_env_20230426_0105_dummy.lz.age"
     mock_obj_3 = Mock()
-    mock_obj_3.object_name = "fake_env/file_20230427_0105_dummy.lz.age"
+    mock_obj_3.object_name = "fake_env/fake_env_20230427_0105_dummy.lz.age"
 
     mock_client = Mock()
     mock_client.list_objects.return_value = [mock_obj_1, mock_obj_2, mock_obj_3]
@@ -546,7 +548,7 @@ def test_s3_clean_filters_no_such_key_errors(monkeypatch: pytest.MonkeyPatch) ->
 
     fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env"
     fake_backup_dir_path.mkdir(parents=True, exist_ok=True)
-    fake_backup_file = fake_backup_dir_path / "file_20230427_0105_dummy.lz.age"
+    fake_backup_file = fake_backup_dir_path / "fake_env_20230427_0105_dummy.lz.age"
 
     # This should not raise an exception even though NoSuchKey is in the errors
     provider.clean(fake_backup_file, max_backups=2, min_retention_days=1)
@@ -561,11 +563,11 @@ def test_s3_clean_raises_on_non_no_such_key_errors(
     """Test S3 clean() raises RuntimeError for non-NoSuchKey errors."""
     # Create mock S3 components
     mock_obj_1 = Mock()
-    mock_obj_1.object_name = "backups/fake_env/file_20230425_0105_dummy.lz.age"
+    mock_obj_1.object_name = "backups/fake_env/fake_env_20230425_0105_dummy.lz.age"
     mock_obj_2 = Mock()
-    mock_obj_2.object_name = "backups/fake_env/file_20230426_0105_dummy.lz.age"
+    mock_obj_2.object_name = "backups/fake_env/fake_env_20230426_0105_dummy.lz.age"
     mock_obj_3 = Mock()
-    mock_obj_3.object_name = "backups/fake_env/file_20230427_0105_dummy.lz.age"
+    mock_obj_3.object_name = "backups/fake_env/fake_env_20230427_0105_dummy.lz.age"
 
     mock_client = Mock()
     mock_client.list_objects.return_value = [mock_obj_1, mock_obj_2, mock_obj_3]
@@ -593,7 +595,7 @@ def test_s3_clean_raises_on_non_no_such_key_errors(
 
     fake_backup_dir_path = config.CONST_DATA_FOLDER_PATH / "fake_env"
     fake_backup_dir_path.mkdir(parents=True, exist_ok=True)
-    fake_backup_file = fake_backup_dir_path / "file_20230427_0105_dummy.lz.age"
+    fake_backup_file = fake_backup_dir_path / "fake_env_20230427_0105_dummy.lz.age"
 
     # This should raise RuntimeError for non-NoSuchKey errors
     with pytest.raises(RuntimeError):

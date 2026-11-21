@@ -4,6 +4,7 @@
 import logging
 import smtplib
 import ssl
+from email.message import EmailMessage
 from typing import override
 
 from ogion import config
@@ -23,13 +24,11 @@ class SMTP(NotificationSystem):
 
         log.info("sending smtp notification")
 
-        email_message = (
-            f"FROM: {config.options.SMTP_FROM_ADDR}"
-            + "\n"
-            + f"SUBJECT: {config.options.INSTANCE_NAME}"
-            + "\n\n"
-            + message
-        )
+        email_message = EmailMessage()
+        email_message["From"] = config.options.SMTP_FROM_ADDR
+        email_message["To"] = ", ".join(config.options.smtp_addresses)
+        email_message["Subject"] = config.options.INSTANCE_NAME
+        email_message.set_content(message)
 
         log.debug(
             "smtp sendmail: from: %s, to: %s, msg: %s",
@@ -48,9 +47,5 @@ class SMTP(NotificationSystem):
                 password=config.options.SMTP_PASSWORD.get_secret_value(),
             )
 
-            smtp_server.sendmail(
-                from_addr=config.options.SMTP_FROM_ADDR,
-                to_addrs=config.options.smtp_addresses,
-                msg=email_message,
-            )
+            smtp_server.send_message(email_message)
             return True

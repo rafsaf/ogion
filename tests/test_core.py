@@ -4,6 +4,7 @@
 import logging
 import os
 import subprocess
+import traceback
 from pathlib import Path, PosixPath
 from typing import Any
 from unittest.mock import Mock
@@ -15,6 +16,7 @@ from pydantic import SecretStr
 from pytest import LogCaptureFixture
 
 from ogion import config, core
+from ogion.models import backup_target_models, upload_provider_models
 
 
 @pytest.mark.parametrize(
@@ -32,7 +34,9 @@ def test_safe_text_version(text: str, result: str) -> None:
 
 def test_run_subprocess_fail(caplog: LogCaptureFixture) -> None:
     with caplog.at_level(logging.DEBUG):
-        with pytest.raises(core.CoreSubprocessError):
+        with pytest.raises(
+            core.CoreSubprocessError, match="false exited with status 1"
+        ):
             core.run_subprocess(["false"])
         assert caplog.messages == [
             "run_subprocess running: 'false'",
@@ -94,6 +98,15 @@ def test_run_subprocess_opens_stdin_path_in_binary_mode(
     assert result == "ok"
 
 
+def test_run_subprocess_error_traceback_does_not_contain_args() -> None:
+    args = ["bash", "-c", "exit 1", "supersecret"]
+    with pytest.raises(core.CoreSubprocessError) as err:
+        core.run_subprocess(args)
+
+    tb = "".join(traceback.format_exception(err.value))
+    assert "supersecret" not in tb
+
+
 def test_run_subprocess_missing_executable(caplog: LogCaptureFixture) -> None:
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(core.CoreSubprocessError, match="No such file or directory"):
@@ -115,7 +128,7 @@ def test_run_subprocess_timeout_is_wrapped(
     monkeypatch.setattr("ogion.core.subprocess.run", run_mock)
 
     with caplog.at_level(logging.DEBUG):
-        with pytest.raises(core.CoreSubprocessError, match="Command timed out"):
+        with pytest.raises(core.CoreSubprocessError, match="timed out after"):
             core.run_subprocess(["sleep", "1"])
 
     assert "run_subprocess timed out after 0.01 seconds" in caplog.messages
@@ -177,10 +190,13 @@ def test_run_create_age_archive_removes_partial_output_on_error(
         Mock(side_effect=core.CoreSubprocessError("age failed")),
     )
 
+    compressed_backup.write_text("compressed")
+
     with pytest.raises(core.CoreSubprocessError, match="age failed"):
         core.run_create_age_archive(backup_file)
 
     assert not archive_out.exists()
+    assert not compressed_backup.exists()
 
 
 def test_run_create_age_archive_dir_raise_error(tmp_path: Path) -> None:
@@ -775,6 +791,24 @@ def test_create_provider_model_does_not_log_provider_secrets(
     assert "supersecret" not in "\n".join(caplog.messages)
 
 
+def test_validation_errors_do_not_contain_secrets() -> None:
+    with pytest.raises(Exception) as provider_err:
+        core._validate_model(
+            "backup_provider",
+            "name=s3 bucket_name=test secret_key=supersecret",
+            upload_provider_models.S3ProviderModel,
+        )
+    with pytest.raises(Exception) as target_err:
+        core._validate_model(
+            "postgresql_db",
+            "host=localhost password=supersecret",
+            backup_target_models.PostgreSQLTargetModel,
+        )
+
+    assert "supersecret" not in str(provider_err.value)
+    assert "supersecret" not in str(target_err.value)
+
+
 @pytest.mark.parametrize(
     "provider_config",
     [
@@ -814,7 +848,9 @@ def test_remove_path_file_not_found(tmp_path: Path) -> None:
 @freeze_time("2026-03-14 12:00:00")
 def test_file_before_retention_period_ends() -> None:
     assert core.file_before_retention_period_ends(
-        "backup_20260314_1159_payload_token.lz.age", min_retention_days=1
+        "backup_20260314_1159_payload_token.lz.age",
+        env_name="backup",
+        min_retention_days=1,
     )
 
 
@@ -822,14 +858,25 @@ def test_file_before_retention_period_ends() -> None:
 def test_file_before_retention_period_ends_uses_file_name_only() -> None:
     assert not core.file_before_retention_period_ends(
         "/tmp/20200101_0000/backup_20260313_1100_payload_token.lz.age",
+        env_name="backup",
         min_retention_days=0,
     )
 
 
-def test_file_before_retention_period_ends_rejects_ambiguous_datetime() -> None:
-    with pytest.raises(ValueError, match="expected exactly one datetime segment"):
+@freeze_time("2026-03-14 12:00:00")
+def test_file_before_retention_period_ends_ignores_datetime_like_db_name() -> None:
+    assert not core.file_before_retention_period_ends(
+        "mariadb_shop_20260313_1100_sales_20260315_1145_token.sql.lz.age",
+        env_name="mariadb_shop",
+        min_retention_days=0,
+    )
+
+
+def test_file_before_retention_period_ends_rejects_unexpected_name() -> None:
+    with pytest.raises(ValueError, match="unexpected backup file name"):
         core.file_before_retention_period_ends(
-            "backup_20260314_1200_payload_20260315_1201_token.lz.age",
+            "other_20260314_1200_payload_token.lz.age",
+            env_name="backup",
             min_retention_days=1,
         )
 

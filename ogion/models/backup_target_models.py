@@ -26,7 +26,7 @@ class TargetModel(BaseModel):
         ge=0, le=36600, default=config.options.BACKUP_MIN_RETENTION_DAYS
     )
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, hide_input_in_errors=True)
 
     @field_validator("cron_rule")
     def cron_rule_is_valid(cls, cron_rule: str) -> str:

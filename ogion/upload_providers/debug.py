@@ -86,7 +86,9 @@ class UploadProviderLocalDebug(BaseUploadProvider):
         while len(backups) > max_backups:
             backup_to_remove = Path(backups.pop())
             if core.file_before_retention_period_ends(
-                backup_name=backup_to_remove.name, min_retention_days=min_retention_days
+                backup_name=backup_to_remove.name,
+                env_name=backup_file.parent.name,
+                min_retention_days=min_retention_days,
             ):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "

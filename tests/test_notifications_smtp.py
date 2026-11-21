@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import smtplib
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from pydantic import SecretStr
@@ -29,3 +29,19 @@ def test_smtp_work_on_smtp_client_mock(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     assert smtp.SMTP().send(message="text")
+
+
+def test_smtp_sends_non_ascii_message(monkeypatch: pytest.MonkeyPatch) -> None:
+    smtp_mock = MagicMock()
+    monkeypatch.setattr(smtplib, "SMTP", smtp_mock)
+    monkeypatch.setattr(config.options, "SMTP_HOST", "xxxx11231453.com")
+    monkeypatch.setattr(config.options, "SMTP_FROM_ADDR", "example@example.com")
+    monkeypatch.setattr(config.options, "SMTP_TO_ADDRS", "example2@example.com")
+
+    assert smtp.SMTP().send(message="błąd zażółć")
+
+    smtp_server = smtp_mock.return_value.__enter__.return_value
+    sent = smtp_server.send_message.call_args.args[0]
+    assert sent["To"] == "example2@example.com"
+    assert "błąd zażółć" in sent.get_content()
+    sent.as_bytes()

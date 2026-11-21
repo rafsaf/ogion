@@ -47,9 +47,8 @@ class Discord(NotificationSystem):
 
             if discord_resp.status_code != STATUS_CODE_204:
                 log.error(
-                    "failed send discord `%s` to %s with status code %s and resp: %s",
+                    "failed send discord `%s` with status code %s and resp: %s",
                     message,
-                    config.options.DISCORD_WEBHOOK_URL,
                     discord_resp.status_code,
                     discord_resp.content,
                 )

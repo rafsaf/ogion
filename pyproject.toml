@@ -2,13 +2,13 @@
 authors = [{ name = "Rafał Safin", email = "rafal.safin@rafsaf.pl" }]
 dependencies = [
   "argcomplete>=3.7.0",
-  "azure-identity>=1.17.1",
   "azure-storage-blob>=12.20.0",
   "croniter>=6.2.4",
   "google-cloud-storage>=3.13.0",
   "minio>=7.2.13",
   "pydantic-settings>=2.7.1",
   "pydantic>=2.11.0",
+  "requests>=2.32.3",
   "tenacity>=9.1.2",
 ]
 description = "A tool for performing scheduled database backups and transferring encrypted data to secure clouds, for home labs, hobby projects, etc., in environments such as k8s, docker, vms."
@@ -31,7 +31,6 @@ dev = [
   "psutil>=7.1.0",
   "pymdown-extensions>=10.13",
   "pyyaml>=6.0.2",
-  "requests>=2.32.3",
   "ruff>=0.14.3",
   "types-croniter>=5.0.1.20241205",
   "types-google-cloud-ndb>=2.3.0.20240813",

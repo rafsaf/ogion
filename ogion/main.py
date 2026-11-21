@@ -89,7 +89,9 @@ def backup_targets() -> list[base_target.BaseBackupTarget]:
     return backup_targets
 
 
-def shutdown() -> NoReturn:  # pragma: no cover
+def shutdown(
+    backup_failed: threading.Event | None = None,
+) -> NoReturn:  # pragma: no cover
     timeout_secs = config.options.SIGTERM_TIMEOUT_SECS
     start = time.time()
     deadline = start + timeout_secs
@@ -122,7 +124,7 @@ def shutdown() -> NoReturn:  # pragma: no cover
             )
     if threading.active_count() == 1:
         log.info("gracefully exiting ogion")
-        sys.exit(0)
+        sys.exit(1 if backup_failed and backup_failed.is_set() else 0)
     else:
         log.warning(
             "noooo, exiting! i am now killing myself with %d daemon threads "
@@ -441,15 +443,39 @@ def run_single_all_backups(target_name: str | None) -> NoReturn:
             print(f"target '{target_name}' does not exist")
             sys.exit(1)
 
-    for target in targets:
+    backup_failed = threading.Event()
+
+    def run_backup_or_flag_failure(target: base_target.BaseBackupTarget) -> None:
+        try:
+            run_backup(target)
+        except Exception:
+            backup_failed.set()
+            raise
+
+    threads = [
         threading.Thread(
-            target=run_backup,
+            target=run_backup_or_flag_failure,
             args=(target,),
             daemon=True,
             name=target.pretty_thread_name,
-        ).start()
+        )
+        for target in targets
+    ]
+    for thread in threads:
+        thread.start()
 
-    shutdown()
+    # SIGTERM_TIMEOUT_SECS only applies after a signal, not to normal runs
+    for thread in threads:
+        while thread.is_alive() and not exit_event.is_set():
+            thread.join(timeout=1)
+    if exit_event.is_set():  # pragma: no cover
+        shutdown(backup_failed)
+
+    if backup_failed.is_set():
+        log.error("single backup run finished with failures")
+        sys.exit(1)
+    log.info("single backup run finished")
+    sys.exit(0)
 
 
 def run_download_backup_file(path: str) -> NoReturn:

@@ -11,7 +11,7 @@ from ogion import config
 class ProviderModel(BaseModel):
     name: str
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, hide_input_in_errors=True)
 
 
 class DebugProviderModel(ProviderModel):
@@ -39,11 +39,10 @@ class S3ProviderModel(ProviderModel):
     name: str = config.UploadProviderEnum.S3
     bucket_name: str
     bucket_upload_path: str
-    secure: bool = False
+    secure: bool = True
     access_key: str | None = None
     secret_key: SecretStr | None = None
     region: str | None = None
-    max_bandwidth: int | None = None
 
 
 class AzureProviderModel(ProviderModel):

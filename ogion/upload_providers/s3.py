@@ -20,7 +20,6 @@ class UploadProviderS3(BaseUploadProvider):
 
     def __init__(self, target_provider: S3ProviderModel) -> None:
         self.bucket_upload_path = target_provider.bucket_upload_path
-        self.max_bandwidth = target_provider.max_bandwidth
 
         self.client = Minio(
             target_provider.endpoint,
@@ -99,7 +98,9 @@ class UploadProviderS3(BaseUploadProvider):
             backup_to_remove = backups.pop()
             file_name = backup_to_remove.split("/")[-1]
             if core.file_before_retention_period_ends(
-                backup_name=file_name, min_retention_days=min_retention_days
+                backup_name=file_name,
+                env_name=backup_file.parent.name,
+                min_retention_days=min_retention_days,
             ):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "
@@ -119,7 +120,7 @@ class UploadProviderS3(BaseUploadProvider):
             # Filter out NoSuchKey errors (happens with concurrent cleanup)
             errors = [error for error in delete_response if error.code != "NoSuchKey"]
             if errors:
-                raise RuntimeError("Fail to delete backups from s3: %s", errors)
+                raise RuntimeError(f"Fail to delete backups from s3: {errors}")
             log.info(
                 "%s backups were successfully deleted from s3 bucket",
                 len(items_to_delete),
