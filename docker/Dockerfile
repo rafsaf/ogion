@@ -6,7 +6,6 @@ ARG PIP_NO_CACHE_DIR=1
 ENV SERVICE_NAME="ogion"
 ENV FOLDER_PATH="/var/lib/ogion"
 ENV LOG_FOLDER_PATH="/var/log/ogion"
-ENV OGION_CPU_ARCHITECTURE=${TARGETARCH}
 WORKDIR ${FOLDER_PATH}
 
 RUN python -m venv /opt/venv

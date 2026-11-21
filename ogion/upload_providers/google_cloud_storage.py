@@ -105,7 +105,9 @@ class UploadProviderGCS(BaseUploadProvider):
             backup_to_remove = backups.pop()
             file_name = backup_to_remove.split("/")[-1]
             if core.file_before_retention_period_ends(
-                backup_name=file_name, min_retention_days=min_retention_days
+                backup_name=file_name,
+                env_name=backup_file.parent.name,
+                min_retention_days=min_retention_days,
             ):
                 log.info(
                     "there are more backups than max_backups (%s/%s), "

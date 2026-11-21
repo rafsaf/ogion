@@ -47,9 +47,8 @@ class Slack(NotificationSystem):
 
             if slack_resp.status_code != STATUS_CODE_200:
                 log.error(
-                    "failed send slack `%s` to %s with status code %s and resp: %s",
+                    "failed send slack `%s` with status code %s and resp: %s",
                     message,
-                    config.options.SLACK_WEBHOOK_URL,
                     slack_resp.status_code,
                     slack_resp.content,
                 )

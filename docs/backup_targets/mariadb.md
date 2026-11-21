@@ -49,7 +49,7 @@ MARIADB_FIRST_DB='host=localhost port=3306 password=secret cron_rule=* * * * *'
 MARIADB_SECOND_DB='host=10.0.0.1 port=3306 user=foo password=change_me! db=bar cron_rule=0 5 * * *'
 
 # 3. MariaDB in local network with backup on every 6 hours at '15 with max number of backups of 20
-MARIADB_THIRD_DB='host=192.168.1.5 port=3306 user=root password=change_me_please! db=project cron_rule=15 */3 * * * max_backups=20'
+MARIADB_THIRD_DB='host=192.168.1.5 port=3306 user=root password=change_me_please! db=project cron_rule=15 */6 * * * max_backups=20'
 
 # 4. MariaDB local database above 11.3 with ssl-verify-server-cert disabled
 MARIADB_4_DB='host=localhost port=3306 password=secret cron_rule=* * * * * client_ssl-verify-server-cert=false'

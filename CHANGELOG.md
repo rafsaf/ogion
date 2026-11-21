@@ -21,11 +21,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - Migrate to Python 3.15
+- **Breaking:** S3 provider `secure` now defaults to `true` (HTTPS), as documented
+- Removed unused S3 `max_bandwidth` param, `OGION_CPU_ARCHITECTURE` setting and `azure-identity` dependency
+- `ogion -s` exits with code 1 when any backup fails and no longer applies `SIGTERM_TIMEOUT_SECS` unless a signal is received
 
 ### Fixed
 
 - A lot of CVE issues
 - Prevented concurrent debug-provider cleanup from deleting a backup while it is being copied
+- Config validation errors no longer include secrets (passwords, keys) in logs and notifications
+- Failed subprocess notifications no longer include the full command line (e.g. PostgreSQL connection URI with `conn_*` params)
+- Cleanup no longer fails for databases with date-like names (e.g. `sales_20240101`)
+- Unencrypted compressed dump is removed when age encryption fails
+- SMTP notifications with non-ASCII characters are no longer dropped
+- Webhook URLs are no longer written to logs on notification failure
+- PostgreSQL user and database names with spaces are now encoded correctly
+- Docs: wrong defaults in configuration table, cron examples
 
 ## [8.5] - 2026-09-17
 

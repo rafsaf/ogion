@@ -60,8 +60,8 @@ class PostgreSQL(BaseBackupTarget):
         # it includes symbols with special meaning in any of its parts.
 
         pgpass_file = self._init_pgpass_file()
-        encoded_user = urllib.parse.quote_plus(self.target_model.user)
-        encoded_db = urllib.parse.quote_plus(self.target_model.db)
+        encoded_user = urllib.parse.quote(self.target_model.user, safe="")
+        encoded_db = urllib.parse.quote(self.target_model.db, safe="")
 
         params = {"passfile": pgpass_file}
         if self.target_model.model_extra is not None:

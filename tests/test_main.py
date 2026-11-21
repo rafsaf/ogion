@@ -171,6 +171,18 @@ def test_main_single_with_nonexistent_target(monkeypatch: pytest.MonkeyPatch) ->
     assert system_exit.value.code == 1
 
 
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnhandledThreadExceptionWarning")
+def test_main_single_exits_1_when_backup_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(sys, "argv", ["main.py", "--single"])
+    monkeypatch.setattr(config.options, "BACKUP_PROVIDER", "name=debug")
+    monkeypatch.setattr(core, "create_target_models", Mock(return_value=[FILE_1]))
+    monkeypatch.setattr(main, "run_backup", Mock(side_effect=ValueError("fail")))
+
+    with pytest.raises(SystemExit) as system_exit:
+        main.main()
+    assert system_exit.value.code == 1
+
+
 def test_main_debug_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["main.py", "--debug-notifications"])
 

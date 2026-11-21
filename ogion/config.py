@@ -53,9 +53,6 @@ class Settings(BaseSettings):
     AGE_RECIPIENTS: str
     DEBUG_AGE_SECRET_KEY: str = ""
     INSTANCE_NAME: str = socket.gethostname()
-    CPU_ARCH: Literal["amd64", "arm64"] = Field(
-        default="amd64", alias_priority=2, alias="OGION_CPU_ARCHITECTURE"
-    )
     SUBPROCESS_TIMEOUT_SECS: float = Field(ge=5, le=3600 * 24, default=3600)
     SIGTERM_TIMEOUT_SECS: float = Field(ge=0, le=3600 * 24, default=3600)
     BACKUP_MAX_NUMBER: int = Field(ge=1, le=998, default=7)

@@ -48,7 +48,7 @@ POSTGRESQL_FIRST_DB='host=localhost port=5432 password=secret cron_rule=* * * * 
 POSTGRESQL_SECOND_DB='host=10.0.0.1 port=5432 user=foo password=change_me! db=bar cron_rule=0 5 * * *'
 
 # 3. PostgreSQL in local network with backup on every 6 hours at '15 with max number of backups of 20
-POSTGRESQL_THIRD_DB='host=192.168.1.5 port=5432 user=root password=change_me_please! db=project cron_rule=15 */3 * * * max_backups=20'
+POSTGRESQL_THIRD_DB='host=192.168.1.5 port=5432 user=root password=change_me_please! db=project cron_rule=15 */6 * * * max_backups=20'
 
 # 4. PostgreSQL connected using sslmode require
 POSTGRESQL_4_DB_SSL='host=localhost port=5432 password=secret cron_rule=* * * * * conn_sslmode=require'

@@ -33,7 +33,7 @@ DIRECTORY_FIRST='abs_path=/home/user/folder cron_rule=* * * * *'
 DIRECTORY_SECOND='abs_path=/etc cron_rule=0 5 * * *'
 
 # 3. Mounted directory /mnt/homedir with backup on every 6 hours at '15 with max number of backups of 20
-DIRECTORY_HOME_DIR='abs_path=/mnt/homedir cron_rule=15 */3 * * * max_backups=20'
+DIRECTORY_HOME_DIR='abs_path=/mnt/homedir cron_rule=15 */6 * * * max_backups=20'
 ```
 
 <br>
