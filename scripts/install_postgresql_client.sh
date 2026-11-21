@@ -11,7 +11,7 @@ set -euo pipefail
 CPU="$(dpkg --print-architecture)"
 DISTR_VERSION="$(awk -F= '/^VERSION_CODENAME=/{print $2}' /etc/os-release)"
 
-echo "Installing postgresql-client-18"
+echo "Installing postgresql-client-19"
 
 mkdir -p /etc/apt/keyrings/
 if [ -f "/etc/apt/keyrings/www.postgresql.org.gpg" ]
@@ -26,5 +26,5 @@ then
 else
   echo "deb [signed-by=/etc/apt/keyrings/www.postgresql.org.gpg arch=$CPU] http://apt.postgresql.org/pub/repos/apt $DISTR_VERSION-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 fi
-apt-get -y update && apt-get -y install postgresql-client-18
-echo "postgresql-client-18 installed"
+apt-get -y update && apt-get -y install postgresql-client-19
+echo "postgresql-client-19 installed"

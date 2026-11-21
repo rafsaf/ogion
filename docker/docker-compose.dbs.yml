@@ -142,3 +142,14 @@ services:
     ports:
     - 10018:5432
     restart: 'no'
+  ogion_postgres_19:
+    environment:
+    - POSTGRES_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_DB=database-_-12!@#%^&*()/;><.,]}{[
+    - POSTGRES_USER=user-_-12!@#%^&*()/;><.,]}{[
+    image: postgres:19-trixie
+    networks:
+    - ogion
+    ports:
+    - 10019:5432
+    restart: 'no'

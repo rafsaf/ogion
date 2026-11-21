@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+### Fixed
+
+## [8.6] - 2026-11-21
+
+### Added
+
+- Update from postgresql-client-18 to postgresql-client-19 so postgres 19.x can be supported
+
+### Changed
+
 - Migrate to Python 3.15
 
 ### Fixed
