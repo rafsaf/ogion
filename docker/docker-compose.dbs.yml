@@ -62,6 +62,18 @@ services:
     ports:
     - 11130:3306
     restart: 'no'
+  ogion_mariadb_13_1:
+    environment:
+    - MARIADB_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
+    - MARIADB_DATABASE=database-_-12!@#%^&*()/;><.,]}{[
+    - MARIADB_USER=user-_-12!@#%^&*()/;><.,]}{[
+    - MARIADB_PASSWORD=password-_-12!@#%^&*()/;><.,]}{[
+    image: mariadb:13.1-rc
+    networks:
+    - ogion
+    ports:
+    - 11131:3306
+    restart: 'no'
   ogion_mysql_26_10:
     environment:
     - MYSQL_ROOT_PASSWORD=root-password-_-12!@#%^&*()/;><.,]}{[
